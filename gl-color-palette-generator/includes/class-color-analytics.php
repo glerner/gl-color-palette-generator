@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ColorAnalytics {
     private $color_analyzer;
@@ -253,4 +254,48 @@ class ColorAnalytics {
 
         return $alignment_score / count($palette['colors']);
     }
-} 
+
+    /**
+     * Analyze color harmony
+     */
+    public function analyze_harmony($palette) {
+        $harmonization = new ColorHarmonization();
+        $wheel = new ColorWheel();
+
+        return [
+            'harmony_score' => $harmonization->calculate_harmony_score($palette),
+            'relationships' => $wheel->analyze_relationships($palette),
+            'balance' => $this->analyze_balance($palette)
+        ];
+    }
+
+    /**
+     * Analyze psychological impact
+     */
+    public function analyze_psychological_impact($palette) {
+        $psychological = new PsychologicalEffects();
+        $cultural = new CulturalMappings();
+        $emotional = new EmotionalMapping();
+
+        return [
+            'psychological_effects' => $psychological->analyze($palette),
+            'cultural_significance' => $cultural->get_significance($palette),
+            'emotional_response' => $emotional->predict_response($palette)
+        ];
+    }
+
+    /**
+     * Generate analytics dashboard data
+     */
+    public function generate_dashboard_data($palette) {
+        $dashboard = new ColorAnalyticsDashboard();
+
+        return [
+            'harmony_analysis' => $this->analyze_harmony($palette),
+            'psychological_analysis' => $this->analyze_psychological_impact($palette),
+            'business_impact' => $this->analyze_business_impact($palette),
+            'accessibility_scores' => $this->analyze_accessibility($palette),
+            'usage_recommendations' => $this->generate_recommendations($palette)
+        ];
+    }
+}

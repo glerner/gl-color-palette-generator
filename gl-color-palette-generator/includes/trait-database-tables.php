@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 trait GLColorPaletteDatabaseTables {
     /**
@@ -13,4 +14,4 @@ trait GLColorPaletteDatabaseTables {
         ];
         return isset($tables[$table]) ? $tables[$table] : false;
     }
-} 
+}

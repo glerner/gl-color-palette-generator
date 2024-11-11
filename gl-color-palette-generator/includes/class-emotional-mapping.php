@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class EmotionalMapping {
     private $color_analyzer;

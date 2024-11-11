@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class GLColorPaletteManager {
     use GLColorPaletteDatabaseTables;
@@ -45,4 +46,4 @@ class GLColorPaletteManager {
             ['%d', '%s', '%d']
         );
     }
-} 
+}

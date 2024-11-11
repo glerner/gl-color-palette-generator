@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class PromptEngineer {
     private $settings;
@@ -296,4 +297,57 @@ VOICE;
 
         return $examples;
     }
-} 
+
+    /**
+     * Generate optimized prompts
+     */
+    public function generate_prompt($context, $parameters = []) {
+        $base_prompt = $this->get_base_prompt($context);
+        $enhanced_prompt = $this->enhance_prompt($base_prompt, $parameters);
+
+        return [
+            'prompt' => $enhanced_prompt,
+            'tokens' => $this->estimate_tokens($enhanced_prompt),
+            'context_data' => $this->extract_context_data($parameters),
+            'metadata' => [
+                'prompt_type' => $context,
+                'enhancement_level' => $this->calculate_enhancement_level($enhanced_prompt),
+                'complexity_score' => $this->calculate_complexity_score($enhanced_prompt)
+            ]
+        ];
+    }
+
+    /**
+     * Optimize prompt structure
+     */
+    public function optimize_prompt($prompt, $target_model) {
+        $structured_prompt = $this->structure_prompt($prompt);
+        $optimized_prompt = $this->apply_model_specific_optimizations($structured_prompt, $target_model);
+
+        return [
+            'original_prompt' => $prompt,
+            'optimized_prompt' => $optimized_prompt,
+            'optimization_steps' => $this->get_optimization_steps(),
+            'expected_improvements' => $this->calculate_expected_improvements($prompt, $optimized_prompt)
+        ];
+    }
+
+    /**
+     * Generate context-aware prompts
+     */
+    public function generate_context_aware_prompt($base_color, $requirements) {
+        $context_data = [
+            'color_analysis' => $this->analyze_color_context($base_color),
+            'user_preferences' => $this->extract_user_preferences($requirements),
+            'industry_standards' => $this->get_industry_standards($requirements),
+            'accessibility_requirements' => $this->get_accessibility_requirements($requirements)
+        ];
+
+        return [
+            'prompt' => $this->build_contextual_prompt($context_data),
+            'context_variables' => $this->extract_variables($context_data),
+            'prompt_variations' => $this->generate_prompt_variations($context_data),
+            'fallback_prompts' => $this->generate_fallback_prompts($context_data)
+        ];
+    }
+}

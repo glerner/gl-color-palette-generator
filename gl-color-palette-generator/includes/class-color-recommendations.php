@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ColorRecommendations {
     private $color_analyzer;
@@ -304,4 +305,4 @@ class ColorRecommendations {
 
         return $explanation;
     }
-} 
+}

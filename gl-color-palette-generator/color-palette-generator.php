@@ -6,6 +6,8 @@ Version: 1.0
 Author: George Lerner, https://website-tech.glerner.com/contact
 */
 
+namespace GLColorPalette;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -15,6 +17,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/class-name-generator.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-settings-page.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-preview-generator.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-file-handler.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-theme-json-generator.php';
 
 class ColorPaletteGenerator {
     private $colors = [];
@@ -22,24 +25,30 @@ class ColorPaletteGenerator {
     private $name_generator;
     private $settings;
     private $file_handler;
+    private $theme_json_generator;
+    private $contrast_checker;
 
     public function __construct() {
+        $this->contrast_checker = new ContrastChecker();
+
         $this->settings = new ColorPaletteGeneratorSettings();
+
         // Get OpenAI API key from WordPress options
         $openai_api_key = get_option('color_palette_generator_openai_key');
 
-        // Initialize name generator with preferences and API key
         $this->name_generator = new ColorNameGenerator(
             get_option('color_naming_preference', 'both'),
             $openai_api_key
         );
 
-        add_action('admin_menu', [$this, 'add_admin_menu']);
-        add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
+        $this->theme_json_generator = new ThemeJsonGenerator($this->contrast_checker);
 
         $this->file_handler = new FileHandler();
 
-        // Add cleanup hook
+        add_action('admin_init', [$this, 'register_settings']);
+
+        add_action('admin_menu', [$this, 'add_admin_menu']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
         add_action('wp_scheduled_delete', [$this->file_handler, 'cleanup']);
     }
 
@@ -131,6 +140,63 @@ class ColorPaletteGenerator {
                 'message' => $e->getMessage()
             ];
         }
+    }
+
+    /**
+     * Enqueue admin scripts and styles
+     *
+     * @param string $hook Current admin page hook
+     */
+    public function enqueue_assets($hook) {
+        // Only load on our plugin's page
+        if ('toplevel_page_color-palette-generator' !== $hook) {
+            return;
+        }
+
+        // Enqueue CSS
+        wp_enqueue_style(
+            'color-palette-generator-admin',
+            plugin_dir_url(__FILE__) . 'assets/css/admin.css',
+            [],
+            COLOR_PALETTE_GENERATOR_VERSION
+        );
+
+        // Add WordPress color picker
+        wp_enqueue_style('wp-color-picker');
+
+        // Enqueue admin-settings.js
+        wp_enqueue_script(
+            'color-palette-generator-admin-settings',
+            plugin_dir_url(__FILE__) . 'assets/js/admin-settings.js',
+            ['jquery'],
+            COLOR_PALETTE_GENERATOR_VERSION,
+            true
+        );
+
+        // Enqueue main admin.js
+        wp_enqueue_script(
+            'color-palette-generator-admin',
+            plugin_dir_url(__FILE__) . 'assets/js/admin.js',
+            ['jquery', 'wp-color-picker', 'color-palette-generator-admin-settings'],
+            COLOR_PALETTE_GENERATOR_VERSION,
+            true
+        );
+
+        // Localize script with data
+        wp_localize_script(
+            'color-palette-generator-admin',
+            'colorPaletteGenerator',
+            [
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('color_palette_generator_nonce'),
+                'strings' => [
+                    'generating' => __('Generating palette...', 'color-palette-generator'),
+                    'error' => __('Error generating palette', 'color-palette-generator'),
+                    'success' => __('Palette generated successfully!', 'color-palette-generator'),
+                    'confirmReset' => __('Are you sure you want to reset settings?', 'color-palette-generator')
+                ]
+            ]
+        );
     }
 }
 

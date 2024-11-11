@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette\Providers;
 
 class AzureOpenAIProvider implements AIProviderInterface {
     private $client;
@@ -53,4 +54,4 @@ class AzureOpenAIProvider implements AIProviderInterface {
         }
         return $response->choices[0]->message->content;
     }
-} 
+}

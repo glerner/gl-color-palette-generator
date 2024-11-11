@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class DocumentationGenerator {
     private $content_manager;
@@ -155,14 +156,43 @@ class DocumentationGenerator {
     ];
 
     /**
-     * Generate documentation
+     * Generate comprehensive documentation
      */
-    public function generate_documentation($palette, $options = []) {
+    public function generate_documentation($palette) {
+        $sections = [
+            'overview' => $this->generate_overview($palette),
+            'technical_specs' => $this->generate_technical_specs($palette),
+            'usage_guidelines' => $this->generate_usage_guidelines($palette),
+            'implementation_guide' => $this->generate_implementation_guide($palette),
+            'accessibility_notes' => $this->generate_accessibility_notes($palette),
+            'code_examples' => $this->generate_code_examples($palette)
+        ];
+
+        return $this->compile_documentation($sections);
+    }
+
+    /**
+     * Generate API documentation
+     */
+    public function generate_api_documentation() {
         return [
-            'style_guide' => $this->create_style_guide($palette),
-            'technical_specs' => $this->create_technical_specs($palette),
-            'implementation_guide' => $this->create_implementation_guide($palette),
-            'assets' => $this->generate_supporting_assets($palette)
+            'endpoints' => $this->document_endpoints(),
+            'authentication' => $this->document_authentication(),
+            'request_examples' => $this->generate_request_examples(),
+            'response_formats' => $this->document_response_formats(),
+            'error_handling' => $this->document_error_handling()
+        ];
+    }
+
+    /**
+     * Generate user guides
+     */
+    public function generate_user_guides() {
+        return [
+            'getting_started' => $this->generate_getting_started_guide(),
+            'advanced_features' => $this->generate_advanced_features_guide(),
+            'troubleshooting' => $this->generate_troubleshooting_guide(),
+            'best_practices' => $this->generate_best_practices_guide()
         ];
     }
 
@@ -177,4 +207,4 @@ class DocumentationGenerator {
             'distribution_package' => $this->prepare_distribution($documentation, $format)
         ];
     }
-} 
+}

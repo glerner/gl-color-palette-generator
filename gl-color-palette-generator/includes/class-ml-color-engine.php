@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class MLColorEngine {
     private $model_manager;
@@ -181,4 +182,85 @@ class MLColorEngine {
             'adjustments' => $this->suggest_refinements()
         ];
     }
-} 
+
+    /**
+     * Train model on color preferences
+     */
+    public function train_model($training_data) {
+        $processed_data = $this->preprocess_training_data($training_data);
+        $model = $this->initialize_model();
+
+        $training_results = [
+            'epochs_completed' => 0,
+            'loss_history' => [],
+            'accuracy_history' => []
+        ];
+
+        for ($epoch = 0; $epoch < $this->config['epochs']; $epoch++) {
+            $batch_results = $this->train_epoch($model, $processed_data);
+
+            $training_results['epochs_completed']++;
+            $training_results['loss_history'][] = $batch_results['loss'];
+            $training_results['accuracy_history'][] = $batch_results['accuracy'];
+
+            if ($this->should_stop_training($training_results)) {
+                break;
+            }
+        }
+
+        $this->save_model($model);
+        return $training_results;
+    }
+
+    /**
+     * Predict color combinations
+     */
+    public function predict_combinations($base_color) {
+        $model = $this->load_model();
+        $color_features = $this->extract_color_features($base_color);
+
+        $predictions = $model->predict($color_features);
+        return $this->process_predictions($predictions);
+    }
+
+    /**
+     * Update model with new data
+     */
+    public function update_model($new_data) {
+        $model = $this->load_model();
+        $processed_data = $this->preprocess_training_data($new_data);
+
+        $update_results = [
+            'initial_performance' => $this->evaluate_model($model),
+            'update_metrics' => $this->perform_model_update($model, $processed_data),
+            'final_performance' => $this->evaluate_model($model)
+        ];
+
+        $this->save_model($model);
+
+        return [
+            'update_status' => 'success',
+            'performance_delta' => $this->calculate_performance_delta($update_results),
+            'model_metrics' => $this->generate_model_metrics($model),
+            'recommendations' => $this->generate_model_recommendations($update_results)
+        ];
+    }
+
+    /**
+     * Generate color predictions
+     */
+    public function generate_predictions($input_data) {
+        $model = $this->load_model();
+        $processed_input = $this->preprocess_input($input_data);
+
+        $predictions = $model->predict($processed_input);
+        $processed_predictions = $this->postprocess_predictions($predictions);
+
+        return [
+            'raw_predictions' => $predictions,
+            'processed_predictions' => $processed_predictions,
+            'confidence_scores' => $this->calculate_confidence_scores($predictions),
+            'alternative_suggestions' => $this->generate_alternatives($predictions)
+        ];
+    }
+}

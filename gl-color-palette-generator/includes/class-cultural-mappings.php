@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class CulturalMappings {
     // Comprehensive cultural color mappings
@@ -212,4 +213,59 @@ class CulturalMappings {
 
         return $warnings;
     }
-} 
+
+    /**
+     * Analyze cultural significance
+     */
+    public function analyze_cultural_significance($palette) {
+        $regions = $this->get_supported_regions();
+        $significance_map = [];
+
+        foreach ($regions as $region) {
+            $significance_map[$region] = [
+                'positive_associations' => $this->get_positive_associations($palette, $region),
+                'negative_associations' => $this->get_negative_associations($palette, $region),
+                'cultural_contexts' => $this->get_cultural_contexts($palette, $region),
+                'usage_recommendations' => $this->get_usage_recommendations($palette, $region)
+            ];
+        }
+
+        return $significance_map;
+    }
+
+    /**
+     * Get regional color preferences
+     */
+    public function get_regional_preferences($region) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'cultural_color_preferences';
+
+        $preferences = $wpdb->get_results($wpdb->prepare(
+            "SELECT color_hex, preference_score, context
+             FROM $table_name
+             WHERE region = %s
+             ORDER BY preference_score DESC",
+            $region
+        ));
+
+        return $this->process_regional_preferences($preferences);
+    }
+
+    /**
+     * Generate culturally appropriate variations
+     */
+    public function generate_cultural_variations($palette, $target_regions) {
+        $variations = [];
+
+        foreach ($target_regions as $region) {
+            $variations[$region] = [
+                'adapted_palette' => $this->adapt_palette_for_region($palette, $region),
+                'cultural_notes' => $this->get_cultural_notes($palette, $region),
+                'usage_guidelines' => $this->generate_regional_guidelines($palette, $region),
+                'market_considerations' => $this->get_market_considerations($region)
+            ];
+        }
+
+        return $variations;
+    }
+}

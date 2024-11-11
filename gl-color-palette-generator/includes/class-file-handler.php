@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class FileHandler {
     private $base_theme;
@@ -64,4 +65,62 @@ class FileHandler {
             throw new Exception('Error saving theme.json file: ' . $e->getMessage());
         }
     }
-} 
+
+    /**
+     * Handle file operations
+     */
+    public function handle_file_operation($operation, $file_data) {
+        switch ($operation) {
+            case 'upload':
+                return $this->handle_file_upload($file_data);
+            case 'download':
+                return $this->handle_file_download($file_data);
+            case 'delete':
+                return $this->handle_file_deletion($file_data);
+            case 'update':
+                return $this->handle_file_update($file_data);
+            default:
+                throw new Exception("Unsupported file operation: {$operation}");
+        }
+    }
+
+    /**
+     * Manage temporary files
+     */
+    public function manage_temp_files() {
+        $temp_dir = $this->get_temp_directory();
+        $expired_files = $this->find_expired_temp_files();
+
+        foreach ($expired_files as $file) {
+            $this->delete_temp_file($file);
+        }
+
+        return [
+            'cleaned_files' => count($expired_files),
+            'remaining_files' => $this->count_temp_files(),
+            'disk_space_recovered' => $this->calculate_recovered_space(),
+            'next_cleanup' => $this->schedule_next_cleanup()
+        ];
+    }
+
+    /**
+     * Process file exports
+     */
+    public function process_file_export($data, $format) {
+        $export_path = $this->get_export_directory();
+        $filename = $this->generate_export_filename($format);
+
+        switch ($format) {
+            case 'pdf':
+                return $this->export_as_pdf($data, $filename);
+            case 'json':
+                return $this->export_as_json($data, $filename);
+            case 'csv':
+                return $this->export_as_csv($data, $filename);
+            case 'xml':
+                return $this->export_as_xml($data, $filename);
+            default:
+                throw new Exception("Unsupported export format: {$format}");
+        }
+    }
+}

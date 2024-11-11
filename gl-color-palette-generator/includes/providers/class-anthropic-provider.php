@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class AnthropicProvider implements AIProviderInterface {
     private $client;
@@ -38,4 +39,4 @@ class AnthropicProvider implements AIProviderInterface {
         }
         return $response->content[0]->text;
     }
-} 
+}

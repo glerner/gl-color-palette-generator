@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ProviderSelector {
     private $settings;
@@ -93,22 +94,17 @@ class ProviderSelector {
      * Get currently available providers
      */
     private function get_available_providers() {
-        $available = [];
+        $factory = new Providers\AiProviderFactory();
+        $providers = $factory->get_available_providers();
 
-        foreach ($this->provider_specs as $provider => $specs) {
-            if ($this->availability_checker->is_available($provider)) {
-                $available[$provider] = array_merge(
-                    $specs,
-                    [
-                        'current_performance' => $this->performance_monitor->get_metrics($provider),
-                        'current_costs' => $this->cost_calculator->get_current_costs($provider),
-                        'quality_metrics' => $this->quality_tracker->get_metrics($provider)
-                    ]
-                );
-            }
+        foreach ($providers as $key => &$provider) {
+            $provider['status'] = $this->check_provider_status($key);
+            $provider['features'] = $this->get_provider_features($key);
+            $provider['pricing'] = $this->get_provider_pricing($key);
+            $provider['requirements'] = $this->get_provider_requirements($key);
         }
 
-        return $available;
+        return $providers;
     }
 
     /**
@@ -294,4 +290,47 @@ class ProviderSelector {
         // Log to database or monitoring system
         do_action('color_palette_provider_selection', $log_data);
     }
-} 
+
+    /**
+     * Select optimal provider
+     */
+    public function select_optimal_provider($requirements = []) {
+        $providers = $this->get_available_providers();
+        $scores = [];
+
+        foreach ($providers as $key => $provider) {
+            $scores[$key] = $this->calculate_provider_score($provider, $requirements);
+        }
+
+        arsort($scores);
+        return [
+            'selected_provider' => key($scores),
+            'score_breakdown' => $scores,
+            'reasoning' => $this->get_selection_reasoning($scores)
+        ];
+    }
+
+    /**
+     * Validate provider configuration
+     */
+    public function validate_provider_configuration($provider, $config) {
+        try {
+            $factory = new Providers\AiProviderFactory();
+            $provider_instance = $factory->create_provider($provider);
+
+            $validation_result = $provider_instance->validate_configuration($config);
+
+            return [
+                'is_valid' => $validation_result['valid'],
+                'messages' => $validation_result['messages'],
+                'recommendations' => $this->get_configuration_recommendations($provider, $validation_result)
+            ];
+        } catch (Exception $e) {
+            return [
+                'is_valid' => false,
+                'messages' => [$e->getMessage()],
+                'recommendations' => $this->get_error_recommendations($e)
+            ];
+        }
+    }
+}

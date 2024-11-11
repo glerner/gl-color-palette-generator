@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class PaletteValidator {
     private $color_analyzer;
@@ -337,4 +338,4 @@ class PaletteValidator {
 
         return $this->color_analyzer->lab_to_hex($lab);
     }
-} 
+}

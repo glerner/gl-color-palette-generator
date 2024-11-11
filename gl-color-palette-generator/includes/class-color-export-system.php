@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ColorExportSystem {
     private $format_converter;
@@ -180,14 +181,48 @@ class ColorExportSystem {
 
     /**
      * Export color palette
+     *
+     * @param array $palette The color palette to export
+     * @param string|array $format Format(s) to export to
+     * @param array $options Optional export options
+     * @return array Export results
      */
     public function export_palette($palette, $format, $options = []) {
-        return [
-            'exported_files' => $this->generate_exports($palette, $format),
-            'metadata' => $this->generate_metadata($palette),
-            'validation' => $this->validate_exports($format),
-            'package' => $this->package_exports($format)
-        ];
+        if (is_string($format)) {
+            // Original single-format export logic
+            return [
+                'exported_files' => $this->generate_exports($palette, $format),
+                'metadata' => $this->generate_metadata($palette),
+                'validation' => $this->validate_exports($format),
+                'package' => $this->package_exports($format)
+            ];
+        }
+
+        // Multi-format export logic
+        $results = [];
+        $exporter = new ColorExporter();
+
+        foreach ($format as $fmt) {
+            switch ($fmt) {
+                case 'theme_json':
+                    $results[$fmt] = $this->export_theme_json($palette);
+                    break;
+                case 'css':
+                    $results[$fmt] = $exporter->to_css($palette);
+                    break;
+                case 'scss':
+                    $results[$fmt] = $exporter->to_scss($palette);
+                    break;
+                case 'tailwind':
+                    $results[$fmt] = $exporter->to_tailwind_config($palette);
+                    break;
+                case 'pdf':
+                    $results[$fmt] = $this->generate_pdf_guide($palette);
+                    break;
+            }
+        }
+
+        return $results;
     }
 
     /**
@@ -201,4 +236,33 @@ class ColorExportSystem {
             'summary' => $this->generate_summary()
         ];
     }
-} 
+
+    /**
+     * Generate implementation guide
+     */
+    private function generate_pdf_guide(array $palette) {
+        $guide_generator = new ImplementationGuides();
+        $documentation = new DocumentationGenerator();
+
+        $guide_data = [
+            'palette' => $palette,
+            'usage_guidelines' => $guide_generator->generate_guidelines($palette),
+            'accessibility_notes' => $this->generate_accessibility_notes($palette),
+            'implementation_examples' => $this->generate_code_examples($palette)
+        ];
+
+        return $documentation->generate_pdf($guide_data);
+    }
+
+    /**
+     * Generate code examples
+     */
+    private function generate_code_examples(array $palette) {
+        return [
+            'css' => $this->generate_css_examples($palette),
+            'wordpress' => $this->generate_wordpress_examples($palette),
+            'react' => $this->generate_react_examples($palette),
+            'tailwind' => $this->generate_tailwind_examples($palette)
+        ];
+    }
+}

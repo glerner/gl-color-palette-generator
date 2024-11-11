@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ErrorCodes {
     // Color-related errors (1000-1999)
@@ -218,4 +219,59 @@ class ErrorCodes {
 
         return isset($fixes[$code]) ? $fixes[$code] : null;
     }
-} 
+
+    /**
+     * Register error codes
+     */
+    public function register_error_codes() {
+        $this->error_codes = [
+            'CPG001' => [
+                'message' => __('Invalid color format', 'color-palette-generator'),
+                'severity' => 'error',
+                'solution' => __('Please provide a valid hex color code', 'color-palette-generator')
+            ],
+            'CPG002' => [
+                'message' => __('API request failed', 'color-palette-generator'),
+                'severity' => 'error',
+                'solution' => __('Check your API credentials and try again', 'color-palette-generator')
+            ],
+            'CPG003' => [
+                'message' => __('Cache operation failed', 'color-palette-generator'),
+                'severity' => 'warning',
+                'solution' => __('Clear the cache and try again', 'color-palette-generator')
+            ]
+            // ... more error codes
+        ];
+    }
+
+    /**
+     * Get error details
+     */
+    public function get_error_details($code) {
+        if (!isset($this->error_codes[$code])) {
+            return [
+                'message' => __('Unknown error code', 'color-palette-generator'),
+                'severity' => 'error',
+                'solution' => __('Contact support for assistance', 'color-palette-generator')
+            ];
+        }
+
+        return $this->error_codes[$code];
+    }
+
+    /**
+     * Generate error response
+     */
+    public function generate_error_response($code, $context = []) {
+        $error_details = $this->get_error_details($code);
+
+        return [
+            'code' => $code,
+            'message' => $error_details['message'],
+            'severity' => $error_details['severity'],
+            'solution' => $error_details['solution'],
+            'context' => $context,
+            'timestamp' => current_time('mysql')
+        ];
+    }
+}

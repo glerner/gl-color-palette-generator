@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class VisualizationHelper {
     private $svg_generator;
@@ -297,4 +298,4 @@ class VisualizationHelper {
 
         return $templates[$type] ?? '';
     }
-} 
+}

@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette\Providers;
 
 class OpenAIProvider implements AIProviderInterface {
     private $api_key;
@@ -54,4 +55,4 @@ class OpenAIProvider implements AIProviderInterface {
 
         return $response->choices[0]->message->content;
     }
-} 
+}

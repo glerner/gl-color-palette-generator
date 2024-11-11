@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class NeurologicalResponses {
     private $brain_activity_analyzer;
@@ -182,4 +183,49 @@ class NeurologicalResponses {
             'interaction_patterns' => $this->analyze_neural_interactions($colors)
         ];
     }
-} 
+
+    /**
+     * Analyze cognitive impact
+     */
+    public function analyze_cognitive_impact($palette) {
+        $emotional = new EmotionalMapping();
+        $autonomic = new AutonomicResponses();
+
+        return [
+            'attention_impact' => $this->measure_attention_impact($palette),
+            'memory_retention' => $this->analyze_memory_retention($palette),
+            'emotional_response' => $emotional->analyze_response($palette),
+            'autonomic_response' => $autonomic->measure_response($palette)
+        ];
+    }
+
+    /**
+     * Generate response predictions
+     */
+    public function generate_response_predictions($palette) {
+        return [
+            'initial_impact' => $this->predict_initial_response($palette),
+            'sustained_effect' => $this->predict_sustained_effect($palette),
+            'cognitive_load' => $this->calculate_cognitive_load($palette),
+            'adaptation_period' => $this->estimate_adaptation_period($palette)
+        ];
+    }
+
+    /**
+     * Optimize for cognitive engagement
+     */
+    public function optimize_for_cognitive_engagement($palette) {
+        $original_metrics = $this->analyze_cognitive_impact($palette);
+        $optimized_palette = $this->optimize_palette_for_cognition($palette);
+
+        return [
+            'original_metrics' => $original_metrics,
+            'optimized_palette' => $optimized_palette,
+            'improvement_metrics' => $this->calculate_improvement_metrics(
+                $original_metrics,
+                $this->analyze_cognitive_impact($optimized_palette)
+            ),
+            'implementation_recommendations' => $this->generate_implementation_recommendations($optimized_palette)
+        ];
+    }
+}

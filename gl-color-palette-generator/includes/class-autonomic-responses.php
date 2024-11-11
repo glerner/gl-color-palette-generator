@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class AutonomicResponses {
     private $physiological_monitor;
@@ -168,4 +169,4 @@ class AutonomicResponses {
             'adaptation_metrics' => $this->analyze_adaptation_patterns($colors)
         ];
     }
-} 
+}

@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class PaletteGenerator {
     private $color_analyzer;
@@ -257,4 +258,42 @@ class PaletteGenerator {
             'color_properties' => $this->color_analyzer->analyze_color($base_color)
         ];
     }
-} 
+
+    /**
+     * Generate color palette with AI assistance
+     */
+    public function generate_ai_palette($base_color, $options = []) {
+        try {
+            $ai_service = new AiColorService($this->get_active_provider());
+            $colors = $ai_service->generate_palette($base_color, $options);
+
+            return $this->validate_and_process_palette($colors);
+        } catch (Exception $e) {
+            $this->error_handler->log_error($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Validate and process generated palette
+     */
+    private function validate_and_process_palette($colors) {
+        $validator = new PaletteValidator();
+        if (!$validator->validate($colors)) {
+            throw new Exception('Invalid color palette generated');
+        }
+
+        $processed_colors = $this->color_processor->process_colors($colors);
+        $this->cache_palette($processed_colors);
+
+        return $processed_colors;
+    }
+
+    /**
+     * Cache generated palette
+     */
+    private function cache_palette($colors) {
+        $cache = new ColorCache();
+        $cache->store($colors);
+    }
+}

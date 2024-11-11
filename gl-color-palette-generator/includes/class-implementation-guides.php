@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ImplementationGuides {
     private $color_analyzer;

@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ColorNameValidator {
     private $error_handler;
@@ -307,4 +308,4 @@ class ColorNameValidator {
 
         return ['valid' => true, 'message' => ''];
     }
-} 
+}

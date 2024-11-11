@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette\Providers;
 
 class CohereProvider implements AIProviderInterface {
     private $client;
@@ -42,4 +43,4 @@ class CohereProvider implements AIProviderInterface {
         }
         return $response->generations[0]->text;
     }
-} 
+}

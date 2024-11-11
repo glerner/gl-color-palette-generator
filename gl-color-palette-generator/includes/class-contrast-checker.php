@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ContrastChecker {
     // WCAG 2.1 minimum contrast requirements
@@ -49,4 +50,4 @@ class ContrastChecker {
 
         return ($lighter + 0.05) / ($darker + 0.05);
     }
-} 
+}

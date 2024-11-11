@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class PersonalityMatching {
     private $personality_analyzer;
@@ -185,4 +186,54 @@ class PersonalityMatching {
             'recommendations' => $this->generate_optimization_recommendations($colors, $personality_profile)
         ];
     }
-} 
+
+    /**
+     * Match colors to personality traits
+     */
+    public function match_personality_traits($traits) {
+        $color_mappings = [];
+        foreach ($traits as $trait => $score) {
+            $color_mappings[$trait] = [
+                'primary_colors' => $this->get_primary_colors_for_trait($trait, $score),
+                'secondary_colors' => $this->get_secondary_colors_for_trait($trait, $score),
+                'combinations' => $this->get_color_combinations_for_trait($trait, $score)
+            ];
+        }
+
+        return [
+            'color_mappings' => $color_mappings,
+            'palette_suggestions' => $this->generate_palette_suggestions($color_mappings),
+            'personality_analysis' => $this->analyze_personality_color_fit($color_mappings)
+        ];
+    }
+
+    /**
+     * Generate brand personality palette
+     */
+    public function generate_brand_personality_palette($brand_traits) {
+        $emotional = new EmotionalMapping();
+        $psychological = new PsychologicalEffects();
+
+        return [
+            'primary_palette' => $this->generate_primary_brand_colors($brand_traits),
+            'accent_colors' => $this->generate_accent_colors($brand_traits),
+            'emotional_impact' => $emotional->analyze_brand_emotions($brand_traits),
+            'psychological_alignment' => $psychological->analyze_brand_alignment($brand_traits)
+        ];
+    }
+
+    /**
+     * Optimize personality-color alignment
+     */
+    public function optimize_personality_alignment($current_palette, $target_traits) {
+        $current_alignment = $this->analyze_current_alignment($current_palette, $target_traits);
+        $optimization_suggestions = $this->generate_optimization_suggestions($current_alignment);
+
+        return [
+            'current_alignment' => $current_alignment,
+            'suggested_changes' => $optimization_suggestions,
+            'optimized_palette' => $this->generate_optimized_palette($current_palette, $optimization_suggestions),
+            'implementation_guide' => $this->create_implementation_guide($optimization_suggestions)
+        ];
+    }
+}

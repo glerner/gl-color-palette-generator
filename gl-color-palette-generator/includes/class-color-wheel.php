@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ColorWheel {
     private $color_calculator;
@@ -91,15 +92,14 @@ class ColorWheel {
     /**
      * Calculate color relationships
      */
-    public function calculate_relationships($color, $relationship_type) {
-        $hsl = $this->conversion_utils->hex_to_hsl($color);
-
+    public function calculate_relationships($color) {
         return [
-            'tints' => $this->calculate_tints($hsl),
-            'shades' => $this->calculate_shades($hsl),
-            'tones' => $this->calculate_tones($hsl),
-            'saturations' => $this->calculate_saturations($hsl),
-            'temperatures' => $this->calculate_temperatures($hsl)
+            'complementary' => $this->find_complementary($color),
+            'analogous' => $this->find_analogous($color),
+            'triadic' => $this->find_triadic($color),
+            'tetradic' => $this->find_tetradic($color),
+            'split_complementary' => $this->find_split_complementary($color),
+            'distance_relationships' => $this->calculate_distance_relationships($color)
         ];
     }
 
@@ -222,4 +222,38 @@ class ColorWheel {
 
         return $strength;
     }
-} 
+
+    /**
+     * Generate color wheel data
+     */
+    public function generate_wheel_data($resolution = 360) {
+        $wheel_data = [
+            'primary_colors' => $this->get_primary_colors(),
+            'secondary_colors' => $this->get_secondary_colors(),
+            'tertiary_colors' => $this->get_tertiary_colors(),
+            'color_points' => $this->generate_color_points($resolution)
+        ];
+
+        return [
+            'wheel_data' => $wheel_data,
+            'segments' => $this->generate_wheel_segments($wheel_data),
+            'relationships' => $this->analyze_color_relationships($wheel_data),
+            'metadata' => $this->generate_wheel_metadata($wheel_data)
+        ];
+    }
+
+    /**
+     * Generate interactive wheel data
+     */
+    public function generate_interactive_data($selected_color = null) {
+        $wheel_data = $this->generate_wheel_data();
+
+        return [
+            'base_wheel' => $wheel_data,
+            'interactive_points' => $this->generate_interactive_points(),
+            'selection_guides' => $this->generate_selection_guides($selected_color),
+            'harmony_indicators' => $this->generate_harmony_indicators($selected_color),
+            'interaction_handlers' => $this->get_interaction_handlers()
+        ];
+    }
+}

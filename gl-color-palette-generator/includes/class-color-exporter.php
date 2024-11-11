@@ -1,5 +1,5 @@
 <?php
-
+namespace GLColorPalette;
 class ColorExporter {
     private $formatter;
     private $validator;
@@ -259,4 +259,4 @@ class ColorExporter {
         $output .= "}\n";
         return $output;
     }
-} 
+}

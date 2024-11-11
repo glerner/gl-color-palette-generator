@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class AccessibilityChecker {
     private $settings;
@@ -215,4 +216,46 @@ class AccessibilityChecker {
         // Return simulated color in hex
         return $hex; // Placeholder
     }
-} 
+
+    /**
+     * Generate accessibility report
+     */
+    public function generate_accessibility_report($palette) {
+        $compliance = $this->check_wcag_compliance($palette);
+        $contrast_matrix = $this->generate_contrast_matrix($palette);
+
+        return [
+            'compliance_status' => $compliance,
+            'contrast_analysis' => [
+                'matrix' => $contrast_matrix,
+                'failing_combinations' => $this->identify_failing_combinations($contrast_matrix),
+                'recommendations' => $this->generate_contrast_recommendations($contrast_matrix)
+            ],
+            'color_blindness_analysis' => [
+                'protanopia' => $this->analyze_protanopia_impact($palette),
+                'deuteranopia' => $this->analyze_deuteranopia_impact($palette),
+                'tritanopia' => $this->analyze_tritanopia_impact($palette)
+            ],
+            'readability_analysis' => $this->analyze_text_readability($palette)
+        ];
+    }
+
+    /**
+     * Optimize for accessibility
+     */
+    public function optimize_for_accessibility($palette, $target_level = 'AA') {
+        $original_compliance = $this->check_wcag_compliance($palette);
+        $optimized_palette = $this->optimize_palette($palette, $target_level);
+
+        return [
+            'original_palette' => $palette,
+            'optimized_palette' => $optimized_palette,
+            'compliance_improvement' => [
+                'before' => $original_compliance,
+                'after' => $this->check_wcag_compliance($optimized_palette)
+            ],
+            'optimization_steps' => $this->get_optimization_steps(),
+            'implementation_guide' => $this->generate_implementation_guide($optimized_palette)
+        ];
+    }
+}

@@ -1,5 +1,5 @@
 <?php
-
+namespace GLColorPalette\Providers;
 class PalmProvider implements AIProviderInterface {
     private $client;
     private $config;
@@ -48,4 +48,4 @@ class PalmProvider implements AIProviderInterface {
         }
         return $response->predictions()[0]->content;
     }
-} 
+}

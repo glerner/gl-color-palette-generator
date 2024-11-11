@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ColorCombinationEngine {
     private $color_analyzer;
@@ -153,4 +154,4 @@ class ColorCombinationEngine {
             'optimization_suggestions' => $this->generate_optimization_suggestions($colors, $context)
         ];
     }
-} 
+}

@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class AIColorService {
     private $settings;
@@ -257,4 +258,4 @@ PROMPT;
             'stop' => ["\n\n"]
         ];
     }
-} 
+}

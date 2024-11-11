@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class WCAGCompliance {
     private $contrast_calculator;
@@ -162,4 +163,51 @@ class WCAGCompliance {
 
         return ($lighter + 0.05) / ($darker + 0.05);
     }
-} 
+
+    /**
+     * Check WCAG compliance levels
+     */
+    public function check_compliance_levels($colors) {
+        $results = [];
+        foreach ($colors as $color) {
+            $results[$color] = [
+                'aa_normal_text' => $this->check_aa_normal_text($color),
+                'aa_large_text' => $this->check_aa_large_text($color),
+                'aaa_normal_text' => $this->check_aaa_normal_text($color),
+                'aaa_large_text' => $this->check_aaa_large_text($color)
+            ];
+        }
+
+        return [
+            'compliance_results' => $results,
+            'overall_status' => $this->calculate_overall_compliance($results),
+            'recommendations' => $this->generate_compliance_recommendations($results)
+        ];
+    }
+
+    /**
+     * Generate compliance report
+     */
+    public function generate_compliance_report($palette) {
+        $compliance_data = $this->check_compliance_levels($palette);
+
+        return [
+            'summary' => $this->generate_compliance_summary($compliance_data),
+            'detailed_analysis' => $this->generate_detailed_analysis($compliance_data),
+            'visualizations' => $this->generate_compliance_visualizations($compliance_data),
+            'action_items' => $this->generate_action_items($compliance_data)
+        ];
+    }
+
+    /**
+     * Monitor compliance changes
+     */
+    public function monitor_compliance_changes($palette, $interval = 'daily') {
+        return [
+            'compliance_history' => $this->get_compliance_history($palette),
+            'change_log' => $this->get_compliance_changes($palette),
+            'trend_analysis' => $this->analyze_compliance_trends($palette),
+            'notifications' => $this->get_compliance_notifications($palette)
+        ];
+    }
+}

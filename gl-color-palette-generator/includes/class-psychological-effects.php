@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class PsychologicalEffects {
     // Adding to the existing PSYCHOLOGICAL_EFFECTS constant

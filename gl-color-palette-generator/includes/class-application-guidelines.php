@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ApplicationGuidelines {
     private $color_analyzer;
@@ -253,4 +254,4 @@ class ApplicationGuidelines {
 
         return $validation;
     }
-} 
+}

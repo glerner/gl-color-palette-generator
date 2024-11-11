@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class PreviewGenerator {
     /**
@@ -270,4 +271,54 @@ class PreviewGenerator {
 
         return $luminance > 128 ? '#000000' : '#ffffff';
     }
-} 
+
+    /**
+     * Generate preview HTML
+     */
+    public function generate_preview($palette) {
+        $visualization = new VisualizationEngine();
+        $helper = new VisualizationHelper();
+
+        $preview_data = $this->prepare_preview_data($palette);
+        $accessibility_info = $this->check_accessibility($palette);
+
+        ob_start();
+        include COLOR_PALETTE_GENERATOR_PATH . 'templates/preview.php';
+        return ob_get_clean();
+    }
+
+    /**
+     * Prepare preview data
+     */
+    private function prepare_preview_data($palette) {
+        $data = [];
+        foreach ($palette as $color) {
+            $data[] = [
+                'hex' => $color['hex'],
+                'name' => $color['name'],
+                'rgb' => $this->color_processor->hex_to_rgb($color['hex']),
+                'hsl' => $this->color_processor->hex_to_hsl($color['hex']),
+                'contrast' => $this->contrast_checker->get_contrast_ratios($color['hex'])
+            ];
+        }
+        return $data;
+    }
+
+    /**
+     * Check accessibility
+     */
+    private function check_accessibility($palette) {
+        $checker = new AccessibilityChecker();
+        $wcag = new WCAGCompliance();
+
+        $results = [];
+        foreach ($palette as $color) {
+            $results[$color['hex']] = [
+                'wcag_aa' => $wcag->check_aa_compliance($color['hex']),
+                'wcag_aaa' => $wcag->check_aaa_compliance($color['hex']),
+                'color_blindness' => $checker->check_color_blindness_safety($color['hex'])
+            ];
+        }
+        return $results;
+    }
+}

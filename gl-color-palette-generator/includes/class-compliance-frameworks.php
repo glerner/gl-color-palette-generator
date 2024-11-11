@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ComplianceFrameworks {
     private $compliance_manager;
@@ -184,12 +185,100 @@ class ComplianceFrameworks {
     /**
      * Generate compliance report
      */
-    public function generate_compliance_report($framework, $period) {
+    public function generate_compliance_report($palette) {
+        $compliance_status = $this->check_compliance_status($palette);
+
         return [
-            'summary' => $this->generate_executive_summary($framework, $period),
-            'detailed_findings' => $this->compile_detailed_findings($framework, $period),
-            'remediation_status' => $this->track_remediation_progress($framework),
-            'evidence_collection' => $this->compile_evidence($framework, $period)
+            'status' => $compliance_status,
+            'detailed_analysis' => $this->analyze_compliance_details($compliance_status),
+            'recommendations' => $this->generate_compliance_recommendations($compliance_status),
+            'implementation_guide' => $this->create_implementation_guide($compliance_status)
         ];
     }
-} 
+
+    /**
+     * Check compliance status
+     */
+    public function check_compliance($palette) {
+        $wcag = new WCAGCompliance();
+        $accessibility = new AccessibilityChecker();
+
+        return [
+            'wcag_compliance' => [
+                'aa_level' => $wcag->check_aa_compliance($palette),
+                'aaa_level' => $wcag->check_aaa_compliance($palette)
+            ],
+            'accessibility_compliance' => [
+                'color_blindness' => $accessibility->check_color_blindness($palette),
+                'contrast_ratios' => $accessibility->check_contrast_ratios($palette)
+            ],
+            'industry_compliance' => $this->check_industry_compliance($palette),
+            'recommendations' => $this->generate_compliance_recommendations($palette)
+        ];
+    }
+
+    /**
+     * Monitor compliance changes
+     */
+    public function monitor_compliance_changes($palette) {
+        return [
+            'current_status' => $this->check_compliance_status($palette),
+            'historical_data' => $this->get_historical_compliance_data($palette),
+            'trend_analysis' => $this->analyze_compliance_trends($palette),
+            'alerts' => $this->generate_compliance_alerts($palette)
+        ];
+    }
+
+    /**
+     * Check compliance status
+     */
+    public function check_compliance_status($palette) {
+        return [
+            'wcag' => $this->check_wcag_compliance($palette),
+            'section508' => $this->check_section508_compliance($palette),
+            'aoda' => $this->check_aoda_compliance($palette),
+            'en301549' => $this->check_en301549_compliance($palette)
+        ];
+    }
+
+    // Private helper methods
+    private function check_wcag_compliance($palette) {
+        // Implementation
+    }
+
+    private function check_section508_compliance($palette) {
+        // Implementation
+    }
+
+    private function check_aoda_compliance($palette) {
+        // Implementation
+    }
+
+    private function check_en301549_compliance($palette) {
+        // Implementation
+    }
+
+    private function analyze_compliance_details($status) {
+        // Implementation
+    }
+
+    private function generate_compliance_recommendations($status) {
+        // Implementation
+    }
+
+    private function create_implementation_guide($status) {
+        // Implementation
+    }
+
+    private function get_historical_compliance_data($palette) {
+        // Implementation
+    }
+
+    private function analyze_compliance_trends($palette) {
+        // Implementation
+    }
+
+    private function generate_compliance_alerts($palette) {
+        // Implementation
+    }
+}

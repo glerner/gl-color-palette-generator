@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette\Providers;
 
 class HuggingFaceProvider implements AIProviderInterface {
     private $client;
@@ -48,4 +49,4 @@ class HuggingFaceProvider implements AIProviderInterface {
         }
         return $response[0]['generated_text'];
     }
-} 
+}

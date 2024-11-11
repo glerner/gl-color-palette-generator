@@ -89,6 +89,9 @@ final class ColorPaletteGenerator {
 
         // Register update routine
         add_action('plugins_loaded', [$this, 'update']);
+
+        // Register uninstall hook
+        register_uninstall_hook(__FILE__, ['GLColorPaletteUninstall', 'uninstall']);
     }
 
     /**
@@ -115,3 +118,9 @@ final class ColorPaletteGenerator {
 
 // Initialize plugin
 ColorPaletteGenerator::instance();
+
+// Initialize deletion handler
+add_action('init', function() {
+    $deletion_handler = new GLColorPaletteDeletion();
+    $deletion_handler->init();
+});

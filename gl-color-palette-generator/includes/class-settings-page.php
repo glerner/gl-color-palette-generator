@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ColorPaletteGeneratorSettings {
     private $options_group = 'color_palette_generator';
@@ -25,74 +26,30 @@ class ColorPaletteGeneratorSettings {
     }
 
     public function register_settings() {
-        // API Settings Section
+        register_setting(
+            'color_palette_generator_settings',
+            'color_palette_generator_options',
+            [$this, 'validate_settings']
+        );
+
+        // General Settings
+        add_settings_section(
+            'general_settings',
+            __('General Settings', 'color-palette-generator'),
+            [$this, 'render_general_section'],
+            'color-palette-generator-settings'
+        );
+
+        // API Settings
         add_settings_section(
             'api_settings',
-            'API Configuration',
+            __('API Configuration', 'color-palette-generator'),
             [$this, 'render_api_section'],
-            $this->options_page
+            'color-palette-generator-settings'
         );
 
-        // OpenAI API Key
-        register_setting(
-            $this->options_group,
-            'color_palette_generator_openai_key',
-            ['sanitize_callback' => 'sanitize_text_field']
-        );
-
-        add_settings_field(
-            'openai_api_key',
-            'OpenAI API Key',
-            [$this, 'render_openai_api_field'],
-            $this->options_page,
-            'api_settings'
-        );
-
-        // Color Naming Preferences Section
-        add_settings_section(
-            'naming_settings',
-            'Color Naming Preferences',
-            [$this, 'render_naming_section'],
-            $this->options_page
-        );
-
-        // Naming Preference
-        register_setting(
-            $this->options_group,
-            'color_naming_preference',
-            ['sanitize_callback' => 'sanitize_text_field']
-        );
-
-        add_settings_field(
-            'naming_preference',
-            'Naming Style',
-            [$this, 'render_naming_preference_field'],
-            $this->options_page,
-            'naming_settings'
-        );
-
-        // Cache Settings Section
-        add_settings_section(
-            'cache_settings',
-            'Cache Settings',
-            [$this, 'render_cache_section'],
-            $this->options_page
-        );
-
-        // Cache Duration
-        register_setting(
-            $this->options_group,
-            'color_palette_generator_cache_duration',
-            ['sanitize_callback' => 'absint']
-        );
-
-        add_settings_field(
-            'cache_duration',
-            'Cache Duration (days)',
-            [$this, 'render_cache_duration_field'],
-            $this->options_page,
-            'cache_settings'
-        );
+        // Add settings fields
+        $this->add_settings_fields();
     }
 
     public function render_settings_page() {
@@ -367,5 +324,47 @@ class ColorPaletteGeneratorSettings {
         );
 
         return $cleared;
+    }
+
+    /**
+     * Initialize settings page
+     */
+    public function init_settings_page() {
+        add_action('admin_menu', [$this, 'add_settings_menu']);
+        add_action('admin_init', [$this, 'register_settings']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_settings_assets']);
+    }
+
+    /**
+     * Add settings fields
+     */
+    private function add_settings_fields() {
+        // General Settings Fields
+        add_settings_field(
+            'default_palette_size',
+            __('Default Palette Size', 'color-palette-generator'),
+            [$this, 'render_number_field'],
+            'color-palette-generator-settings',
+            'general_settings',
+            [
+                'label_for' => 'default_palette_size',
+                'min' => 3,
+                'max' => 10,
+                'default' => 5
+            ]
+        );
+
+        // API Settings Fields
+        add_settings_field(
+            'api_provider',
+            __('AI Provider', 'color-palette-generator'),
+            [$this, 'render_select_field'],
+            'color-palette-generator-settings',
+            'api_settings',
+            [
+                'label_for' => 'api_provider',
+                'options' => $this->get_available_providers()
+            ]
+        );
     }
 }

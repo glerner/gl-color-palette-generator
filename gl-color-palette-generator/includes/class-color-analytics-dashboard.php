@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ColorAnalyticsDashboard {
     private $analytics_engine;
@@ -162,12 +163,61 @@ class ColorAnalyticsDashboard {
     /**
      * Generate custom report
      */
-    public function generate_custom_report($metrics = [], $timeframe = 'monthly') {
+    public function generate_custom_report($params) {
+        $report_data = [
+            'color_usage' => $this->analyze_color_usage($params),
+            'user_behavior' => $this->analyze_user_behavior($params),
+            'conversion_impact' => $this->analyze_conversion_impact($params),
+            'accessibility_metrics' => $this->analyze_accessibility_metrics($params)
+        ];
+
         return [
-            'report_data' => $this->compile_report_data($metrics, $timeframe),
-            'visualizations' => $this->create_visualizations($metrics),
-            'insights' => $this->extract_insights($metrics),
-            'export_options' => $this->get_export_options()
+            'report_data' => $report_data,
+            'visualizations' => $this->generate_visualizations($report_data),
+            'recommendations' => $this->generate_recommendations($report_data),
+            'export_formats' => $this->get_available_export_formats()
         ];
     }
-} 
+
+    /**
+     * Generate dashboard data
+     */
+    public function generate_dashboard_data($timeframe = 'last_30_days') {
+        return [
+            'usage_metrics' => $this->get_usage_metrics($timeframe),
+            'palette_analytics' => $this->get_palette_analytics($timeframe),
+            'performance_metrics' => $this->get_performance_metrics($timeframe),
+            'trend_analysis' => $this->get_trend_analysis($timeframe)
+        ];
+    }
+
+    /**
+     * Update dashboard widgets
+     */
+    public function update_dashboard_widgets() {
+        $widgets = [
+            'color_usage' => $this->update_color_usage_widget(),
+            'palette_performance' => $this->update_palette_performance_widget(),
+            'accessibility_status' => $this->update_accessibility_widget(),
+            'trend_indicators' => $this->update_trend_indicators()
+        ];
+
+        return [
+            'updated_widgets' => $widgets,
+            'last_update' => current_time('mysql'),
+            'next_update' => $this->schedule_next_update(),
+            'update_status' => 'success'
+        ];
+    }
+
+    // Add private helper methods here
+    private function get_usage_metrics($timeframe) {
+        // Implementation
+    }
+
+    private function get_palette_analytics($timeframe) {
+        // Implementation
+    }
+
+    // ... other helper methods
+}

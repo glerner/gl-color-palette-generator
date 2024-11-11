@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ColorNamer {
     private $settings;
@@ -262,4 +263,4 @@ class ColorNamer {
 
         return $delta_e;
     }
-} 
+}

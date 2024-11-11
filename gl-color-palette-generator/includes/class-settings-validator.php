@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class SettingsValidator {
     private $errors = [];
@@ -378,4 +379,83 @@ class SettingsValidator {
 
         return $sanitized;
     }
-} 
+
+    /**
+     * Validate settings
+     */
+    public function validate_settings($input) {
+        $validated = [];
+        $errors = new WP_Error();
+
+        // Validate General Settings
+        $validated['default_palette_size'] = $this->validate_palette_size(
+            $input['default_palette_size'] ?? 5
+        );
+
+        // Validate API Settings
+        $validated['api_provider'] = $this->validate_api_provider(
+            $input['api_provider'] ?? ''
+        );
+
+        $validated['api_key'] = $this->validate_api_key(
+            $input['api_key'] ?? '',
+            $validated['api_provider']
+        );
+
+        if ($errors->has_errors()) {
+            add_settings_error(
+                'color_palette_generator_settings',
+                'validation_failed',
+                $errors->get_error_message()
+            );
+            return get_option('color_palette_generator_options');
+        }
+
+        return $validated;
+    }
+
+    /**
+     * Validate individual settings
+     */
+    private function validate_palette_size($size) {
+        $size = absint($size);
+        if ($size < 3 || $size > 10) {
+            add_settings_error(
+                'color_palette_generator_settings',
+                'invalid_palette_size',
+                __('Palette size must be between 3 and 10', 'color-palette-generator')
+            );
+            return 5;
+        }
+        return $size;
+    }
+
+    /**
+     * Validate API credentials
+     */
+    private function validate_api_credentials($provider, $key) {
+        $factory = new Providers\AiProviderFactory();
+        try {
+            $provider_instance = $factory->create_provider($provider);
+            $validation_result = $provider_instance->validate_credentials($key);
+
+            if (!$validation_result['valid']) {
+                add_settings_error(
+                    'color_palette_generator_settings',
+                    'invalid_api_credentials',
+                    $validation_result['message']
+                );
+                return false;
+            }
+
+            return true;
+        } catch (Exception $e) {
+            add_settings_error(
+                'color_palette_generator_settings',
+                'api_validation_error',
+                $e->getMessage()
+            );
+            return false;
+        }
+    }
+}

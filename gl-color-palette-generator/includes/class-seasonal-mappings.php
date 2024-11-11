@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class SeasonalMappings {
     // Comprehensive seasonal color mappings
@@ -247,4 +248,4 @@ class SeasonalMappings {
 
         return $applications;
     }
-} 
+}

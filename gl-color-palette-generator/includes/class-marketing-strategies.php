@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class MarketingStrategies {
     private $color_analyzer;
@@ -223,4 +224,43 @@ class MarketingStrategies {
         }
         return null;
     }
-} 
+
+    /**
+     * Generate brand strategy
+     */
+    public function generate_brand_strategy($palette) {
+        $business = new BusinessApplications();
+        $psychological = new PsychologicalEffects();
+
+        return [
+            'brand_personality' => $psychological->analyze_brand_personality($palette),
+            'target_demographics' => $this->identify_target_demographics($palette),
+            'marketing_recommendations' => $this->generate_marketing_recommendations($palette),
+            'implementation_timeline' => $this->create_implementation_timeline()
+        ];
+    }
+
+    /**
+     * Analyze market impact
+     */
+    public function analyze_market_impact($palette) {
+        return [
+            'industry_alignment' => $this->analyze_industry_alignment($palette),
+            'competitor_differentiation' => $this->analyze_competitor_colors($palette),
+            'market_positioning' => $this->determine_market_positioning($palette),
+            'trend_alignment' => $this->analyze_trend_alignment($palette)
+        ];
+    }
+
+    /**
+     * Generate marketing assets
+     */
+    public function generate_marketing_assets($palette) {
+        return [
+            'social_media_templates' => $this->create_social_templates($palette),
+            'email_templates' => $this->create_email_templates($palette),
+            'presentation_templates' => $this->create_presentation_templates($palette),
+            'brand_guidelines' => $this->create_brand_guidelines($palette)
+        ];
+    }
+}

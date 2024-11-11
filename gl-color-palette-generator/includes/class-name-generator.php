@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ColorNameGenerator {
     private $naming_preference;
@@ -164,5 +165,66 @@ class ColorNameGenerator {
         if ($b > $r && $b > $g) return 'Blue';
 
         return 'Custom Color';
+    }
+
+    /**
+     * Generate creative color names
+     */
+    public function generate_creative_names($colors) {
+        $names = [];
+        foreach ($colors as $hex) {
+            $names[$hex] = [
+                'creative_name' => $this->generate_single_name($hex),
+                'descriptive_name' => $this->generate_descriptive_name($hex),
+                'marketing_name' => $this->generate_marketing_name($hex),
+                'alternatives' => $this->generate_alternative_names($hex)
+            ];
+        }
+
+        return [
+            'names' => $names,
+            'metadata' => $this->generate_naming_metadata($names),
+            'suggestions' => $this->generate_name_suggestions($names)
+        ];
+    }
+
+    /**
+     * Validate color names
+     */
+    public function validate_color_names($names) {
+        $validator = new ColorNameValidator();
+        $results = [];
+
+        foreach ($names as $hex => $name) {
+            $results[$hex] = [
+                'is_valid' => $validator->validate_name($name),
+                'uniqueness_score' => $validator->check_uniqueness($name),
+                'marketing_effectiveness' => $validator->assess_marketing_value($name),
+                'localization_status' => $validator->check_localization($name)
+            ];
+        }
+
+        return $results;
+    }
+
+    /**
+     * Generate localized names
+     */
+    public function generate_localized_names($colors, $languages) {
+        $localizer = new ColorLocalizer();
+        $localized_names = [];
+
+        foreach ($colors as $hex) {
+            $localized_names[$hex] = [];
+            foreach ($languages as $lang) {
+                $localized_names[$hex][$lang] = [
+                    'name' => $localizer->get_localized_name($hex, $lang),
+                    'description' => $localizer->get_localized_description($hex, $lang),
+                    'cultural_context' => $localizer->get_cultural_context($hex, $lang)
+                ];
+            }
+        }
+
+        return $localized_names;
     }
 }

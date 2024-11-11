@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class GLColorPaletteSetup {
     /**
@@ -99,5 +100,97 @@ class GLColorPaletteSetup {
         // Remove options
         delete_option('gl_color_palette_db_version');
         delete_option('gl_color_palette_settings');
+    }
+
+    /**
+     * Initialize database tables
+     */
+    public function create_tables() {
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+
+        $tables = [
+            'color_palettes' => "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}color_palettes (
+                id bigint(20) NOT NULL AUTO_INCREMENT,
+                name varchar(255) NOT NULL,
+                colors longtext NOT NULL,
+                created_at datetime DEFAULT CURRENT_TIMESTAMP,
+                updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                user_id bigint(20) NOT NULL,
+                status varchar(20) DEFAULT 'active',
+                metadata longtext,
+                PRIMARY KEY  (id)
+            ) $charset_collate;",
+
+            'color_analytics' => "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}color_analytics (
+                id bigint(20) NOT NULL AUTO_INCREMENT,
+                palette_id bigint(20) NOT NULL,
+                metric_type varchar(50) NOT NULL,
+                metric_value longtext NOT NULL,
+                recorded_at datetime DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY  (id),
+                KEY palette_id (palette_id)
+            ) $charset_collate;",
+
+            'color_cache' => "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}color_cache (
+                id bigint(20) NOT NULL AUTO_INCREMENT,
+                cache_key varchar(255) NOT NULL,
+                cache_value longtext NOT NULL,
+                expires_at datetime NOT NULL,
+                created_at datetime DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY  (id),
+                UNIQUE KEY cache_key (cache_key)
+            ) $charset_collate;"
+        ];
+
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        foreach ($tables as $sql) {
+            dbDelta($sql);
+        }
+    }
+
+    /**
+     * Set default options
+     */
+    public function set_default_options() {
+        $defaults = [
+            'color_palette_generator_version' => COLOR_PALETTE_GENERATOR_VERSION,
+            'color_palette_generator_settings' => [
+                'ai_provider' => 'openai',
+                'cache_duration' => 86400,
+                'default_palette_size' => 5,
+                'accessibility_level' => 'AA',
+                'enable_analytics' => true,
+                'enable_ai_features' => true
+            ]
+        ];
+
+        foreach ($defaults as $option => $value) {
+            if (get_option($option) === false) {
+                update_option($option, $value);
+            }
+        }
+    }
+
+    /**
+     * Upgrade database and settings
+     */
+    public function upgrade($old_version, $new_version) {
+        if (version_compare($old_version, '1.1.0', '<')) {
+            $this->upgrade_to_110();
+        }
+
+        if (version_compare($old_version, '1.2.0', '<')) {
+            $this->upgrade_to_120();
+        }
+
+        update_option('color_palette_generator_version', $new_version);
+
+        return [
+            'status' => 'success',
+            'upgraded_from' => $old_version,
+            'upgraded_to' => $new_version,
+            'upgrade_log' => $this->get_upgrade_log()
+        ];
     }
 }

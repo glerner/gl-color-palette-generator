@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ErrorHandler {
     private $error_reporter;
@@ -355,4 +356,10 @@ class ErrorHandler {
 
         return isset($map[$php_error]) ? $map[$php_error] : ErrorCodes::SYSTEM_UNKNOWN_ERROR;
     }
-} 
+
+    // Add error code registration
+    public function register_error_codes() {
+        $this->error_codes = new ErrorCodes();
+        $this->error_reporter = new ErrorReporter();
+    }
+}

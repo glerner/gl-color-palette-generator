@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class BusinessApplications {
     private $color_analyzer;
@@ -228,4 +229,4 @@ class BusinessApplications {
 
         return $strategy;
     }
-} 
+}

@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ColorLocalizer {
     private $translator;
@@ -221,4 +222,4 @@ class ColorLocalizer {
         // Returns the closest matching color from the list
         return $color_list[0]; // Placeholder
     }
-} 
+}

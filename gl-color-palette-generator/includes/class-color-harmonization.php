@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class ColorHarmonization {
     private $color_analyzer;
@@ -164,4 +165,54 @@ class ColorHarmonization {
 
         return $validation;
     }
-} 
+
+    /**
+     * Generate harmonic combinations
+     */
+    public function generate_harmonic_combinations($base_color) {
+        return [
+            'complementary' => $this->get_complementary_colors($base_color),
+            'analogous' => $this->get_analogous_colors($base_color),
+            'triadic' => $this->get_triadic_colors($base_color),
+            'split_complementary' => $this->get_split_complementary($base_color),
+            'tetradic' => $this->get_tetradic_colors($base_color),
+            'square' => $this->get_square_colors($base_color)
+        ];
+    }
+
+    /**
+     * Optimize color harmony
+     */
+    public function optimize_harmony($palette) {
+        $current_harmony = $this->analyze_harmony($palette);
+        $optimization_needed = $this->check_optimization_needed($current_harmony);
+
+        if ($optimization_needed) {
+            return [
+                'optimized_palette' => $this->perform_harmony_optimization($palette),
+                'harmony_score' => $this->calculate_harmony_score($palette),
+                'adjustments_made' => $this->get_optimization_adjustments(),
+                'harmony_analysis' => $this->analyze_optimized_harmony()
+            ];
+        }
+
+        return [
+            'status' => 'harmony_optimal',
+            'current_score' => $current_harmony['score'],
+            'analysis' => $current_harmony
+        ];
+    }
+
+    /**
+     * Generate harmony variations
+     */
+    public function generate_harmony_variations($palette) {
+        return [
+            'monochromatic' => $this->generate_monochromatic_variation($palette),
+            'warm_harmony' => $this->generate_warm_variation($palette),
+            'cool_harmony' => $this->generate_cool_variation($palette),
+            'neutral_harmony' => $this->generate_neutral_variation($palette),
+            'vibrant_harmony' => $this->generate_vibrant_variation($palette)
+        ];
+    }
+}

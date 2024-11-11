@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class AdminInterface {
     private $plugin_slug = 'color-palette-generator';
@@ -11,17 +12,36 @@ class AdminInterface {
     }
 
     /**
+     * Initialize admin interface
+     */
+    public function init() {
+        add_action('admin_menu', [$this, 'add_menu_pages']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
+        add_action('wp_ajax_generate_palette', [$this, 'handle_palette_generation']);
+        add_action('wp_ajax_save_palette', [$this, 'handle_palette_save']);
+    }
+
+    /**
      * Add menu pages
      */
     public function add_menu_pages() {
         add_menu_page(
-            'Color Palette Generator',
-            'Color Palette',
-            $this->capability,
-            $this->plugin_slug,
+            __('Color Palette Generator', 'color-palette-generator'),
+            __('Color Palettes', 'color-palette-generator'),
+            'manage_options',
+            'color-palette-generator',
             [$this, 'render_main_page'],
             'dashicons-art',
             30
+        );
+
+        add_submenu_page(
+            'color-palette-generator',
+            __('Settings', 'color-palette-generator'),
+            __('Settings', 'color-palette-generator'),
+            'manage_options',
+            'color-palette-settings',
+            [$this, 'render_settings_page']
         );
     }
 
@@ -163,29 +183,33 @@ class AdminInterface {
     /**
      * Handle AJAX palette generation
      */
-    public function handle_generate_palette() {
-        check_ajax_referer('color_palette_generator', 'nonce');
+    public function handle_palette_generation() {
+        check_ajax_referer('color_palette_generator_nonce', 'nonce');
 
-        if (!current_user_can($this->capability)) {
-            wp_send_json_error(['message' => 'Insufficient permissions']);
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Unauthorized'], 403);
         }
 
-        $colors = isset($_POST['colors']) ? array_map('sanitize_hex_color', $_POST['colors']) : [];
-        $naming_preference = isset($_POST['naming_preference']) ?
-            sanitize_text_field($_POST['naming_preference']) : 'both';
-        $base_theme = isset($_POST['base_theme']) ?
-            sanitize_text_field($_POST['base_theme']) : 'twentytwentyfour';
+        $base_color = sanitize_text_field($_POST['base_color'] ?? '');
+        $options = array_map('sanitize_text_field', $_POST['options'] ?? []);
 
         try {
-            // Process colors and generate files
-            $generator = new ColorPaletteGenerator();
-            $result = $generator->process_colors($colors, $naming_preference, $base_theme);
+            $palette = $this->palette_generator->generate_ai_palette($base_color, $options);
 
-            wp_send_json_success($result);
+            if (!$palette) {
+                throw new Exception('Failed to generate palette');
+            }
+
+            $preview = $this->preview_generator->generate_preview($palette);
+
+            wp_send_json_success([
+                'palette' => $palette,
+                'preview' => $preview
+            ]);
         } catch (Exception $e) {
             wp_send_json_error([
                 'message' => $e->getMessage()
             ]);
         }
     }
-} 
+}

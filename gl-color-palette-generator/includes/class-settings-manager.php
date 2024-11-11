@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class SettingsManager {
     private $option_name = 'color_palette_generator_settings';
@@ -36,82 +37,48 @@ class SettingsManager {
 
     public function register_settings() {
         register_setting(
+            'color_palette_generator_settings',
             'color_palette_generator_options',
-            $this->option_name,
-            [
-                'type' => 'array',
-                'sanitize_callback' => [$this, 'sanitize_settings'],
-                'default' => $this->defaults
-            ]
+            [$this, 'validate_settings']
         );
 
-        add_settings_section(
-            'color_palette_general',
-            __('General Settings', 'color-palette-generator'),
-            [$this, 'render_section_header'],
-            'color-palette-generator-settings'
-        );
-
+        $this->add_settings_sections();
         $this->add_settings_fields();
     }
 
-    private function add_settings_fields() {
-        // Naming Service
-        add_settings_field(
-            'naming_service',
-            __('Color Naming Service', 'color-palette-generator'),
-            [$this, 'render_select_field'],
-            'color-palette-generator-settings',
-            'color_palette_general',
-            [
-                'id' => 'naming_service',
-                'options' => [
-                    'local' => __('Local Database', 'color-palette-generator'),
-                    'openai' => __('OpenAI API', 'color-palette-generator'),
-                    'custom' => __('Custom API', 'color-palette-generator')
-                ]
-            ]
+    private function add_settings_sections() {
+        add_settings_section(
+            'ai_provider_section',
+            __('AI Provider Settings', 'color-palette-generator'),
+            [$this, 'render_provider_section'],
+            'color-palette-generator'
         );
 
-        // API Key
+        add_settings_section(
+            'color_options_section',
+            __('Color Generation Options', 'color-palette-generator'),
+            [$this, 'render_color_section'],
+            'color-palette-generator'
+        );
+    }
+
+    private function add_settings_fields() {
+        // AI Provider fields
+        add_settings_field(
+            'ai_provider',
+            __('AI Provider', 'color-palette-generator'),
+            [$this, 'render_provider_field'],
+            'color-palette-generator',
+            'ai_provider_section'
+        );
+
+        // API Key field
         add_settings_field(
             'api_key',
             __('API Key', 'color-palette-generator'),
-            [$this, 'render_text_field'],
-            'color-palette-generator-settings',
-            'color_palette_general',
-            [
-                'id' => 'api_key',
-                'class' => 'regular-text',
-                'description' => __('Required for OpenAI or custom API services', 'color-palette-generator')
-            ]
-        );
-
-        // Accessibility Settings
-        add_settings_field(
-            'accessibility_settings',
-            __('Accessibility', 'color-palette-generator'),
-            [$this, 'render_accessibility_fields'],
-            'color-palette-generator-settings',
-            'color_palette_general'
-        );
-
-        // Export Options
-        add_settings_field(
-            'export_options',
-            __('Export Options', 'color-palette-generator'),
-            [$this, 'render_export_fields'],
-            'color-palette-generator-settings',
-            'color_palette_general'
-        );
-
-        // Default Colors
-        add_settings_field(
-            'default_colors',
-            __('Default Colors', 'color-palette-generator'),
-            [$this, 'render_color_fields'],
-            'color-palette-generator-settings',
-            'color_palette_general'
+            [$this, 'render_api_key_field'],
+            'color-palette-generator',
+            'ai_provider_section'
         );
     }
 
@@ -262,4 +229,10 @@ class SettingsManager {
             $this->defaults
         );
     }
-} 
+
+    // Add settings validation
+    public function validate_settings($settings) {
+        $validator = new SettingsValidator();
+        return $validator->validate($settings);
+    }
+}

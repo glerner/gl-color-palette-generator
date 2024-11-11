@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class VariationGenerator {
     private $color_analyzer;
@@ -24,31 +25,34 @@ class VariationGenerator {
     /**
      * Generate comprehensive color variations
      */
-    public function generate_variations($base_color, $options = []) {
-        $lab = $this->color_analyzer->hex_to_lab($base_color);
-        $variations = [
-            'base' => $base_color,
-            'tints' => $this->generate_tints($lab, $options),
-            'shades' => $this->generate_shades($lab, $options),
-            'tones' => $this->generate_tones($lab, $options),
-            'saturated' => $this->generate_saturated($lab, $options),
-            'desaturated' => $this->generate_desaturated($lab, $options),
-            'temperature' => $this->generate_temperature_variations($lab, $options),
-            'neutrals' => $this->generate_neutrals($lab, $options),
-            'accents' => $this->generate_accents($lab, $options)
+    public function generate_variations($base_color, $variation_types = []) {
+        $variations = [];
+
+        foreach ($variation_types as $type) {
+            switch ($type) {
+                case 'shades':
+                    $variations['shades'] = $this->generate_shades($base_color);
+                    break;
+                case 'tints':
+                    $variations['tints'] = $this->generate_tints($base_color);
+                    break;
+                case 'tones':
+                    $variations['tones'] = $this->generate_tones($base_color);
+                    break;
+                case 'analogous':
+                    $variations['analogous'] = $this->generate_analogous($base_color);
+                    break;
+                case 'monochromatic':
+                    $variations['monochromatic'] = $this->generate_monochromatic($base_color);
+                    break;
+            }
+        }
+
+        return [
+            'base_color' => $base_color,
+            'variations' => $variations,
+            'metadata' => $this->generate_variation_metadata($variations)
         ];
-
-        // Add semantic variations if requested
-        if (!empty($options['semantic'])) {
-            $variations['semantic'] = $this->generate_semantic_variations($base_color);
-        }
-
-        // Add custom variations if specified
-        if (!empty($options['custom'])) {
-            $variations['custom'] = $this->generate_custom_variations($base_color, $options['custom']);
-        }
-
-        return $variations;
     }
 
     /**
@@ -235,14 +239,33 @@ class VariationGenerator {
     /**
      * Generate custom variations
      */
-    private function generate_custom_variations($base_color, $custom_options) {
-        $custom = [];
+    public function generate_custom_variations($base_color, $parameters) {
+        $custom_variations = [];
 
-        foreach ($custom_options as $name => $adjustments) {
-            $custom[$name] = $this->apply_custom_adjustments($base_color, $adjustments);
+        if (isset($parameters['lightness'])) {
+            $custom_variations['lightness'] = $this->vary_lightness(
+                $base_color,
+                $parameters['lightness']['start'],
+                $parameters['lightness']['end'],
+                $parameters['lightness']['steps']
+            );
         }
 
-        return $custom;
+        if (isset($parameters['saturation'])) {
+            $custom_variations['saturation'] = $this->vary_saturation(
+                $base_color,
+                $parameters['saturation']['start'],
+                $parameters['saturation']['end'],
+                $parameters['saturation']['steps']
+            );
+        }
+
+        return [
+            'base_color' => $base_color,
+            'parameters' => $parameters,
+            'variations' => $custom_variations,
+            'preview_data' => $this->generate_preview_data($custom_variations)
+        ];
     }
 
     /**
@@ -290,4 +313,32 @@ class VariationGenerator {
         ];
         return $this->color_analyzer->lab_to_hex($new_lab);
     }
-} 
+
+    /**
+     * Generate accessibility variations
+     */
+    public function generate_accessibility_variations($base_color) {
+        $accessibility = new AccessibilityChecker();
+        $variations = [];
+
+        // Generate variations for different contrast ratios
+        $variations['aa_normal'] = $this->generate_aa_compliant_variations($base_color, 'normal');
+        $variations['aa_large'] = $this->generate_aa_compliant_variations($base_color, 'large');
+        $variations['aaa_normal'] = $this->generate_aaa_compliant_variations($base_color, 'normal');
+        $variations['aaa_large'] = $this->generate_aaa_compliant_variations($base_color, 'large');
+
+        // Check accessibility for each variation
+        foreach ($variations as $type => $colors) {
+            foreach ($colors as &$color) {
+                $color['contrast_ratio'] = $accessibility->check_contrast_ratio($base_color, $color['hex']);
+                $color['wcag_status'] = $accessibility->check_wcag_compliance($color['contrast_ratio']);
+            }
+        }
+
+        return [
+            'base_color' => $base_color,
+            'variations' => $variations,
+            'accessibility_report' => $this->generate_accessibility_report($variations)
+        ];
+    }
+}

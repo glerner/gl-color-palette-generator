@@ -1,4 +1,5 @@
 <?php
+namespace GLColorPalette;
 
 class VisualizationEngine {
     private $render_engine;
@@ -190,4 +191,43 @@ class VisualizationEngine {
             'optimization_suggestions' => $this->generate_optimization_tips()
         ];
     }
-} 
+
+    /**
+     * Generate color visualizations
+     */
+    public function generate_visualizations($palette, $context = 'web') {
+        $helper = new VisualizationHelper();
+
+        return [
+            'swatches' => $this->generate_color_swatches($palette),
+            'combinations' => $this->generate_combination_preview($palette),
+            'application_examples' => $this->generate_application_examples($palette, $context),
+            'accessibility_visualization' => $this->generate_accessibility_preview($palette)
+        ];
+    }
+
+    /**
+     * Create interactive previews
+     */
+    public function create_interactive_previews($palette) {
+        return [
+            'light_dark_variants' => $this->generate_light_dark_variants($palette),
+            'context_switches' => $this->generate_context_switches($palette),
+            'device_previews' => $this->generate_device_previews($palette),
+            'animation_sequences' => $this->generate_animation_sequences($palette)
+        ];
+    }
+
+    /**
+     * Generate data visualizations
+     */
+    public function generate_data_visualizations($data) {
+        return [
+            'charts' => $this->generate_charts($data),
+            'graphs' => $this->generate_graphs($data),
+            'heatmaps' => $this->generate_heatmaps($data),
+            'timelines' => $this->generate_timelines($data),
+            'export_options' => $this->get_export_options()
+        ];
+    }
+}
