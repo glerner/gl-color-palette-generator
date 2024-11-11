@@ -1,0 +1,113 @@
+/* Error Display Styles */
+.notice {
+    position: relative;
+    padding: 15px;
+    margin: 15px 0;
+    border-left-width: 4px;
+}
+
+.notice-error {
+    border-left-color: #d63638;
+}
+
+.notice-warning {
+    border-left-color: #dba617;
+}
+
+.notice-notice {
+    border-left-color: #72aee6;
+}
+
+.error-context {
+    margin: 10px 0;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+.error-context li {
+    margin-bottom: 5px;
+}
+
+.error-meta {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #666;
+}
+
+.error-code,
+.error-time {
+    margin-right: 15px;
+}
+
+/* Debug Panel */
+.debug-panel {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.debug-panel h3 {
+    margin-top: 0;
+}
+
+.debug-log {
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: monospace;
+    background: #fff;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.debug-entry {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.debug-timestamp {
+    color: #666;
+    font-size: 12px;
+}
+
+.debug-message {
+    margin: 5px 0;
+    color: #1e1e1e;
+}
+
+.debug-data {
+    margin-left: 20px;
+    color: #666;
+}
+
+/* Dismissible Notices */
+.notice-dismiss {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 10px;
+    color: #666;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.notice-dismiss:hover {
+    color: #d63638;
+}
+
+/* Mobile Responsiveness */
+@media screen and (max-width: 782px) {
+    .error-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .error-context li {
+        word-break: break-word;
+    }
+} 
