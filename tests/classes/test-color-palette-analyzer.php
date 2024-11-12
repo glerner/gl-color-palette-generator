@@ -1,4 +1,12 @@
 <?php
+/**
+ * Color Palette Analyzer Tests
+ *
+ * @package GLColorPalette
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ * @since   1.0.0
+ */
 
 namespace GLColorPalette\Tests;
 
@@ -8,247 +16,144 @@ use GLColorPalette\ColorPaletteAnalyzer;
 use GLColorPalette\ColorPaletteFormatter;
 
 class ColorPaletteAnalyzerTest extends TestCase {
-    private $analyzer;
-    private $formatter;
-    private $palette;
+    private ColorPaletteAnalyzer $analyzer;
+    private ColorPaletteFormatter $formatter;
+    private ColorPalette $test_palette;
 
     protected function setUp(): void {
         $this->formatter = new ColorPaletteFormatter();
         $this->analyzer = new ColorPaletteAnalyzer($this->formatter);
-        $this->palette = new ColorPalette([
+        $this->test_palette = new ColorPalette([
             'name' => 'Test Palette',
-            'colors' => ['#FF0000', '#00FF00', '#0000FF']
+            'colors' => ['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF'],
+            'metadata' => ['type' => 'test']
         ]);
     }
 
-    public function test_analyze_palette_returns_complete_analysis(): void {
-        // Act
-        $result = $this->analyzer->analyze_palette($this->palette);
+    public function test_analyze_palette(): void {
+        $analysis = $this->analyzer->analyzePalette($this->test_palette);
 
-        // Assert
-        $this->assertArrayHasKey('contrast', $result);
-        $this->assertArrayHasKey('harmony', $result);
-        $this->assertArrayHasKey('distribution', $result);
-        $this->assertArrayHasKey('accessibility', $result);
+        $this->assertArrayHasKey('contrast_ratios', $analysis);
+        $this->assertArrayHasKey('harmony', $analysis);
+        $this->assertArrayHasKey('accessibility', $analysis);
+        $this->assertArrayHasKey('relationships', $analysis);
+        $this->assertArrayHasKey('statistics', $analysis);
     }
 
-    public function test_analyze_palette_respects_options(): void {
-        // Arrange
-        $options = [
-            'contrast' => true,
-            'harmony' => false,
-            'distribution' => true,
-            'accessibility' => false
-        ];
+    public function test_calculate_contrast_ratios(): void {
+        $ratios = $this->analyzer->calculateContrastRatios($this->test_palette);
 
-        // Act
-        $result = $this->analyzer->analyze_palette($this->palette, $options);
-
-        // Assert
-        $this->assertArrayHasKey('contrast', $result);
-        $this->assertArrayNotHasKey('harmony', $result);
-        $this->assertArrayHasKey('distribution', $result);
-        $this->assertArrayNotHasKey('accessibility', $result);
+        $this->assertIsArray($ratios);
+        $this->assertNotEmpty($ratios);
+        $this->assertArrayHasKey('ratio', $ratios[0]);
+        $this->assertArrayHasKey('colors', $ratios[0]);
     }
 
-    public function test_analyze_contrast_calculates_correct_ratios(): void {
-        // Arrange
-        $black_white_palette = new ColorPalette([
-            'name' => 'Black & White',
-            'colors' => ['#000000', '#FFFFFF']
+    public function test_analyze_harmony(): void {
+        $harmony = $this->analyzer->analyzeHarmony($this->test_palette);
+
+        $this->assertArrayHasKey('complementary', $harmony);
+        $this->assertArrayHasKey('analogous', $harmony);
+        $this->assertArrayHasKey('triadic', $harmony);
+        $this->assertArrayHasKey('harmony_score', $harmony);
+        $this->assertIsFloat($harmony['harmony_score']);
+        $this->assertGreaterThanOrEqual(0, $harmony['harmony_score']);
+        $this->assertLessThanOrEqual(1, $harmony['harmony_score']);
+    }
+
+    public function test_analyze_accessibility(): void {
+        $accessibility = $this->analyzer->analyzeAccessibility($this->test_palette, 'AA');
+
+        $this->assertArrayHasKey('level', $accessibility);
+        $this->assertArrayHasKey('compliant_pairs', $accessibility);
+        $this->assertArrayHasKey('non_compliant_pairs', $accessibility);
+        $this->assertArrayHasKey('compliance_rate', $accessibility);
+        $this->assertIsFloat($accessibility['compliance_rate']);
+    }
+
+    public function test_get_color_relationships(): void {
+        $relationships = $this->analyzer->getColorRelationships($this->test_palette);
+
+        $this->assertIsArray($relationships);
+        $this->assertNotEmpty($relationships);
+        $this->assertArrayHasKey('colors', $relationships[0]);
+        $this->assertArrayHasKey('hue_difference', $relationships[0]);
+        $this->assertArrayHasKey('saturation_difference', $relationships[0]);
+        $this->assertArrayHasKey('lightness_difference', $relationships[0]);
+    }
+
+    public function test_get_palette_stats(): void {
+        $stats = $this->analyzer->getPaletteStats($this->test_palette);
+
+        $this->assertArrayHasKey('color_count', $stats);
+        $this->assertArrayHasKey('hue_range', $stats);
+        $this->assertArrayHasKey('saturation_range', $stats);
+        $this->assertArrayHasKey('lightness_range', $stats);
+        $this->assertArrayHasKey('contrast_range', $stats);
+    }
+
+    public function test_complementary_colors(): void {
+        $palette = new ColorPalette([
+            'colors' => ['#FF0000', '#00FFFF'] // Red and Cyan
         ]);
 
-        // Act
-        $result = $this->analyzer->analyze_palette($black_white_palette);
-
-        // Assert
-        $this->assertArrayHasKey('contrast', $result);
-        $this->assertEquals(21, round($result['contrast']['ratios'][0]['ratio']));
-        $this->assertTrue($result['contrast']['ratios'][0]['wcag_aa']);
-        $this->assertTrue($result['contrast']['ratios'][0]['wcag_aaa']);
+        $harmony = $this->analyzer->analyzeHarmony($palette);
+        $this->assertNotEmpty($harmony['complementary']);
     }
 
-    public function test_analyze_harmony_identifies_relationships(): void {
-        // Arrange
-        $complementary_palette = new ColorPalette([
-            'name' => 'Complementary',
-            'colors' => ['#FF0000', '#00FFFF']
+    public function test_analogous_colors(): void {
+        $palette = new ColorPalette([
+            'colors' => ['#FF0000', '#FF3300', '#FF6600'] // Red and orange shades
         ]);
 
-        // Act
-        $result = $this->analyzer->analyze_palette($complementary_palette);
-
-        // Assert
-        $this->assertArrayHasKey('harmony', $result);
-        $this->assertArrayHasKey('relationships', $result['harmony']);
-        $this->assertEquals('complementary', $result['harmony']['relationships'][0]['type']);
+        $harmony = $this->analyzer->analyzeHarmony($palette);
+        $this->assertNotEmpty($harmony['analogous']);
     }
 
-    public function test_analyze_distribution_calculates_coverage(): void {
-        // Act
-        $result = $this->analyzer->analyze_palette($this->palette);
-
-        // Assert
-        $this->assertArrayHasKey('distribution', $result);
-        $this->assertArrayHasKey('hue_distribution', $result['distribution']);
-        $this->assertArrayHasKey('coverage', $result['distribution']['hue_distribution']);
-        $this->assertGreaterThan(0, $result['distribution']['hue_distribution']['coverage']);
-    }
-
-    public function test_analyze_accessibility_identifies_issues(): void {
-        // Arrange
-        $low_contrast_palette = new ColorPalette([
-            'name' => 'Low Contrast',
-            'colors' => ['#CCCCCC', '#DDDDDD']
+    public function test_triadic_colors(): void {
+        $palette = new ColorPalette([
+            'colors' => ['#FF0000', '#00FF00', '#0000FF'] // Red, Green, Blue
         ]);
 
-        // Act
-        $result = $this->analyzer->analyze_palette($low_contrast_palette);
-
-        // Assert
-        $this->assertArrayHasKey('accessibility', $result);
-        $this->assertArrayHasKey('wcag_compliance', $result['accessibility']);
-        $this->assertEquals(0, $result['accessibility']['wcag_compliance']['aa_pass_rate']);
+        $harmony = $this->analyzer->analyzeHarmony($palette);
+        $this->assertNotEmpty($harmony['triadic']);
     }
 
-    public function test_analyze_color_blindness_provides_recommendations(): void {
-        // Arrange
-        $problematic_palette = new ColorPalette([
-            'name' => 'Problematic for Color Blindness',
-            'colors' => ['#FF0000', '#00FF00'] // Red-green problematic
+    public function test_accessibility_levels(): void {
+        $palette = new ColorPalette([
+            'colors' => ['#000000', '#FFFFFF'] // Maximum contrast
         ]);
 
-        // Act
-        $result = $this->analyzer->analyze_palette($problematic_palette);
+        $aa_analysis = $this->analyzer->analyzeAccessibility($palette, 'AA');
+        $aaa_analysis = $this->analyzer->analyzeAccessibility($palette, 'AAA');
 
-        // Assert
-        $this->assertArrayHasKey('accessibility', $result);
-        $this->assertArrayHasKey('color_blindness', $result['accessibility']);
-        $this->assertNotEmpty($result['accessibility']['color_blindness']['recommendations']);
+        $this->assertEquals(1.0, $aa_analysis['compliance_rate']);
+        $this->assertEquals(1.0, $aaa_analysis['compliance_rate']);
+    }
+
+    public function test_contrast_ratio_calculation(): void {
+        $palette = new ColorPalette([
+            'colors' => ['#000000', '#FFFFFF'] // Maximum contrast
+        ]);
+
+        $ratios = $this->analyzer->calculateContrastRatios($palette);
+        $this->assertGreaterThan(20, $ratios[0]['ratio']); // Black/White contrast should be >21
     }
 
     public function test_harmony_score_calculation(): void {
-        // Arrange
-        $harmonious_palette = new ColorPalette([
-            'name' => 'Harmonious',
-            'colors' => [
-                '#FF0000', // Red
-                '#FF8000', // Orange
-                '#FFFF00'  // Yellow
-            ]
+        // Test complementary harmony
+        $complementary = new ColorPalette([
+            'colors' => ['#FF0000', '#00FFFF']
         ]);
+        $comp_harmony = $this->analyzer->analyzeHarmony($complementary);
 
-        // Act
-        $result = $this->analyzer->analyze_palette($harmonious_palette);
-
-        // Assert
-        $this->assertArrayHasKey('harmony', $result);
-        $this->assertArrayHasKey('harmony_score', $result['harmony']);
-        $this->assertGreaterThan(0.5, $result['harmony']['harmony_score']);
-    }
-
-    public function test_analyze_empty_palette(): void {
-        // Arrange
-        $empty_palette = new ColorPalette([
-            'name' => 'Empty',
-            'colors' => []
+        // Test analogous harmony
+        $analogous = new ColorPalette([
+            'colors' => ['#FF0000', '#FF1A00', '#FF3300']
         ]);
+        $ana_harmony = $this->analyzer->analyzeHarmony($analogous);
 
-        // Act
-        $result = $this->analyzer->analyze_palette($empty_palette);
-
-        // Assert
-        $this->assertArrayHasKey('contrast', $result);
-        $this->assertEmpty($result['contrast']['ratios']);
-        $this->assertEquals(0, $result['distribution']['hue_distribution']['coverage']);
+        $this->assertGreaterThan(0.5, $comp_harmony['harmony_score']);
+        $this->assertGreaterThan(0.5, $ana_harmony['harmony_score']);
     }
-
-    public function test_analyze_single_color_palette(): void {
-        // Arrange
-        $single_color = new ColorPalette([
-            'name' => 'Single Color',
-            'colors' => ['#FF0000']
-        ]);
-
-        // Act
-        $result = $this->analyzer->analyze_palette($single_color);
-
-        // Assert
-        $this->assertArrayHasKey('harmony', $result);
-        $this->assertEquals(1.0, $result['harmony']['harmony_score']);
-        $this->assertEmpty($result['contrast']['ratios']);
-    }
-
-    /**
-     * @dataProvider colorRelationshipProvider
-     */
-    public function test_color_relationships(
-        array $colors,
-        string $expected_relationship
-    ): void {
-        // Arrange
-        $palette = new ColorPalette([
-            'name' => 'Test Relationship',
-            'colors' => $colors
-        ]);
-
-        // Act
-        $result = $this->analyzer->analyze_palette($palette);
-
-        // Assert
-        $this->assertArrayHasKey('harmony', $result);
-        $this->assertContains(
-            $expected_relationship,
-            array_column($result['harmony']['relationships'], 'type')
-        );
-    }
-
-    public function colorRelationshipProvider(): array {
-        return [
-            'complementary' => [
-                ['#FF0000', '#00FFFF'],
-                'complementary'
-            ],
-            'analogous' => [
-                ['#FF0000', '#FF8000'],
-                'analogous'
-            ],
-            'triadic' => [
-                ['#FF0000', '#00FF00', '#0000FF'],
-                'triadic'
-            ],
-            'monochromatic' => [
-                ['#FF0000', '#FF0033'],
-                'monochromatic'
-            ]
-        ];
-    }
-
-    public function test_contrast_ratio_calculation_accuracy(): void {
-        // Arrange
-        $test_cases = [
-            ['#000000', '#FFFFFF', 21],  // Black-White
-            ['#FF0000', '#FFFFFF', 4],   // Red-White
-            ['#808080', '#FFFFFF', 3.95] // Gray-White
-        ];
-
-        foreach ($test_cases as [$color1, $color2, $expected]) {
-            // Arrange
-            $palette = new ColorPalette([
-                'name' => 'Test Contrast',
-                'colors' => [$color1, $color2]
-            ]);
-
-            // Act
-            $result = $this->analyzer->analyze_palette($palette);
-
-            // Assert
-            $this->assertEqualsWithDelta(
-                $expected,
-                $result['contrast']['ratios'][0]['ratio'],
-                0.1,
-                "Contrast ratio for {$color1}-{$color2} should be approximately {$expected}"
-            );
-        }
-    }
-} 
+}

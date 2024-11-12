@@ -1,195 +1,156 @@
 <?php
-
-namespace GLColorPalette;
-
 /**
- * Color Palette Class
- *
- * Core class for managing a color palette and its properties.
+ * Core Color Palette Class
  *
  * @package GLColorPalette
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-class ColorPalette {
+
+namespace GLColorPalette;
+
+use GLColorPalette\Interfaces\ColorPaletteInterface;
+
+/**
+ * Represents a color palette with its associated metadata and operations.
+ */
+class ColorPalette implements ColorPaletteInterface {
     /**
-     * Palette identifier.
+     * Palette name
      *
      * @var string
      */
-    private $id;
+    private string $name;
 
     /**
-     * Palette name.
-     *
-     * @var string
-     */
-    private $name;
-
-    /**
-     * Array of colors in the palette.
+     * Array of colors in hex format
      *
      * @var array
      */
-    private $colors;
+    private array $colors;
 
     /**
-     * Palette metadata.
+     * Palette metadata
      *
      * @var array
      */
-    private $metadata;
+    private array $metadata;
 
     /**
-     * Constructor.
+     * Constructor
      *
      * @param array $data {
-     *     Optional. Initial palette data.
-     *     @type string $id        Palette identifier.
-     *     @type string $name      Palette name.
-     *     @type array  $colors    Palette colors.
-     *     @type array  $metadata  Palette metadata.
+     *     Optional. Array of palette data.
+     *     @type string $name     Palette name. Default 'Untitled Palette'.
+     *     @type array  $colors   Array of hex colors. Default empty array.
+     *     @type array  $metadata Additional metadata. Default empty array.
      * }
      */
     public function __construct(array $data = []) {
-        $this->id = $data['id'] ?? uniqid('pal_');
-        $this->name = $data['name'] ?? '';
+        $this->name = $data['name'] ?? 'Untitled Palette';
         $this->colors = $data['colors'] ?? [];
-        $this->metadata = $data['metadata'] ?? [
-            'created_at' => current_time('mysql'),
-            'updated_at' => current_time('mysql'),
-            'version' => '1.0'
-        ];
+        $this->metadata = $data['metadata'] ?? [];
+
+        // Ensure colors are properly formatted
+        $this->colors = array_map([$this, 'normalize_color'], $this->colors);
     }
 
     /**
-     * Gets palette identifier.
+     * Gets the palette name.
      *
-     * @return string Palette ID.
+     * @return string
      */
-    public function get_id(): string {
-        return $this->id;
-    }
-
-    /**
-     * Gets palette name.
-     *
-     * @return string Palette name.
-     */
-    public function get_name(): string {
+    public function getName(): string {
         return $this->name;
     }
 
     /**
-     * Sets palette name.
+     * Gets the palette colors.
      *
-     * @param string $name New palette name.
-     * @return void
+     * @return array
      */
-    public function set_name(string $name): void {
-        $this->name = $name;
-        $this->update_metadata();
-    }
-
-    /**
-     * Gets all colors.
-     *
-     * @return array Array of colors.
-     */
-    public function get_colors(): array {
+    public function getColors(): array {
         return $this->colors;
     }
 
     /**
-     * Gets color by index.
+     * Gets the palette metadata.
      *
-     * @param int $index Color index.
-     * @return string|null Color value or null if not found.
+     * @return array
      */
-    public function get_color(int $index): ?string {
-        return $this->colors[$index] ?? null;
-    }
-
-    /**
-     * Adds color to palette.
-     *
-     * @param string $color Color to add.
-     * @return void
-     * @throws \InvalidArgumentException If color is invalid.
-     */
-    public function add_color(string $color): void {
-        if (!$this->validate_color($color)) {
-            throw new \InvalidArgumentException("Invalid color value: {$color}");
-        }
-        $this->colors[] = $color;
-        $this->update_metadata();
-    }
-
-    /**
-     * Updates color at index.
-     *
-     * @param int $index Color index.
-     * @param string $color New color value.
-     * @return void
-     * @throws \InvalidArgumentException If color is invalid.
-     * @throws \OutOfRangeException If index is invalid.
-     */
-    public function update_color(int $index, string $color): void {
-        if (!isset($this->colors[$index])) {
-            throw new \OutOfRangeException("Invalid color index: {$index}");
-        }
-        if (!$this->validate_color($color)) {
-            throw new \InvalidArgumentException("Invalid color value: {$color}");
-        }
-        $this->colors[$index] = $color;
-        $this->update_metadata();
-    }
-
-    /**
-     * Removes color at index.
-     *
-     * @param int $index Color index.
-     * @return void
-     * @throws \OutOfRangeException If index is invalid.
-     */
-    public function remove_color(int $index): void {
-        if (!isset($this->colors[$index])) {
-            throw new \OutOfRangeException("Invalid color index: {$index}");
-        }
-        array_splice($this->colors, $index, 1);
-        $this->update_metadata();
-    }
-
-    /**
-     * Gets palette metadata.
-     *
-     * @return array Metadata array.
-     */
-    public function get_metadata(): array {
+    public function getMetadata(): array {
         return $this->metadata;
     }
 
     /**
-     * Updates metadata field.
+     * Sets the palette name.
      *
-     * @param string $key Metadata key.
-     * @param mixed $value Metadata value.
-     * @return void
+     * @param string $name New palette name.
+     * @return self
      */
-    public function update_metadata_field(string $key, $value): void {
-        $this->metadata[$key] = $value;
-        $this->metadata['updated_at'] = current_time('mysql');
+    public function setName(string $name): self {
+        $this->name = $name;
+        return $this;
     }
 
     /**
-     * Converts palette to array.
+     * Sets the palette colors.
      *
-     * @return array Palette data array.
+     * @param array $colors Array of hex colors.
+     * @return self
+     * @throws \InvalidArgumentException If any color is invalid.
      */
-    public function to_array(): array {
+    public function setColors(array $colors): self {
+        $this->colors = array_map([$this, 'normalize_color'], $colors);
+        return $this;
+    }
+
+    /**
+     * Sets the palette metadata.
+     *
+     * @param array $metadata Palette metadata.
+     * @return self
+     */
+    public function setMetadata(array $metadata): self {
+        $this->metadata = $metadata;
+        return $this;
+    }
+
+    /**
+     * Adds a color to the palette.
+     *
+     * @param string $color Hex color to add.
+     * @return self
+     * @throws \InvalidArgumentException If color is invalid.
+     */
+    public function addColor(string $color): self {
+        $this->colors[] = $this->normalize_color($color);
+        return $this;
+    }
+
+    /**
+     * Removes a color from the palette.
+     *
+     * @param string $color Hex color to remove.
+     * @return self
+     */
+    public function removeColor(string $color): self {
+        $normalized = $this->normalize_color($color);
+        $this->colors = array_values(array_filter(
+            $this->colors,
+            fn($c) => $c !== $normalized
+        ));
+        return $this;
+    }
+
+    /**
+     * Converts the palette to an array.
+     *
+     * @return array
+     */
+    public function toArray(): array {
         return [
-            'id' => $this->id,
             'name' => $this->name,
             'colors' => $this->colors,
             'metadata' => $this->metadata
@@ -197,22 +158,25 @@ class ColorPalette {
     }
 
     /**
-     * Updates metadata timestamp.
+     * Normalizes a color to 6-digit hex format.
      *
-     * @return void
+     * @param string $color Color to normalize.
+     * @return string Normalized color.
+     * @throws \InvalidArgumentException If color is invalid.
      */
-    private function update_metadata(): void {
-        $this->metadata['updated_at'] = current_time('mysql');
-    }
+    private function normalize_color(string $color): string {
+        $color = strtoupper(trim($color, '# '));
 
-    /**
-     * Validates color value.
-     *
-     * @param string $color Color to validate.
-     * @return bool True if valid, false otherwise.
-     */
-    private function validate_color(string $color): bool {
-        // Basic hex color validation
-        return (bool) preg_match('/^#(?:[0-9a-fA-F]{3}){1,2}$/', $color);
+        // Convert 3-digit hex to 6-digit
+        if (strlen($color) === 3) {
+            $color = $color[0] . $color[0] . $color[1] . $color[1] . $color[2] . $color[2];
+        }
+
+        // Validate hex format
+        if (!preg_match('/^[0-9A-F]{6}$/', $color)) {
+            throw new \InvalidArgumentException("Invalid color format: {$color}");
+        }
+
+        return "#{$color}";
     }
-} 
+}

@@ -2,6 +2,8 @@
 
 namespace GLColorPalette\Interfaces;
 
+use GLColorPalette\ColorPalette;
+
 /**
  * Color Palette Cache Interface
  *
@@ -12,89 +14,52 @@ namespace GLColorPalette\Interfaces;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorPaletteCache {
+interface ColorPaletteCacheInterface {
     /**
-     * Stores palette data in cache.
+     * Stores a palette in cache.
+     *
+     * @param string       $key     Cache key.
+     * @param ColorPalette $palette Palette to cache.
+     * @param int          $ttl     Time to live in seconds.
+     * @return bool True on success.
+     */
+    public function set(string $key, ColorPalette $palette, int $ttl = 3600): bool;
+
+    /**
+     * Retrieves a palette from cache.
      *
      * @param string $key Cache key.
-     * @param array $data Palette data to cache.
-     * @param array $options {
-     *     Optional. Cache options.
-     *     @type int    $ttl           Time to live in seconds.
-     *     @type string $group         Cache group identifier.
-     *     @type bool   $compress      Compress cached data.
-     *     @type array  $tags          Cache tags for grouping.
-     * }
-     * @return array {
-     *     Cache storage results.
-     *     @type bool   $cached        Whether data was cached.
-     *     @type string $cache_key     Generated cache key.
-     *     @type array  $metadata      Cache entry metadata.
-     *     @type array  $diagnostics   Cache operation details.
-     * }
+     * @return ColorPalette|null Cached palette or null if not found.
      */
-    public function store(string $key, array $data, array $options = []): array;
+    public function get(string $key): ?ColorPalette;
 
     /**
-     * Retrieves palette data from cache.
+     * Deletes a palette from cache.
      *
      * @param string $key Cache key.
-     * @param array $options {
-     *     Optional. Retrieval options.
-     *     @type bool   $refresh       Force refresh from source.
-     *     @type mixed  $default       Default value if not found.
-     *     @type bool   $with_meta     Include cache metadata.
-     *     @type array  $transforms    Data transformations.
-     * }
-     * @return array {
-     *     Cache retrieval results.
-     *     @type mixed  $data          Retrieved data or default.
-     *     @type bool   $found         Whether entry was found.
-     *     @type array  $metadata      Cache entry metadata.
-     *     @type array  $performance   Retrieval performance data.
-     * }
+     * @return bool True on success.
      */
-    public function retrieve(string $key, array $options = []): array;
+    public function delete(string $key): bool;
 
     /**
-     * Invalidates cached palette data.
+     * Checks if a palette exists in cache.
      *
-     * @param mixed $identifier Cache key or tag.
-     * @param array $options {
-     *     Optional. Invalidation options.
-     *     @type string $scope         Invalidation scope ('key', 'tag', 'group').
-     *     @type bool   $soft_delete   Mark as invalid vs delete.
-     *     @type bool   $cascade       Cascade to related entries.
-     *     @type array  $conditions    Conditional invalidation rules.
-     * }
-     * @return array {
-     *     Invalidation results.
-     *     @type bool   $invalidated   Whether cache was invalidated.
-     *     @type int    $affected      Number of affected entries.
-     *     @type array  $details       Invalidation details.
-     *     @type array  $errors        Any errors encountered.
-     * }
+     * @param string $key Cache key.
+     * @return bool True if exists.
      */
-    public function invalidate($identifier, array $options = []): array;
+    public function has(string $key): bool;
 
     /**
-     * Manages cache statistics and health.
+     * Clears all cached palettes.
      *
-     * @param string $operation Operation type ('stats', 'cleanup', 'optimize').
-     * @param array $params {
-     *     Optional. Operation parameters.
-     *     @type array  $metrics       Stats to collect.
-     *     @type array  $cleanup_rules Cleanup criteria.
-     *     @type array  $optimize_opts Optimization options.
-     *     @type bool   $detailed      Include detailed results.
-     * }
-     * @return array {
-     *     Operation results.
-     *     @type array  $statistics    Cache statistics.
-     *     @type array  $health        Cache health metrics.
-     *     @type array  $actions       Performed actions.
-     *     @type array  $recommendations Optimization suggestions.
-     * }
+     * @return bool True on success.
      */
-    public function manage(string $operation, array $params = []): array;
-} 
+    public function clear(): bool;
+
+    /**
+     * Gets cache statistics.
+     *
+     * @return array Cache stats.
+     */
+    public function getStats(): array;
+}

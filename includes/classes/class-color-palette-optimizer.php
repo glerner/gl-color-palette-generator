@@ -2,6 +2,11 @@
 
 namespace GLColorPalette;
 
+use GLColorPalette\Interfaces\ColorPaletteOptimizerInterface;
+use GLColorPalette\ColorPalette;
+use GLColorPalette\ColorPaletteAnalyzer;
+use GLColorPalette\ColorPaletteFormatter;
+
 /**
  * Color Palette Optimizer Class
  *
@@ -12,371 +17,433 @@ namespace GLColorPalette;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-class ColorPaletteOptimizer {
-    /**
-     * Color formatter instance.
-     *
-     * @var ColorPaletteFormatter
-     */
-    private $formatter;
-
+class ColorPaletteOptimizer implements ColorPaletteOptimizerInterface {
     /**
      * Color analyzer instance.
      *
      * @var ColorPaletteAnalyzer
      */
-    private $analyzer;
+    private ColorPaletteAnalyzer $analyzer;
 
     /**
-     * Default optimization options.
+     * Color formatter instance.
+     *
+     * @var ColorPaletteFormatter
+     */
+    private ColorPaletteFormatter $formatter;
+
+    /**
+     * Available optimization strategies.
      *
      * @var array
      */
-    private $default_options = [
-        'target_contrast_ratio' => 4.5,    // WCAG AA standard
-        'min_contrast_ratio' => 3.0,       // Minimum acceptable contrast
-        'harmony_weight' => 0.3,           // Weight for harmony score
-        'contrast_weight' => 0.4,          // Weight for contrast score
-        'accessibility_weight' => 0.3,      // Weight for accessibility score
-        'max_iterations' => 100,           // Maximum optimization iterations
-        'convergence_threshold' => 0.01,   // Minimum improvement for convergence
-        'preserve_primary' => true,        // Whether to preserve primary color
-        'color_space' => 'hsl',           // Color space for optimization
-        'optimization_strategy' => 'global' // global|local optimization strategy
+    private array $strategies = [
+        'accessibility',
+        'harmony',
+        'contrast',
+        'balance',
+        'saturation',
+        'lightness'
+    ];
+
+    /**
+     * Strategy-specific options.
+     *
+     * @var array
+     */
+    private array $strategy_options = [
+        'accessibility' => [
+            'level' => 'AA',
+            'min_contrast' => 4.5,
+            'preserve_hues' => true
+        ],
+        'harmony' => [
+            'type' => 'complementary',
+            'tolerance' => 15,
+            'preserve_lightness' => true
+        ],
+        'contrast' => [
+            'target_ratio' => 4.5,
+            'tolerance' => 0.5,
+            'preserve_hues' => true
+        ],
+        'balance' => [
+            'hue_spacing' => 30,
+            'saturation_range' => [50, 100],
+            'lightness_range' => [20, 80]
+        ],
+        'saturation' => [
+            'target' => 75,
+            'tolerance' => 10,
+            'preserve_hues' => true
+        ],
+        'lightness' => [
+            'target' => 50,
+            'tolerance' => 10,
+            'preserve_hues' => true
+        ]
     ];
 
     /**
      * Constructor.
      *
+     * @param ColorPaletteAnalyzer $analyzer  Color analyzer instance.
      * @param ColorPaletteFormatter $formatter Color formatter instance.
-     * @param ColorPaletteAnalyzer  $analyzer  Color analyzer instance.
      */
     public function __construct(
-        ColorPaletteFormatter $formatter,
-        ColorPaletteAnalyzer $analyzer
+        ColorPaletteAnalyzer $analyzer,
+        ColorPaletteFormatter $formatter
     ) {
-        $this->formatter = $formatter;
         $this->analyzer = $analyzer;
+        $this->formatter = $formatter;
     }
 
     /**
      * Optimizes a color palette.
      *
      * @param ColorPalette $palette Palette to optimize.
-     * @param array $options Optional. Optimization options.
+     * @param array        $options Optimization options.
      * @return ColorPalette Optimized palette.
      */
-    public function optimize_palette(ColorPalette $palette, array $options = []): ColorPalette {
-        $options = array_merge($this->default_options, $options);
-        $colors = $palette->get_colors();
+    public function optimizePalette(ColorPalette $palette, array $options = []): ColorPalette {
+        $strategy = $options['strategy'] ?? 'accessibility';
 
-        if (empty($colors)) {
-            return $palette;
+        if (!in_array($strategy, $this->strategies)) {
+            throw new \InvalidArgumentException("Invalid strategy: {$strategy}");
         }
 
-        $best_score = $this->evaluate_palette($palette, $options);
-        $best_colors = $colors;
-        $iterations = 0;
-        $last_improvement = 0;
+        return match ($strategy) {
+            'accessibility' => $this->optimizeForAccessibility($palette, $options['level'] ?? 'AA'),
+            'harmony' => $this->optimizeForHarmony($palette, $options['type'] ?? 'complementary'),
+            'contrast' => $this->optimizeForContrast($palette, $options['target'] ?? 4.5),
+            'balance' => $this->optimizeForBalance($palette, $options),
+            'saturation' => $this->optimizeForSaturation($palette, $options),
+            'lightness' => $this->optimizeForLightness($palette, $options),
+            default => throw new \InvalidArgumentException("Unsupported strategy: {$strategy}")
+        };
+    }
 
-        while ($iterations < $options['max_iterations']) {
-            $candidate_colors = $this->generate_candidate_colors(
-                $best_colors,
-                $options
-            );
+    /**
+     * Optimizes for accessibility.
+     *
+     * @param ColorPalette $palette Palette to optimize.
+     * @param string       $level   WCAG level.
+     * @return ColorPalette Optimized palette.
+     */
+    public function optimizeForAccessibility(ColorPalette $palette, string $level = 'AA'): ColorPalette {
+        $options = $this->strategy_options['accessibility'];
+        $colors = $palette->getColors();
+        $optimized_colors = [];
 
-            $candidate_palette = new ColorPalette([
-                'name' => $palette->get_name(),
-                'colors' => $candidate_colors
-            ]);
+        foreach ($colors as $color) {
+            $hsl = $this->formatter->hexToHsl($color);
 
-            $candidate_score = $this->evaluate_palette($candidate_palette, $options);
-
-            if ($candidate_score > $best_score) {
-                $improvement = $candidate_score - $best_score;
-                if ($improvement < $options['convergence_threshold']) {
-                    $last_improvement++;
-                    if ($last_improvement > 5) { // No significant improvement in 5 iterations
-                        break;
-                    }
-                } else {
-                    $last_improvement = 0;
-                }
-
-                $best_score = $candidate_score;
-                $best_colors = $candidate_colors;
+            // Adjust lightness to meet contrast requirements
+            if ($hsl[2] > 50) {
+                $hsl[2] = min(95, $hsl[2] + 10);
+            } else {
+                $hsl[2] = max(5, $hsl[2] - 10);
             }
 
-            $iterations++;
+            $optimized_colors[] = $this->formatter->hslToHex($hsl);
         }
 
         return new ColorPalette([
-            'name' => $palette->get_name(),
-            'colors' => $best_colors,
-            'metadata' => array_merge($palette->get_metadata(), [
-                'optimized' => true,
-                'optimization_score' => $best_score,
-                'optimization_iterations' => $iterations
+            'name' => $palette->getName() . ' (Accessibility Optimized)',
+            'colors' => $optimized_colors,
+            'metadata' => array_merge($palette->getMetadata(), [
+                'optimization' => [
+                    'strategy' => 'accessibility',
+                    'level' => $level
+                ]
             ])
         ]);
     }
 
     /**
-     * Evaluates a palette's fitness score.
+     * Optimizes for harmony.
      *
-     * @param ColorPalette $palette Palette to evaluate.
-     * @param array $options Evaluation options.
-     * @return float Fitness score (0-1).
+     * @param ColorPalette $palette Palette to optimize.
+     * @param string       $type    Harmony type.
+     * @return ColorPalette Optimized palette.
      */
-    private function evaluate_palette(ColorPalette $palette, array $options): float {
-        $analysis = $this->analyzer->analyze_palette($palette);
+    public function optimizeForHarmony(ColorPalette $palette, string $type = 'complementary'): ColorPalette {
+        $options = $this->strategy_options['harmony'];
+        $colors = $palette->getColors();
+        $optimized_colors = [];
+        $base_hsl = $this->formatter->hexToHsl($colors[0]);
 
-        // Calculate contrast score
-        $contrast_score = $this->calculate_contrast_score(
-            $analysis['contrast'],
-            $options['target_contrast_ratio']
-        );
-
-        // Calculate harmony score
-        $harmony_score = $analysis['harmony']['harmony_score'];
-
-        // Calculate accessibility score
-        $accessibility_score = $this->calculate_accessibility_score(
-            $analysis['accessibility']
-        );
-
-        // Weighted combination of scores
-        return
-            $options['contrast_weight'] * $contrast_score +
-            $options['harmony_weight'] * $harmony_score +
-            $options['accessibility_weight'] * $accessibility_score;
-    }
-
-    /**
-     * Generates candidate colors for optimization.
-     *
-     * @param array $current_colors Current colors.
-     * @param array $options Generation options.
-     * @return array Candidate colors.
-     */
-    private function generate_candidate_colors(array $current_colors, array $options): array {
-        $candidates = $current_colors;
-
-        if ($options['optimization_strategy'] === 'global') {
-            return $this->global_optimization_step($candidates, $options);
-        } else {
-            return $this->local_optimization_step($candidates, $options);
-        }
-    }
-
-    /**
-     * Performs global optimization step.
-     *
-     * @param array $colors Current colors.
-     * @param array $options Optimization options.
-     * @return array Modified colors.
-     */
-    private function global_optimization_step(array $colors, array $options): array {
-        $modified = [];
-        $start_index = $options['preserve_primary'] ? 1 : 0;
-
-        for ($i = $start_index; $i < count($colors); $i++) {
-            $color = $colors[$i];
-            $hsl = $this->formatter->format_color($color, 'hsl');
-            preg_match('/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/', $hsl, $matches);
-
-            // Apply global transformations
-            $h = ($matches[1] + rand(-30, 30)) % 360;
-            $s = max(0, min(100, $matches[2] + rand(-10, 10)));
-            $l = max(0, min(100, $matches[3] + rand(-10, 10)));
-
-            $modified[] = $this->formatter->format_color(
-                "hsl({$h}, {$s}%, {$l}%)",
-                'hex'
-            );
+        switch ($type) {
+            case 'complementary':
+                $optimized_colors = $this->generateComplementaryColors($base_hsl);
+                break;
+            case 'analogous':
+                $optimized_colors = $this->generateAnalogousColors($base_hsl);
+                break;
+            case 'triadic':
+                $optimized_colors = $this->generateTriadicColors($base_hsl);
+                break;
+            default:
+                throw new \InvalidArgumentException("Unsupported harmony type: {$type}");
         }
 
-        return array_merge(
-            array_slice($colors, 0, $start_index),
-            $modified
-        );
+        return new ColorPalette([
+            'name' => $palette->getName() . ' (Harmony Optimized)',
+            'colors' => $optimized_colors,
+            'metadata' => array_merge($palette->getMetadata(), [
+                'optimization' => [
+                    'strategy' => 'harmony',
+                    'type' => $type
+                ]
+            ])
+        ]);
     }
 
     /**
-     * Performs local optimization step.
+     * Optimizes for contrast.
      *
-     * @param array $colors Current colors.
-     * @param array $options Optimization options.
-     * @return array Modified colors.
+     * @param ColorPalette $palette Palette to optimize.
+     * @param float        $target  Target contrast ratio.
+     * @return ColorPalette Optimized palette.
      */
-    private function local_optimization_step(array $colors, array $options): array {
-        $modified = [];
-        $start_index = $options['preserve_primary'] ? 1 : 0;
+    public function optimizeForContrast(ColorPalette $palette, float $target = 4.5): ColorPalette {
+        $options = $this->strategy_options['contrast'];
+        $colors = $palette->getColors();
+        $optimized_colors = [];
 
-        for ($i = $start_index; $i < count($colors); $i++) {
-            $color = $colors[$i];
-            $hsl = $this->formatter->format_color($color, 'hsl');
-            preg_match('/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/', $hsl, $matches);
+        foreach ($colors as $i => $color) {
+            $hsl = $this->formatter->hexToHsl($color);
 
-            // Apply local transformations based on neighbors
-            $prev_color = $i > 0 ? $colors[$i - 1] : null;
-            $next_color = $i < count($colors) - 1 ? $colors[$i + 1] : null;
+            // Adjust lightness to improve contrast with adjacent colors
+            if ($i > 0) {
+                $prev_hsl = $this->formatter->hexToHsl($optimized_colors[$i - 1]);
+                $hsl[2] = $this->adjustLightnessForContrast($hsl[2], $prev_hsl[2], $target);
+            }
 
-            list($h, $s, $l) = $this->calculate_local_adjustment(
-                [$matches[1], $matches[2], $matches[3]],
-                $prev_color,
-                $next_color,
-                $options
+            $optimized_colors[] = $this->formatter->hslToHex($hsl);
+        }
+
+        return new ColorPalette([
+            'name' => $palette->getName() . ' (Contrast Optimized)',
+            'colors' => $optimized_colors,
+            'metadata' => array_merge($palette->getMetadata(), [
+                'optimization' => [
+                    'strategy' => 'contrast',
+                    'target' => $target
+                ]
+            ])
+        ]);
+    }
+
+    /**
+     * Optimizes for balance.
+     *
+     * @param ColorPalette $palette Palette to optimize.
+     * @param array        $options Balance options.
+     * @return ColorPalette Optimized palette.
+     */
+    private function optimizeForBalance(ColorPalette $palette, array $options = []): ColorPalette {
+        $balance_options = array_merge($this->strategy_options['balance'], $options);
+        $colors = $palette->getColors();
+        $optimized_colors = [];
+
+        // Distribute hues evenly
+        $hue_step = 360 / count($colors);
+        foreach ($colors as $i => $color) {
+            $hsl = $this->formatter->hexToHsl($color);
+            $hsl[0] = ($hue_step * $i) % 360;
+
+            // Normalize saturation and lightness
+            $hsl[1] = $this->normalizeValue(
+                $hsl[1],
+                $balance_options['saturation_range'][0],
+                $balance_options['saturation_range'][1]
             );
 
-            $modified[] = $this->formatter->format_color(
-                "hsl({$h}, {$s}%, {$l}%)",
-                'hex'
+            $hsl[2] = $this->normalizeValue(
+                $hsl[2],
+                $balance_options['lightness_range'][0],
+                $balance_options['lightness_range'][1]
             );
+
+            $optimized_colors[] = $this->formatter->hslToHex($hsl);
         }
 
-        return array_merge(
-            array_slice($colors, 0, $start_index),
-            $modified
-        );
+        return new ColorPalette([
+            'name' => $palette->getName() . ' (Balance Optimized)',
+            'colors' => $optimized_colors,
+            'metadata' => array_merge($palette->getMetadata(), [
+                'optimization' => [
+                    'strategy' => 'balance',
+                    'options' => $balance_options
+                ]
+            ])
+        ]);
     }
 
     /**
-     * Calculates contrast score.
+     * Optimizes for saturation.
      *
-     * @param array $contrast_analysis Contrast analysis results.
-     * @param float $target_ratio Target contrast ratio.
-     * @return float Score (0-1).
+     * @param ColorPalette $palette Palette to optimize.
+     * @param array        $options Saturation options.
+     * @return ColorPalette Optimized palette.
      */
-    private function calculate_contrast_score(array $contrast_analysis, float $target_ratio): float {
-        $ratios = array_column($contrast_analysis['ratios'], 'ratio');
-        if (empty($ratios)) {
-            return 0;
+    private function optimizeForSaturation(ColorPalette $palette, array $options = []): ColorPalette {
+        $sat_options = array_merge($this->strategy_options['saturation'], $options);
+        $colors = $palette->getColors();
+        $optimized_colors = [];
+
+        foreach ($colors as $color) {
+            $hsl = $this->formatter->hexToHsl($color);
+            $hsl[1] = $sat_options['target'];
+            $optimized_colors[] = $this->formatter->hslToHex($hsl);
         }
 
-        $score = 0;
-        foreach ($ratios as $ratio) {
-            $score += min(1, $ratio / $target_ratio);
-        }
-
-        return $score / count($ratios);
+        return new ColorPalette([
+            'name' => $palette->getName() . ' (Saturation Optimized)',
+            'colors' => $optimized_colors,
+            'metadata' => array_merge($palette->getMetadata(), [
+                'optimization' => [
+                    'strategy' => 'saturation',
+                    'options' => $sat_options
+                ]
+            ])
+        ]);
     }
 
     /**
-     * Calculates accessibility score.
+     * Optimizes for lightness.
      *
-     * @param array $accessibility_analysis Accessibility analysis results.
-     * @return float Score (0-1).
+     * @param ColorPalette $palette Palette to optimize.
+     * @param array        $options Lightness options.
+     * @return ColorPalette Optimized palette.
      */
-    private function calculate_accessibility_score(array $accessibility_analysis): float {
-        $wcag = $accessibility_analysis['wcag_compliance'];
-        $cvd = $accessibility_analysis['color_blindness'];
+    private function optimizeForLightness(ColorPalette $palette, array $options = []): ColorPalette {
+        $light_options = array_merge($this->strategy_options['lightness'], $options);
+        $colors = $palette->getColors();
+        $optimized_colors = [];
 
-        $wcag_score = ($wcag['aa_pass_rate'] + $wcag['aaa_pass_rate'] * 1.5) / 2.5;
-        $cvd_score = empty($cvd['issues']) ? 1 : 1 - (count($cvd['issues']) * 0.2);
+        foreach ($colors as $color) {
+            $hsl = $this->formatter->hexToHsl($color);
+            $hsl[2] = $light_options['target'];
+            $optimized_colors[] = $this->formatter->hslToHex($hsl);
+        }
 
-        return ($wcag_score + $cvd_score) / 2;
+        return new ColorPalette([
+            'name' => $palette->getName() . ' (Lightness Optimized)',
+            'colors' => $optimized_colors,
+            'metadata' => array_merge($palette->getMetadata(), [
+                'optimization' => [
+                    'strategy' => 'lightness',
+                    'options' => $light_options
+                ]
+            ])
+        ]);
     }
 
     /**
-     * Calculates local color adjustment.
+     * Gets available optimization strategies.
      *
-     * @param array $current_hsl Current HSL values.
-     * @param string|null $prev_color Previous color.
-     * @param string|null $next_color Next color.
-     * @param array $options Adjustment options.
-     * @return array Adjusted HSL values.
+     * @return array List of available strategies.
      */
-    private function calculate_local_adjustment(
-        array $current_hsl,
-        ?string $prev_color,
-        ?string $next_color,
-        array $options
-    ): array {
-        list($h, $s, $l) = $current_hsl;
-
-        if ($prev_color) {
-            $prev_hsl = $this->color_to_hsl($prev_color);
-            $h = $this->adjust_hue($h, $prev_hsl[0], $options);
-            $s = $this->adjust_saturation($s, $prev_hsl[1], $options);
-            $l = $this->adjust_lightness($l, $prev_hsl[2], $options);
-        }
-
-        if ($next_color) {
-            $next_hsl = $this->color_to_hsl($next_color);
-            $h = $this->adjust_hue($h, $next_hsl[0], $options);
-            $s = $this->adjust_saturation($s, $next_hsl[1], $options);
-            $l = $this->adjust_lightness($l, $next_hsl[2], $options);
-        }
-
-        return [
-            max(0, min(360, $h)),
-            max(0, min(100, $s)),
-            max(0, min(100, $l))
-        ];
+    public function getAvailableStrategies(): array {
+        return $this->strategies;
     }
 
     /**
-     * Converts color to HSL array.
+     * Gets optimization options.
      *
-     * @param string $color Color value.
-     * @return array HSL values [h, s, l].
+     * @param string $strategy Strategy to get options for.
+     * @return array Strategy options.
      */
-    private function color_to_hsl(string $color): array {
-        $hsl = $this->formatter->format_color($color, 'hsl');
-        preg_match('/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/', $hsl, $matches);
-        return [
-            (int)$matches[1],
-            (int)$matches[2],
-            (int)$matches[3]
-        ];
+    public function getStrategyOptions(string $strategy): array {
+        if (!isset($this->strategy_options[$strategy])) {
+            throw new \InvalidArgumentException("Invalid strategy: {$strategy}");
+        }
+        return $this->strategy_options[$strategy];
     }
 
     /**
-     * Adjusts hue value based on reference.
+     * Generates complementary colors.
      *
-     * @param int $current Current hue.
-     * @param int $reference Reference hue.
-     * @param array $options Adjustment options.
-     * @return int Adjusted hue.
+     * @param array $base_hsl Base HSL values.
+     * @return array Array of hex colors.
      */
-    private function adjust_hue(int $current, int $reference, array $options): int {
-        $diff = abs($current - $reference);
-        if ($diff < 30) {
-            return $current + rand(30, 60) * (rand(0, 1) ? 1 : -1);
-        }
-        return $current;
+    private function generateComplementaryColors(array $base_hsl): array {
+        $colors = [$this->formatter->hslToHex($base_hsl)];
+
+        // Add complement
+        $complement_hsl = $base_hsl;
+        $complement_hsl[0] = ($base_hsl[0] + 180) % 360;
+        $colors[] = $this->formatter->hslToHex($complement_hsl);
+
+        return $colors;
     }
 
     /**
-     * Adjusts saturation value based on reference.
+     * Generates analogous colors.
      *
-     * @param int $current Current saturation.
-     * @param int $reference Reference saturation.
-     * @param array $options Adjustment options.
-     * @return int Adjusted saturation.
+     * @param array $base_hsl Base HSL values.
+     * @return array Array of hex colors.
      */
-    private function adjust_saturation(int $current, int $reference, array $options): int {
-        $diff = abs($current - $reference);
-        if ($diff < 10) {
-            return $current + rand(10, 20) * (rand(0, 1) ? 1 : -1);
+    private function generateAnalogousColors(array $base_hsl): array {
+        $colors = [$this->formatter->hslToHex($base_hsl)];
+
+        // Add analogous colors
+        for ($angle = -30; $angle <= 30; $angle += 30) {
+            if ($angle === 0) continue;
+
+            $analogous_hsl = $base_hsl;
+            $analogous_hsl[0] = ($base_hsl[0] + $angle + 360) % 360;
+            $colors[] = $this->formatter->hslToHex($analogous_hsl);
         }
-        return $current;
+
+        return $colors;
     }
 
     /**
-     * Adjusts lightness value based on reference.
+     * Generates triadic colors.
      *
-     * @param int $current Current lightness.
-     * @param int $reference Reference lightness.
-     * @param array $options Adjustment options.
-     * @return int Adjusted lightness.
+     * @param array $base_hsl Base HSL values.
+     * @return array Array of hex colors.
      */
-    private function adjust_lightness(int $current, int $reference, array $options): int {
-        $diff = abs($current - $reference);
-        if ($diff < 10) {
-            return $current + rand(10, 20) * (rand(0, 1) ? 1 : -1);
+    private function generateTriadicColors(array $base_hsl): array {
+        $colors = [$this->formatter->hslToHex($base_hsl)];
+
+        // Add triadic colors
+        for ($angle = 120; $angle < 360; $angle += 120) {
+            $triadic_hsl = $base_hsl;
+            $triadic_hsl[0] = ($base_hsl[0] + $angle) % 360;
+            $colors[] = $this->formatter->hslToHex($triadic_hsl);
         }
-        return $current;
+
+        return $colors;
     }
-} 
+
+    /**
+     * Adjusts lightness for contrast.
+     *
+     * @param float $l1     First lightness value.
+     * @param float $l2     Second lightness value.
+     * @param float $target Target contrast ratio.
+     * @return float Adjusted lightness value.
+     */
+    private function adjustLightnessForContrast(float $l1, float $l2, float $target): float {
+        if (abs($l1 - $l2) < $target) {
+            return $l1 > $l2 ? min(100, $l1 + $target) : max(0, $l1 - $target);
+        }
+        return $l1;
+    }
+
+    /**
+     * Normalizes a value within a range.
+     *
+     * @param float $value Value to normalize.
+     * @param float $min   Minimum value.
+     * @param float $max   Maximum value.
+     * @return float Normalized value.
+     */
+    private function normalizeValue(float $value, float $min, float $max): float {
+        return max($min, min($max, $value));
+    }
+}

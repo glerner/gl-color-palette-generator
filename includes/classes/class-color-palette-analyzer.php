@@ -1,24 +1,29 @@
 <?php
-
-namespace GLColorPalette;
-
 /**
  * Color Palette Analyzer Class
- *
- * Analyzes color palettes for various properties and relationships.
  *
  * @package GLColorPalette
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-class ColorPaletteAnalyzer {
+
+namespace GLColorPalette;
+
+use GLColorPalette\Interfaces\ColorPaletteAnalyzerInterface;
+use GLColorPalette\ColorPalette;
+use GLColorPalette\ColorPaletteFormatter;
+
+/**
+ * Analyzes color palettes for various properties.
+ */
+class ColorPaletteAnalyzer implements ColorPaletteAnalyzerInterface {
     /**
      * Color formatter instance.
      *
      * @var ColorPaletteFormatter
      */
-    private $formatter;
+    private ColorPaletteFormatter $formatter;
 
     /**
      * Constructor.
@@ -33,195 +38,167 @@ class ColorPaletteAnalyzer {
      * Analyzes a color palette.
      *
      * @param ColorPalette $palette Palette to analyze.
-     * @param array $options {
-     *     Optional. Analysis options.
-     *     @type bool $contrast     Analyze contrast ratios.
-     *     @type bool $harmony      Analyze color harmony.
-     *     @type bool $distribution Analyze color distribution.
-     *     @type bool $accessibility Analyze accessibility.
-     * }
-     * @return array {
-     *     Analysis results.
-     *     @type array  $contrast     Contrast analysis.
-     *     @type array  $harmony      Harmony analysis.
-     *     @type array  $distribution Distribution analysis.
-     *     @type array  $accessibility Accessibility analysis.
-     * }
+     * @return array Analysis results.
      */
-    public function analyze_palette(ColorPalette $palette, array $options = []): array {
-        $options = array_merge([
-            'contrast' => true,
-            'harmony' => true,
-            'distribution' => true,
-            'accessibility' => true
-        ], $options);
-
-        $results = [];
-
-        if ($options['contrast']) {
-            $results['contrast'] = $this->analyze_contrast($palette);
-        }
-
-        if ($options['harmony']) {
-            $results['harmony'] = $this->analyze_harmony($palette);
-        }
-
-        if ($options['distribution']) {
-            $results['distribution'] = $this->analyze_distribution($palette);
-        }
-
-        if ($options['accessibility']) {
-            $results['accessibility'] = $this->analyze_accessibility($palette);
-        }
-
-        return $results;
+    public function analyzePalette(ColorPalette $palette): array {
+        return [
+            'contrast_ratios' => $this->calculateContrastRatios($palette),
+            'harmony' => $this->analyzeHarmony($palette),
+            'accessibility' => $this->analyzeAccessibility($palette),
+            'relationships' => $this->getColorRelationships($palette),
+            'statistics' => $this->getPaletteStats($palette)
+        ];
     }
 
     /**
-     * Analyzes contrast relationships.
+     * Calculates contrast ratios between colors.
      *
      * @param ColorPalette $palette Palette to analyze.
-     * @return array Contrast analysis results.
+     * @return array Contrast ratios.
      */
-    private function analyze_contrast(ColorPalette $palette): array {
-        $colors = $palette->get_colors();
-        $count = count($colors);
+    public function calculateContrastRatios(ColorPalette $palette): array {
+        $colors = $palette->getColors();
         $ratios = [];
-        $stats = [
-            'min' => PHP_FLOAT_MAX,
-            'max' => 0,
-            'avg' => 0,
-            'wcag_aa_pass' => 0,
-            'wcag_aaa_pass' => 0
-        ];
 
-        // Calculate contrast ratios between all color pairs
-        for ($i = 0; $i < $count; $i++) {
-            for ($j = $i + 1; $j < $count; $j++) {
-                $ratio = $this->calculate_contrast_ratio($colors[$i], $colors[$j]);
+        foreach ($colors as $i => $color1) {
+            foreach ($colors as $j => $color2) {
+                if ($i >= $j) {
+                    continue;
+                }
                 $ratios[] = [
-                    'colors' => [$colors[$i], $colors[$j]],
-                    'ratio' => $ratio,
-                    'wcag_aa' => $ratio >= 4.5,
-                    'wcag_aaa' => $ratio >= 7.0
+                    'colors' => [$color1, $color2],
+                    'ratio' => $this->getContrastRatio($color1, $color2)
                 ];
-
-                $stats['min'] = min($stats['min'], $ratio);
-                $stats['max'] = max($stats['max'], $ratio);
-                $stats['avg'] += $ratio;
-
-                if ($ratio >= 4.5) $stats['wcag_aa_pass']++;
-                if ($ratio >= 7.0) $stats['wcag_aaa_pass']++;
             }
         }
 
-        $pair_count = count($ratios);
-        $stats['avg'] = $pair_count > 0 ? $stats['avg'] / $pair_count : 0;
-
-        return [
-            'ratios' => $ratios,
-            'statistics' => $stats
-        ];
+        return $ratios;
     }
 
     /**
      * Analyzes color harmony.
      *
      * @param ColorPalette $palette Palette to analyze.
-     * @return array Harmony analysis results.
+     * @return array Harmony analysis.
      */
-    private function analyze_harmony(ColorPalette $palette): array {
-        $colors = $palette->get_colors();
-        $hsl_colors = array_map(function($color) {
-            return $this->color_to_hsl($color);
-        }, $colors);
+    public function analyzeHarmony(ColorPalette $palette): array {
+        $colors = $palette->getColors();
+        $hsls = array_map([$this->formatter, 'hexToHsl'], $colors);
 
-        $relationships = [];
-        $harmony_types = [];
+        return [
+            'complementary' => $this->findComplementaryPairs($hsls),
+            'analogous' => $this->findAnalogousGroups($hsls),
+            'triadic' => $this->findTriadicGroups($hsls),
+            'harmony_score' => $this->calculateHarmonyScore($hsls)
+        ];
+    }
 
-        // Analyze color relationships
-        foreach ($hsl_colors as $i => $hsl1) {
-            foreach (array_slice($hsl_colors, $i + 1) as $j => $hsl2) {
-                $relationship = $this->analyze_color_relationship($hsl1, $hsl2);
-                if ($relationship) {
-                    $relationships[] = [
-                        'colors' => [$colors[$i], $colors[$j + $i + 1]],
-                        'type' => $relationship
-                    ];
-                    $harmony_types[$relationship] = ($harmony_types[$relationship] ?? 0) + 1;
-                }
+    /**
+     * Analyzes accessibility compliance.
+     *
+     * @param ColorPalette $palette Palette to analyze.
+     * @param string       $level   WCAG level ('A', 'AA', or 'AAA').
+     * @return array Accessibility analysis.
+     */
+    public function analyzeAccessibility(ColorPalette $palette, string $level = 'AA'): array {
+        $min_ratios = [
+            'A' => [
+                'large' => 3,
+                'normal' => 3
+            ],
+            'AA' => [
+                'large' => 3,
+                'normal' => 4.5
+            ],
+            'AAA' => [
+                'large' => 4.5,
+                'normal' => 7
+            ]
+        ];
+
+        $contrast_ratios = $this->calculateContrastRatios($palette);
+        $compliant_pairs = [];
+        $non_compliant_pairs = [];
+
+        foreach ($contrast_ratios as $pair) {
+            if ($pair['ratio'] >= $min_ratios[$level]['normal']) {
+                $compliant_pairs[] = $pair;
+            } else {
+                $non_compliant_pairs[] = $pair;
             }
         }
 
-        // Analyze overall palette harmony
-        $harmony_score = $this->calculate_harmony_score($hsl_colors);
-
         return [
-            'relationships' => $relationships,
-            'harmony_types' => $harmony_types,
-            'harmony_score' => $harmony_score
+            'level' => $level,
+            'compliant_pairs' => $compliant_pairs,
+            'non_compliant_pairs' => $non_compliant_pairs,
+            'compliance_rate' => count($compliant_pairs) / count($contrast_ratios)
         ];
     }
 
     /**
-     * Analyzes color distribution.
+     * Gets color relationships.
      *
      * @param ColorPalette $palette Palette to analyze.
-     * @return array Distribution analysis results.
+     * @return array Color relationships.
      */
-    private function analyze_distribution(ColorPalette $palette): array {
-        $colors = $palette->get_colors();
-        $hsl_colors = array_map(function($color) {
-            return $this->color_to_hsl($color);
-        }, $colors);
+    public function getColorRelationships(ColorPalette $palette): array {
+        $colors = $palette->getColors();
+        $hsls = array_map([$this->formatter, 'hexToHsl'], $colors);
+        $relationships = [];
 
-        // Analyze hue distribution
-        $hue_distribution = $this->analyze_hue_distribution($hsl_colors);
+        foreach ($hsls as $i => $hsl1) {
+            foreach ($hsls as $j => $hsl2) {
+                if ($i >= $j) {
+                    continue;
+                }
+                $relationships[] = [
+                    'colors' => [$colors[$i], $colors[$j]],
+                    'hue_difference' => $this->calculateHueDifference($hsl1[0], $hsl2[0]),
+                    'saturation_difference' => abs($hsl1[1] - $hsl2[1]),
+                    'lightness_difference' => abs($hsl1[2] - $hsl2[2])
+                ];
+            }
+        }
 
-        // Analyze saturation and lightness ranges
-        $sat_range = $this->analyze_value_range(array_column($hsl_colors, 1));
-        $light_range = $this->analyze_value_range(array_column($hsl_colors, 2));
-
-        return [
-            'hue_distribution' => $hue_distribution,
-            'saturation_range' => $sat_range,
-            'lightness_range' => $light_range
-        ];
+        return $relationships;
     }
 
     /**
-     * Analyzes accessibility considerations.
+     * Gets palette statistics.
      *
      * @param ColorPalette $palette Palette to analyze.
-     * @return array Accessibility analysis results.
+     * @return array Palette statistics.
      */
-    private function analyze_accessibility(ColorPalette $palette): array {
-        $colors = $palette->get_colors();
-        $issues = [];
-        $recommendations = [];
+    public function getPaletteStats(ColorPalette $palette): array {
+        $colors = $palette->getColors();
+        $hsls = array_map([$this->formatter, 'hexToHsl'], $colors);
 
-        // Check for color blindness considerations
-        $cvd_analysis = $this->analyze_color_blindness($colors);
-        if (!empty($cvd_analysis['issues'])) {
-            $issues = array_merge($issues, $cvd_analysis['issues']);
-            $recommendations = array_merge($recommendations, $cvd_analysis['recommendations']);
-        }
-
-        // Check for sufficient contrast
-        $contrast_analysis = $this->analyze_contrast($palette);
-        if ($contrast_analysis['statistics']['wcag_aa_pass'] === 0) {
-            $issues[] = 'No color combinations meet WCAG AA contrast requirements';
-            $recommendations[] = 'Consider adding colors with higher contrast ratios';
-        }
+        $hues = array_column($hsls, 0);
+        $saturations = array_column($hsls, 1);
+        $lightnesses = array_column($hsls, 2);
 
         return [
-            'wcag_compliance' => [
-                'aa_pass_rate' => $contrast_analysis['statistics']['wcag_aa_pass'],
-                'aaa_pass_rate' => $contrast_analysis['statistics']['wcag_aaa_pass']
+            'color_count' => count($colors),
+            'hue_range' => [
+                'min' => min($hues),
+                'max' => max($hues),
+                'average' => array_sum($hues) / count($hues)
             ],
-            'color_blindness' => $cvd_analysis,
-            'issues' => $issues,
-            'recommendations' => $recommendations
+            'saturation_range' => [
+                'min' => min($saturations),
+                'max' => max($saturations),
+                'average' => array_sum($saturations) / count($saturations)
+            ],
+            'lightness_range' => [
+                'min' => min($lightnesses),
+                'max' => max($lightnesses),
+                'average' => array_sum($lightnesses) / count($lightnesses)
+            ],
+            'contrast_range' => [
+                'min' => $this->getMinContrastRatio($colors),
+                'max' => $this->getMaxContrastRatio($colors)
+            ]
         ];
     }
 
@@ -232,9 +209,9 @@ class ColorPaletteAnalyzer {
      * @param string $color2 Second color.
      * @return float Contrast ratio.
      */
-    private function calculate_contrast_ratio(string $color1, string $color2): float {
-        $l1 = $this->get_relative_luminance($color1);
-        $l2 = $this->get_relative_luminance($color2);
+    private function getContrastRatio(string $color1, string $color2): float {
+        $l1 = $this->getLuminance($color1);
+        $l2 = $this->getLuminance($color2);
 
         $lighter = max($l1, $l2);
         $darker = min($l1, $l2);
@@ -245,177 +222,176 @@ class ColorPaletteAnalyzer {
     /**
      * Gets relative luminance of a color.
      *
-     * @param string $color Color value.
+     * @param string $color Color in hex format.
      * @return float Relative luminance.
      */
-    private function get_relative_luminance(string $color): float {
-        $rgb = $this->formatter->format_color($color, 'rgb');
-        preg_match('/rgb\((\d+),\s*(\d+),\s*(\d+)\)/', $rgb, $matches);
+    private function getLuminance(string $color): float {
+        $rgb = $this->formatter->hexToRgb($color);
+        $rgb = array_map(function($val) {
+            $val = $val / 255;
+            return $val <= 0.03928
+                ? $val / 12.92
+                : pow(($val + 0.055) / 1.055, 2.4);
+        }, $rgb);
 
-        $r = $this->to_luminance_component((int)$matches[1]);
-        $g = $this->to_luminance_component((int)$matches[2]);
-        $b = $this->to_luminance_component((int)$matches[3]);
-
-        return 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
+        return $rgb[0] * 0.2126 + $rgb[1] * 0.7152 + $rgb[2] * 0.0722;
     }
 
     /**
-     * Converts RGB component to luminance component.
+     * Finds complementary color pairs.
      *
-     * @param int $value RGB component value.
-     * @return float Luminance component value.
+     * @param array $hsls Array of HSL values.
+     * @return array Complementary pairs.
      */
-    private function to_luminance_component(int $value): float {
-        $value = $value / 255;
-        return $value <= 0.03928
-            ? $value / 12.92
-            : pow(($value + 0.055) / 1.055, 2.4);
-    }
-
-    /**
-     * Converts color to HSL array.
-     *
-     * @param string $color Color value.
-     * @return array HSL values [h, s, l].
-     */
-    private function color_to_hsl(string $color): array {
-        $hsl = $this->formatter->format_color($color, 'hsl');
-        preg_match('/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/', $hsl, $matches);
-        return [
-            (int)$matches[1], // hue
-            (int)$matches[2], // saturation
-            (int)$matches[3]  // lightness
-        ];
-    }
-
-    /**
-     * Analyzes relationship between two colors in HSL space.
-     *
-     * @param array $hsl1 First HSL color.
-     * @param array $hsl2 Second HSL color.
-     * @return string|null Relationship type or null.
-     */
-    private function analyze_color_relationship(array $hsl1, array $hsl2): ?string {
-        $hue_diff = abs($hsl1[0] - $hsl2[0]);
-
-        // Analyze hue relationships
-        if ($hue_diff < 10) {
-            return 'monochromatic';
-        } elseif (abs($hue_diff - 180) < 10) {
-            return 'complementary';
-        } elseif (abs($hue_diff - 120) < 10) {
-            return 'triadic';
-        } elseif (abs($hue_diff - 90) < 10 || abs($hue_diff - 270) < 10) {
-            return 'square';
-        } elseif (abs($hue_diff - 60) < 10 || abs($hue_diff - 300) < 10) {
-            return 'analogous';
-        }
-
-        return null;
-    }
-
-    /**
-     * Calculates overall harmony score.
-     *
-     * @param array $hsl_colors Array of HSL colors.
-     * @return float Harmony score (0-1).
-     */
-    private function calculate_harmony_score(array $hsl_colors): float {
-        $score = 0;
-        $count = count($hsl_colors);
-
-        if ($count < 2) {
-            return 1.0;
-        }
-
-        // Analyze hue spacing
-        $hues = array_column($hsl_colors, 0);
-        sort($hues);
-        $hue_spacing_score = $this->calculate_hue_spacing_score($hues);
-
-        // Analyze saturation and lightness consistency
-        $sat_score = $this->calculate_value_consistency(array_column($hsl_colors, 1));
-        $light_score = $this->calculate_value_consistency(array_column($hsl_colors, 2));
-
-        // Weight the components
-        $score = (
-            $hue_spacing_score * 0.5 +
-            $sat_score * 0.25 +
-            $light_score * 0.25
-        );
-
-        return max(0, min(1, $score));
-    }
-
-    /**
-     * Analyzes hue distribution.
-     *
-     * @param array $hsl_colors Array of HSL colors.
-     * @return array Distribution analysis.
-     */
-    private function analyze_hue_distribution(array $hsl_colors): array {
-        $hues = array_column($hsl_colors, 0);
-        $distribution = array_fill(0, 12, 0); // 12 hue sectors
-
-        foreach ($hues as $hue) {
-            $sector = floor($hue / 30) % 12;
-            $distribution[$sector]++;
-        }
-
-        return [
-            'sectors' => $distribution,
-            'coverage' => count(array_filter($distribution)) / 12,
-            'balance' => $this->calculate_distribution_balance($distribution)
-        ];
-    }
-
-    /**
-     * Analyzes value range (saturation/lightness).
-     *
-     * @param array $values Array of values.
-     * @return array Range analysis.
-     */
-    private function analyze_value_range(array $values): array {
-        return [
-            'min' => min($values),
-            'max' => max($values),
-            'range' => max($values) - min($values),
-            'average' => array_sum($values) / count($values)
-        ];
-    }
-
-    /**
-     * Analyzes color blindness considerations.
-     *
-     * @param array $colors Array of colors.
-     * @return array Analysis results.
-     */
-    private function analyze_color_blindness(array $colors): array {
-        $issues = [];
-        $recommendations = [];
-
-        // Simulate different types of color blindness
-        $deuteranopia = $this->simulate_color_blindness($colors, 'deuteranopia');
-        $protanopia = $this->simulate_color_blindness($colors, 'protanopia');
-        $tritanopia = $this->simulate_color_blindness($colors, 'tritanopia');
-
-        // Analyze similarities in simulated colors
-        foreach (['deuteranopia', 'protanopia', 'tritanopia'] as $type) {
-            $simulated = ${$type};
-            if ($this->has_similar_colors($simulated)) {
-                $issues[] = "Colors may be difficult to distinguish for people with {$type}";
-                $recommendations[] = "Consider adjusting colors for better {$type} distinction";
+    private function findComplementaryPairs(array $hsls): array {
+        $pairs = [];
+        foreach ($hsls as $i => $hsl1) {
+            foreach ($hsls as $j => $hsl2) {
+                if ($i >= $j) {
+                    continue;
+                }
+                $diff = $this->calculateHueDifference($hsl1[0], $hsl2[0]);
+                if (abs($diff - 180) < 15) {
+                    $pairs[] = [$i, $j];
+                }
             }
         }
-
-        return [
-            'issues' => $issues,
-            'recommendations' => $recommendations,
-            'simulations' => [
-                'deuteranopia' => $deuteranopia,
-                'protanopia' => $protanopia,
-                'tritanopia' => $tritanopia
-            ]
-        ];
+        return $pairs;
     }
-} 
+
+    /**
+     * Finds analogous color groups.
+     *
+     * @param array $hsls Array of HSL values.
+     * @return array Analogous groups.
+     */
+    private function findAnalogousGroups(array $hsls): array {
+        $groups = [];
+        for ($i = 0; $i < count($hsls); $i++) {
+            $group = [$i];
+            for ($j = 0; $j < count($hsls); $j++) {
+                if ($i === $j) {
+                    continue;
+                }
+                $diff = $this->calculateHueDifference($hsls[$i][0], $hsls[$j][0]);
+                if ($diff <= 30) {
+                    $group[] = $j;
+                }
+            }
+            if (count($group) > 1) {
+                $groups[] = $group;
+            }
+        }
+        return $groups;
+    }
+
+    /**
+     * Finds triadic color groups.
+     *
+     * @param array $hsls Array of HSL values.
+     * @return array Triadic groups.
+     */
+    private function findTriadicGroups(array $hsls): array {
+        $groups = [];
+        for ($i = 0; $i < count($hsls); $i++) {
+            for ($j = $i + 1; $j < count($hsls); $j++) {
+                for ($k = $j + 1; $k < count($hsls); $k++) {
+                    $diff1 = $this->calculateHueDifference($hsls[$i][0], $hsls[$j][0]);
+                    $diff2 = $this->calculateHueDifference($hsls[$j][0], $hsls[$k][0]);
+                    $diff3 = $this->calculateHueDifference($hsls[$k][0], $hsls[$i][0]);
+
+                    if (abs($diff1 - 120) < 15 && abs($diff2 - 120) < 15 && abs($diff3 - 120) < 15) {
+                        $groups[] = [$i, $j, $k];
+                    }
+                }
+            }
+        }
+        return $groups;
+    }
+
+    /**
+     * Calculates harmony score.
+     *
+     * @param array $hsls Array of HSL values.
+     * @return float Harmony score between 0 and 1.
+     */
+    private function calculateHarmonyScore(array $hsls): float {
+        $scores = [];
+
+        // Check for complementary pairs
+        $complementary_pairs = $this->findComplementaryPairs($hsls);
+        $scores[] = count($complementary_pairs) > 0 ? 1 : 0;
+
+        // Check for analogous groups
+        $analogous_groups = $this->findAnalogousGroups($hsls);
+        $scores[] = count($analogous_groups) > 0 ? 1 : 0;
+
+        // Check for triadic groups
+        $triadic_groups = $this->findTriadicGroups($hsls);
+        $scores[] = count($triadic_groups) > 0 ? 1 : 0;
+
+        // Check saturation and lightness consistency
+        $saturations = array_column($hsls, 1);
+        $lightnesses = array_column($hsls, 2);
+
+        $sat_range = max($saturations) - min($saturations);
+        $light_range = max($lightnesses) - min($lightnesses);
+
+        $scores[] = 1 - ($sat_range / 100);
+        $scores[] = 1 - ($light_range / 100);
+
+        return array_sum($scores) / count($scores);
+    }
+
+    /**
+     * Calculates hue difference.
+     *
+     * @param float $h1 First hue.
+     * @param float $h2 Second hue.
+     * @return float Hue difference.
+     */
+    private function calculateHueDifference(float $h1, float $h2): float {
+        $diff = abs($h1 - $h2);
+        return min($diff, 360 - $diff);
+    }
+
+    /**
+     * Gets minimum contrast ratio in palette.
+     *
+     * @param array $colors Array of colors.
+     * @return float Minimum contrast ratio.
+     */
+    private function getMinContrastRatio(array $colors): float {
+        $min_ratio = PHP_FLOAT_MAX;
+        foreach ($colors as $i => $color1) {
+            foreach ($colors as $j => $color2) {
+                if ($i >= $j) {
+                    continue;
+                }
+                $ratio = $this->getContrastRatio($color1, $color2);
+                $min_ratio = min($min_ratio, $ratio);
+            }
+        }
+        return $min_ratio;
+    }
+
+    /**
+     * Gets maximum contrast ratio in palette.
+     *
+     * @param array $colors Array of colors.
+     * @return float Maximum contrast ratio.
+     */
+    private function getMaxContrastRatio(array $colors): float {
+        $max_ratio = 0;
+        foreach ($colors as $i => $color1) {
+            foreach ($colors as $j => $color2) {
+                if ($i >= $j) {
+                    continue;
+                }
+                $ratio = $this->getContrastRatio($color1, $color2);
+                $max_ratio = max($max_ratio, $ratio);
+            }
+        }
+        return $max_ratio;
+    }
+}

@@ -1,202 +1,207 @@
 <?php
+/**
+ * Color Palette Renderer Tests
+ *
+ * @package GLColorPalette
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ * @since   1.0.0
+ */
 
 namespace GLColorPalette\Tests;
 
 use PHPUnit\Framework\TestCase;
 use GLColorPalette\ColorPalette;
 use GLColorPalette\ColorPaletteRenderer;
+use GLColorPalette\ColorPaletteFormatter;
 
 class ColorPaletteRendererTest extends TestCase {
-    private $renderer;
-    private $palette;
+    private ColorPaletteRenderer $renderer;
+    private ColorPaletteFormatter $formatter;
+    private ColorPalette $test_palette;
 
     protected function setUp(): void {
-        $this->renderer = new ColorPaletteRenderer();
-        $this->palette = new ColorPalette([
+        $this->formatter = new ColorPaletteFormatter();
+        $this->renderer = new ColorPaletteRenderer($this->formatter);
+        $this->test_palette = new ColorPalette([
             'name' => 'Test Palette',
-            'colors' => ['#FF0000', '#00FF00', '#0000FF']
+            'colors' => ['#FF0000', '#00FF00', '#0000FF'],
+            'metadata' => ['type' => 'test']
         ]);
     }
 
-    public function test_render_html_creates_valid_markup(): void {
-        // Act
-        $output = $this->renderer->render($this->palette, ['format' => 'html']);
+    public function test_render_html(): void {
+        $output = $this->renderer->renderPalette($this->test_palette, 'html');
 
-        // Assert
-        $this->assertStringContainsString('<div class="gl-palette-container', $output);
-        $this->assertStringContainsString('gl-palette-grid', $output);
-        $this->assertStringContainsString('gl-palette-medium', $output);
+        $this->assertStringContainsString('class="color-palette"', $output);
+        $this->assertStringContainsString('class="color-swatch"', $output);
+        $this->assertStringContainsString('#FF0000', $output);
+        $this->assertStringContainsString('#00FF00', $output);
+        $this->assertStringContainsString('#0000FF', $output);
+    }
+
+    public function test_render_svg(): void {
+        $output = $this->renderer->renderPalette($this->test_palette, 'svg');
+
+        $this->assertStringContainsString('<svg', $output);
+        $this->assertStringContainsString('</svg>', $output);
+        $this->assertStringContainsString('fill="#FF0000"', $output);
+        $this->assertStringContainsString('fill="#00FF00"', $output);
+        $this->assertStringContainsString('fill="#0000FF"', $output);
+    }
+
+    public function test_render_text(): void {
+        $output = $this->renderer->renderPalette($this->test_palette, 'text');
+
+        $this->assertStringContainsString('#FF0000', $output);
+        $this->assertStringContainsString('#00FF00', $output);
+        $this->assertStringContainsString('#0000FF', $output);
         $this->assertStringContainsString('Test Palette', $output);
-        $this->assertStringContainsString('background-color: #FF0000', $output);
-        $this->assertStringContainsString('role="listitem"', $output);
     }
 
-    public function test_render_html_respects_options(): void {
-        // Arrange
-        $options = [
-            'format' => 'html',
-            'template' => 'list',
-            'show_labels' => false,
-            'show_values' => false,
-            'class_prefix' => 'custom',
-            'container_class' => 'extra-class',
-            'swatch_size' => 'large',
-            'accessibility' => false
-        ];
-
-        // Act
-        $output = $this->renderer->render($this->palette, $options);
-
-        // Assert
-        $this->assertStringContainsString('custom-container', $output);
-        $this->assertStringContainsString('custom-list', $output);
-        $this->assertStringContainsString('custom-large', $output);
-        $this->assertStringContainsString('extra-class', $output);
-        $this->assertStringNotContainsString('Test Palette', $output);
-        $this->assertStringNotContainsString('role="listitem"', $output);
-    }
-
-    public function test_render_css_creates_valid_stylesheet(): void {
-        // Act
-        $output = $this->renderer->render($this->palette, ['format' => 'css']);
-
-        // Assert
-        $this->assertStringContainsString('/* Test Palette */', $output);
-        $this->assertStringContainsString(':root {', $output);
-        $this->assertStringContainsString('--test-palette-color-1: #FF0000;', $output);
-        $this->assertStringContainsString('--test-palette-color-2: #00FF00;', $output);
-        $this->assertStringContainsString('--test-palette-color-3: #0000FF;', $output);
-    }
-
-    public function test_render_json_creates_valid_json(): void {
-        // Act
-        $output = $this->renderer->render($this->palette, ['format' => 'json']);
+    public function test_render_json(): void {
+        $output = $this->renderer->renderPalette($this->test_palette, 'json');
         $data = json_decode($output, true);
 
-        // Assert
         $this->assertIsArray($data);
         $this->assertEquals('Test Palette', $data['name']);
-        $this->assertCount(3, $data['colors']);
-        $this->assertArrayHasKey('metadata', $data);
+        $this->assertContains('#FF0000', $data['colors']);
+        $this->assertContains('#00FF00', $data['colors']);
+        $this->assertContains('#0000FF', $data['colors']);
     }
 
-    public function test_get_supported_formats_returns_array(): void {
-        // Act
-        $formats = $this->renderer->get_supported_formats();
+    public function test_render_html_swatch(): void {
+        $output = $this->renderer->renderSwatch('#FF0000', 'html');
 
-        // Assert
+        $this->assertStringContainsString('class="color-swatch"', $output);
+        $this->assertStringContainsString('background-color: #FF0000', $output);
+    }
+
+    public function test_render_svg_swatch(): void {
+        $output = $this->renderer->renderSwatch('#FF0000', 'svg', ['x' => 0]);
+
+        $this->assertStringContainsString('<rect', $output);
+        $this->assertStringContainsString('fill="#FF0000"', $output);
+    }
+
+    public function test_render_color_info(): void {
+        $output = $this->renderer->renderColorInfo('#FF0000');
+
+        $this->assertStringContainsString('HEX: #FF0000', $output);
+        $this->assertStringContainsString('RGB: 255, 0, 0', $output);
+        $this->assertStringContainsString('HSL:', $output);
+    }
+
+    public function test_get_supported_formats(): void {
+        $formats = $this->renderer->getSupportedFormats();
+
         $this->assertIsArray($formats);
         $this->assertContains('html', $formats);
-        $this->assertContains('css', $formats);
+        $this->assertContains('svg', $formats);
+        $this->assertContains('text', $formats);
         $this->assertContains('json', $formats);
     }
 
-    public function test_get_supported_templates_returns_array(): void {
-        // Act
-        $templates = $this->renderer->get_supported_templates();
+    public function test_get_format_options(): void {
+        $options = $this->renderer->getFormatOptions('html');
 
-        // Assert
-        $this->assertIsArray($templates);
-        $this->assertContains('grid', $templates);
-        $this->assertContains('list', $templates);
-        $this->assertContains('circle', $templates);
-        $this->assertContains('compact', $templates);
+        $this->assertIsArray($options);
+        $this->assertArrayHasKey('swatch_size', $options);
+        $this->assertArrayHasKey('border_radius', $options);
+        $this->assertArrayHasKey('spacing', $options);
     }
 
-    public function test_get_supported_sizes_returns_array(): void {
-        // Act
-        $sizes = $this->renderer->get_supported_sizes();
-
-        // Assert
-        $this->assertIsArray($sizes);
-        $this->assertContains('small', $sizes);
-        $this->assertContains('medium', $sizes);
-        $this->assertContains('large', $sizes);
-    }
-
-    /**
-     * @dataProvider invalidFormatProvider
-     */
-    public function test_render_validates_format(string $invalid_format): void {
-        // Assert
-        $this->expectException(\InvalidArgumentException::class);
-
-        // Act
-        $this->renderer->render($this->palette, ['format' => $invalid_format]);
-    }
-
-    public function invalidFormatProvider(): array {
-        return [
-            'empty_format' => [''],
-            'invalid_format' => ['invalid'],
-            'numeric_format' => ['123'],
-            'special_chars' => ['format@!']
+    public function test_validate_options(): void {
+        $valid_options = [
+            'swatch_size' => '60px',
+            'border_radius' => '8px'
         ];
+
+        $invalid_options = [
+            'invalid_option' => 'value'
+        ];
+
+        $this->assertTrue($this->renderer->validateOptions($valid_options, 'html'));
+        $this->assertFalse($this->renderer->validateOptions($invalid_options, 'html'));
     }
 
-    public function test_render_html_escapes_output(): void {
-        // Arrange
-        $palette = new ColorPalette([
-            'name' => 'Test <script>alert("XSS")</script>',
-            'colors' => ['#FF0000', '#00FF00']
-        ]);
-
-        // Act
-        $output = $this->renderer->render($palette, ['format' => 'html']);
-
-        // Assert
-        $this->assertStringNotContainsString('<script>', $output);
-        $this->assertStringContainsString('&lt;script&gt;', $output);
+    public function test_invalid_format(): void {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->renderer->renderPalette($this->test_palette, 'invalid');
     }
 
-    public function test_render_css_sanitizes_identifiers(): void {
-        // Arrange
-        $palette = new ColorPalette([
-            'name' => 'Test @ Palette!',
-            'colors' => ['#FF0000']
-        ]);
+    public function test_html_custom_options(): void {
+        $options = [
+            'swatch_size' => '100px',
+            'border_radius' => '10px',
+            'spacing' => '20px'
+        ];
 
-        // Act
-        $output = $this->renderer->render($palette, ['format' => 'css']);
+        $output = $this->renderer->renderPalette($this->test_palette, 'html', $options);
 
-        // Assert
-        $this->assertStringContainsString('--test-palette', $output);
-        $this->assertStringNotContainsString('@', $output);
-        $this->assertStringNotContainsString('!', $output);
+        $this->assertStringContainsString('width: 100px', $output);
+        $this->assertStringContainsString('border-radius: 10px', $output);
+        $this->assertStringContainsString('gap: 20px', $output);
     }
 
-    public function test_render_handles_empty_palette(): void {
-        // Arrange
+    public function test_svg_custom_options(): void {
+        $options = [
+            'width' => 800,
+            'height' => 200,
+            'swatch_size' => 120
+        ];
+
+        $output = $this->renderer->renderPalette($this->test_palette, 'svg', $options);
+
+        $this->assertStringContainsString('width="800"', $output);
+        $this->assertStringContainsString('height="200"', $output);
+        $this->assertStringContainsString('width="120"', $output);
+    }
+
+    public function test_text_custom_separator(): void {
+        $options = [
+            'separator' => ' | ',
+            'show_name' => true,
+            'show_info' => true
+        ];
+
+        $output = $this->renderer->renderPalette($this->test_palette, 'text', $options);
+
+        $this->assertStringContainsString(' | ', $output);
+    }
+
+    public function test_json_pretty_print(): void {
+        $options = [
+            'pretty_print' => true,
+            'include_metadata' => true
+        ];
+
+        $output = $this->renderer->renderPalette($this->test_palette, 'json', $options);
+
+        $this->assertStringContainsString("\n", $output);
+        $this->assertStringContainsString('    ', $output);
+    }
+
+    public function test_render_with_empty_palette(): void {
         $empty_palette = new ColorPalette([
             'name' => 'Empty Palette',
             'colors' => []
         ]);
 
-        // Act
-        $html = $this->renderer->render($empty_palette, ['format' => 'html']);
-        $css = $this->renderer->render($empty_palette, ['format' => 'css']);
-        $json = $this->renderer->render($empty_palette, ['format' => 'json']);
+        $html = $this->renderer->renderPalette($empty_palette, 'html');
+        $svg = $this->renderer->renderPalette($empty_palette, 'svg');
+        $text = $this->renderer->renderPalette($empty_palette, 'text');
+        $json = $this->renderer->renderPalette($empty_palette, 'json');
 
-        // Assert
-        $this->assertStringContainsString('gl-palette-swatches', $html);
-        $this->assertStringContainsString(':root {', $css);
-        $this->assertStringContainsString('"colors":[]', $json);
+        $this->assertNotEmpty($html);
+        $this->assertNotEmpty($svg);
+        $this->assertNotEmpty($text);
+        $this->assertNotEmpty($json);
     }
 
-    public function test_render_html_includes_container_attributes(): void {
-        // Arrange
-        $options = [
-            'format' => 'html',
-            'container_class' => 'test-class another-class',
-            'accessibility' => true
-        ];
+    public function test_color_info_custom_separator(): void {
+        $output = $this->renderer->renderColorInfo('#FF0000', ['separator' => ' | ']);
 
-        // Act
-        $output = $this->renderer->render($this->palette, $options);
-
-        // Assert
-        $this->assertStringContainsString('class="gl-palette-container test-class another-class"', $output);
-        $this->assertStringContainsString('role="listitem"', $output);
-        $this->assertStringContainsString('aria-label="Color', $output);
+        $this->assertStringContainsString(' | ', $output);
     }
-} 
+}

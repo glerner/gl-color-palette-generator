@@ -1,184 +1,374 @@
 <?php
-
-namespace GLColorPalette;
-
 /**
  * Color Palette Renderer Class
- *
- * Handles rendering of color palettes in various formats and contexts.
  *
  * @package GLColorPalette
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-class ColorPaletteRenderer {
+
+namespace GLColorPalette;
+
+use GLColorPalette\Interfaces\ColorPaletteRendererInterface;
+use GLColorPalette\ColorPalette;
+use GLColorPalette\ColorPaletteFormatter;
+
+/**
+ * Renders color palettes in various formats.
+ */
+class ColorPaletteRenderer implements ColorPaletteRendererInterface {
     /**
-     * Default render options.
+     * Color formatter instance.
+     *
+     * @var ColorPaletteFormatter
+     */
+    private ColorPaletteFormatter $formatter;
+
+    /**
+     * Supported rendering formats.
      *
      * @var array
      */
-    private $default_options = [
-        'format' => 'html',
-        'template' => 'grid',
-        'show_labels' => true,
-        'show_values' => true,
-        'class_prefix' => 'gl-palette',
-        'container_class' => '',
-        'swatch_size' => 'medium',
-        'accessibility' => true
+    private array $supported_formats = [
+        'html',
+        'svg',
+        'canvas',
+        'text',
+        'json'
     ];
+
+    /**
+     * Format-specific options.
+     *
+     * @var array
+     */
+    private array $format_options = [
+        'html' => [
+            'swatch_size' => '50px',
+            'border_radius' => '4px',
+            'spacing' => '10px',
+            'show_labels' => true,
+            'show_info' => true,
+            'container_class' => 'color-palette',
+            'swatch_class' => 'color-swatch',
+            'label_class' => 'color-label',
+            'info_class' => 'color-info'
+        ],
+        'svg' => [
+            'width' => 500,
+            'height' => 100,
+            'swatch_size' => 80,
+            'spacing' => 10,
+            'show_labels' => true,
+            'font_family' => 'Arial',
+            'font_size' => 12
+        ],
+        'canvas' => [
+            'width' => 500,
+            'height' => 100,
+            'swatch_size' => 80,
+            'spacing' => 10,
+            'background' => '#FFFFFF'
+        ],
+        'text' => [
+            'format' => 'hex',
+            'separator' => "\n",
+            'show_name' => true,
+            'show_info' => true
+        ],
+        'json' => [
+            'pretty_print' => true,
+            'include_metadata' => true,
+            'include_info' => true
+        ]
+    ];
+
+    /**
+     * Constructor.
+     *
+     * @param ColorPaletteFormatter $formatter Color formatter instance.
+     */
+    public function __construct(ColorPaletteFormatter $formatter) {
+        $this->formatter = $formatter;
+    }
 
     /**
      * Renders a color palette.
      *
      * @param ColorPalette $palette Palette to render.
-     * @param array $options {
-     *     Optional. Render options.
-     *     @type string $format          Output format (html|css|json).
-     *     @type string $template        Layout template.
-     *     @type bool   $show_labels     Show color labels.
-     *     @type bool   $show_values     Show color values.
-     *     @type string $class_prefix    CSS class prefix.
-     *     @type string $container_class Additional container classes.
-     *     @type string $swatch_size     Swatch size (small|medium|large).
-     *     @type bool   $accessibility   Include accessibility attributes.
-     * }
+     * @param string       $format  Output format.
+     * @param array        $options Rendering options.
      * @return string Rendered output.
-     * @throws \InvalidArgumentException If format is invalid.
      */
-    public function render(ColorPalette $palette, array $options = []): string {
-        $options = array_merge($this->default_options, $options);
-
-        switch ($options['format']) {
-            case 'html':
-                return $this->render_html($palette, $options);
-            case 'css':
-                return $this->render_css($palette, $options);
-            case 'json':
-                return $this->render_json($palette, $options);
-            default:
-                throw new \InvalidArgumentException("Invalid render format: {$options['format']}");
+    public function renderPalette(ColorPalette $palette, string $format = 'html', array $options = []): string {
+        if (!in_array($format, $this->supported_formats)) {
+            throw new \InvalidArgumentException("Unsupported format: {$format}");
         }
+
+        $options = array_merge($this->format_options[$format], $options);
+
+        return match ($format) {
+            'html' => $this->renderHtml($palette, $options),
+            'svg' => $this->renderSvg($palette, $options),
+            'canvas' => $this->renderCanvas($palette, $options),
+            'text' => $this->renderText($palette, $options),
+            'json' => $this->renderJson($palette, $options),
+            default => throw new \InvalidArgumentException("Unsupported format: {$format}")
+        };
+    }
+
+    /**
+     * Renders a color swatch.
+     *
+     * @param string $color   Color to render.
+     * @param string $format  Output format.
+     * @param array  $options Rendering options.
+     * @return string Rendered swatch.
+     */
+    public function renderSwatch(string $color, string $format = 'html', array $options = []): string {
+        $options = array_merge($this->format_options[$format], $options);
+
+        return match ($format) {
+            'html' => $this->renderHtmlSwatch($color, $options),
+            'svg' => $this->renderSvgSwatch($color, $options),
+            'canvas' => $this->renderCanvasSwatch($color, $options),
+            default => $color
+        };
+    }
+
+    /**
+     * Renders color information.
+     *
+     * @param string $color   Color to render info for.
+     * @param array  $options Rendering options.
+     * @return string Rendered color information.
+     */
+    public function renderColorInfo(string $color, array $options = []): string {
+        $rgb = $this->formatter->hexToRgb($color);
+        $hsl = $this->formatter->hexToHsl($color);
+        $info = [];
+
+        $info[] = "HEX: {$color}";
+        $info[] = sprintf("RGB: %d, %d, %d", $rgb[0], $rgb[1], $rgb[2]);
+        $info[] = sprintf("HSL: %d°, %d%%, %d%%", round($hsl[0]), round($hsl[1]), round($hsl[2]));
+
+        return implode($options['separator'] ?? '<br>', $info);
+    }
+
+    /**
+     * Gets supported rendering formats.
+     *
+     * @return array List of supported formats.
+     */
+    public function getSupportedFormats(): array {
+        return $this->supported_formats;
+    }
+
+    /**
+     * Gets format-specific options.
+     *
+     * @param string $format Format to get options for.
+     * @return array Format options.
+     */
+    public function getFormatOptions(string $format): array {
+        if (!isset($this->format_options[$format])) {
+            throw new \InvalidArgumentException("Invalid format: {$format}");
+        }
+        return $this->format_options[$format];
+    }
+
+    /**
+     * Validates rendering options.
+     *
+     * @param array  $options Options to validate.
+     * @param string $format  Format to validate against.
+     * @return bool True if valid.
+     */
+    public function validateOptions(array $options, string $format): bool {
+        if (!isset($this->format_options[$format])) {
+            return false;
+        }
+
+        foreach ($options as $key => $value) {
+            if (!array_key_exists($key, $this->format_options[$format])) {
+                return false;
+            }
+
+            $default_value = $this->format_options[$format][$key];
+            if (gettype($value) !== gettype($default_value)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
      * Renders palette as HTML.
      *
      * @param ColorPalette $palette Palette to render.
-     * @param array $options Render options.
+     * @param array        $options Rendering options.
      * @return string HTML output.
      */
-    private function render_html(ColorPalette $palette, array $options): string {
-        $container_class = trim("{$options['class_prefix']}-container {$options['container_class']}");
-        $template_class = "{$options['class_prefix']}-{$options['template']}";
-        $size_class = "{$options['class_prefix']}-{$options['swatch_size']}";
+    private function renderHtml(ColorPalette $palette, array $options): string {
+        $output = "<div class=\"{$options['container_class']}\" style=\"display: flex; gap: {$options['spacing']};\">\n";
 
-        $output = "<div class=\"{$container_class} {$template_class} {$size_class}\">\n";
-
-        if ($options['show_labels']) {
-            $output .= "  <h3 class=\"{$options['class_prefix']}-title\">" .
-                      esc_html($palette->get_name()) . "</h3>\n";
+        foreach ($palette->getColors() as $color) {
+            $output .= $this->renderHtmlSwatch($color, $options);
         }
 
-        $output .= "  <div class=\"{$options['class_prefix']}-swatches\">\n";
-
-        foreach ($palette->get_colors() as $index => $color) {
-            $output .= $this->render_swatch($color, $index, $options);
-        }
-
-        $output .= "  </div>\n</div>";
-
+        $output .= "</div>\n";
         return $output;
     }
 
     /**
-     * Renders individual color swatch.
-     *
-     * @param string $color Color value.
-     * @param int $index Color index.
-     * @param array $options Render options.
-     * @return string Swatch HTML.
-     */
-    private function render_swatch(string $color, int $index, array $options): string {
-        $swatch_class = "{$options['class_prefix']}-swatch";
-        $style = "background-color: " . esc_attr($color);
-        $attrs = $options['accessibility'] ?
-            "role=\"listitem\" aria-label=\"Color {$index}: {$color}\"" : '';
-
-        $output = "    <div class=\"{$swatch_class}\" style=\"{$style}\" {$attrs}>\n";
-
-        if ($options['show_values']) {
-            $output .= "      <span class=\"{$options['class_prefix']}-value\">" .
-                      esc_html($color) . "</span>\n";
-        }
-
-        $output .= "    </div>\n";
-
-        return $output;
-    }
-
-    /**
-     * Renders palette as CSS.
+     * Renders palette as SVG.
      *
      * @param ColorPalette $palette Palette to render.
-     * @param array $options Render options.
-     * @return string CSS output.
+     * @param array        $options Rendering options.
+     * @return string SVG output.
      */
-    private function render_css(ColorPalette $palette, array $options): string {
-        $prefix = sanitize_title($palette->get_name());
-        $output = "/* {$palette->get_name()} */\n:root {\n";
+    private function renderSvg(ColorPalette $palette, array $options): string {
+        $colors = $palette->getColors();
+        $total_width = $options['width'];
+        $swatch_width = $options['swatch_size'];
+        $spacing = $options['spacing'];
 
-        foreach ($palette->get_colors() as $index => $color) {
-            $variable = "--{$prefix}-color-" . ($index + 1);
-            $output .= "  {$variable}: {$color};\n";
+        $output = "<svg width=\"{$total_width}\" height=\"{$options['height']}\" xmlns=\"http://www.w3.org/2000/svg\">\n";
+
+        foreach ($colors as $i => $color) {
+            $x = $i * ($swatch_width + $spacing);
+            $output .= $this->renderSvgSwatch($color, array_merge($options, ['x' => $x]));
         }
 
-        $output .= "}\n";
+        $output .= "</svg>\n";
         return $output;
+    }
+
+    /**
+     * Renders HTML swatch.
+     *
+     * @param string $color   Color to render.
+     * @param array  $options Rendering options.
+     * @return string HTML swatch.
+     */
+    private function renderHtmlSwatch(string $color, array $options): string {
+        $style = "
+            width: {$options['swatch_size']};
+            height: {$options['swatch_size']};
+            background-color: {$color};
+            border-radius: {$options['border_radius']};
+        ";
+
+        $output = "<div class=\"{$options['swatch_class']}\" style=\"{$style}\">";
+
+        if ($options['show_labels']) {
+            $output .= "<span class=\"{$options['label_class']}\">{$color}</span>";
+        }
+
+        if ($options['show_info']) {
+            $output .= "<div class=\"{$options['info_class']}\">";
+            $output .= $this->renderColorInfo($color, ['separator' => '<br>']);
+            $output .= "</div>";
+        }
+
+        $output .= "</div>\n";
+        return $output;
+    }
+
+    /**
+     * Renders SVG swatch.
+     *
+     * @param string $color   Color to render.
+     * @param array  $options Rendering options.
+     * @return string SVG swatch.
+     */
+    private function renderSvgSwatch(string $color, array $options): string {
+        $x = $options['x'] ?? 0;
+        $size = $options['swatch_size'];
+
+        $output = "<rect x=\"{$x}\" y=\"0\" width=\"{$size}\" height=\"{$size}\" fill=\"{$color}\"/>\n";
+
+        if ($options['show_labels']) {
+            $text_x = $x + ($size / 2);
+            $text_y = $size + $options['font_size'] + 5;
+            $output .= "<text x=\"{$text_x}\" y=\"{$text_y}\"
+                             font-family=\"{$options['font_family']}\"
+                             font-size=\"{$options['font_size']}px\"
+                             text-anchor=\"middle\">{$color}</text>\n";
+        }
+
+        return $output;
+    }
+
+    /**
+     * Renders canvas swatch.
+     *
+     * @param string $color   Color to render.
+     * @param array  $options Rendering options.
+     * @return string Canvas instructions.
+     */
+    private function renderCanvasSwatch(string $color, array $options): string {
+        $rgb = $this->formatter->hexToRgb($color);
+        return "ctx.fillStyle = 'rgb({$rgb[0]}, {$rgb[1]}, {$rgb[2]})';";
+    }
+
+    /**
+     * Renders palette as text.
+     *
+     * @param ColorPalette $palette Palette to render.
+     * @param array        $options Rendering options.
+     * @return string Text output.
+     */
+    private function renderText(ColorPalette $palette, array $options): string {
+        $output = [];
+
+        if ($options['show_name']) {
+            $output[] = $palette->getName();
+        }
+
+        foreach ($palette->getColors() as $color) {
+            $line = $color;
+            if ($options['show_info']) {
+                $line .= $options['separator'] . $this->renderColorInfo($color, $options);
+            }
+            $output[] = $line;
+        }
+
+        return implode($options['separator'], $output);
     }
 
     /**
      * Renders palette as JSON.
      *
      * @param ColorPalette $palette Palette to render.
-     * @param array $options Render options.
+     * @param array        $options Rendering options.
      * @return string JSON output.
      */
-    private function render_json(ColorPalette $palette, array $options): string {
+    private function renderJson(ColorPalette $palette, array $options): string {
         $data = [
-            'name' => $palette->get_name(),
-            'colors' => $palette->get_colors(),
-            'metadata' => $palette->get_metadata()
+            'name' => $palette->getName(),
+            'colors' => $palette->getColors()
         ];
 
-        return wp_json_encode($data, JSON_PRETTY_PRINT);
-    }
+        if ($options['include_metadata']) {
+            $data['metadata'] = $palette->getMetadata();
+        }
 
-    /**
-     * Gets supported render formats.
-     *
-     * @return array Array of supported formats.
-     */
-    public function get_supported_formats(): array {
-        return ['html', 'css', 'json'];
-    }
+        if ($options['include_info']) {
+            $data['color_info'] = array_map(function ($color) {
+                return [
+                    'hex' => $color,
+                    'rgb' => $this->formatter->hexToRgb($color),
+                    'hsl' => $this->formatter->hexToHsl($color)
+                ];
+            }, $palette->getColors());
+        }
 
-    /**
-     * Gets supported templates.
-     *
-     * @return array Array of supported templates.
-     */
-    public function get_supported_templates(): array {
-        return ['grid', 'list', 'circle', 'compact'];
-    }
-
-    /**
-     * Gets supported swatch sizes.
-     *
-     * @return array Array of supported sizes.
-     */
-    public function get_supported_sizes(): array {
-        return ['small', 'medium', 'large'];
+        return json_encode(
+            $data,
+            $options['pretty_print'] ? JSON_PRETTY_PRINT : 0
+        );
     }
 } 

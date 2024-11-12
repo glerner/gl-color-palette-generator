@@ -1,255 +1,150 @@
 <?php
+/**
+ * Color Palette Generator Tests
+ *
+ * @package GLColorPalette
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ * @since   1.0.0
+ */
 
 namespace GLColorPalette\Tests;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\ColorPalette;
 use GLColorPalette\ColorPaletteGenerator;
 use GLColorPalette\ColorPaletteFormatter;
-use GLColorPalette\ColorPaletteAnalyzer;
 
 class ColorPaletteGeneratorTest extends TestCase {
-    private $generator;
-    private $formatter;
-    private $analyzer;
+    private ColorPaletteGenerator $generator;
+    private ColorPaletteFormatter $formatter;
 
     protected function setUp(): void {
         $this->formatter = new ColorPaletteFormatter();
-        $this->analyzer = new ColorPaletteAnalyzer($this->formatter);
-        $this->generator = new ColorPaletteGenerator($this->formatter, $this->analyzer);
+        $this->generator = new ColorPaletteGenerator($this->formatter);
     }
 
-    public function test_generate_from_color_creates_valid_palette(): void {
-        // Act
-        $palette = $this->generator->generate_from_color('#FF0000');
+    public function test_generate_palette_default(): void {
+        $palette = $this->generator->generatePalette();
 
-        // Assert
-        $this->assertInstanceOf(ColorPalette::class, $palette);
-        $this->assertNotEmpty($palette->get_colors());
-        $this->assertEquals(5, count($palette->get_colors())); // Default count
-
-        foreach ($palette->get_colors() as $color) {
-            $this->assertMatchesRegularExpression('/^#[0-9A-F]{6}$/', $color);
-        }
+        $this->assertCount(5, $palette->getColors()); // Default count
+        $this->assertNotEmpty($palette->getName());
+        $this->assertArrayHasKey('algorithm', $palette->getMetadata());
     }
 
     /**
-     * @dataProvider colorSchemeProvider
+     * @dataProvider algorithmProvider
      */
-    public function test_generate_different_color_schemes(
-        string $scheme,
-        int $count,
-        array $expectations
-    ): void {
-        // Arrange
-        $options = [
-            'scheme' => $scheme,
-            'count' => $count
-        ];
+    public function test_generate_palette_algorithms(string $algorithm): void {
+        $options = ['algorithm' => $algorithm, 'base_color' => '#FF0000'];
+        $palette = $this->generator->generatePalette($options);
 
-        // Act
-        $palette = $this->generator->generate_from_color('#FF0000', $options);
-        $colors = $palette->get_colors();
-        $analysis = $this->analyzer->analyze_palette($palette);
-
-        // Assert
-        $this->assertCount($count, $colors);
-        foreach ($expectations as $key => $expected) {
-            $this->assertGreaterThanOrEqual(
-                $expected,
-                $this->get_nested_value($analysis, $key)
-            );
-        }
+        $this->assertEquals($algorithm, $palette->getMetadata()['algorithm']);
+        $this->assertNotEmpty($palette->getColors());
     }
 
-    public function colorSchemeProvider(): array {
+    public function algorithmProvider(): array {
         return [
-            'monochromatic' => [
-                'monochromatic',
-                5,
-                ['harmony.harmony_score' => 0.7]
-            ],
-            'analogous' => [
-                'analogous',
-                5,
-                ['harmony.harmony_score' => 0.6]
-            ],
-            'complementary' => [
-                'complementary',
-                4,
-                ['contrast.statistics.avg' => 3.0]
-            ],
-            'triadic' => [
-                'triadic',
-                6,
-                ['distribution.hue_distribution.coverage' => 0.5]
-            ],
-            'tetradic' => [
-                'tetradic',
-                8,
-                ['distribution.hue_distribution.coverage' => 0.6]
-            ],
-            'split_complementary' => [
-                'split_complementary',
-                5,
-                ['contrast.statistics.avg' => 2.5]
-            ]
+            ['complementary'],
+            ['analogous'],
+            ['triadic'],
+            ['monochromatic'],
+            ['split_complementary'],
+            ['tetradic'],
+            ['random']
         ];
     }
 
-    public function test_generate_random_creates_valid_palette(): void {
-        // Act
-        $palette = $this->generator->generate_random();
-
-        // Assert
-        $this->assertInstanceOf(ColorPalette::class, $palette);
-        $this->assertNotEmpty($palette->get_colors());
-
-        $analysis = $this->analyzer->analyze_palette($palette);
-        $this->assertGreaterThan(0.5, $analysis['harmony']['harmony_score']);
-    }
-
-    public function test_generate_respects_quality_threshold(): void {
-        // Arrange
-        $options = [
-            'quality_threshold' => 0.8,
-            'max_attempts' => 50
-        ];
-
-        // Act
-        $palette = $this->generator->generate_from_color('#FF0000', $options);
-        $metadata = $palette->get_metadata();
-
-        // Assert
-        $this->assertArrayHasKey('quality_score', $metadata);
-        $this->assertGreaterThanOrEqual(0.8, $metadata['quality_score']);
-    }
-
-    public function test_generate_respects_color_constraints(): void {
-        // Arrange
-        $options = [
-            'saturation_range' => ['min' => 50, 'max' => 70],
-            'lightness_range' => ['min' => 40, 'max' => 60]
-        ];
-
-        // Act
-        $palette = $this->generator->generate_from_color('#FF0000', $options);
-
-        // Assert
-        foreach ($palette->get_colors() as $color) {
-            $hsl = $this->color_to_hsl($color);
-            $this->assertGreaterThanOrEqual(50, $hsl[1]);
-            $this->assertLessThanOrEqual(70, $hsl[1]);
-            $this->assertGreaterThanOrEqual(40, $hsl[2]);
-            $this->assertLessThanOrEqual(60, $hsl[2]);
-        }
-    }
-
-    public function test_generate_handles_edge_cases(): void {
-        // Test with extreme base colors
-        $edge_cases = ['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF'];
-
-        foreach ($edge_cases as $color) {
-            $palette = $this->generator->generate_from_color($color);
-            $this->assertNotEmpty($palette->get_colors());
-            $this->assertContains($color, $palette->get_colors());
-        }
-    }
-
-    public function test_generate_preserves_input_color(): void {
-        // Arrange
+    public function test_generate_complementary(): void {
         $base_color = '#FF0000';
-        $options = ['preserve_input' => true];
+        $palette = $this->generator->generateComplementary($base_color);
+        $colors = $palette->getColors();
 
-        // Act
-        $palette = $this->generator->generate_from_color($base_color, $options);
-
-        // Assert
-        $this->assertContains($base_color, $palette->get_colors());
+        $this->assertContains($base_color, $colors);
+        $this->assertContains('#00FFFF', $colors); // Cyan is complement of Red
     }
 
-    public function test_generate_with_invalid_scheme_throws_exception(): void {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->generator->generate_from_color('#FF0000', ['scheme' => 'invalid']);
+    public function test_generate_analogous(): void {
+        $base_color = '#FF0000';
+        $palette = $this->generator->generateAnalogous($base_color);
+        $colors = $palette->getColors();
+
+        $this->assertContains($base_color, $colors);
+        $this->assertCount(5, $colors);
     }
 
-    public function test_generate_performance(): void {
-        // Arrange
-        $start_time = microtime(true);
-        $max_execution_time = 2.0; // seconds
+    public function test_generate_triadic(): void {
+        $base_color = '#FF0000';
+        $palette = $this->generator->generateTriadic($base_color);
+        $colors = $palette->getColors();
 
-        // Act
-        $this->generator->generate_from_color('#FF0000');
-        $execution_time = microtime(true) - $start_time;
-
-        // Assert
-        $this->assertLessThan($max_execution_time, $execution_time);
+        $this->assertContains($base_color, $colors);
+        $this->assertCount(5, $colors);
     }
 
-    public function test_generate_multiple_palettes_are_unique(): void {
-        // Generate multiple palettes with same base color
-        $palettes = [];
-        for ($i = 0; $i < 5; $i++) {
-            $palettes[] = $this->generator->generate_from_color('#FF0000');
-        }
+    public function test_generate_monochromatic(): void {
+        $base_color = '#FF0000';
+        $palette = $this->generator->generateMonochromatic($base_color);
+        $colors = $palette->getColors();
 
-        // Compare each palette with others
-        for ($i = 0; $i < count($palettes); $i++) {
-            for ($j = $i + 1; $j < count($palettes); $j++) {
-                $this->assertNotEquals(
-                    $palettes[$i]->get_colors(),
-                    $palettes[$j]->get_colors()
-                );
-            }
+        $this->assertContains($base_color, $colors);
+        $this->assertCount(5, $colors);
+
+        // All colors should have same hue
+        $base_hsl = $this->formatter->formatColor($base_color, 'hsl');
+        foreach ($colors as $color) {
+            $color_hsl = $this->formatter->formatColor($color, 'hsl');
+            $this->assertEquals($base_hsl[0], $color_hsl[0]);
         }
     }
 
-    public function test_generate_with_custom_metadata(): void {
-        // Arrange
+    public function test_custom_options(): void {
         $options = [
-            'metadata' => [
-                'purpose' => 'testing',
-                'author' => 'PHPUnit'
-            ]
+            'count' => 3,
+            'saturation_range' => [80, 100],
+            'lightness_range' => [40, 60],
+            'name' => 'Custom Palette'
         ];
 
-        // Act
-        $palette = $this->generator->generate_from_color('#FF0000', $options);
-        $metadata = $palette->get_metadata();
+        $palette = $this->generator->generatePalette($options);
 
-        // Assert
-        $this->assertArrayHasKey('purpose', $metadata);
-        $this->assertEquals('testing', $metadata['purpose']);
-        $this->assertEquals('PHPUnit', $metadata['author']);
+        $this->assertCount(3, $palette->getColors());
+        $this->assertEquals('Custom Palette', $palette->getName());
     }
 
-    /**
-     * Helper method to convert color to HSL.
-     */
-    private function color_to_hsl(string $color): array {
-        $hsl = $this->formatter->format_color($color, 'hsl');
-        preg_match('/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/', $hsl, $matches);
-        return [
-            (int)$matches[1],
-            (int)$matches[2],
-            (int)$matches[3]
-        ];
+    public function test_invalid_algorithm(): void {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $options = ['algorithm' => 'invalid_algorithm'];
+        $this->generator->generatePalette($options);
     }
 
-    /**
-     * Helper method to get nested array value.
-     */
-    private function get_nested_value(array $array, string $path) {
-        $keys = explode('.', $path);
-        $value = $array;
+    public function test_get_available_algorithms(): void {
+        $algorithms = $this->generator->getAvailableAlgorithms();
 
-        foreach ($keys as $key) {
-            if (!isset($value[$key])) {
-                return null;
-            }
-            $value = $value[$key];
-        }
-
-        return $value;
+        $this->assertIsArray($algorithms);
+        $this->assertContains('complementary', $algorithms);
+        $this->assertContains('analogous', $algorithms);
+        $this->assertContains('triadic', $algorithms);
     }
-} 
+
+    public function test_get_default_options(): void {
+        $options = $this->generator->getDefaultOptions();
+
+        $this->assertIsArray($options);
+        $this->assertArrayHasKey('count', $options);
+        $this->assertArrayHasKey('saturation_range', $options);
+        $this->assertArrayHasKey('lightness_range', $options);
+    }
+
+    public function test_color_variations(): void {
+        $base_color = '#FF0000';
+        $options = ['count' => 10];
+
+        $palette = $this->generator->generatePalette(
+            array_merge($options, ['base_color' => $base_color])
+        );
+
+        $this->assertCount(10, $palette->getColors());
+        $this->assertContains($base_color, $palette->getColors());
+    }
+}

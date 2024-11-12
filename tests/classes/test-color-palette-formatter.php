@@ -1,4 +1,12 @@
 <?php
+/**
+ * Color Palette Formatter Tests
+ *
+ * @package GLColorPalette
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ * @since   1.0.0
+ */
 
 namespace GLColorPalette\Tests;
 
@@ -6,111 +14,104 @@ use PHPUnit\Framework\TestCase;
 use GLColorPalette\ColorPaletteFormatter;
 
 class ColorPaletteFormatterTest extends TestCase {
-    private $formatter;
+    private ColorPaletteFormatter $formatter;
 
     protected function setUp(): void {
         $this->formatter = new ColorPaletteFormatter();
     }
 
     /**
-     * @dataProvider formatConversionProvider
+     * @dataProvider validColorFormatProvider
      */
-    public function test_format_color_converts_between_formats(
-        string $input_color,
-        string $target_format,
-        string $expected
-    ): void {
-        // Act
-        $result = $this->formatter->format_color($input_color, $target_format);
-
-        // Assert
+    public function test_format_color_valid_formats(string $input, string $format, string $expected): void {
+        $result = $this->formatter->formatColor($input, $format);
         $this->assertEquals($expected, $result);
     }
 
-    public function formatConversionProvider(): array {
+    public function validColorFormatProvider(): array {
         return [
             'hex_to_rgb' => [
                 '#FF0000',
                 'rgb',
                 'rgb(255, 0, 0)'
             ],
-            'hex_to_rgba' => [
-                '#FF0000',
-                'rgba',
-                'rgba(255, 0, 0, 1)'
+            'rgb_to_hex' => [
+                'rgb(255, 0, 0)',
+                'hex',
+                '#FF0000'
             ],
             'hex_to_hsl' => [
                 '#FF0000',
                 'hsl',
                 'hsl(0, 100%, 50%)'
             ],
-            'rgb_to_hex' => [
-                'rgb(255, 0, 0)',
-                'hex',
-                '#ff0000'
-            ],
-            'rgb_to_hsl' => [
-                'rgb(255, 0, 0)',
-                'hsl',
-                'hsl(0, 100%, 50%)'
-            ],
             'hsl_to_hex' => [
                 'hsl(0, 100%, 50%)',
                 'hex',
-                '#ff0000'
+                '#FF0000'
             ],
-            'hsl_to_rgb' => [
+            'rgb_to_rgba' => [
+                'rgb(255, 0, 0)',
+                'rgba',
+                'rgba(255, 0, 0, 1.00)'
+            ],
+            'hsl_to_hsla' => [
                 'hsl(0, 100%, 50%)',
-                'rgb',
-                'rgb(255, 0, 0)'
+                'hsla',
+                'hsla(0, 100%, 50%, 1.00)'
             ],
-            'short_hex_to_rgb' => [
+            'short_hex_to_full_hex' => [
                 '#F00',
-                'rgb',
-                'rgb(255, 0, 0)'
-            ],
-            'grayscale_hsl_to_rgb' => [
-                'hsl(0, 0%, 50%)',
-                'rgb',
-                'rgb(128, 128, 128)'
+                'hex',
+                '#FF0000'
             ]
         ];
     }
 
     /**
-     * @dataProvider formatDetectionProvider
+     * @dataProvider invalidColorFormatProvider
      */
-    public function test_detect_format_identifies_color_format(
-        string $color,
-        string $expected_format
-    ): void {
-        // Act
-        $result = $this->formatter->detect_format($color);
-
-        // Assert
-        $this->assertEquals($expected_format, $result);
+    public function test_format_color_invalid_formats(string $input, string $format): void {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->formatter->formatColor($input, $format);
     }
 
-    public function formatDetectionProvider(): array {
+    public function invalidColorFormatProvider(): array {
         return [
-            'hex_6_digits' => ['#FF0000', 'hex'],
-            'hex_3_digits' => ['#F00', 'hex'],
-            'hex_lowercase' => ['#ff0000', 'hex'],
-            'rgb' => ['rgb(255, 0, 0)', 'rgb'],
-            'rgb_spaces' => ['rgb(255,0,0)', 'rgb'],
-            'rgba' => ['rgba(255, 0, 0, 1)', 'rgba'],
-            'rgba_decimal' => ['rgba(255, 0, 0, 0.5)', 'rgba'],
-            'hsl' => ['hsl(0, 100%, 50%)', 'hsl'],
-            'hsl_no_percent' => ['hsl(0, 100, 50)', 'hsl'],
-            'hsla' => ['hsla(0, 100%, 50%, 1)', 'hsla']
+            'invalid_hex' => ['#GG0000', 'hex'],
+            'invalid_rgb' => ['rgb(256, 0, 0)', 'rgb'],
+            'invalid_hsl' => ['hsl(361, 100%, 50%)', 'hsl'],
+            'invalid_format' => ['#FF0000', 'invalid'],
+            'malformed_rgb' => ['rgb(255 0 0)', 'rgb'],
+            'malformed_hsl' => ['hsl(0,100%,50%)', 'hsl']
         ];
     }
 
-    public function test_get_supported_formats_returns_array(): void {
-        // Act
-        $formats = $this->formatter->get_supported_formats();
+    /**
+     * @dataProvider validFormatCheckProvider
+     */
+    public function test_is_valid_format(string $color, string $format, bool $expected): void {
+        $result = $this->formatter->isValidFormat($color, $format);
+        $this->assertEquals($expected, $result);
+    }
 
-        // Assert
+    public function validFormatCheckProvider(): array {
+        return [
+            'valid_hex' => ['#FF0000', 'hex', true],
+            'valid_short_hex' => ['#F00', 'hex', true],
+            'valid_rgb' => ['rgb(255, 0, 0)', 'rgb', true],
+            'valid_rgba' => ['rgba(255, 0, 0, 1)', 'rgba', true],
+            'valid_hsl' => ['hsl(0, 100%, 50%)', 'hsl', true],
+            'valid_hsla' => ['hsla(0, 100%, 50%, 1)', 'hsla', true],
+            'invalid_hex' => ['#GG0000', 'hex', false],
+            'invalid_rgb' => ['rgb(256, 0, 0)', 'rgb', false],
+            'invalid_hsl' => ['hsl(361, 100%, 50%)', 'hsl', false],
+            'wrong_format' => ['#FF0000', 'rgb', false]
+        ];
+    }
+
+    public function test_get_supported_formats(): void {
+        $formats = $this->formatter->getSupportedFormats();
         $this->assertIsArray($formats);
         $this->assertContains('hex', $formats);
         $this->assertContains('rgb', $formats);
@@ -120,115 +121,78 @@ class ColorPaletteFormatterTest extends TestCase {
     }
 
     /**
-     * @dataProvider invalidColorProvider
+     * @dataProvider normalizeColorProvider
      */
-    public function test_format_color_validates_input(string $invalid_color): void {
-        // Assert
-        $this->expectException(\InvalidArgumentException::class);
-
-        // Act
-        $this->formatter->format_color($invalid_color, 'rgb');
+    public function test_normalize_color(string $input, string $expected): void {
+        $result = $this->formatter->normalizeColor($input);
+        $this->assertEquals($expected, $result);
     }
 
-    public function invalidColorProvider(): array {
+    public function normalizeColorProvider(): array {
         return [
-            'empty_color' => [''],
-            'invalid_hex' => ['#XYZ'],
-            'wrong_hex_length' => ['#FF'],
-            'invalid_rgb' => ['rgb(256, 0, 0)'],
-            'invalid_hsl' => ['hsl(361, 100%, 50%)'],
-            'malformed_rgb' => ['rgb(255 0 0)'],
-            'malformed_hsl' => ['hsl(0 100% 50%)']
+            'full_hex' => ['#FF0000', '#FF0000'],
+            'short_hex' => ['#F00', '#FF0000'],
+            'no_hash' => ['FF0000', '#FF0000'],
+            'rgb' => ['rgb(255, 0, 0)', '#FF0000'],
+            'rgba' => ['rgba(255, 0, 0, 1)', '#FF0000'],
+            'hsl' => ['hsl(0, 100%, 50%)', '#FF0000'],
+            'hsla' => ['hsla(0, 100%, 50%, 1)', '#FF0000'],
+            'lowercase' => ['#ff0000', '#FF0000'],
+            'mixed_case' => ['#Ff0000', '#FF0000']
         ];
+    }
+
+    public function test_edge_cases(): void {
+        // Black
+        $this->assertEquals('#000000', $this->formatter->formatColor('rgb(0, 0, 0)', 'hex'));
+        $this->assertEquals('hsl(0, 0%, 0%)', $this->formatter->formatColor('#000000', 'hsl'));
+
+        // White
+        $this->assertEquals('#FFFFFF', $this->formatter->formatColor('rgb(255, 255, 255)', 'hex'));
+        $this->assertEquals('hsl(0, 0%, 100%)', $this->formatter->formatColor('#FFFFFF', 'hsl'));
+
+        // Gray (no saturation)
+        $this->assertEquals('hsl(0, 0%, 50%)', $this->formatter->formatColor('#808080', 'hsl'));
+    }
+
+    public function test_color_conversion_precision(): void {
+        // Test RGB to HSL to RGB conversion maintains color accuracy
+        $original = '#FF0000';
+        $hsl = $this->formatter->formatColor($original, 'hsl');
+        $back_to_hex = $this->formatter->formatColor($hsl, 'hex');
+        $this->assertEquals($original, $back_to_hex);
+
+        // Test with a more complex color
+        $original = '#8A2BE2'; // Blue Violet
+        $rgb = $this->formatter->formatColor($original, 'rgb');
+        $back_to_hex = $this->formatter->formatColor($rgb, 'hex');
+        $this->assertEquals($original, $back_to_hex);
     }
 
     /**
-     * @dataProvider invalidFormatProvider
+     * @dataProvider hslConversionProvider
      */
-    public function test_format_color_validates_format(string $invalid_format): void {
-        // Assert
-        $this->expectException(\InvalidArgumentException::class);
-
-        // Act
-        $this->formatter->format_color('#FF0000', $invalid_format);
-    }
-
-    public function invalidFormatProvider(): array {
-        return [
-            'empty_format' => [''],
-            'invalid_format' => ['invalid'],
-            'numeric_format' => ['123'],
-            'special_chars' => ['format@!']
-        ];
-    }
-
-    public function test_format_color_handles_edge_cases(): void {
-        // Test black
-        $this->assertEquals(
-            'rgb(0, 0, 0)',
-            $this->formatter->format_color('#000000', 'rgb')
-        );
-
-        // Test white
-        $this->assertEquals(
-            'rgb(255, 255, 255)',
-            $this->formatter->format_color('#FFFFFF', 'rgb')
-        );
-
-        // Test gray
-        $this->assertEquals(
-            'hsl(0, 0%, 50%)',
-            $this->formatter->format_color('rgb(128, 128, 128)', 'hsl')
-        );
-    }
-
-    public function test_format_color_preserves_precision(): void {
-        // Test HSL to RGB conversion precision
-        $hsl = 'hsl(210, 50%, 50%)';
-        $rgb = $this->formatter->format_color($hsl, 'rgb');
-        $back_to_hsl = $this->formatter->format_color($rgb, 'hsl');
+    public function test_hsl_conversion_accuracy(string $hex, array $expected_hsl): void {
+        $hsl = $this->formatter->formatColor($hex, 'hsl');
+        preg_match('/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/', $hsl, $matches);
+        array_shift($matches);
+        $actual_hsl = array_map('intval', $matches);
 
         // Allow for small rounding differences
-        $this->assertStringStartsWith('hsl(210,', $back_to_hsl);
+        foreach ($actual_hsl as $i => $value) {
+            $this->assertEqualsWithDelta($expected_hsl[$i], $value, 1);
+        }
     }
 
-    public function test_format_color_handles_same_format(): void {
-        $color = '#FF0000';
-        $this->assertEquals(
-            $color,
-            $this->formatter->format_color($color, 'hex')
-        );
-    }
-
-    /**
-     * @dataProvider hslEdgeCaseProvider
-     */
-    public function test_hsl_edge_cases(string $hsl, string $expected_rgb): void {
-        // Act
-        $result = $this->formatter->format_color($hsl, 'rgb');
-
-        // Assert
-        $this->assertEquals($expected_rgb, $result);
-    }
-
-    public function hslEdgeCaseProvider(): array {
+    public function hslConversionProvider(): array {
         return [
-            'zero_saturation' => [
-                'hsl(0, 0%, 50%)',
-                'rgb(128, 128, 128)'
-            ],
-            'full_saturation' => [
-                'hsl(0, 100%, 50%)',
-                'rgb(255, 0, 0)'
-            ],
-            'zero_lightness' => [
-                'hsl(0, 100%, 0%)',
-                'rgb(0, 0, 0)'
-            ],
-            'full_lightness' => [
-                'hsl(0, 100%, 100%)',
-                'rgb(255, 255, 255)'
-            ]
+            'red' => ['#FF0000', [0, 100, 50]],
+            'green' => ['#00FF00', [120, 100, 50]],
+            'blue' => ['#0000FF', [240, 100, 50]],
+            'yellow' => ['#FFFF00', [60, 100, 50]],
+            'cyan' => ['#00FFFF', [180, 100, 50]],
+            'magenta' => ['#FF00FF', [300, 100, 50]],
+            'gray' => ['#808080', [0, 0, 50]]
         ];
     }
-} 
+}

@@ -2,6 +2,8 @@
 
 namespace GLColorPalette\Interfaces;
 
+use GLColorPalette\ColorPalette;
+
 /**
  * Color Palette Generator Interface
  *
@@ -12,87 +14,62 @@ namespace GLColorPalette\Interfaces;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorPaletteGenerator {
+interface ColorPaletteGeneratorInterface {
     /**
-     * Generates palette from base color.
+     * Generates a new color palette.
      *
-     * @param string $base_color Base color value.
-     * @param array $options {
-     *     Optional. Generation options.
-     *     @type string $scheme        Color scheme.
-     *     @type int    $count         Colors count.
-     *     @type array  $rules         Generation rules.
-     *     @type array  $constraints   Color constraints.
-     * }
-     * @return array {
-     *     Generation results.
-     *     @type array  $palette       Generated palette.
-     *     @type array  $relationships Color relationships.
-     *     @type array  $metrics       Generation metrics.
-     *     @type array  $metadata      Generation metadata.
-     * }
+     * @param array $options Generation options.
+     * @return ColorPalette Generated palette.
      */
-    public function generate_from_color(string $base_color, array $options = []): array;
+    public function generatePalette(array $options = []): ColorPalette;
 
     /**
-     * Generates palette from theme.
+     * Generates a complementary color palette.
      *
-     * @param string $theme Theme identifier.
-     * @param array $options {
-     *     Optional. Theme options.
-     *     @type array  $mood          Theme mood.
-     *     @type array  $style         Theme style.
-     *     @type array  $constraints   Theme constraints.
-     *     @type array  $metadata      Theme metadata.
-     * }
-     * @return array {
-     *     Theme results.
-     *     @type array  $palette       Generated palette.
-     *     @type array  $theme         Theme details.
-     *     @type array  $variations    Theme variations.
-     *     @type array  $metadata      Generation metadata.
-     * }
+     * @param string $base_color Base color to build from.
+     * @param array  $options    Generation options.
+     * @return ColorPalette Generated palette.
      */
-    public function generate_from_theme(string $theme, array $options = []): array;
+    public function generateComplementary(string $base_color, array $options = []): ColorPalette;
 
     /**
-     * Generates random palette.
+     * Generates an analogous color palette.
      *
-     * @param array $options {
-     *     Optional. Random options.
-     *     @type int    $count         Colors count.
-     *     @type array  $constraints   Color constraints.
-     *     @type array  $rules         Generation rules.
-     *     @type array  $metadata      Generation metadata.
-     * }
-     * @return array {
-     *     Random results.
-     *     @type array  $palette       Generated palette.
-     *     @type array  $metrics       Generation metrics.
-     *     @type array  $validation    Palette validation.
-     *     @type array  $metadata      Generation metadata.
-     * }
+     * @param string $base_color Base color to build from.
+     * @param array  $options    Generation options.
+     * @return ColorPalette Generated palette.
      */
-    public function generate_random(array $options = []): array;
+    public function generateAnalogous(string $base_color, array $options = []): ColorPalette;
 
     /**
-     * Generates variations of palette.
+     * Generates a triadic color palette.
      *
-     * @param array $palette Base palette.
-     * @param array $options {
-     *     Optional. Variation options.
-     *     @type array  $types         Variation types.
-     *     @type array  $constraints   Color constraints.
-     *     @type array  $count         Variations count.
-     *     @type array  $metadata      Generation metadata.
-     * }
-     * @return array {
-     *     Variation results.
-     *     @type array  $variations    Generated variations.
-     *     @type array  $relationships Variation relationships.
-     *     @type array  $metrics       Generation metrics.
-     *     @type array  $metadata      Generation metadata.
-     * }
+     * @param string $base_color Base color to build from.
+     * @param array  $options    Generation options.
+     * @return ColorPalette Generated palette.
      */
-    public function generate_variations(array $palette, array $options = []): array;
-} 
+    public function generateTriadic(string $base_color, array $options = []): ColorPalette;
+
+    /**
+     * Generates a monochromatic color palette.
+     *
+     * @param string $base_color Base color to build from.
+     * @param array  $options    Generation options.
+     * @return ColorPalette Generated palette.
+     */
+    public function generateMonochromatic(string $base_color, array $options = []): ColorPalette;
+
+    /**
+     * Gets available generation algorithms.
+     *
+     * @return array List of available algorithms.
+     */
+    public function getAvailableAlgorithms(): array;
+
+    /**
+     * Gets default generation options.
+     *
+     * @return array Default options.
+     */
+    public function getDefaultOptions(): array;
+}

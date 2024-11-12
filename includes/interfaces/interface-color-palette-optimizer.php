@@ -2,6 +2,8 @@
 
 namespace GLColorPalette\Interfaces;
 
+use GLColorPalette\ColorPalette;
+
 /**
  * Color Palette Optimizer Interface
  *
@@ -12,88 +14,55 @@ namespace GLColorPalette\Interfaces;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorPaletteOptimizer {
+interface ColorPaletteOptimizerInterface {
+    /**
+     * Optimizes a color palette.
+     *
+     * @param ColorPalette $palette Palette to optimize.
+     * @param array        $options Optimization options.
+     * @return ColorPalette Optimized palette.
+     */
+    public function optimizePalette(ColorPalette $palette, array $options = []): ColorPalette;
+
     /**
      * Optimizes for accessibility.
      *
-     * @param array $palette Palette to optimize.
-     * @param array $options {
-     *     Optional. Accessibility options.
-     *     @type array  $standards     Target standards.
-     *     @type array  $constraints   Color constraints.
-     *     @type array  $priorities    Optimization priorities.
-     *     @type array  $metadata      Optimization metadata.
-     * }
-     * @return array {
-     *     Optimization results.
-     *     @type array  $optimized     Optimized palette.
-     *     @type array  $improvements  Accessibility improvements.
-     *     @type array  $compliance    Standards compliance.
-     *     @type array  $metadata      Optimization metadata.
-     * }
+     * @param ColorPalette $palette Palette to optimize.
+     * @param string       $level   WCAG level ('A', 'AA', or 'AAA').
+     * @return ColorPalette Optimized palette.
      */
-    public function optimize_accessibility(array $palette, array $options = []): array;
+    public function optimizeForAccessibility(ColorPalette $palette, string $level = 'AA'): ColorPalette;
 
     /**
      * Optimizes for harmony.
      *
-     * @param array $palette Palette to optimize.
-     * @param array $options {
-     *     Optional. Harmony options.
-     *     @type array  $schemes       Target schemes.
-     *     @type array  $thresholds    Harmony thresholds.
-     *     @type array  $constraints   Color constraints.
-     *     @type array  $metadata      Optimization metadata.
-     * }
-     * @return array {
-     *     Optimization results.
-     *     @type array  $optimized     Optimized palette.
-     *     @type array  $improvements  Harmony improvements.
-     *     @type array  $scores        Harmony scores.
-     *     @type array  $metadata      Optimization metadata.
-     * }
+     * @param ColorPalette $palette Palette to optimize.
+     * @param string       $type    Harmony type (complementary, analogous, etc.).
+     * @return ColorPalette Optimized palette.
      */
-    public function optimize_harmony(array $palette, array $options = []): array;
+    public function optimizeForHarmony(ColorPalette $palette, string $type = 'complementary'): ColorPalette;
 
     /**
-     * Optimizes for performance.
+     * Optimizes for contrast.
      *
-     * @param array $palette Palette to optimize.
-     * @param array $options {
-     *     Optional. Performance options.
-     *     @type array  $targets       Performance targets.
-     *     @type array  $compression   Color compression.
-     *     @type array  $formats       Output formats.
-     *     @type array  $metadata      Optimization metadata.
-     * }
-     * @return array {
-     *     Optimization results.
-     *     @type array  $optimized     Optimized palette.
-     *     @type array  $improvements  Performance improvements.
-     *     @type array  $metrics       Performance metrics.
-     *     @type array  $metadata      Optimization metadata.
-     * }
+     * @param ColorPalette $palette Palette to optimize.
+     * @param float        $target  Target contrast ratio.
+     * @return ColorPalette Optimized palette.
      */
-    public function optimize_performance(array $palette, array $options = []): array;
+    public function optimizeForContrast(ColorPalette $palette, float $target = 4.5): ColorPalette;
 
     /**
-     * Optimizes for display.
+     * Gets available optimization strategies.
      *
-     * @param array $palette Palette to optimize.
-     * @param array $options {
-     *     Optional. Display options.
-     *     @type array  $devices       Target devices.
-     *     @type array  $environments  Display environments.
-     *     @type array  $calibration   Color calibration.
-     *     @type array  $metadata      Optimization metadata.
-     * }
-     * @return array {
-     *     Optimization results.
-     *     @type array  $optimized     Optimized palette.
-     *     @type array  $improvements  Display improvements.
-     *     @type array  $profiles      Device profiles.
-     *     @type array  $metadata      Optimization metadata.
-     * }
+     * @return array List of available strategies.
      */
-    public function optimize_display(array $palette, array $options = []): array;
-} 
+    public function getAvailableStrategies(): array;
+
+    /**
+     * Gets optimization options.
+     *
+     * @param string $strategy Strategy to get options for.
+     * @return array Strategy options.
+     */
+    public function getStrategyOptions(string $strategy): array;
+}

@@ -2,6 +2,8 @@
 
 namespace GLColorPalette\Interfaces;
 
+use GLColorPalette\ColorPalette;
+
 /**
  * Color Palette Renderer Interface
  *
@@ -12,90 +14,57 @@ namespace GLColorPalette\Interfaces;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorPaletteRenderer {
+interface ColorPaletteRendererInterface {
     /**
-     * Renders palette as HTML.
+     * Renders a color palette.
      *
-     * @param array $palette Palette to render.
-     * @param array $options {
-     *     Optional. HTML options.
-     *     @type string $template      HTML template.
-     *     @type array  $classes       CSS classes.
-     *     @type array  $attributes    HTML attributes.
-     *     @type array  $interactions  Interactive features.
-     *     @type array  $accessibility A11y options.
-     * }
-     * @return array {
-     *     HTML render results.
-     *     @type string $html          Rendered HTML.
-     *     @type array  $assets        Required assets.
-     *     @type array  $interactions  Interaction data.
-     *     @type array  $metadata      Render metadata.
-     * }
+     * @param ColorPalette $palette Palette to render.
+     * @param string       $format  Output format (html, svg, etc.).
+     * @param array        $options Rendering options.
+     * @return string Rendered output.
      */
-    public function render_as_html(array $palette, array $options = []): array;
+    public function renderPalette(ColorPalette $palette, string $format = 'html', array $options = []): string;
 
     /**
-     * Renders palette as image.
+     * Renders a color swatch.
      *
-     * @param array $palette Palette to render.
-     * @param array $options {
-     *     Optional. Image options.
-     *     @type string $format        Image format.
-     *     @type array  $dimensions    Image size.
-     *     @type array  $layout        Color layout.
-     *     @type array  $effects       Visual effects.
-     *     @type array  $optimization  Image optimization.
-     * }
-     * @return array {
-     *     Image render results.
-     *     @type string $image         Image data/path.
-     *     @type array  $dimensions    Image dimensions.
-     *     @type array  $format        Image format info.
-     *     @type array  $metadata      Render metadata.
-     * }
+     * @param string $color   Color to render.
+     * @param string $format  Output format.
+     * @param array  $options Rendering options.
+     * @return string Rendered swatch.
      */
-    public function render_as_image(array $palette, array $options = []): array;
+    public function renderSwatch(string $color, string $format = 'html', array $options = []): string;
 
     /**
-     * Renders palette preview.
+     * Renders color information.
      *
-     * @param array $palette Palette to preview.
-     * @param array $options {
-     *     Optional. Preview options.
-     *     @type string $type          Preview type.
-     *     @type array  $context       Preview context.
-     *     @type array  $elements      Preview elements.
-     *     @type array  $interactions  Interactive features.
-     * }
-     * @return array {
-     *     Preview results.
-     *     @type string $preview       Preview content.
-     *     @type array  $context       Context data.
-     *     @type array  $interactions  Interaction data.
-     *     @type array  $metadata      Preview metadata.
-     * }
+     * @param string $color   Color to render info for.
+     * @param array  $options Rendering options.
+     * @return string Rendered color information.
      */
-    public function render_preview(array $palette, array $options = []): array;
+    public function renderColorInfo(string $color, array $options = []): string;
 
     /**
-     * Renders palette documentation.
+     * Gets supported rendering formats.
      *
-     * @param array $palette Palette to document.
-     * @param array $options {
-     *     Optional. Documentation options.
-     *     @type string $format        Doc format.
-     *     @type array  $sections      Doc sections.
-     *     @type array  $examples      Usage examples.
-     *     @type array  $metadata      Doc metadata.
-     * }
-     * @return array {
-     *     Documentation results.
-     *     @type string $documentation Generated docs.
-     *     @type array  $sections      Section content.
-     *     @type array  $examples      Example content.
-     *     @type array  $metadata      Doc metadata.
-     * }
+     * @return array List of supported formats.
      */
-    public function render_documentation(array $palette, array $options = []): array;
-} 
+    public function getSupportedFormats(): array;
+
+    /**
+     * Gets format-specific options.
+     *
+     * @param string $format Format to get options for.
+     * @return array Format options.
+     */
+    public function getFormatOptions(string $format): array;
+
+    /**
+     * Validates rendering options.
+     *
+     * @param array  $options Options to validate.
+     * @param string $format  Format to validate against.
+     * @return bool True if valid.
+     */
+    public function validateOptions(array $options, string $format): bool;
+}

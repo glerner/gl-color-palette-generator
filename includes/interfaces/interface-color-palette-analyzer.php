@@ -2,6 +2,8 @@
 
 namespace GLColorPalette\Interfaces;
 
+use GLColorPalette\ColorPalette;
+
 /**
  * Color Palette Analyzer Interface
  *
@@ -12,88 +14,53 @@ namespace GLColorPalette\Interfaces;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorPaletteAnalyzer {
+interface ColorPaletteAnalyzerInterface {
+    /**
+     * Analyzes a color palette.
+     *
+     * @param ColorPalette $palette Palette to analyze.
+     * @return array Analysis results.
+     */
+    public function analyzePalette(ColorPalette $palette): array;
+
+    /**
+     * Calculates contrast ratios between colors.
+     *
+     * @param ColorPalette $palette Palette to analyze.
+     * @return array Contrast ratios.
+     */
+    public function calculateContrastRatios(ColorPalette $palette): array;
+
     /**
      * Analyzes color harmony.
      *
-     * @param array $palette Palette to analyze.
-     * @param array $options {
-     *     Optional. Harmony options.
-     *     @type array  $schemes       Harmony schemes.
-     *     @type array  $thresholds    Harmony thresholds.
-     *     @type array  $weights       Color weights.
-     *     @type array  $metadata      Analysis metadata.
-     * }
-     * @return array {
-     *     Harmony results.
-     *     @type array  $relationships Color relationships.
-     *     @type array  $scores        Harmony scores.
-     *     @type array  $suggestions   Improvement suggestions.
-     *     @type array  $metadata      Analysis metadata.
-     * }
+     * @param ColorPalette $palette Palette to analyze.
+     * @return array Harmony analysis.
      */
-    public function analyze_harmony(array $palette, array $options = []): array;
+    public function analyzeHarmony(ColorPalette $palette): array;
 
     /**
-     * Analyzes color contrast.
+     * Analyzes accessibility compliance.
      *
-     * @param array $palette Palette to analyze.
-     * @param array $options {
-     *     Optional. Contrast options.
-     *     @type array  $ratios        Target ratios.
-     *     @type array  $combinations  Color combinations.
-     *     @type array  $standards     Accessibility standards.
-     *     @type array  $metadata      Analysis metadata.
-     * }
-     * @return array {
-     *     Contrast results.
-     *     @type array  $ratios        Contrast ratios.
-     *     @type array  $compliance    Standards compliance.
-     *     @type array  $suggestions   Improvement suggestions.
-     *     @type array  $metadata      Analysis metadata.
-     * }
+     * @param ColorPalette $palette Palette to analyze.
+     * @param string       $level   WCAG level ('A', 'AA', or 'AAA').
+     * @return array Accessibility analysis.
      */
-    public function analyze_contrast(array $palette, array $options = []): array;
+    public function analyzeAccessibility(ColorPalette $palette, string $level = 'AA'): array;
 
     /**
-     * Analyzes color distribution.
+     * Gets color relationships.
      *
-     * @param array $palette Palette to analyze.
-     * @param array $options {
-     *     Optional. Distribution options.
-     *     @type array  $metrics       Distribution metrics.
-     *     @type array  $ranges        Value ranges.
-     *     @type array  $weights       Color weights.
-     *     @type array  $metadata      Analysis metadata.
-     * }
-     * @return array {
-     *     Distribution results.
-     *     @type array  $metrics       Distribution metrics.
-     *     @type array  $balance       Color balance.
-     *     @type array  $suggestions   Balance suggestions.
-     *     @type array  $metadata      Analysis metadata.
-     * }
+     * @param ColorPalette $palette Palette to analyze.
+     * @return array Color relationships.
      */
-    public function analyze_distribution(array $palette, array $options = []): array;
+    public function getColorRelationships(ColorPalette $palette): array;
 
     /**
-     * Analyzes color psychology.
+     * Gets palette statistics.
      *
-     * @param array $palette Palette to analyze.
-     * @param array $options {
-     *     Optional. Psychology options.
-     *     @type array  $associations  Color associations.
-     *     @type array  $context       Usage context.
-     *     @type array  $culture      Cultural factors.
-     *     @type array  $metadata      Analysis metadata.
-     * }
-     * @return array {
-     *     Psychology results.
-     *     @type array  $meanings      Color meanings.
-     *     @type array  $emotions      Emotional impact.
-     *     @type array  $suggestions   Usage suggestions.
-     *     @type array  $metadata      Analysis metadata.
-     * }
+     * @param ColorPalette $palette Palette to analyze.
+     * @return array Palette statistics.
      */
-    public function analyze_psychology(array $palette, array $options = []): array;
-} 
+    public function getPaletteStats(ColorPalette $palette): array;
+}

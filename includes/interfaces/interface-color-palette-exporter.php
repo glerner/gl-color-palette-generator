@@ -2,6 +2,8 @@
 
 namespace GLColorPalette\Interfaces;
 
+use GLColorPalette\ColorPalette;
+
 /**
  * Color Palette Exporter Interface
  *
@@ -12,92 +14,57 @@ namespace GLColorPalette\Interfaces;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorPaletteExporter {
+interface ColorPaletteExporterInterface {
     /**
-     * Exports palette to file.
+     * Exports a color palette.
      *
-     * @param array $palette Palette to export.
-     * @param string $format Export format ('json', 'xml', 'yaml', 'csv').
-     * @param array $options {
-     *     Optional. Export options.
-     *     @type string $path          Output path.
-     *     @type array  $structure     Data structure.
-     *     @type array  $formatting    Output formatting.
-     *     @type array  $compression   File compression.
-     *     @type array  $metadata      Export metadata.
-     * }
-     * @return array {
-     *     Export results.
-     *     @type string $file          Exported file path.
-     *     @type array  $stats         Export statistics.
-     *     @type array  $validation    Export validation.
-     *     @type array  $metadata      Export metadata.
-     * }
+     * @param ColorPalette $palette Palette to export.
+     * @param string       $format  Export format.
+     * @param array        $options Export options.
+     * @return string Exported data.
      */
-    public function export_to_file(array $palette, string $format, array $options = []): array;
+    public function exportPalette(ColorPalette $palette, string $format, array $options = []): string;
 
     /**
-     * Exports palette to code.
+     * Exports to file.
      *
-     * @param array $palette Palette to export.
-     * @param string $language Target language ('css', 'scss', 'less', 'js').
-     * @param array $options {
-     *     Optional. Code options.
-     *     @type string $format        Code format.
-     *     @type array  $variables     Variable options.
-     *     @type array  $formatting    Code formatting.
-     *     @type array  $comments      Documentation.
-     * }
-     * @return array {
-     *     Code export results.
-     *     @type string $code          Generated code.
-     *     @type array  $variables     Variable mapping.
-     *     @type array  $documentation Code documentation.
-     *     @type array  $metadata      Export metadata.
-     * }
+     * @param ColorPalette $palette  Palette to export.
+     * @param string       $filename Target filename.
+     * @param string       $format   Export format.
+     * @param array        $options  Export options.
+     * @return bool True on success.
      */
-    public function export_to_code(array $palette, string $language, array $options = []): array;
+    public function exportToFile(ColorPalette $palette, string $filename, string $format, array $options = []): bool;
 
     /**
-     * Exports palette to design tool.
+     * Gets supported export formats.
      *
-     * @param array $palette Palette to export.
-     * @param string $tool Target tool ('sketch', 'figma', 'adobe').
-     * @param array $options {
-     *     Optional. Tool options.
-     *     @type string $version       Tool version.
-     *     @type array  $format        Tool format.
-     *     @type array  $swatches      Swatch options.
-     *     @type array  $metadata      Tool metadata.
-     * }
-     * @return array {
-     *     Tool export results.
-     *     @type string $file          Export file path.
-     *     @type array  $swatches      Swatch data.
-     *     @type array  $compatibility Tool compatibility.
-     *     @type array  $metadata      Export metadata.
-     * }
+     * @return array List of supported formats.
      */
-    public function export_to_tool(array $palette, string $tool, array $options = []): array;
+    public function getSupportedFormats(): array;
 
     /**
-     * Validates export format.
+     * Gets format-specific options.
      *
-     * @param array $export Export data to validate.
-     * @param array $rules {
-     *     Optional. Validation rules.
-     *     @type array  $format        Format requirements.
-     *     @type array  $structure     Structure rules.
-     *     @type array  $constraints   Export constraints.
-     *     @type array  $compatibility Format compatibility.
-     * }
-     * @return array {
-     *     Validation results.
-     *     @type bool   $valid         Validation status.
-     *     @type array  $errors        Validation errors.
-     *     @type array  $warnings      Validation warnings.
-     *     @type array  $metadata      Validation metadata.
-     * }
+     * @param string $format Format to get options for.
+     * @return array Format options.
      */
-    public function validate_export(array $export, array $rules = []): array;
-} 
+    public function getFormatOptions(string $format): array;
+
+    /**
+     * Gets file extension for format.
+     *
+     * @param string $format Format to get extension for.
+     * @return string File extension.
+     */
+    public function getFileExtension(string $format): string;
+
+    /**
+     * Validates export options.
+     *
+     * @param array  $options Options to validate.
+     * @param string $format  Format to validate against.
+     * @return bool True if valid.
+     */
+    public function validateOptions(array $options, string $format): bool;
+}

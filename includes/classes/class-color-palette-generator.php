@@ -1,127 +1,354 @@
 <?php
-
-namespace GLColorPalette;
-
 /**
  * Color Palette Generator Class
- *
- * Generates color palettes based on various algorithms and color theory.
  *
  * @package GLColorPalette
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-class ColorPaletteGenerator {
+
+namespace GLColorPalette;
+
+use GLColorPalette\Interfaces\ColorPaletteGeneratorInterface;
+use GLColorPalette\ColorPalette;
+use GLColorPalette\ColorPaletteFormatter;
+
+/**
+ * Generates color palettes using various algorithms.
+ */
+class ColorPaletteGenerator implements ColorPaletteGeneratorInterface {
     /**
      * Color formatter instance.
      *
      * @var ColorPaletteFormatter
      */
-    private $formatter;
+    private ColorPaletteFormatter $formatter;
 
     /**
-     * Color analyzer instance.
+     * Available generation algorithms.
      *
-     * @var ColorPaletteAnalyzer
+     * @var array
      */
-    private $analyzer;
+    private array $algorithms = [
+        'complementary',
+        'analogous',
+        'triadic',
+        'monochromatic',
+        'split_complementary',
+        'tetradic',
+        'random'
+    ];
 
     /**
      * Default generation options.
      *
      * @var array
      */
-    private $default_options = [
-        'scheme' => 'analogous',     // Color scheme type
-        'count' => 5,                // Number of colors
-        'saturation_range' => [      // Saturation constraints
-            'min' => 30,
-            'max' => 80
-        ],
-        'lightness_range' => [       // Lightness constraints
-            'min' => 20,
-            'max' => 80
-        ],
-        'angle_range' => [           // Hue angle constraints
-            'min' => 30,
-            'max' => 90
-        ],
-        'quality_threshold' => 0.7,  // Minimum quality score
-        'max_attempts' => 100,       // Maximum generation attempts
-        'preserve_input' => true,    // Keep input color in palette
-        'color_space' => 'hsl'       // Color space for generation
+    private array $default_options = [
+        'count' => 5,
+        'saturation_range' => [50, 100],
+        'lightness_range' => [20, 80],
+        'angle_variation' => 15,
+        'include_base' => true,
+        'name' => 'Generated Palette'
     ];
 
     /**
      * Constructor.
      *
      * @param ColorPaletteFormatter $formatter Color formatter instance.
-     * @param ColorPaletteAnalyzer  $analyzer  Color analyzer instance.
      */
-    public function __construct(
-        ColorPaletteFormatter $formatter,
-        ColorPaletteAnalyzer $analyzer
-    ) {
+    public function __construct(ColorPaletteFormatter $formatter) {
         $this->formatter = $formatter;
-        $this->analyzer = $analyzer;
     }
 
     /**
-     * Generates a color palette from a base color.
+     * Generates a new color palette.
      *
-     * @param string $base_color Base color to generate from.
-     * @param array $options Optional. Generation options.
+     * @param array $options Generation options.
      * @return ColorPalette Generated palette.
      */
-    public function generate_from_color(string $base_color, array $options = []): ColorPalette {
+    public function generatePalette(array $options = []): ColorPalette {
         $options = array_merge($this->default_options, $options);
-        $base_hsl = $this->color_to_hsl($base_color);
-        $colors = [$base_color];
 
-        switch ($options['scheme']) {
-            case 'monochromatic':
-                $colors = $this->generate_monochromatic($base_hsl, $options);
-                break;
-            case 'analogous':
-                $colors = $this->generate_analogous($base_hsl, $options);
-                break;
-            case 'complementary':
-                $colors = $this->generate_complementary($base_hsl, $options);
-                break;
-            case 'triadic':
-                $colors = $this->generate_triadic($base_hsl, $options);
-                break;
-            case 'tetradic':
-                $colors = $this->generate_tetradic($base_hsl, $options);
-                break;
-            case 'split_complementary':
-                $colors = $this->generate_split_complementary($base_hsl, $options);
-                break;
-            default:
-                throw new \InvalidArgumentException("Unsupported scheme: {$options['scheme']}");
+        if (!isset($options['algorithm'])) {
+            $options['algorithm'] = $this->algorithms[array_rand($this->algorithms)];
         }
 
-        // Ensure quality meets threshold
-        $attempts = 0;
-        $palette = new ColorPalette(['colors' => $colors]);
-        $quality = $this->evaluate_palette_quality($palette);
+        if (!isset($options['base_color'])) {
+            $options['base_color'] = $this->generateRandomColor();
+        }
 
-        while ($quality < $options['quality_threshold'] && $attempts < $options['max_attempts']) {
-            $colors = $this->regenerate_palette($base_hsl, $options);
-            $palette = new ColorPalette(['colors' => $colors]);
-            $quality = $this->evaluate_palette_quality($palette);
-            $attempts++;
+        return match ($options['algorithm']) {
+            'complementary' => $this->generateComplementary($options['base_color'], $options),
+            'analogous' => $this->generateAnalogous($options['base_color'], $options),
+            'triadic' => $this->generateTriadic($options['base_color'], $options),
+            'monochromatic' => $this->generateMonochromatic($options['base_color'], $options),
+            'split_complementary' => $this->generateSplitComplementary($options['base_color'], $options),
+            'tetradic' => $this->generateTetradic($options['base_color'], $options),
+            'random' => $this->generateRandomPalette($options),
+            default => throw new \InvalidArgumentException("Unknown algorithm: {$options['algorithm']}")
+        };
+    }
+
+    /**
+     * Generates a complementary color palette.
+     *
+     * @param string $base_color Base color to build from.
+     * @param array  $options    Generation options.
+     * @return ColorPalette Generated palette.
+     */
+    public function generateComplementary(string $base_color, array $options = []): ColorPalette {
+        $options = array_merge($this->default_options, $options);
+        $base_hsl = $this->hexToHsl($base_color);
+        $colors = [];
+
+        if ($options['include_base']) {
+            $colors[] = $base_color;
+        }
+
+        // Add complementary color (180 degrees)
+        $complement_hue = ($base_hsl[0] + 180) % 360;
+        $colors[] = $this->hslToHex([
+            $complement_hue,
+            $base_hsl[1],
+            $base_hsl[2]
+        ]);
+
+        // Add variations if needed
+        while (count($colors) < $options['count']) {
+            $colors[] = $this->generateVariation($base_color, $options);
         }
 
         return new ColorPalette([
-            'name' => "Generated {$options['scheme']} Palette",
+            'name' => $options['name'],
             'colors' => $colors,
             'metadata' => [
-                'base_color' => $base_color,
-                'scheme' => $options['scheme'],
-                'quality_score' => $quality,
-                'generation_attempts' => $attempts + 1
+                'algorithm' => 'complementary',
+                'base_color' => $base_color
+            ]
+        ]);
+    }
+
+    /**
+     * Generates an analogous color palette.
+     *
+     * @param string $base_color Base color to build from.
+     * @param array  $options    Generation options.
+     * @return ColorPalette Generated palette.
+     */
+    public function generateAnalogous(string $base_color, array $options = []): ColorPalette {
+        $options = array_merge($this->default_options, $options);
+        $base_hsl = $this->hexToHsl($base_color);
+        $colors = [];
+
+        if ($options['include_base']) {
+            $colors[] = $base_color;
+        }
+
+        // Generate colors on either side of the base color
+        $angle = 30;
+        $variations = floor(($options['count'] - 1) / 2);
+
+        for ($i = 1; $i <= $variations; $i++) {
+            // Add color clockwise
+            $colors[] = $this->hslToHex([
+                ($base_hsl[0] + ($angle * $i)) % 360,
+                $base_hsl[1],
+                $base_hsl[2]
+            ]);
+
+            // Add color counter-clockwise
+            $colors[] = $this->hslToHex([
+                ($base_hsl[0] - ($angle * $i) + 360) % 360,
+                $base_hsl[1],
+                $base_hsl[2]
+            ]);
+        }
+
+        // Add one more if we need an odd number
+        if (count($colors) < $options['count']) {
+            $colors[] = $this->generateVariation($base_color, $options);
+        }
+
+        return new ColorPalette([
+            'name' => $options['name'],
+            'colors' => $colors,
+            'metadata' => [
+                'algorithm' => 'analogous',
+                'base_color' => $base_color
+            ]
+        ]);
+    }
+
+    /**
+     * Generates a triadic color palette.
+     *
+     * @param string $base_color Base color to build from.
+     * @param array  $options    Generation options.
+     * @return ColorPalette Generated palette.
+     */
+    public function generateTriadic(string $base_color, array $options = []): ColorPalette {
+        $options = array_merge($this->default_options, $options);
+        $base_hsl = $this->hexToHsl($base_color);
+        $colors = [];
+
+        if ($options['include_base']) {
+            $colors[] = $base_color;
+        }
+
+        // Add colors at 120 and 240 degrees
+        for ($i = 1; $i <= 2; $i++) {
+            $colors[] = $this->hslToHex([
+                ($base_hsl[0] + (120 * $i)) % 360,
+                $base_hsl[1],
+                $base_hsl[2]
+            ]);
+        }
+
+        // Add variations if needed
+        while (count($colors) < $options['count']) {
+            $colors[] = $this->generateVariation($base_color, $options);
+        }
+
+        return new ColorPalette([
+            'name' => $options['name'],
+            'colors' => $colors,
+            'metadata' => [
+                'algorithm' => 'triadic',
+                'base_color' => $base_color
+            ]
+        ]);
+    }
+
+    /**
+     * Generates a monochromatic color palette.
+     *
+     * @param string $base_color Base color to build from.
+     * @param array  $options    Generation options.
+     * @return ColorPalette Generated palette.
+     */
+    public function generateMonochromatic(string $base_color, array $options = []): ColorPalette {
+        $options = array_merge($this->default_options, $options);
+        $base_hsl = $this->hexToHsl($base_color);
+        $colors = [];
+
+        if ($options['include_base']) {
+            $colors[] = $base_color;
+        }
+
+        // Generate variations with different lightness values
+        $lightness_step = (
+            $options['lightness_range'][1] - $options['lightness_range'][0]
+        ) / ($options['count'] - 1);
+
+        for ($i = 0; $i < $options['count']; $i++) {
+            if (count($colors) >= $options['count']) {
+                break;
+            }
+
+            $lightness = $options['lightness_range'][0] + ($lightness_step * $i);
+            $colors[] = $this->hslToHex([
+                $base_hsl[0],
+                $base_hsl[1],
+                $lightness
+            ]);
+        }
+
+        return new ColorPalette([
+            'name' => $options['name'],
+            'colors' => array_unique($colors),
+            'metadata' => [
+                'algorithm' => 'monochromatic',
+                'base_color' => $base_color
+            ]
+        ]);
+    }
+
+    /**
+     * Generates a split complementary color palette.
+     *
+     * @param string $base_color Base color to build from.
+     * @param array  $options    Generation options.
+     * @return ColorPalette Generated palette.
+     */
+    private function generateSplitComplementary(string $base_color, array $options = []): ColorPalette {
+        $options = array_merge($this->default_options, $options);
+        $base_hsl = $this->hexToHsl($base_color);
+        $colors = [];
+
+        if ($options['include_base']) {
+            $colors[] = $base_color;
+        }
+
+        // Add split complementary colors (150 and 210 degrees from base)
+        $complement_hue = ($base_hsl[0] + 180) % 360;
+        $split_angle = 30;
+
+        $colors[] = $this->hslToHex([
+            ($complement_hue - $split_angle + 360) % 360,
+            $base_hsl[1],
+            $base_hsl[2]
+        ]);
+
+        $colors[] = $this->hslToHex([
+            ($complement_hue + $split_angle) % 360,
+            $base_hsl[1],
+            $base_hsl[2]
+        ]);
+
+        // Add variations if needed
+        while (count($colors) < $options['count']) {
+            $colors[] = $this->generateVariation($base_color, $options);
+        }
+
+        return new ColorPalette([
+            'name' => $options['name'],
+            'colors' => $colors,
+            'metadata' => [
+                'algorithm' => 'split_complementary',
+                'base_color' => $base_color
+            ]
+        ]);
+    }
+
+    /**
+     * Generates a tetradic color palette.
+     *
+     * @param string $base_color Base color to build from.
+     * @param array  $options    Generation options.
+     * @return ColorPalette Generated palette.
+     */
+    private function generateTetradic(string $base_color, array $options = []): ColorPalette {
+        $options = array_merge($this->default_options, $options);
+        $base_hsl = $this->hexToHsl($base_color);
+        $colors = [];
+
+        if ($options['include_base']) {
+            $colors[] = $base_color;
+        }
+
+        // Add colors at 90, 180, and 270 degrees
+        for ($i = 1; $i <= 3; $i++) {
+            $colors[] = $this->hslToHex([
+                ($base_hsl[0] + (90 * $i)) % 360,
+                $base_hsl[1],
+                $base_hsl[2]
+            ]);
+        }
+
+        // Add variations if needed
+        while (count($colors) < $options['count']) {
+            $colors[] = $this->generateVariation($base_color, $options);
+        }
+
+        return new ColorPalette([
+            'name' => $options['name'],
+            'colors' => $colors,
+            'metadata' => [
+                'algorithm' => 'tetradic',
+                'base_color' => $base_color
             ]
         ]);
     }
@@ -129,276 +356,103 @@ class ColorPaletteGenerator {
     /**
      * Generates a random color palette.
      *
-     * @param array $options Optional. Generation options.
+     * @param array $options Generation options.
      * @return ColorPalette Generated palette.
      */
-    public function generate_random(array $options = []): ColorPalette {
+    private function generateRandomPalette(array $options = []): ColorPalette {
         $options = array_merge($this->default_options, $options);
-        $base_hsl = [
-            rand(0, 360),  // Hue
-            rand($options['saturation_range']['min'], $options['saturation_range']['max']),
-            rand($options['lightness_range']['min'], $options['lightness_range']['max'])
-        ];
-
-        return $this->generate_from_color(
-            $this->hsl_to_hex($base_hsl),
-            $options
-        );
-    }
-
-    /**
-     * Generates monochromatic color scheme.
-     *
-     * @param array $base_hsl Base HSL values.
-     * @param array $options Generation options.
-     * @return array Generated colors.
-     */
-    private function generate_monochromatic(array $base_hsl, array $options): array {
         $colors = [];
-        $count = $options['count'];
-        $s_step = ($options['saturation_range']['max'] - $options['saturation_range']['min']) / ($count - 1);
-        $l_step = ($options['lightness_range']['max'] - $options['lightness_range']['min']) / ($count - 1);
 
-        for ($i = 0; $i < $count; $i++) {
-            $hsl = [
-                $base_hsl[0],
-                $options['saturation_range']['min'] + ($s_step * $i),
-                $options['lightness_range']['min'] + ($l_step * $i)
-            ];
-            $colors[] = $this->hsl_to_hex($hsl);
+        for ($i = 0; $i < $options['count']; $i++) {
+            $colors[] = $this->generateRandomColor($options);
         }
 
-        return $colors;
+        return new ColorPalette([
+            'name' => $options['name'],
+            'colors' => $colors,
+            'metadata' => [
+                'algorithm' => 'random'
+            ]
+        ]);
     }
 
     /**
-     * Generates analogous color scheme.
+     * Generates a random color.
      *
-     * @param array $base_hsl Base HSL values.
-     * @param array $options Generation options.
-     * @return array Generated colors.
+     * @param array $options Optional. Generation options.
+     * @return string Generated color in hex format.
      */
-    private function generate_analogous(array $base_hsl, array $options): array {
-        $colors = [];
-        $count = $options['count'];
-        $angle = $options['angle_range']['min'];
-        $step = ($angle * 2) / ($count - 1);
+    private function generateRandomColor(array $options = []): string {
+        $options = array_merge($this->default_options, $options);
 
-        for ($i = 0; $i < $count; $i++) {
-            $hue = ($base_hsl[0] - $angle + ($step * $i)) % 360;
-            if ($hue < 0) $hue += 360;
-
-            $hsl = [
-                $hue,
-                $base_hsl[1],
-                $base_hsl[2]
-            ];
-            $colors[] = $this->hsl_to_hex($hsl);
-        }
-
-        return $colors;
+        return $this->hslToHex([
+            rand(0, 359),
+            rand(
+                $options['saturation_range'][0],
+                $options['saturation_range'][1]
+            ),
+            rand(
+                $options['lightness_range'][0],
+                $options['lightness_range'][1]
+            )
+        ]);
     }
 
     /**
-     * Generates complementary color scheme.
+     * Generates a variation of a color.
      *
-     * @param array $base_hsl Base HSL values.
-     * @param array $options Generation options.
-     * @return array Generated colors.
+     * @param string $base_color Base color.
+     * @param array  $options    Generation options.
+     * @return string Generated color in hex format.
      */
-    private function generate_complementary(array $base_hsl, array $options): array {
-        $colors = [$this->hsl_to_hex($base_hsl)];
-        $complement_hue = ($base_hsl[0] + 180) % 360;
+    private function generateVariation(string $base_color, array $options = []): string {
+        $base_hsl = $this->hexToHsl($base_color);
+        $variation = $options['angle_variation'] ?? 15;
 
-        // Generate variations around the complement
-        $variations = $options['count'] - 1;
-        $angle = 15;
-
-        for ($i = 0; $i < $variations; $i++) {
-            $hue = ($complement_hue + ($angle * ($i - floor($variations/2)))) % 360;
-            if ($hue < 0) $hue += 360;
-
-            $hsl = [
-                $hue,
-                $base_hsl[1],
-                $base_hsl[2]
-            ];
-            $colors[] = $this->hsl_to_hex($hsl);
-        }
-
-        return $colors;
+        return $this->hslToHex([
+            ($base_hsl[0] + rand(-$variation, $variation) + 360) % 360,
+            $base_hsl[1],
+            $base_hsl[2]
+        ]);
     }
 
     /**
-     * Generates triadic color scheme.
+     * Gets available generation algorithms.
      *
-     * @param array $base_hsl Base HSL values.
-     * @param array $options Generation options.
-     * @return array Generated colors.
+     * @return array List of available algorithms.
      */
-    private function generate_triadic(array $base_hsl, array $options): array {
-        $colors = [];
-        $base_angles = [0, 120, 240];
-        $variations_per_angle = ceil($options['count'] / 3);
-
-        foreach ($base_angles as $angle) {
-            $hue = ($base_hsl[0] + $angle) % 360;
-
-            for ($i = 0; $i < $variations_per_angle; $i++) {
-                if (count($colors) >= $options['count']) break;
-
-                $variation = 15 * ($i - floor($variations_per_angle/2));
-                $final_hue = ($hue + $variation) % 360;
-                if ($final_hue < 0) $final_hue += 360;
-
-                $hsl = [
-                    $final_hue,
-                    $base_hsl[1],
-                    $base_hsl[2]
-                ];
-                $colors[] = $this->hsl_to_hex($hsl);
-            }
-        }
-
-        return array_slice($colors, 0, $options['count']);
+    public function getAvailableAlgorithms(): array {
+        return $this->algorithms;
     }
 
     /**
-     * Generates tetradic color scheme.
+     * Gets default generation options.
      *
-     * @param array $base_hsl Base HSL values.
-     * @param array $options Generation options.
-     * @return array Generated colors.
+     * @return array Default options.
      */
-    private function generate_tetradic(array $base_hsl, array $options): array {
-        $colors = [];
-        $base_angles = [0, 90, 180, 270];
-        $variations_per_angle = ceil($options['count'] / 4);
-
-        foreach ($base_angles as $angle) {
-            $hue = ($base_hsl[0] + $angle) % 360;
-
-            for ($i = 0; $i < $variations_per_angle; $i++) {
-                if (count($colors) >= $options['count']) break;
-
-                $variation = 15 * ($i - floor($variations_per_angle/2));
-                $final_hue = ($hue + $variation) % 360;
-                if ($final_hue < 0) $final_hue += 360;
-
-                $hsl = [
-                    $final_hue,
-                    $base_hsl[1],
-                    $base_hsl[2]
-                ];
-                $colors[] = $this->hsl_to_hex($hsl);
-            }
-        }
-
-        return array_slice($colors, 0, $options['count']);
+    public function getDefaultOptions(): array {
+        return $this->default_options;
     }
 
     /**
-     * Generates split-complementary color scheme.
+     * Converts hex color to HSL array.
      *
-     * @param array $base_hsl Base HSL values.
-     * @param array $options Generation options.
-     * @return array Generated colors.
-     */
-    private function generate_split_complementary(array $base_hsl, array $options): array {
-        $colors = [$this->hsl_to_hex($base_hsl)];
-        $complement_hue = ($base_hsl[0] + 180) % 360;
-        $split_angle = 30;
-
-        $split_hues = [
-            ($complement_hue - $split_angle) % 360,
-            ($complement_hue + $split_angle) % 360
-        ];
-
-        foreach ($split_hues as $hue) {
-            if ($hue < 0) $hue += 360;
-
-            $variations = floor(($options['count'] - 1) / 2);
-            $angle = 15;
-
-            for ($i = 0; $i < $variations; $i++) {
-                $final_hue = ($hue + ($angle * ($i - floor($variations/2)))) % 360;
-                if ($final_hue < 0) $final_hue += 360;
-
-                $hsl = [
-                    $final_hue,
-                    $base_hsl[1],
-                    $base_hsl[2]
-                ];
-                $colors[] = $this->hsl_to_hex($hsl);
-            }
-        }
-
-        return array_slice($colors, 0, $options['count']);
-    }
-
-    /**
-     * Evaluates palette quality.
-     *
-     * @param ColorPalette $palette Palette to evaluate.
-     * @return float Quality score (0-1).
-     */
-    private function evaluate_palette_quality(ColorPalette $palette): float {
-        $analysis = $this->analyzer->analyze_palette($palette);
-
-        // Weight different aspects of the palette
-        $contrast_score = $analysis['contrast']['statistics']['avg'] / 21.0; // Max contrast is 21
-        $harmony_score = $analysis['harmony']['harmony_score'];
-        $distribution_score = $analysis['distribution']['hue_distribution']['balance'];
-
-        return ($contrast_score * 0.4 + $harmony_score * 0.4 + $distribution_score * 0.2);
-    }
-
-    /**
-     * Regenerates palette with slight variations.
-     *
-     * @param array $base_hsl Base HSL values.
-     * @param array $options Generation options.
-     * @return array Regenerated colors.
-     */
-    private function regenerate_palette(array $base_hsl, array $options): array {
-        // Add small random variations to the base color
-        $varied_base = [
-            ($base_hsl[0] + rand(-10, 10)) % 360,
-            max(0, min(100, $base_hsl[1] + rand(-5, 5))),
-            max(0, min(100, $base_hsl[2] + rand(-5, 5)))
-        ];
-
-        // Generate new palette with varied base
-        $method = "generate_{$options['scheme']}";
-        return $this->$method($varied_base, $options);
-    }
-
-    /**
-     * Converts color to HSL array.
-     *
-     * @param string $color Color value.
+     * @param string $hex Color in hex format.
      * @return array HSL values [h, s, l].
      */
-    private function color_to_hsl(string $color): array {
-        $hsl = $this->formatter->format_color($color, 'hsl');
-        preg_match('/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/', $hsl, $matches);
-        return [
-            (int)$matches[1],
-            (int)$matches[2],
-            (int)$matches[3]
-        ];
+    private function hexToHsl(string $hex): array {
+        $hex = $this->formatter->normalizeColor($hex);
+        return $this->formatter->formatColor($hex, 'hsl');
     }
 
     /**
-     * Converts HSL values to hex color.
+     * Converts HSL array to hex color.
      *
      * @param array $hsl HSL values [h, s, l].
-     * @return string Hex color value.
+     * @return string Color in hex format.
      */
-    private function hsl_to_hex(array $hsl): string {
-        return $this->formatter->format_color(
-            sprintf('hsl(%d, %d%%, %d%%)', $hsl[0], $hsl[1], $hsl[2]),
-            'hex'
-        );
+    private function hslToHex(array $hsl): string {
+        $hsl_string = sprintf('hsl(%d, %d%%, %d%%)', ...$hsl);
+        return $this->formatter->formatColor($hsl_string, 'hex');
     }
-} 
+}

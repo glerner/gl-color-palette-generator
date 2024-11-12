@@ -1,130 +1,155 @@
 <?php
-
-namespace GLColorPalette;
-
 /**
  * Color Palette Formatter Class
- *
- * Handles formatting and conversion of color values between different formats.
  *
  * @package GLColorPalette
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-class ColorPaletteFormatter {
+
+namespace GLColorPalette;
+
+use GLColorPalette\Interfaces\ColorPaletteFormatterInterface;
+
+/**
+ * Handles color format conversions and validation.
+ */
+class ColorPaletteFormatter implements ColorPaletteFormatterInterface {
     /**
      * Supported color formats.
      *
      * @var array
      */
-    private $supported_formats = [
-        'hex' => '/^#(?:[0-9a-fA-F]{3}){1,2}$/',
-        'rgb' => '/^rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)$/',
-        'rgba' => '/^rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*(?:0|1|0?\.\d+)\s*\)$/',
-        'hsl' => '/^hsl\(\s*\d+\s*,\s*\d+%?\s*,\s*\d+%?\s*\)$/',
-        'hsla' => '/^hsla\(\s*\d+\s*,\s*\d+%?\s*,\s*\d+%?\s*,\s*(?:0|1|0?\.\d+)\s*\)$/'
+    private array $supported_formats = ['hex', 'rgb', 'rgba', 'hsl', 'hsla'];
+
+    /**
+     * Format regex patterns.
+     *
+     * @var array
+     */
+    private array $format_patterns = [
+        'hex'  => '/^#?[0-9A-Fa-f]{3}([0-9A-Fa-f]{3})?$/',
+        'rgb'  => '/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/',
+        'rgba' => '/^rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*([01]\.?\d*)\s*\)$/',
+        'hsl'  => '/^hsl\(\s*(\d{1,3})\s*,\s*(\d{1,3})%\s*,\s*(\d{1,3})%\s*\)$/',
+        'hsla' => '/^hsla\(\s*(\d{1,3})\s*,\s*(\d{1,3})%\s*,\s*(\d{1,3})%\s*,\s*([01]\.?\d*)\s*\)$/'
     ];
 
     /**
-     * Formats a color value to specified format.
+     * Formats a color to the specified format.
      *
-     * @param string $color Color value to format.
-     * @param string $format Target format.
+     * @param string $color  Color value to format.
+     * @param string $format Target format (hex, rgb, hsl, etc.).
      * @return string Formatted color value.
-     * @throws \InvalidArgumentException If color or format is invalid.
+     * @throws \InvalidArgumentException If format is invalid.
      */
-    public function format_color(string $color, string $format): string {
-        $current_format = $this->detect_format($color);
-        if (!$current_format) {
-            throw new \InvalidArgumentException("Invalid color value: {$color}");
-        }
-
-        if (!array_key_exists($format, $this->supported_formats)) {
+    public function formatColor(string $color, string $format): string {
+        if (!in_array($format, $this->supported_formats)) {
             throw new \InvalidArgumentException("Unsupported format: {$format}");
         }
 
-        if ($current_format === $format) {
-            return $color;
-        }
+        // Normalize input color to RGB array
+        $rgb = $this->toRgbArray($color);
 
-        // Convert to RGB array as intermediate format
-        $rgb = $this->to_rgb_array($color, $current_format);
-
-        // Convert from RGB array to target format
-        return $this->from_rgb_array($rgb, $format);
+        // Convert to target format
+        return match ($format) {
+            'hex'  => $this->rgbToHex($rgb),
+            'rgb'  => $this->rgbToRgbString($rgb),
+            'rgba' => $this->rgbToRgbaString($rgb),
+            'hsl'  => $this->rgbToHslString($rgb),
+            'hsla' => $this->rgbToHslaString($rgb),
+            default => throw new \InvalidArgumentException("Unsupported format: {$format}")
+        };
     }
 
     /**
-     * Detects format of color value.
+     * Validates a color format.
      *
-     * @param string $color Color value.
-     * @return string|null Format name or null if not detected.
+     * @param string $color  Color to validate.
+     * @param string $format Format to validate against.
+     * @return bool True if valid.
      */
-    public function detect_format(string $color): ?string {
-        foreach ($this->supported_formats as $format => $pattern) {
-            if (preg_match($pattern, $color)) {
-                return $format;
-            }
+    public function isValidFormat(string $color, string $format): bool {
+        if (!isset($this->format_patterns[$format])) {
+            return false;
         }
-        return null;
+
+        return (bool) preg_match($this->format_patterns[$format], $color);
     }
 
     /**
      * Gets supported color formats.
      *
-     * @return array Array of supported formats.
+     * @return array List of supported formats.
      */
-    public function get_supported_formats(): array {
-        return array_keys($this->supported_formats);
+    public function getSupportedFormats(): array {
+        return $this->supported_formats;
     }
 
     /**
-     * Converts color to RGB array.
+     * Normalizes a color value to hex format.
      *
-     * @param string $color Color value.
-     * @param string $format Color format.
+     * @param string $color Color to normalize.
+     * @return string Normalized hex color value.
+     * @throws \InvalidArgumentException If color is invalid.
+     */
+    public function normalizeColor(string $color): string {
+        return $this->formatColor($color, 'hex');
+    }
+
+    /**
+     * Converts any supported color format to RGB array.
+     *
+     * @param string $color Color value to convert.
      * @return array RGB values [r, g, b].
+     * @throws \InvalidArgumentException If color format is invalid.
      */
-    private function to_rgb_array(string $color, string $format): array {
-        switch ($format) {
-            case 'hex':
-                return $this->hex_to_rgb($color);
-            case 'rgb':
-            case 'rgba':
-                return $this->parse_rgb($color);
-            case 'hsl':
-            case 'hsla':
-                return $this->hsl_to_rgb($color);
-            default:
-                throw new \InvalidArgumentException("Unsupported format: {$format}");
-        }
-    }
+    private function toRgbArray(string $color): array {
+        $color = trim($color);
 
-    /**
-     * Converts RGB array to target format.
-     *
-     * @param array $rgb RGB values [r, g, b].
-     * @param string $format Target format.
-     * @return string Formatted color value.
-     */
-    private function from_rgb_array(array $rgb, string $format): string {
-        switch ($format) {
-            case 'hex':
-                return $this->rgb_to_hex($rgb);
-            case 'rgb':
-                return sprintf('rgb(%d, %d, %d)', ...$rgb);
-            case 'rgba':
-                return sprintf('rgba(%d, %d, %d, 1)', ...$rgb);
-            case 'hsl':
-                $hsl = $this->rgb_to_hsl($rgb);
-                return sprintf('hsl(%d, %d%%, %d%%)', ...$hsl);
-            case 'hsla':
-                $hsl = $this->rgb_to_hsl($rgb);
-                return sprintf('hsla(%d, %d%%, %d%%, 1)', ...$hsl);
-            default:
-                throw new \InvalidArgumentException("Unsupported format: {$format}");
+        // Try hex format
+        if (preg_match($this->format_patterns['hex'], $color)) {
+            return $this->hexToRgbArray($color);
         }
+
+        // Try RGB format
+        if (preg_match($this->format_patterns['rgb'], $color, $matches)) {
+            return [
+                (int) $matches[1],
+                (int) $matches[2],
+                (int) $matches[3]
+            ];
+        }
+
+        // Try RGBA format
+        if (preg_match($this->format_patterns['rgba'], $color, $matches)) {
+            return [
+                (int) $matches[1],
+                (int) $matches[2],
+                (int) $matches[3]
+            ];
+        }
+
+        // Try HSL format
+        if (preg_match($this->format_patterns['hsl'], $color, $matches)) {
+            return $this->hslToRgbArray([
+                (int) $matches[1],
+                (int) $matches[2],
+                (int) $matches[3]
+            ]);
+        }
+
+        // Try HSLA format
+        if (preg_match($this->format_patterns['hsla'], $color, $matches)) {
+            return $this->hslToRgbArray([
+                (int) $matches[1],
+                (int) $matches[2],
+                (int) $matches[3]
+            ]);
+        }
+
+        throw new \InvalidArgumentException("Invalid color format: {$color}");
     }
 
     /**
@@ -133,7 +158,7 @@ class ColorPaletteFormatter {
      * @param string $hex Hex color value.
      * @return array RGB values [r, g, b].
      */
-    private function hex_to_rgb(string $hex): array {
+    private function hexToRgbArray(string $hex): array {
         $hex = ltrim($hex, '#');
 
         if (strlen($hex) === 3) {
@@ -148,55 +173,44 @@ class ColorPaletteFormatter {
     }
 
     /**
-     * Parses RGB/RGBA color to RGB array.
+     * Converts HSL values to RGB array.
      *
-     * @param string $color RGB/RGBA color value.
+     * @param array $hsl HSL values [h, s, l].
      * @return array RGB values [r, g, b].
      */
-    private function parse_rgb(string $color): array {
-        preg_match('/\((.+)\)/', $color, $matches);
-        $values = explode(',', $matches[1]);
-        return array_map(function($val) {
-            return (int) trim($val);
-        }, array_slice($values, 0, 3));
-    }
-
-    /**
-     * Converts HSL/HSLA color to RGB array.
-     *
-     * @param string $color HSL/HSLA color value.
-     * @return array RGB values [r, g, b].
-     */
-    private function hsl_to_rgb(string $color): array {
-        preg_match('/\((.+)\)/', $color, $matches);
-        $values = explode(',', $matches[1]);
-        $h = (float) trim($values[0]);
-        $s = (float) trim($values[1], '% ');
-        $l = (float) trim($values[2], '% ');
-
+    private function hslToRgbArray(array $hsl): array {
+        [$h, $s, $l] = $hsl;
         $h /= 360;
         $s /= 100;
         $l /= 100;
 
         if ($s === 0) {
-            $val = (int) round($l * 255);
-            return [$val, $val, $val];
+            $r = $g = $b = $l;
+        } else {
+            $q = $l < 0.5 ? $l * (1 + $s) : $l + $s - $l * $s;
+            $p = 2 * $l - $q;
+
+            $r = $this->hueToRgb($p, $q, $h + 1/3);
+            $g = $this->hueToRgb($p, $q, $h);
+            $b = $this->hueToRgb($p, $q, $h - 1/3);
         }
 
-        $q = $l < 0.5 ? $l * (1 + $s) : $l + $s - $l * $s;
-        $p = 2 * $l - $q;
-
         return [
-            (int) round($this->hue_to_rgb($p, $q, $h + 1/3) * 255),
-            (int) round($this->hue_to_rgb($p, $q, $h) * 255),
-            (int) round($this->hue_to_rgb($p, $q, $h - 1/3) * 255)
+            round($r * 255),
+            round($g * 255),
+            round($b * 255)
         ];
     }
 
     /**
      * Helper function for HSL to RGB conversion.
+     *
+     * @param float $p First value.
+     * @param float $q Second value.
+     * @param float $t Third value.
+     * @return float Resulting value.
      */
-    private function hue_to_rgb(float $p, float $q, float $t): float {
+    private function hueToRgb(float $p, float $q, float $t): float {
         if ($t < 0) $t += 1;
         if ($t > 1) $t -= 1;
         if ($t < 1/6) return $p + ($q - $p) * 6 * $t;
@@ -206,13 +220,57 @@ class ColorPaletteFormatter {
     }
 
     /**
-     * Converts RGB array to hex color.
+     * Converts RGB array to hex string.
      *
      * @param array $rgb RGB values [r, g, b].
      * @return string Hex color value.
      */
-    private function rgb_to_hex(array $rgb): string {
-        return sprintf('#%02x%02x%02x', ...$rgb);
+    private function rgbToHex(array $rgb): string {
+        return sprintf('#%02X%02X%02X', ...$rgb);
+    }
+
+    /**
+     * Converts RGB array to RGB string.
+     *
+     * @param array $rgb RGB values [r, g, b].
+     * @return string RGB color value.
+     */
+    private function rgbToRgbString(array $rgb): string {
+        return sprintf('rgb(%d, %d, %d)', ...$rgb);
+    }
+
+    /**
+     * Converts RGB array to RGBA string.
+     *
+     * @param array $rgb RGB values [r, g, b].
+     * @param float $alpha Alpha value (0-1).
+     * @return string RGBA color value.
+     */
+    private function rgbToRgbaString(array $rgb, float $alpha = 1.0): string {
+        return sprintf('rgba(%d, %d, %d, %.2f)', ...array_merge($rgb, [$alpha]));
+    }
+
+    /**
+     * Converts RGB array to HSL string.
+     *
+     * @param array $rgb RGB values [r, g, b].
+     * @return string HSL color value.
+     */
+    private function rgbToHslString(array $rgb): string {
+        $hsl = $this->rgbToHslArray($rgb);
+        return sprintf('hsl(%d, %d%%, %d%%)', ...$hsl);
+    }
+
+    /**
+     * Converts RGB array to HSLA string.
+     *
+     * @param array $rgb RGB values [r, g, b].
+     * @param float $alpha Alpha value (0-1).
+     * @return string HSLA color value.
+     */
+    private function rgbToHslaString(array $rgb, float $alpha = 1.0): string {
+        $hsl = $this->rgbToHslArray($rgb);
+        return sprintf('hsla(%d, %d%%, %d%%, %.2f)', ...array_merge($hsl, [$alpha]));
     }
 
     /**
@@ -221,10 +279,8 @@ class ColorPaletteFormatter {
      * @param array $rgb RGB values [r, g, b].
      * @return array HSL values [h, s, l].
      */
-    private function rgb_to_hsl(array $rgb): array {
-        list($r, $g, $b) = array_map(function($val) {
-            return $val / 255;
-        }, $rgb);
+    private function rgbToHslArray(array $rgb): array {
+        [$r, $g, $b] = array_map(fn($val) => $val / 255, $rgb);
 
         $max = max($r, $g, $b);
         $min = min($r, $g, $b);
@@ -236,24 +292,20 @@ class ColorPaletteFormatter {
             $d = $max - $min;
             $s = $l > 0.5 ? $d / (2 - $max - $min) : $d / ($max + $min);
 
-            switch ($max) {
-                case $r:
-                    $h = ($g - $b) / $d + ($g < $b ? 6 : 0);
-                    break;
-                case $g:
-                    $h = ($b - $r) / $d + 2;
-                    break;
-                case $b:
-                    $h = ($r - $g) / $d + 4;
-                    break;
-            }
+            $h = match ($max) {
+                $r => ($g - $b) / $d + ($g < $b ? 6 : 0),
+                $g => ($b - $r) / $d + 2,
+                $b => ($r - $g) / $d + 4,
+                default => 0
+            };
+
             $h /= 6;
         }
 
         return [
-            (int) round($h * 360),
-            (int) round($s * 100),
-            (int) round($l * 100)
+            round($h * 360),
+            round($s * 100),
+            round($l * 100)
         ];
     }
 } 

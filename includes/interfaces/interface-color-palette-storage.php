@@ -2,6 +2,8 @@
 
 namespace GLColorPalette\Interfaces;
 
+use GLColorPalette\ColorPalette;
+
 /**
  * Color Palette Storage Interface
  *
@@ -12,90 +14,53 @@ namespace GLColorPalette\Interfaces;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorPaletteStorage {
+interface ColorPaletteStorageInterface {
     /**
-     * Stores palette in database.
+     * Saves a color palette.
      *
-     * @param array $palette Palette to store.
-     * @param array $options {
-     *     Optional. Storage options.
-     *     @type string $table         Target table.
-     *     @type array  $indexes       Index fields.
-     *     @type bool   $versioning    Enable versioning.
-     *     @type array  $compression   Data compression.
-     *     @type array  $validation    Pre-storage validation.
-     * }
-     * @return array {
-     *     Storage results.
-     *     @type int    $id            Stored palette ID.
-     *     @type bool   $success       Storage success status.
-     *     @type array  $version       Version information.
-     *     @type array  $metadata      Storage metadata.
-     * }
+     * @param ColorPalette $palette Palette to save.
+     * @return int|false Palette ID on success, false on failure.
      */
-    public function store_in_db(array $palette, array $options = []): array;
+    public function savePalette(ColorPalette $palette): int|false;
 
     /**
-     * Retrieves palette from database.
+     * Retrieves a color palette by ID.
      *
      * @param int $id Palette ID.
-     * @param array $options {
-     *     Optional. Retrieval options.
-     *     @type array  $fields        Fields to retrieve.
-     *     @type string $version       Specific version.
-     *     @type array  $with          Related data to include.
-     *     @type array  $transform     Data transformations.
-     * }
-     * @return array {
-     *     Retrieval results.
-     *     @type array  $palette       Retrieved palette.
-     *     @type array  $version       Version information.
-     *     @type array  $related       Related data.
-     *     @type array  $metadata      Retrieval metadata.
-     * }
+     * @return ColorPalette|null Retrieved palette or null if not found.
      */
-    public function retrieve_from_db(int $id, array $options = []): array;
+    public function getPalette(int $id): ?ColorPalette;
 
     /**
-     * Stores palette in cache.
+     * Updates an existing color palette.
      *
-     * @param string $key Cache key.
-     * @param array $palette Palette to cache.
-     * @param array $options {
-     *     Optional. Cache options.
-     *     @type int    $ttl           Time to live.
-     *     @type string $group         Cache group.
-     *     @type array  $tags          Cache tags.
-     *     @type array  $compression   Data compression.
-     * }
-     * @return array {
-     *     Cache results.
-     *     @type bool   $cached        Cache success status.
-     *     @type string $key           Cache key used.
-     *     @type array  $info          Cache information.
-     *     @type array  $metadata      Cache metadata.
-     * }
+     * @param int          $id      Palette ID.
+     * @param ColorPalette $palette Updated palette data.
+     * @return bool True on success, false on failure.
      */
-    public function store_in_cache(string $key, array $palette, array $options = []): array;
+    public function updatePalette(int $id, ColorPalette $palette): bool;
 
     /**
-     * Retrieves palette from cache.
+     * Deletes a color palette.
      *
-     * @param string $key Cache key.
-     * @param array $options {
-     *     Optional. Cache options.
-     *     @type bool   $refresh       Force refresh.
-     *     @type array  $fallback      Fallback options.
-     *     @type array  $transform     Data transformations.
-     *     @type bool   $metadata      Include metadata.
-     * }
-     * @return array {
-     *     Cache retrieval results.
-     *     @type array  $palette       Retrieved palette.
-     *     @type bool   $hit           Cache hit status.
-     *     @type array  $source        Data source info.
-     *     @type array  $metadata      Cache metadata.
-     * }
+     * @param int $id Palette ID.
+     * @return bool True on success, false on failure.
      */
-    public function retrieve_from_cache(string $key, array $options = []): array;
+    public function deletePalette(int $id): bool;
+
+    /**
+     * Lists all color palettes with optional filtering.
+     *
+     * @param array $filters Optional. Filter criteria.
+     * @return array List of palettes.
+     */
+    public function listPalettes(array $filters = []): array;
+
+    /**
+     * Searches for palettes matching criteria.
+     *
+     * @param array $criteria Search criteria.
+     * @return array Matching palettes.
+     */
+    public function searchPalettes(array $criteria): array;
 }

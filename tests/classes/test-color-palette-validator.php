@@ -1,269 +1,168 @@
 <?php
+/**
+ * Color Palette Validator Tests
+ *
+ * @package GLColorPalette
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ * @since   1.0.0
+ */
 
 namespace GLColorPalette\Tests;
 
 use PHPUnit\Framework\TestCase;
 use GLColorPalette\ColorPalette;
 use GLColorPalette\ColorPaletteValidator;
-use GLColorPalette\ColorPaletteFormatter;
 
 class ColorPaletteValidatorTest extends TestCase {
-    private $validator;
-    private $formatter;
+    private ColorPaletteValidator $validator;
 
     protected function setUp(): void {
-        $this->formatter = new ColorPaletteFormatter();
-        $this->validator = new ColorPaletteValidator($this->formatter);
+        $this->validator = new ColorPaletteValidator();
     }
 
-    public function test_validate_palette_accepts_valid_palette(): void {
-        // Arrange
+    public function test_validate_valid_palette(): void {
         $palette = new ColorPalette([
             'name' => 'Test Palette',
-            'colors' => ['#FF0000', '#00FF00', '#0000FF']
+            'colors' => ['#FF0000', '#00FF00', '#0000FF'],
+            'metadata' => [
+                'type' => 'custom',
+                'tags' => ['test', 'rgb'],
+                'created_at' => '2024-03-14T12:00:00Z'
+            ]
         ]);
 
-        // Act
-        $result = $this->validator->validate_palette($palette);
-
-        // Assert
-        $this->assertTrue($result['valid']);
-        $this->assertEmpty($result['errors']);
-        $this->assertEmpty($result['warnings']);
+        $this->assertTrue($this->validator->validatePalette($palette));
+        $this->assertEmpty($this->validator->getErrors());
     }
 
-    public function test_validate_palette_catches_missing_name(): void {
-        // Arrange
+    public function test_validate_invalid_color_format(): void {
         $palette = new ColorPalette([
+            'name' => 'Invalid Colors',
+            'colors' => ['invalid', '#FF0000']
+        ]);
+
+        $this->assertFalse($this->validator->validatePalette($palette));
+        $this->assertNotEmpty($this->validator->getErrors());
+    }
+
+    public function test_validate_empty_name(): void {
+        $palette = new ColorPalette([
+            'name' => '',
             'colors' => ['#FF0000']
         ]);
 
-        // Act
-        $result = $this->validator->validate_palette($palette);
-
-        // Assert
-        $this->assertFalse($result['valid']);
-        $this->assertArrayHasKey('name', $result['errors']);
-        $this->assertStringContainsString('required', $result['errors']['name'][0]);
+        $this->assertFalse($this->validator->validatePalette($palette));
+        $this->assertNotEmpty($this->validator->getErrors());
     }
 
-    public function test_validate_palette_enforces_name_length(): void {
-        // Arrange
+    public function test_validate_empty_colors(): void {
         $palette = new ColorPalette([
-            'name' => str_repeat('a', 101),
-            'colors' => ['#FF0000']
-        ]);
-
-        // Act
-        $result = $this->validator->validate_palette($palette);
-
-        // Assert
-        $this->assertFalse($result['valid']);
-        $this->assertArrayHasKey('name', $result['errors']);
-        $this->assertStringContainsString('100 characters', $result['errors']['name'][0]);
-    }
-
-    public function test_validate_palette_requires_colors(): void {
-        // Arrange
-        $palette = new ColorPalette([
-            'name' => 'Test Palette',
+            'name' => 'Empty Colors',
             'colors' => []
         ]);
 
-        // Act
-        $result = $this->validator->validate_palette($palette);
-
-        // Assert
-        $this->assertFalse($result['valid']);
-        $this->assertArrayHasKey('colors', $result['errors']);
-        $this->assertStringContainsString('at least 1', $result['errors']['colors'][0]);
+        $this->assertFalse($this->validator->validatePalette($palette));
+        $this->assertNotEmpty($this->validator->getErrors());
     }
 
-    public function test_validate_palette_limits_color_count(): void {
-        // Arrange
+    public function test_validate_invalid_metadata_type(): void {
         $palette = new ColorPalette([
-            'name' => 'Test Palette',
-            'colors' => array_fill(0, 21, '#FF0000')
-        ]);
-
-        // Act
-        $result = $this->validator->validate_palette($palette);
-
-        // Assert
-        $this->assertFalse($result['valid']);
-        $this->assertArrayHasKey('colors', $result['errors']);
-        $this->assertStringContainsString('20 items', $result['errors']['colors'][0]);
-    }
-
-    public function test_validate_palette_checks_color_formats(): void {
-        // Arrange
-        $palette = new ColorPalette([
-            'name' => 'Test Palette',
-            'colors' => ['#FF0000', 'invalid-color', 'rgb(256,0,0)']
-        ]);
-
-        // Act
-        $result = $this->validator->validate_palette($palette);
-
-        // Assert
-        $this->assertFalse($result['valid']);
-        $this->assertArrayHasKey('colors', $result['errors']);
-        $this->assertStringContainsString('Invalid color format', $result['errors']['colors'][0]);
-    }
-
-    public function test_validate_palette_warns_about_duplicates(): void {
-        // Arrange
-        $palette = new ColorPalette([
-            'name' => 'Test Palette',
-            'colors' => ['#FF0000', '#FF0000', '#00FF00']
-        ]);
-
-        // Act
-        $result = $this->validator->validate_palette($palette);
-
-        // Assert
-        $this->assertTrue($result['valid']); // Duplicates are warnings, not errors
-        $this->assertEmpty($result['errors']);
-        $this->assertArrayHasKey('colors', $result['warnings']);
-        $this->assertStringContainsString('duplicate', $result['warnings']['colors'][0]);
-    }
-
-    public function test_validate_palette_checks_contrast_ratio(): void {
-        // Arrange
-        $palette = new ColorPalette([
-            'name' => 'Test Palette',
-            'colors' => ['#FFFFFF', '#FEFEFE'] // Very low contrast
-        ]);
-
-        $rules = array_merge($this->validator->get_default_rules(), [
-            'colors' => [
-                'min_contrast' => 4.5 // WCAG AA standard
+            'name' => 'Invalid Metadata',
+            'colors' => ['#FF0000'],
+            'metadata' => [
+                'type' => 'invalid'
             ]
         ]);
 
-        // Act
-        $result = $this->validator->validate_palette($palette, $rules);
-
-        // Assert
-        $this->assertTrue($result['valid']); // Low contrast is a warning
-        $this->assertEmpty($result['errors']);
-        $this->assertArrayHasKey('colors', $result['warnings']);
-        $this->assertStringContainsString('Low contrast ratio', $result['warnings']['colors'][0]);
+        $this->assertFalse($this->validator->validatePalette($palette));
+        $this->assertNotEmpty($this->validator->getErrors());
     }
 
-    public function test_validate_palette_accepts_custom_rules(): void {
-        // Arrange
+    public function test_validate_invalid_metadata_datetime(): void {
         $palette = new ColorPalette([
-            'name' => 'Test Palette',
+            'name' => 'Invalid DateTime',
+            'colors' => ['#FF0000'],
+            'metadata' => [
+                'created_at' => 'invalid-date'
+            ]
+        ]);
+
+        $this->assertFalse($this->validator->validatePalette($palette));
+        $this->assertNotEmpty($this->validator->getErrors());
+    }
+
+    public function test_validate_invalid_metadata_version(): void {
+        $palette = new ColorPalette([
+            'name' => 'Invalid Version',
+            'colors' => ['#FF0000'],
+            'metadata' => [
+                'version' => 'invalid'
+            ]
+        ]);
+
+        $this->assertFalse($this->validator->validatePalette($palette));
+        $this->assertNotEmpty($this->validator->getErrors());
+    }
+
+    public function test_validate_color_format(): void {
+        $this->assertTrue($this->validator->validateColorFormat('#FF0000'));
+        $this->assertTrue($this->validator->validateColorFormat('#fff'));
+        $this->assertFalse($this->validator->validateColorFormat('invalid'));
+        $this->assertFalse($this->validator->validateColorFormat('#GGGGGG'));
+    }
+
+    public function test_validate_structure(): void {
+        $valid_data = [
+            'name' => 'Test',
+            'colors' => ['#FF0000'],
+            'metadata' => []
+        ];
+
+        $this->assertTrue($this->validator->validateStructure($valid_data));
+        $this->assertEmpty($this->validator->getErrors());
+    }
+
+    public function test_get_validation_rules(): void {
+        $rules = $this->validator->getValidationRules();
+
+        $this->assertIsArray($rules);
+        $this->assertArrayHasKey('palette', $rules);
+        $this->assertArrayHasKey('metadata', $rules);
+    }
+
+    public function test_validate_metadata_tags(): void {
+        $valid_metadata = [
+            'tags' => ['tag1', 'tag2']
+        ];
+
+        $invalid_metadata = [
+            'tags' => ['tag1', 123]
+        ];
+
+        $this->assertTrue($this->validator->validateMetadata($valid_metadata));
+        $this->assertFalse($this->validator->validateMetadata($invalid_metadata));
+    }
+
+    public function test_validate_too_many_colors(): void {
+        $colors = array_fill(0, 101, '#FF0000');
+        $palette = new ColorPalette([
+            'name' => 'Too Many Colors',
+            'colors' => $colors
+        ]);
+
+        $this->assertFalse($this->validator->validatePalette($palette));
+        $this->assertNotEmpty($this->validator->getErrors());
+    }
+
+    public function test_validate_name_too_long(): void {
+        $long_name = str_repeat('a', 101);
+        $palette = new ColorPalette([
+            'name' => $long_name,
             'colors' => ['#FF0000']
         ]);
 
-        $custom_rules = [
-            'name' => [
-                'required' => true,
-                'max_length' => 10
-            ]
-        ];
-
-        // Act
-        $result = $this->validator->validate_palette($palette, $custom_rules);
-
-        // Assert
-        $this->assertFalse($result['valid']);
-        $this->assertArrayHasKey('name', $result['errors']);
-        $this->assertStringContainsString('10 characters', $result['errors']['name'][0]);
+        $this->assertFalse($this->validator->validatePalette($palette));
+        $this->assertNotEmpty($this->validator->getErrors());
     }
-
-    public function test_validate_palette_handles_metadata(): void {
-        // Arrange
-        $palette = new ColorPalette([
-            'name' => 'Test Palette',
-            'colors' => ['#FF0000'],
-            'metadata' => 'invalid-metadata' // Should be array
-        ]);
-
-        // Act
-        $result = $this->validator->validate_palette($palette);
-
-        // Assert
-        $this->assertFalse($result['valid']);
-        $this->assertArrayHasKey('metadata', $result['errors']);
-        $this->assertStringContainsString('type array', $result['errors']['metadata'][0]);
-    }
-
-    /**
-     * @dataProvider contrastRatioProvider
-     */
-    public function test_contrast_ratio_calculation(
-        string $color1,
-        string $color2,
-        float $expected_ratio,
-        float $delta = 0.01
-    ): void {
-        // Arrange
-        $palette = new ColorPalette([
-            'name' => 'Test Palette',
-            'colors' => [$color1, $color2]
-        ]);
-
-        $rules = [
-            'colors' => [
-                'min_contrast' => $expected_ratio - $delta
-            ]
-        ];
-
-        // Act
-        $result = $this->validator->validate_palette($palette, $rules);
-
-        // Assert
-        $this->assertTrue($result['valid']);
-        if ($expected_ratio < $rules['colors']['min_contrast']) {
-            $this->assertArrayHasKey('colors', $result['warnings']);
-        } else {
-            $this->assertEmpty($result['warnings']);
-        }
-    }
-
-    public function contrastRatioProvider(): array {
-        return [
-            'black_white' => ['#000000', '#FFFFFF', 21.0],
-            'red_white' => ['#FF0000', '#FFFFFF', 4.0],
-            'blue_yellow' => ['#0000FF', '#FFFF00', 8.0],
-            'similar_grays' => ['#777777', '#888888', 1.2]
-        ];
-    }
-
-    public function test_validate_palette_handles_empty_palette(): void {
-        // Arrange
-        $palette = new ColorPalette();
-
-        // Act
-        $result = $this->validator->validate_palette($palette);
-
-        // Assert
-        $this->assertFalse($result['valid']);
-        $this->assertArrayHasKey('name', $result['errors']);
-        $this->assertArrayHasKey('colors', $result['errors']);
-    }
-
-    public function test_validate_palette_accepts_all_color_formats(): void {
-        // Arrange
-        $palette = new ColorPalette([
-            'name' => 'Test Palette',
-            'colors' => [
-                '#FF0000',
-                'rgb(0, 255, 0)',
-                'rgba(0, 0, 255, 1)',
-                'hsl(0, 100%, 50%)',
-                'hsla(120, 100%, 50%, 1)'
-            ]
-        ]);
-
-        // Act
-        $result = $this->validator->validate_palette($palette);
-
-        // Assert
-        $this->assertTrue($result['valid']);
-        $this->assertEmpty($result['errors']);
-    }
-} 
+}
