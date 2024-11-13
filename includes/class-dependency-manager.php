@@ -2,152 +2,109 @@
 /**
  * Dependency Manager Class
  *
- * @package GLColorPalette
- * @since 1.0.0
+ * @package    GLColorPalette
+ * @author     George Lerner
+ * @link       https://website-tech.glerner.com/
+ * @since      1.0.0
  */
 
 namespace GLColorPalette;
 
 /**
- * Class DependencyManager
+ * Manages plugin dependencies and requirements
  *
- * Handles plugin dependencies and requirements checking.
- *
- * @since 1.0.0
+ * @package    GLColorPalette
+ * @author     George Lerner
+ * @link       https://website-tech.glerner.com/
+ * @since      1.0.0
  */
 class DependencyManager {
     /**
-     * Minimum PHP version required.
-     *
-     * @var string
+     * @var DependencyManager|null Singleton instance
      */
-    private const MIN_PHP_VERSION = '7.4.0';
+    private static $instance = null;
 
     /**
-     * Minimum WordPress version required.
-     *
-     * @var string
-     */
-    private const MIN_WP_VERSION = '5.8';
-
-    /**
-     * Required PHP extensions.
-     *
-     * @var array
-     */
-    private const REQUIRED_PHP_EXTENSIONS = [
-        'curl',
-        'json',
-        'mbstring'
-    ];
-
-    /**
-     * Check if all plugin requirements are met.
+     * Minimum PHP version required
      *
      * @since 1.0.0
-     * @return bool|WP_Error True if requirements are met, WP_Error otherwise
+     * @var string
      */
-    public function check_requirements() {
-        $php_check = $this->check_php_requirements();
-        if (is_wp_error($php_check)) {
-            return $php_check;
-        }
+    const MIN_PHP_VERSION = '8.0';
 
-        $wp_check = $this->check_wp_requirements();
-        if (is_wp_error($wp_check)) {
-            return $wp_check;
-        }
+    /**
+     * Minimum WordPress version required
+     *
+     * @since 1.0.0
+     * @var string
+     */
+    const MIN_WP_VERSION = '6.2';
 
-        $extensions_check = $this->check_php_extensions();
-        if (is_wp_error($extensions_check)) {
-            return $extensions_check;
+    /**
+     * Get singleton instance
+     */
+    public static function get_instance(): self {
+        if (null === self::$instance) {
+            self::$instance = new self();
         }
-
-        return true;
+        return self::$instance;
     }
 
     /**
-     * Check PHP version requirements.
+     * Check if system meets all requirements
      *
-     * @since 1.0.0
-     * @return bool|WP_Error True if requirements are met, WP_Error otherwise
+     * @return bool|WP_Error True if requirements met, WP_Error otherwise
      */
-    private function check_php_requirements() {
-        if (version_compare(PHP_VERSION, self::MIN_PHP_VERSION, '<')) {
+    public function check_system_requirements() {
+        if (!$this->check_php_version()) {
             return new \WP_Error(
-                'php_version_error',
+                'invalid_php_version',
                 sprintf(
-                    __('GL Color Palette Generator requires PHP version %s or higher. Current version is %s', 'gl-color-palette-generator'),
-                    self::MIN_PHP_VERSION,
-                    PHP_VERSION
+                    __('GL Color Palette Generator requires PHP version %s or higher.', 'gl-color-palette-generator'),
+                    self::MIN_PHP_VERSION
                 )
             );
         }
+
+        if (!$this->check_wp_version()) {
+            return new \WP_Error(
+                'invalid_wp_version',
+                sprintf(
+                    __('GL Color Palette Generator requires WordPress version %s or higher.', 'gl-color-palette-generator'),
+                    self::MIN_WP_VERSION
+                )
+            );
+        }
+
+        if (!$this->check_required_extensions()) {
+            return new \WP_Error(
+                'missing_extensions',
+                __('GL Color Palette Generator requires the GD or Imagick PHP extension.', 'gl-color-palette-generator')
+            );
+        }
+
         return true;
     }
 
     /**
-     * Check WordPress version requirements.
-     *
-     * @since 1.0.0
-     * @return bool|WP_Error True if requirements are met, WP_Error otherwise
+     * Check PHP version requirement
      */
-    private function check_wp_requirements() {
+    private function check_php_version(): bool {
+        return version_compare(PHP_VERSION, self::MIN_PHP_VERSION, '>=');
+    }
+
+    /**
+     * Check WordPress version requirement
+     */
+    private function check_wp_version(): bool {
         global $wp_version;
-
-        if (version_compare($wp_version, self::MIN_WP_VERSION, '<')) {
-            return new \WP_Error(
-                'wp_version_error',
-                sprintf(
-                    __('GL Color Palette Generator requires WordPress version %s or higher. Current version is %s', 'gl-color-palette-generator'),
-                    self::MIN_WP_VERSION,
-                    $wp_version
-                )
-            );
-        }
-        return true;
+        return version_compare($wp_version, self::MIN_WP_VERSION, '>=');
     }
 
     /**
-     * Check required PHP extensions.
-     *
-     * @since 1.0.0
-     * @return bool|WP_Error True if requirements are met, WP_Error otherwise
+     * Check required PHP extensions
      */
-    private function check_php_extensions() {
-        $missing_extensions = [];
-
-        foreach (self::REQUIRED_PHP_EXTENSIONS as $extension) {
-            if (!extension_loaded($extension)) {
-                $missing_extensions[] = $extension;
-            }
-        }
-
-        if (!empty($missing_extensions)) {
-            return new \WP_Error(
-                'missing_php_extensions',
-                sprintf(
-                    __('GL Color Palette Generator requires the following PHP extensions: %s', 'gl-color-palette-generator'),
-                    implode(', ', $missing_extensions)
-                )
-            );
-        }
-
-        return true;
+    private function check_required_extensions(): bool {
+        return extension_loaded('gd') || extension_loaded('imagick');
     }
-
-    /**
-     * Display admin notices for requirement errors.
-     *
-     * @since 1.0.0
-     * @param WP_Error $error The error to display
-     * @return void
-     */
-    public function display_requirement_errors(\WP_Error $error): void {
-        $message = $error->get_error_message();
-
-        echo '<div class="notice notice-error">';
-        echo '<p>' . esc_html($message) . '</p>';
-        echo '</div>';
-    }
-} 
+}

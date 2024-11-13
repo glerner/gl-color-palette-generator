@@ -74,4 +74,4 @@ class Azure_OpenAI_Provider extends AI_Provider_Base {
             'deployment_id' => 'Model Deployment ID',
         ];
     }
-}
+} 

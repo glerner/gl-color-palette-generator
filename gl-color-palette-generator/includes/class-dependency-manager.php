@@ -169,7 +169,7 @@ class DependencyManager {
         }
 
         // Check providers directory
-        $provider_path = plugin_dir_path(dirname(__FILE__)) . 'includes/providers/' . $file_name;
+        $provider_path = plugin_dir_path(dirname(__FILE__)) . 'includes/Providers/' . $file_name;
         if (file_exists($provider_path)) {
             return $provider_path;
         }

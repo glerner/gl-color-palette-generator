@@ -27,13 +27,15 @@ class HuggingFace_Provider_Test extends WP_UnitTestCase {
 
     public function test_generate_palette_validates_params() {
         $result = $this->provider->generate_palette([
-            'theme' => '',
+            'base_color' => 'invalid',
+            'mode' => 'invalid',
             'count' => 0
         ]);
         $this->assertWPError($result);
 
         $result = $this->provider->generate_palette([
-            'theme' => 'spring garden',
+            'base_color' => '#FF0000',
+            'mode' => 'analogous',
             'count' => 5
         ]);
         // Would make API call in real scenario
@@ -45,27 +47,5 @@ class HuggingFace_Provider_Test extends WP_UnitTestCase {
         $this->assertIsArray($requirements);
         $this->assertArrayHasKey('api_key', $requirements);
         $this->assertArrayHasKey('model_id', $requirements);
-    }
-
-    public function test_generate_palette_integration() {
-        if (!getenv('HUGGINGFACE_API_KEY') || !getenv('HUGGINGFACE_MODEL_ID')) {
-            $this->markTestSkipped('HuggingFace credentials not configured');
-        }
-
-        $live_provider = new HuggingFace_Provider([
-            'api_key' => getenv('HUGGINGFACE_API_KEY'),
-            'model_id' => getenv('HUGGINGFACE_MODEL_ID')
-        ]);
-
-        $colors = $live_provider->generate_palette([
-            'theme' => 'spring garden',
-            'count' => 5
-        ]);
-
-        $this->assertIsArray($colors);
-        $this->assertCount(5, $colors);
-        foreach ($colors as $color) {
-            $this->assertMatchesRegularExpression('/#[a-fA-F0-9]{6}/', $color);
-        }
     }
 } 

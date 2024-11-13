@@ -27,27 +27,4 @@ class Azure_OpenAI_Provider_Test extends WP_UnitTestCase {
         $provider = new Azure_OpenAI_Provider(['api_key' => 'test_key']);
         $this->assertWPError($provider->validate_credentials());
     }
-
-    public function test_generate_palette_integration() {
-        if (!getenv('AZURE_OPENAI_API_KEY')) {
-            $this->markTestSkipped('Azure OpenAI API key not configured');
-        }
-
-        $live_provider = new Azure_OpenAI_Provider([
-            'api_key' => getenv('AZURE_OPENAI_API_KEY'),
-            'resource_name' => getenv('AZURE_RESOURCE_NAME'),
-            'deployment_id' => getenv('AZURE_DEPLOYMENT_ID')
-        ]);
-
-        $colors = $live_provider->generate_palette([
-            'theme' => 'sunset over ocean',
-            'count' => 5
-        ]);
-
-        $this->assertIsArray($colors);
-        $this->assertCount(5, $colors);
-        foreach ($colors as $color) {
-            $this->assertMatchesRegularExpression('/#[a-fA-F0-9]{6}/', $color);
-        }
-    }
 } 

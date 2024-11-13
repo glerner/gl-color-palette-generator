@@ -1,0 +1,67 @@
+<?php
+/**
+ * Plugin Information Class
+ *
+ * @package    GLColorPalette
+ * @author     George Lerner
+ * @link       https://website-tech.glerner.com/
+ * @since      1.0.0
+ */
+
+namespace GLColorPalette;
+
+/**
+ * Static class to hold plugin information
+ *
+ * @package    GLColorPalette
+ * @author     George Lerner
+ * @link       https://website-tech.glerner.com/
+ * @since      1.0.0
+ */
+class PluginInfo {
+    /**
+     * Plugin version
+     */
+    const VERSION = '1.0.0';
+
+    /**
+     * Plugin minimum PHP version
+     */
+    const MIN_PHP_VERSION = '8.0';
+
+    /**
+     * Plugin minimum WordPress version
+     */
+    const MIN_WP_VERSION = '6.2';
+
+    /**
+     * Plugin author
+     */
+    const AUTHOR = 'George Lerner';
+
+    /**
+     * Plugin author URI
+     */
+    const AUTHOR_URI = 'https://website-tech.glerner.com/';
+
+    /**
+     * Plugin URI
+     */
+    const PLUGIN_URI = 'https://github.com/GeorgeLerner/gl-color-palette-generator';
+
+    /**
+     * Get plugin metadata
+     *
+     * @return array Plugin metadata
+     */
+    public static function get_metadata(): array {
+        return [
+            'version' => self::VERSION,
+            'min_php' => self::MIN_PHP_VERSION,
+            'min_wp' => self::MIN_WP_VERSION,
+            'author' => self::AUTHOR,
+            'author_uri' => self::AUTHOR_URI,
+            'plugin_uri' => self::PLUGIN_URI,
+        ];
+    }
+} 

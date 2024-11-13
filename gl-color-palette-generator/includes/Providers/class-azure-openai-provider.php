@@ -1,21 +1,36 @@
 <?php
+/**
+ * Azure OpenAI Provider Class
+ *
+ * @package    GLColorPalette
+ * @author     George Lerner
+ * @link       https://website-tech.glerner.com/
+ * @since      1.0.0
+ */
+
+namespace GLColorPalette\Providers;
 namespace GLColorPalette\Providers;
 
-class OpenAIProvider implements AIProviderInterface {
-    private $api_key;
-    private $settings;
+class AzureOpenAIProvider implements AIProviderInterface {
     private $client;
+    private $config;
 
-    public function __construct($api_key, $settings = []) {
-        $this->api_key = $api_key;
-        $this->settings = $settings;
-        $this->initialize_client();
+    public function __construct($config) {
+        $this->config = $config;
+        $this->client = new OpenAI([
+            'api_key' => $config['api_key'],
+            'azure' => [
+                'endpoint' => $config['endpoint'],
+                'deployment' => $config['deployment'],
+                'api_version' => $config['api_version'] ?? '2024-02-15-preview'
+            ]
+        ]);
     }
 
     public function generate($prompt, $parameters) {
         try {
             $response = $this->client->chat->create([
-                'model' => $this->settings['model'] ?? 'gpt-4',
+                'model' => $this->config['deployment'],
                 'messages' => [
                     [
                         'role' => 'system',
@@ -35,24 +50,18 @@ class OpenAIProvider implements AIProviderInterface {
             ]);
 
             return $this->process_response($response);
-
         } catch (Exception $e) {
             throw new AIGenerationException(
-                "OpenAI generation failed: " . $e->getMessage(),
+                "Azure OpenAI generation failed: " . $e->getMessage(),
                 ErrorCodes::API_GENERATION_FAILED
             );
         }
     }
 
-    private function initialize_client() {
-        $this->client = OpenAI::client($this->api_key);
-    }
-
     private function process_response($response) {
         if (empty($response->choices)) {
-            throw new Exception("Empty response from OpenAI");
+            throw new Exception("Empty response from Azure OpenAI");
         }
-
         return $response->choices[0]->message->content;
     }
 }

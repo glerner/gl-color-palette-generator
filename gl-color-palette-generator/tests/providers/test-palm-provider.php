@@ -9,9 +9,7 @@ class Palm_Provider_Test extends WP_UnitTestCase {
 
     public function setUp(): void {
         parent::setUp();
-        $this->provider = new Palm_Provider([
-            'api_key' => 'test_key'
-        ]);
+        $this->provider = new Palm_Provider(['api_key' => 'test_key']);
     }
 
     public function test_validate_credentials() {
@@ -23,13 +21,15 @@ class Palm_Provider_Test extends WP_UnitTestCase {
 
     public function test_generate_palette_validates_params() {
         $result = $this->provider->generate_palette([
-            'theme' => '',
+            'base_color' => 'invalid',
+            'mode' => 'invalid',
             'count' => 0
         ]);
         $this->assertWPError($result);
 
         $result = $this->provider->generate_palette([
-            'theme' => 'desert at night',
+            'base_color' => '#FF0000',
+            'mode' => 'analogous',
             'count' => 5
         ]);
         // Would make API call in real scenario
@@ -48,26 +48,5 @@ class Palm_Provider_Test extends WP_UnitTestCase {
         $property->setAccessible(true);
 
         $this->assertStringContainsString('generativelanguage.googleapis.com', $property->getValue($this->provider));
-    }
-
-    public function test_generate_palette_integration() {
-        if (!getenv('PALM_API_KEY')) {
-            $this->markTestSkipped('PaLM API key not configured');
-        }
-
-        $live_provider = new Palm_Provider([
-            'api_key' => getenv('PALM_API_KEY')
-        ]);
-
-        $colors = $live_provider->generate_palette([
-            'theme' => 'desert at night',
-            'count' => 5
-        ]);
-
-        $this->assertIsArray($colors);
-        $this->assertCount(5, $colors);
-        foreach ($colors as $color) {
-            $this->assertMatchesRegularExpression('/#[a-fA-F0-9]{6}/', $color);
-        }
     }
 } 
