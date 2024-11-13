@@ -1,233 +1,153 @@
 <?php
 /**
- * Dependency Manager for GL Color Palette Generator
+ * Dependency Manager Class
  *
  * @package GLColorPalette
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
+ * @since 1.0.0
  */
 
 namespace GLColorPalette;
 
+/**
+ * Class DependencyManager
+ *
+ * Handles plugin dependencies and requirements checking.
+ *
+ * @since 1.0.0
+ */
 class DependencyManager {
-    private static ?self $instance = null;
-    private array $loaded_classes = [];
-    private array $class_dependencies = [];
-    private array $load_order = [];
+    /**
+     * Minimum PHP version required.
+     *
+     * @var string
+     */
+    private const MIN_PHP_VERSION = '7.4.0';
 
-    private const REQUIREMENTS = [
-        'php' => [
-            'version' => '8.0.0',
-            'extensions' => [
-                'gd',
-                'json',
-                'mbstring',
-                'curl',
-                'zip',
-                'dom',
-                'libxml'
-            ]
-        ],
-        'wordpress' => [
-            'version' => '6.2.0',
-            'functions' => [
-                'wp_get_global_settings',
-                'wp_get_global_styles',
-                'wp_enqueue_block_style'
-            ]
-        ],
-        'mysql' => [
-            'version' => '5.7.0'
-        ]
+    /**
+     * Minimum WordPress version required.
+     *
+     * @var string
+     */
+    private const MIN_WP_VERSION = '5.8';
+
+    /**
+     * Required PHP extensions.
+     *
+     * @var array
+     */
+    private const REQUIRED_PHP_EXTENSIONS = [
+        'curl',
+        'json',
+        'mbstring'
     ];
 
-    private function __construct() {
-        $this->initialize_dependencies();
-    }
-
-    public static function get_instance(): self {
-        if (self::$instance === null) {
-            self::$instance = new self();
+    /**
+     * Check if all plugin requirements are met.
+     *
+     * @since 1.0.0
+     * @return bool|WP_Error True if requirements are met, WP_Error otherwise
+     */
+    public function check_requirements() {
+        $php_check = $this->check_php_requirements();
+        if (is_wp_error($php_check)) {
+            return $php_check;
         }
-        return self::$instance;
+
+        $wp_check = $this->check_wp_requirements();
+        if (is_wp_error($wp_check)) {
+            return $wp_check;
+        }
+
+        $extensions_check = $this->check_php_extensions();
+        if (is_wp_error($extensions_check)) {
+            return $extensions_check;
+        }
+
+        return true;
     }
 
-    public function check_system_requirements(): array {
-        $results = [
-            'status' => true,
-            'messages' => [],
-            'details' => []
-        ];
-
-        // Check PHP version
-        if (version_compare(PHP_VERSION, self::REQUIREMENTS['php']['version'], '<')) {
-            $results['status'] = false;
-            $results['messages'][] = sprintf(
-                'PHP version %s or higher is required. Current version: %s',
-                self::REQUIREMENTS['php']['version'],
-                PHP_VERSION
+    /**
+     * Check PHP version requirements.
+     *
+     * @since 1.0.0
+     * @return bool|WP_Error True if requirements are met, WP_Error otherwise
+     */
+    private function check_php_requirements() {
+        if (version_compare(PHP_VERSION, self::MIN_PHP_VERSION, '<')) {
+            return new \WP_Error(
+                'php_version_error',
+                sprintf(
+                    __('GL Color Palette Generator requires PHP version %s or higher. Current version is %s', 'gl-color-palette-generator'),
+                    self::MIN_PHP_VERSION,
+                    PHP_VERSION
+                )
             );
-            $results['details']['php_version'] = [
-                'required' => self::REQUIREMENTS['php']['version'],
-                'current' => PHP_VERSION,
-                'status' => false
-            ];
         }
+        return true;
+    }
 
-        // Check WordPress version
+    /**
+     * Check WordPress version requirements.
+     *
+     * @since 1.0.0
+     * @return bool|WP_Error True if requirements are met, WP_Error otherwise
+     */
+    private function check_wp_requirements() {
         global $wp_version;
-        if (version_compare($wp_version, self::REQUIREMENTS['wordpress']['version'], '<')) {
-            $results['status'] = false;
-            $results['messages'][] = sprintf(
-                'WordPress version %s or higher is required. Current version: %s',
-                self::REQUIREMENTS['wordpress']['version'],
-                $wp_version
-            );
-            $results['details']['wordpress_version'] = [
-                'required' => self::REQUIREMENTS['wordpress']['version'],
-                'current' => $wp_version,
-                'status' => false
-            ];
-        }
 
-        // Check PHP extensions
+        if (version_compare($wp_version, self::MIN_WP_VERSION, '<')) {
+            return new \WP_Error(
+                'wp_version_error',
+                sprintf(
+                    __('GL Color Palette Generator requires WordPress version %s or higher. Current version is %s', 'gl-color-palette-generator'),
+                    self::MIN_WP_VERSION,
+                    $wp_version
+                )
+            );
+        }
+        return true;
+    }
+
+    /**
+     * Check required PHP extensions.
+     *
+     * @since 1.0.0
+     * @return bool|WP_Error True if requirements are met, WP_Error otherwise
+     */
+    private function check_php_extensions() {
         $missing_extensions = [];
-        foreach (self::REQUIREMENTS['php']['extensions'] as $extension) {
+
+        foreach (self::REQUIRED_PHP_EXTENSIONS as $extension) {
             if (!extension_loaded($extension)) {
                 $missing_extensions[] = $extension;
             }
         }
+
         if (!empty($missing_extensions)) {
-            $results['status'] = false;
-            $results['messages'][] = sprintf(
-                'Missing required PHP extensions: %s',
-                implode(', ', $missing_extensions)
+            return new \WP_Error(
+                'missing_php_extensions',
+                sprintf(
+                    __('GL Color Palette Generator requires the following PHP extensions: %s', 'gl-color-palette-generator'),
+                    implode(', ', $missing_extensions)
+                )
             );
-            $results['details']['php_extensions'] = [
-                'missing' => $missing_extensions,
-                'status' => false
-            ];
         }
 
-        return $results;
+        return true;
     }
 
-    public function load_class(string $class_name): object {
-        if (isset($this->loaded_classes[$class_name])) {
-            return $this->loaded_classes[$class_name];
-        }
+    /**
+     * Display admin notices for requirement errors.
+     *
+     * @since 1.0.0
+     * @param WP_Error $error The error to display
+     * @return void
+     */
+    public function display_requirement_errors(\WP_Error $error): void {
+        $message = $error->get_error_message();
 
-        // Implement your class loading logic here
-
-        return new stdClass();
+        echo '<div class="notice notice-error">';
+        echo '<p>' . esc_html($message) . '</p>';
+        echo '</div>';
     }
-
-    private function initialize_dependencies(): void {
-        $this->class_dependencies = [
-            // Core System
-            'Core' => [],
-            'Setup' => ['Core'],
-            'ErrorHandler' => [],
-            'ErrorCodes' => ['ErrorHandler'],
-            'ErrorReporter' => ['ErrorHandler', 'ErrorCodes'],
-            'FileHandler' => ['ErrorHandler'],
-            'PerformanceOptimizer' => ['ErrorHandler'],
-            'DependencyManager' => [],
-
-            // Color Processing Core
-            'ColorConversion' => ['ErrorHandler'],
-            'ColorValidation' => ['ColorConversion'],
-            'ColorWheel' => ['ColorConversion', 'ColorValidation'],
-            'ColorProcessor' => ['ColorConversion', 'ColorValidation'],
-            'ColorCache' => ['ErrorHandler'],
-            'ColorNamer' => ['ColorProcessor'],
-            'ColorNameValidator' => ['ColorNamer'],
-            'ColorLocalizer' => ['ColorNamer'],
-            'ColorHarmonization' => ['ColorWheel'],
-
-            // Palette Generation
-            'PaletteGenerator' => ['ColorWheel', 'ColorProcessor'],
-            'PaletteValidator' => ['ColorValidation'],
-            'PaletteManager' => ['PaletteGenerator', 'PaletteValidator'],
-            'VariationGenerator' => ['ColorProcessor'],
-            'ColorCombinationEngine' => ['ColorProcessor', 'ColorWheel'],
-
-            // AI and ML Integration
-            'AIColorService' => ['ColorProcessor', 'ErrorHandler'],
-            'MLColorEngine' => ['ColorProcessor', 'ErrorHandler'],
-            'PromptEngineer' => ['ErrorHandler'],
-            'ProviderSelector' => ['ErrorHandler'],
-
-            // AI Providers
-            'OpenAIProvider' => ['ProviderSelector', 'ErrorHandler'],
-            'AnthropicProvider' => ['ProviderSelector', 'ErrorHandler'],
-            'AzureOpenAIProvider' => ['ProviderSelector', 'ErrorHandler'],
-            'CohereProvider' => ['ProviderSelector', 'ErrorHandler'],
-            'HuggingfaceProvider' => ['ProviderSelector', 'ErrorHandler'],
-            'PalmProvider' => ['ProviderSelector', 'ErrorHandler'],
-
-            // Analytics and Reporting
-            'ColorAnalytics' => ['ColorProcessor', 'ErrorHandler'],
-            'ColorAnalyticsDashboard' => ['ColorAnalytics'],
-            'ColorAPIIntegration' => ['ErrorHandler'],
-
-            // Accessibility and Compliance
-            'AccessibilityChecker' => ['ColorConversion', 'ContrastChecker'],
-            'ContrastChecker' => ['ColorConversion'],
-            'WCAGCompliance' => ['AccessibilityChecker'],
-            'ComplianceFrameworks' => ['WCAGCompliance'],
-
-            // Export and Documentation
-            'ColorExporter' => ['FileHandler'],
-            'ColorExportSystem' => ['ColorExporter'],
-            'DataExporter' => ['FileHandler'],
-            'DocumentationGenerator' => ['FileHandler'],
-            'ThemeJSONGenerator' => ['ColorProcessor'],
-
-            // Preview and Visualization
-            'PreviewGenerator' => ['ColorProcessor'],
-            'AdvancedPreviews' => ['PreviewGenerator'],
-            'VisualizationEngine' => ['ColorProcessor'],
-            'VisualizationHelper' => ['VisualizationEngine'],
-
-            // Admin and Settings
-            'AdminInterface' => ['Core'],
-            'AdminNotices' => ['Core'],
-            'SettingsPage' => ['AdminInterface'],
-            'SettingsManager' => ['Core'],
-            'SettingsValidator' => ['ErrorHandler'],
-
-            // Color Psychology and Analysis
-            'EmotionalMapping' => ['ColorProcessor'],
-            'PsychologicalEffects' => ['EmotionalMapping'],
-            'BehavioralInfluences' => ['PsychologicalEffects'],
-            'NeurologicalResponses' => ['PsychologicalEffects'],
-            'PersonalityMatching' => ['PsychologicalEffects'],
-
-            // Business and Marketing
-            'BusinessApplications' => ['ColorProcessor'],
-            'MarketingStrategies' => ['BusinessApplications'],
-            'ImplementationGuides' => ['BusinessApplications'],
-            'ApplicationGuidelines' => ['ImplementationGuides'],
-
-            // Cultural and Seasonal
-            'CulturalMappings' => ['ColorProcessor'],
-            'SeasonalMappings' => ['ColorProcessor'],
-
-            // Advanced Features
-            'ColorSyncStrategies' => ['ColorProcessor'],
-            'LongTermAdaptations' => ['ColorProcessor'],
-            'AutonomicResponses' => ['ColorProcessor'],
-
-            // Plugin Management
-            'PluginDeletion' => ['ErrorHandler', 'FileHandler']
-        ];
-
-        $this->calculate_load_order();
-    }
-
-    private function calculate_load_order() {
-        // Implement your load order calculation logic here
-
-    }
-}
+} 

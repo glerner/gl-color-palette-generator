@@ -1,17 +1,18 @@
 <?php
 /**
- * Plugin Name: GL Color Palette Generator
- * Plugin URI: https://website-tech.glerner.com/gl-color-palette-generator
- * Description: Advanced color palette generation with AI integration
- * Version: 1.0.0
+ * Plugin Name:       GL Color Palette Generator
+ * Plugin URI:        https://github.com/GeorgeLerner/gl-color-palette-generator
+ * Description:       Generate color palettes for your website
+ * Version:           1.0.0
  * Requires at least: 6.2
- * Requires PHP: 8.0
- * Author: George Lerner
- * Author URI: https://website-tech.glerner.com/
- * License: GPL v2 or later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: gl-color-palette-generator
- * Domain Path: /languages
+ * Requires PHP:      8.0
+ * Author:            George Lerner
+ * Author URI:        https://website-tech.glerner.com/
+ * Text Domain:       gl-color-palette-generator
+ * License:           GPL v2 or later
+ * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ *
+ * @package           GLColorPalette
  */
 
 if (!defined('WPINC')) {
