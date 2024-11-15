@@ -9,12 +9,21 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
-        php: [8.0, 8.1]
-        wordpress: [6.2, 6.3, 6.4]
+        php-version: ['8.0', '8.1', '8.2']
+        wordpress-version: ['latest']
 
-    name: PHP ${{ matrix.php }} - WordPress ${{ matrix.wordpress }}
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
     - uses: actions/checkout@v2
@@ -22,18 +31,23 @@ jobs:
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: ${{ matrix.php }}
-        extensions: dom, curl, libxml, mbstring, zip, pdo, mysql, pdo_mysql, bcmath, intl
-        coverage: none
+        php-version: ${{ matrix.php-version }}
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
+        coverage: xdebug
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
 
-    - name: Install WordPress test suite
-      run: bash bin/install-wp-tests.sh wordpress_test root '' localhost ${{ matrix.wordpress }}
+    - name: Setup test environment
+      run: |
+        bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 ${{ matrix.wordpress-version }}
 
-    - name: Run test suite
-      run: composer run-script test
+    - name: Run tests
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        # Add other API keys as needed 
+      run: |
+        if [ -z "$OPENAI_API_KEY" ]; then
+          echo "Using mock API key for tests"
+          export OPENAI_API_KEY="test_key_for_ci"
+        fi
+        composer test

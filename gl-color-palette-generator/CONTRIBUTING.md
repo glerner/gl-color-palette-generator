@@ -1,116 +1,153 @@
-Contributing to GL Color Palette Generator
+# Contributing to Color Palette Generator
 
-Prerequisites
+Thank you for your interest in contributing to the Color Palette Generator! This document provides guidelines and steps for contributing.
 
-PHP 8.0 or higher
-WordPress 6.2 or higher
-Composer
-Git
-MySQL/MariaDB
-PHPUnit
+## Development Setup
 
-Setup
+1. Clone the repository:
 
-1. Clone the Repository
-git clone https://github.com/GeorgeLerner/gl-color-palette-generator.git
-cd gl-color-palette-generator
+```bash
+git clone https://github.com/yourusername/gl-color-palette-generator.git
+```
 
-2. Install Dependencies
+
+2. Set up a local WordPress development environment (we recommend [Local](https://localwp.com/) or [VVV](https://varyingvagrantvagrants.org/))
+
+3. Symlink or copy the plugin to your WordPress plugins directory:
+
+```bash
+ln -s /path/to/gl-color-palette-generator /path/to/wordpress/wp-content/plugins/
+```
+
+
+4. Install dependencies:
+
+```bash
 composer install
+```
 
-3. Configure Environment
-cp .env.example .env
-nano .env
 
-4. Setup WordPress Test Environment
-bash bin/install-wp-tests.sh wordpress_test root 'your_password' localhost latest
+5. Activate the plugin in WordPress admin
 
-Testing
+6. For development testing, you can set test configuration in wp-config.php:
 
-1. Run All Tests
-composer test
+```php
+define('GL_COLOR_PALETTE_TEST_API_KEY', 'your_test_key_here');
+define('GL_COLOR_PALETTE_AI_PROVIDER', 'openai'); // Available: 'openai', 'anthropic'
 
-2. Run Unit Tests Only
-composer test:unit
+// Optional: Provider-specific settings
+define('GL_COLOR_PALETTE_OPENAI_MODEL', 'gpt-4'); // Default: gpt-4
+define('GL_COLOR_PALETTE_ANTHROPIC_MODEL', 'claude-3-sonnet'); // Default: claude-3-sonnet
+```
 
-3. Run Integration Tests Only
-composer test:integration
+## Development Environment Details
 
-4. Check Code Standards
-composer phpcs
-composer phpcbf
+### WordPress Development Settings
 
-Development
+1. Enable debug mode in wp-config.php:
 
-1. Create Feature Branch
-git checkout -b feature/your-feature-name
-
-2. Enable Debug Mode in wp-config.php
+```php
 define('WP_DEBUG', true);
 define('WP_DEBUG_LOG', true);
 define('WP_DEBUG_DISPLAY', true);
+```
 
-3. Test Changes
-Run unit tests
-Test multiple WordPress versions
-Test multiple PHP versions
-Verify API integrations
 
-4. Submit Changes
-git add .
-git commit -m "Description of changes"
-git push origin feature/your-feature-name
+2. Install recommended development plugins:
+- Query Monitor
+- Debug Bar
+- WordPress Debug Tools
 
-API Setup
+### Unit Testing
 
-1. OpenAI
-Get key: https://platform.openai.com/
-Add to .env: OPENAI_API_KEY=your_key_here
+1. Set up the test environment:
 
-2. Anthropic
-Get key: https://console.anthropic.com/
-Add to .env: ANTHROPIC_API_KEY=your_key_here
+```bash
+./bin/install-wp-tests.sh wordpress_test root 'your_password' localhost latest
+```
 
-3. Azure OpenAI
-Get credentials from Azure Portal
-Add to .env:
-AZURE_OPENAI_API_KEY=your_key_here
-AZURE_OPENAI_RESOURCE=your_resource_here
-AZURE_OPENAI_DEPLOYMENT=your_deployment_here
+2. Run the tests:
 
-4. Cohere
-Get key: https://dashboard.cohere.ai/
-Add to .env:
-COHERE_API_KEY=your_key_here
+```bash
+composer test
+```
 
-5. HuggingFace
-Get key: https://huggingface.co/settings/tokens
-Add to .env:
-HUGGINGFACE_API_KEY=your_key_here
-HUGGINGFACE_MODEL_ID=your_model_here
 
-6. PaLM
-Get key: https://makersuite.google.com/app/apikey
-Add to .env:
-PALM_API_KEY=your_key_here
+2. Creating new tests:
+- Place test files in the `tests` directory
+- Name test files as `test-*.php` or `class-test-*.php`
+- Extend `WP_UnitTestCase`
 
-Troubleshooting
+### Development Workflow
 
-1. Database Issues
-mysql -u root -p -e "DROP DATABASE IF EXISTS wordpress_test"
-bash bin/install-wp-tests.sh wordpress_test root 'your_password' localhost latest
+1. Create a new branch for each feature/fix
+2. Write/update tests for your changes
+3. Ensure all tests pass
+4. Update documentation as needed
+5. Submit a pull request
 
-2. Composer Issues
-composer clear-cache
-composer update
+## Coding Standards
 
-3. Test Suite Issues
-rm -rf /tmp/wordpress-tests-lib
-rm -rf /tmp/wordpress
-bash bin/install-wp-tests.sh wordpress_test root 'your_password' localhost latest
+This project follows the WordPress Coding Standards. To check your code:
 
-Resources
+```bash
+composer phpcs
+```
 
-WordPress Plugin Handbook: https://developer.wordpress.org/plugins/
-WordPress Coding Standards: https://developer.wordpress.org/coding-standards/
-PHPUnit Documentation: https://phpunit.de/documentation.html
+
+To automatically fix some coding standard issues:
+
+```bash
+composer phpcbf
+```
+
+
+## Pull Request Process
+
+1. Create a new branch for your feature/fix:
+
+```bash
+git checkout -b feature/your-feature-name
+```
+
+
+2. Make your changes and commit them using conventional commits:
+
+```bash
+git commit -m "feat: Add new color analysis feature"
+git commit -m "fix: Resolve contrast calculation issue"
+git commit -m "docs: Update API documentation"
+```
+
+
+3. Push to your fork and create a Pull Request with:
+   - Clear description of the changes
+   - Any relevant issue numbers
+   - Screenshots if UI changes are involved
+
+4. Wait for the pull request to be reviewed and merged
+
+Thank you for your contributions!
+
+## Code of Conduct
+
+### Our Pledge
+
+We pledge to make participation in our project a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
+
+### Our Standards
+
+Examples of behavior that contributes to creating a positive environment include:
+- Using welcoming and inclusive language
+- Being respectful of differing viewpoints and experiences
+- Gracefully accepting constructive criticism
+- Focusing on what is best for the community
+- Showing empathy towards other community members
+
+### Enforcement
+
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team. All complaints will be reviewed and investigated promptly and fairly.
+
+## License
+
+By contributing to this project, you agree that your contributions will be licensed under the GPL v2 or later license.
