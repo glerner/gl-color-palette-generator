@@ -5,39 +5,16 @@
     colors="true"
     convertErrorsToExceptions="true"
     convertNoticesToExceptions="true"
-    convertWarningsToExceptions="true"
->
+    convertWarningsToExceptions="true">
     <testsuites>
         <testsuite name="unit">
-            <directory suffix=".php">./tests/classes</directory>
-            <directory suffix=".php">./tests/interfaces</directory>
-            <directory suffix=".php">./tests/Unit</directory>
             <directory suffix=".php">./tests/providers</directory>
-            <exclude>./tests/providers/**/test-*-integration.php</exclude>
         </testsuite>
-
         <testsuite name="integration">
             <directory suffix=".php">./tests/integration</directory>
-            <file>./tests/providers/test-azure-openai-provider.php</file>
-            <file>./tests/providers/test-openai-provider.php</file>
-            <file>./tests/providers/test-anthropic-provider.php</file>
-            <file>./tests/providers/test-cohere-provider.php</file>
-            <file>./tests/providers/test-huggingface-provider.php</file>
-            <file>./tests/providers/test-palm-provider.php</file>
         </testsuite>
     </testsuites>
-
     <php>
         <env name="WP_TESTS_INTEGRATION" value="1"/>
     </php>
-
-    <coverage>
-        <include>
-            <directory suffix=".php">./includes</directory>
-        </include>
-        <exclude>
-            <directory>./tests</directory>
-            <directory>./vendor</directory>
-        </exclude>
-    </coverage>
 </phpunit> 

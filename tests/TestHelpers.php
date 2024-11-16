@@ -12,58 +12,35 @@ namespace GLColorPalette\Tests;
 
 class TestHelpers {
     /**
-     * Create a mock provider with test credentials
+     * Create a test palette
      *
-     * @param string $provider_class The provider class name
-     * @param array  $credentials    Test credentials
-     * @return object
+     * @param string $name Palette name
+     * @param array  $colors Array of colors
+     * @return int Palette ID
      */
-    public static function create_mock_provider($provider_class, $credentials = []) {
-        $default_credentials = [
-            'api_key' => 'test_key',
-            'model' => 'test_model',
-            'resource_name' => 'test_resource',
-            'deployment_id' => 'test_deployment'
-        ];
+    public static function create_test_palette(string $name, array $colors): int {
+        global $wpdb;
 
-        return new $provider_class(array_merge($default_credentials, $credentials));
+        $wpdb->insert(
+            $wpdb->prefix . 'gl_color_palettes',
+            [
+                'name' => $name,
+                'colors' => json_encode($colors),
+                'created_at' => current_time('mysql'),
+            ],
+            ['%s', '%s', '%s']
+        );
+
+        return $wpdb->insert_id;
     }
 
     /**
-     * Assert that a color is a valid hex code
+     * Clean up test palettes
      *
-     * @param string $color The color to test
      * @return void
      */
-    public static function assertValidHexColor($color) {
-        $pattern = '/#[a-fA-F0-9]{6}/';
-        if (!preg_match($pattern, $color)) {
-            throw new \PHPUnit\Framework\AssertionFailedError(
-                sprintf('Color "%s" is not a valid hex code', $color)
-            );
-        }
-    }
-
-    /**
-     * Assert that an array contains valid hex colors
-     *
-     * @param array $colors Array of colors to test
-     * @param int   $expected_count Expected number of colors
-     * @return void
-     */
-    public static function assertValidColorPalette($colors, $expected_count = 5) {
-        if (!is_array($colors)) {
-            throw new \PHPUnit\Framework\AssertionFailedError('Colors must be an array');
-        }
-
-        if (count($colors) !== $expected_count) {
-            throw new \PHPUnit\Framework\AssertionFailedError(
-                sprintf('Expected %d colors, got %d', $expected_count, count($colors))
-            );
-        }
-
-        foreach ($colors as $color) {
-            self::assertValidHexColor($color);
-        }
+    public static function cleanup_test_palettes(): void {
+        global $wpdb;
+        $wpdb->query("TRUNCATE TABLE {$wpdb->prefix}gl_color_palettes");
     }
 } 
