@@ -2,10 +2,9 @@
 /**
  * Settings page template
  *
- * @package    GLColorPalette
- * @author     George Lerner
- * @link       https://website-tech.glerner.com/
- * @since      1.0.0
+ * @package GL_Color_Palette_Generator
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
  */
 
 if (!defined('ABSPATH')) {
@@ -13,14 +12,14 @@ if (!defined('ABSPATH')) {
 }
 ?>
 
-<div class="wrap">
+<div class="wrap gl-cpg-settings">
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
     <form method="post" action="options.php">
         <?php
-        settings_fields('gl_color_palette_settings');
-        do_settings_sections('gl_color_palette_settings');
+        settings_fields('gl_cpg_settings');
+        do_settings_sections('gl_cpg_settings');
         submit_button();
         ?>
     </form>
-</div> 
+</div>

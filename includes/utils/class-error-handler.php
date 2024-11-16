@@ -1,365 +1,144 @@
 <?php
-namespace GLColorPalette;
+/**
+ * Error Handler Class
+ *
+ * @package GL_Color_Palette_Generator
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ */
 
-class ErrorHandler {
-    private $error_reporter;
-    private $last_error;
-    private $error_stack = [];
-    private $recovery_attempts = 0;
-    private $max_recovery_attempts = 3;
+namespace GL_Color_Palette_Generator\Utils;
 
-    public function __construct() {
-        $this->error_reporter = new ErrorReporter();
-        $this->register_error_handlers();
-    }
-
+/**
+ * Class Error_Handler
+ */
+class Error_Handler {
     /**
-     * Register custom error handlers
+     * Initialize error handling
      */
-    private function register_error_handlers() {
-        set_error_handler([$this, 'handle_php_error']);
-        set_exception_handler([$this, 'handle_uncaught_exception']);
-        register_shutdown_function([$this, 'handle_fatal_error']);
-    }
-
-    /**
-     * Main error handling method
-     */
-    public function handle_error($code, $message, $context = [], $attempt_recovery = true) {
-        $this->last_error = [
-            'code' => $code,
-            'message' => $message,
-            'context' => $context,
-            'timestamp' => current_time('mysql'),
-            'severity' => ErrorCodes::get_severity($code),
-            'category' => ErrorCodes::get_category($code)
-        ];
-
-        $this->error_stack[] = $this->last_error;
-
-        // Log the error
-        $this->log_error($this->last_error);
-
-        // Attempt recovery if appropriate
-        if ($attempt_recovery && $this->can_attempt_recovery($code)) {
-            return $this->attempt_recovery($code, $context);
-        }
-
-        // Handle based on severity
-        switch ($this->last_error['severity']) {
-            case 'critical':
-                $this->handle_critical_error();
-                break;
-            case 'error':
-                $this->handle_standard_error();
-                break;
-            case 'warning':
-                $this->handle_warning();
-                break;
-            case 'notice':
-                $this->handle_notice();
-                break;
-        }
-
-        return $this->format_error_response();
+    public function init() {
+        set_error_handler([$this, 'handle_error']);
+        set_exception_handler([$this, 'handle_exception']);
+        register_shutdown_function([$this, 'handle_shutdown']);
     }
 
     /**
      * Handle PHP errors
+     *
+     * @param int    $errno   Error number.
+     * @param string $errstr  Error message.
+     * @param string $errfile File where error occurred.
+     * @param int    $errline Line number where error occurred.
+     * @return bool
      */
-    public function handle_php_error($errno, $errstr, $errfile, $errline) {
-        $code = $this->map_php_error_to_code($errno);
-        $context = [
-            'file' => $errfile,
-            'line' => $errline,
-            'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
-        ];
+    public function handle_error($errno, $errstr, $errfile, $errline) {
+        if (!(error_reporting() & $errno)) {
+            return false;
+        }
 
-        return $this->handle_error($code, $errstr, $context);
+        $error_message = sprintf(
+            'Error [%s]: %s in %s on line %d',
+            $this->get_error_type($errno),
+            $errstr,
+            $errfile,
+            $errline
+        );
+
+        $this->log_error($error_message);
+
+        if ($errno == E_USER_ERROR) {
+            exit(1);
+        }
+
+        return true;
     }
 
     /**
      * Handle uncaught exceptions
+     *
+     * @param \Throwable $exception The thrown exception.
      */
-    public function handle_uncaught_exception($exception) {
-        $code = $exception instanceof ColorPaletteException
-            ? $exception->getCode()
-            : ErrorCodes::VALIDATION_TYPE_MISMATCH;
+    public function handle_exception($exception) {
+        $error_message = sprintf(
+            'Exception: %s in %s on line %d',
+            $exception->getMessage(),
+            $exception->getFile(),
+            $exception->getLine()
+        );
 
-        $context = [
-            'file' => $exception->getFile(),
-            'line' => $exception->getLine(),
-            'trace' => $exception->getTrace()
-        ];
-
-        return $this->handle_error($code, $exception->getMessage(), $context);
+        $this->log_error($error_message);
     }
 
     /**
      * Handle fatal errors
      */
-    public function handle_fatal_error() {
+    public function handle_shutdown() {
         $error = error_get_last();
 
-        if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_COMPILE_ERROR])) {
-            $code = $this->map_php_error_to_code($error['type']);
-            $context = [
-                'file' => $error['file'],
-                'line' => $error['line']
-            ];
-
-            $this->handle_error($code, $error['message'], $context, false);
-        }
-    }
-
-    /**
-     * Attempt to recover from error
-     */
-    private function attempt_recovery($code, $context) {
-        if ($this->recovery_attempts >= $this->max_recovery_attempts) {
-            return $this->handle_error(
-                ErrorCodes::PERF_CONCURRENT_LIMIT,
-                'Maximum recovery attempts exceeded',
-                $context,
-                false
+        if ($error !== null && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+            $error_message = sprintf(
+                'Fatal Error [%s]: %s in %s on line %d',
+                $this->get_error_type($error['type']),
+                $error['message'],
+                $error['file'],
+                $error['line']
             );
+
+            $this->log_error($error_message);
         }
+    }
 
-        $this->recovery_attempts++;
-
-        switch ($code) {
-            case ErrorCodes::COLOR_INVALID_HEX:
-                return $this->recover_invalid_hex($context);
-
-            case ErrorCodes::API_RATE_LIMIT_EXCEEDED:
-                return $this->handle_rate_limit($context);
-
-            case ErrorCodes::ACCESS_CONTRAST_RATIO_LOW:
-                return $this->adjust_contrast($context);
-
-            case ErrorCodes::FILE_PERMISSION_DENIED:
-                return $this->fix_permissions($context);
-
+    /**
+     * Get error type string
+     *
+     * @param int $type Error type number.
+     * @return string
+     */
+    private function get_error_type($type) {
+        switch ($type) {
+            case E_ERROR:
+                return 'E_ERROR';
+            case E_WARNING:
+                return 'E_WARNING';
+            case E_PARSE:
+                return 'E_PARSE';
+            case E_NOTICE:
+                return 'E_NOTICE';
+            case E_CORE_ERROR:
+                return 'E_CORE_ERROR';
+            case E_CORE_WARNING:
+                return 'E_CORE_WARNING';
+            case E_COMPILE_ERROR:
+                return 'E_COMPILE_ERROR';
+            case E_COMPILE_WARNING:
+                return 'E_COMPILE_WARNING';
+            case E_USER_ERROR:
+                return 'E_USER_ERROR';
+            case E_USER_WARNING:
+                return 'E_USER_WARNING';
+            case E_USER_NOTICE:
+                return 'E_USER_NOTICE';
+            case E_STRICT:
+                return 'E_STRICT';
+            case E_RECOVERABLE_ERROR:
+                return 'E_RECOVERABLE_ERROR';
+            case E_DEPRECATED:
+                return 'E_DEPRECATED';
+            case E_USER_DEPRECATED:
+                return 'E_USER_DEPRECATED';
             default:
-                return false;
+                return 'UNKNOWN';
         }
     }
 
     /**
-     * Handle critical errors
+     * Log error message
+     *
+     * @param string $message Error message to log.
      */
-    private function handle_critical_error() {
-        // Rollback any pending changes
-        $this->rollback_changes();
-
-        // Clear cache if necessary
-        $this->clear_cache();
-
-        // Notify admin if configured
-        $this->notify_admin();
-
-        // Log detailed debug information
-        if (WP_DEBUG) {
-            $this->log_debug_info();
+    private function log_error($message) {
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf('[GL Color Palette Generator] %s', $message));
         }
-    }
-
-    /**
-     * Handle standard errors
-     */
-    private function handle_standard_error() {
-        // Add error to WordPress admin notices
-        add_action('admin_notices', [$this, 'display_admin_notice']);
-
-        // Log error for debugging
-        if (WP_DEBUG) {
-            $this->log_debug_info();
-        }
-    }
-
-    /**
-     * Format error response
-     */
-    private function format_error_response() {
-        $error = $this->last_error;
-
-        return [
-            'success' => false,
-            'error' => [
-                'code' => $error['code'],
-                'message' => $error['message'],
-                'severity' => $error['severity'],
-                'category' => $error['category'],
-                'is_fixable' => ErrorCodes::is_user_fixable($error['code']),
-                'suggested_fix' => ErrorCodes::get_suggested_fix($error['code'])
-            ],
-            'debug' => WP_DEBUG ? [
-                'context' => $error['context'],
-                'stack' => $this->error_stack,
-                'recovery_attempts' => $this->recovery_attempts
-            ] : null
-        ];
-    }
-
-    /**
-     * Recovery methods for specific errors
-     */
-    private function recover_invalid_hex($context) {
-        if (empty($context['color'])) {
-            return false;
-        }
-
-        $color = $context['color'];
-
-        // Try to fix common hex color issues
-        if (strlen($color) === 3) {
-            // Convert 3-digit hex to 6-digit
-            $color = $color[0] . $color[0] . $color[1] . $color[1] . $color[2] . $color[2];
-        }
-
-        // Add missing hash
-        if (strlen($color) === 6 && strpos($color, '#') !== 0) {
-            $color = '#' . $color;
-        }
-
-        // Validate fixed color
-        if (preg_match('/^#[a-f0-9]{6}$/i', $color)) {
-            return [
-                'success' => true,
-                'recovered' => true,
-                'value' => $color,
-                'original' => $context['color']
-            ];
-        }
-
-        return false;
-    }
-
-    /**
-     * Handle rate limit errors
-     */
-    private function handle_rate_limit($context) {
-        $wait_time = isset($context['retry_after']) ? $context['retry_after'] : 60;
-
-        // Add to queue for later processing
-        $this->add_to_processing_queue($context, $wait_time);
-
-        return [
-            'success' => true,
-            'queued' => true,
-            'retry_after' => $wait_time
-        ];
-    }
-
-    /**
-     * Adjust contrast for accessibility
-     */
-    private function adjust_contrast($context) {
-        if (empty($context['foreground']) || empty($context['background'])) {
-            return false;
-        }
-
-        $color_adjuster = new ColorAdjuster();
-        $adjusted_colors = $color_adjuster->adjust_for_contrast(
-            $context['foreground'],
-            $context['background'],
-            4.5 // WCAG AA standard
-        );
-
-        if ($adjusted_colors) {
-            return [
-                'success' => true,
-                'recovered' => true,
-                'adjusted_colors' => $adjusted_colors,
-                'original_colors' => [
-                    'foreground' => $context['foreground'],
-                    'background' => $context['background']
-                ]
-            ];
-        }
-
-        return false;
-    }
-
-    /**
-     * Fix file permissions
-     */
-    private function fix_permissions($context) {
-        if (empty($context['file'])) {
-            return false;
-        }
-
-        $file = $context['file'];
-        $success = false;
-
-        if (file_exists($file)) {
-            if (is_dir($file)) {
-                $success = chmod($file, 0755);
-            } else {
-                $success = chmod($file, 0644);
-            }
-        }
-
-        return [
-            'success' => $success,
-            'recovered' => $success,
-            'file' => $file,
-            'permissions' => $success ? decoct(fileperms($file) & 0777) : null
-        ];
-    }
-
-    /**
-     * Display admin notice
-     */
-    public function display_admin_notice() {
-        $error = $this->last_error;
-        $class = 'notice notice-' . $error['severity'];
-        $message = sprintf(
-            __('%s: %s', 'color-palette-generator'),
-            ucfirst($error['severity']),
-            $error['message']
-        );
-
-        printf(
-            '<div class="%1$s"><p>%2$s</p></div>',
-            esc_attr($class),
-            esc_html($message)
-        );
-    }
-
-    /**
-     * Utility methods
-     */
-    private function can_attempt_recovery($code) {
-        return ErrorCodes::is_user_fixable($code) &&
-               $this->recovery_attempts < $this->max_recovery_attempts;
-    }
-
-    private function map_php_error_to_code($php_error) {
-        $map = [
-            E_ERROR => ErrorCodes::VALIDATION_TYPE_MISMATCH,
-            E_WARNING => ErrorCodes::PERF_MEMORY_WARNING,
-            E_PARSE => ErrorCodes::VALIDATION_SYNTAX_ERROR,
-            E_NOTICE => ErrorCodes::VALIDATION_NOTICE,
-            E_CORE_ERROR => ErrorCodes::SYSTEM_CORE_ERROR,
-            E_CORE_WARNING => ErrorCodes::SYSTEM_CORE_WARNING,
-            E_COMPILE_ERROR => ErrorCodes::SYSTEM_COMPILE_ERROR,
-            E_COMPILE_WARNING => ErrorCodes::SYSTEM_COMPILE_WARNING,
-            E_USER_ERROR => ErrorCodes::VALIDATION_USER_ERROR,
-            E_USER_WARNING => ErrorCodes::VALIDATION_USER_WARNING,
-            E_USER_NOTICE => ErrorCodes::VALIDATION_USER_NOTICE,
-            E_STRICT => ErrorCodes::VALIDATION_STRICT_NOTICE,
-            E_RECOVERABLE_ERROR => ErrorCodes::SYSTEM_RECOVERABLE_ERROR,
-            E_DEPRECATED => ErrorCodes::SYSTEM_DEPRECATED,
-            E_USER_DEPRECATED => ErrorCodes::VALIDATION_USER_DEPRECATED
-        ];
-
-        return isset($map[$php_error]) ? $map[$php_error] : ErrorCodes::SYSTEM_UNKNOWN_ERROR;
-    }
-
-    // Add error code registration
-    public function register_error_codes() {
-        $this->error_codes = new ErrorCodes();
-        $this->error_reporter = new ErrorReporter();
     }
 }

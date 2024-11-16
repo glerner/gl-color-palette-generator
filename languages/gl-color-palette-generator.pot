@@ -1,0 +1,17 @@
+# Copyright (C) 2024 George Lerner
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: GL Color Palette Generator 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/GeorgeLerner/gl-color-palette-generator/issues\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+...
+
+#. Plugin URI of the plugin
+msgid "https://github.com/GeorgeLerner/gl-color-palette-generator"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://website-tech.glerner.com/"
+msgstr "" 
