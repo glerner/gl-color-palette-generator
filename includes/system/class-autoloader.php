@@ -1,111 +1,64 @@
 <?php
 /**
- * Autoloader Class
+ * Autoloader for GL Color Palette Generator
  *
- * @package    GLColorPalette
- * @author     George Lerner
- * @link       https://website-tech.glerner.com/
- * @since      1.0.0
+ * @package GL_Color_Palette_Generator
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
  */
 
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator\System;
 
 /**
  * Class Autoloader
- *
- * @package    GLColorPalette
- * @author     George Lerner
- * @link       https://website-tech.glerner.com/
- * @since      1.0.0
  */
 class Autoloader {
     /**
-     * @var string Base directory for includes
+     * Register autoloader
      */
-    private string $base_dir;
-
-    /**
-     * @var array Registered directories for autoloading
-     */
-    private array $directories = [];
-
-    /**
-     * Initialize the autoloader
-     */
-    private function __construct() {
-        $this->base_dir = dirname(__FILE__);
-        $this->register_directories();
-    }
-
-    /**
-     * Register the autoloader
-     *
-     * @return void
-     */
-    public static function register(): void {
-        $loader = new self();
-        spl_autoload_register([$loader, 'autoload']);
-    }
-
-    /**
-     * Register directories to autoload
-     *
-     * @return void
-     */
-    private function register_directories(): void {
-        $this->directories = [
-            'GLColorPalette\\' => [
-                $this->base_dir,
-                $this->base_dir . '/abstracts',
-                $this->base_dir . '/interfaces',
-                $this->base_dir . '/traits',
-            ],
-            'GLColorPalette\\Providers\\' => [
-                $this->base_dir . '/Providers'
-            ]
-        ];
+    public static function register() {
+        spl_autoload_register([new self(), 'autoload']);
     }
 
     /**
      * Autoload classes
      *
-     * @param string $class The fully-qualified class name.
-     * @return void
+     * @param string $class_name Full class name.
      */
-    private function autoload(string $class): void {
-        foreach ($this->directories as $namespace => $directories) {
-            if (strpos($class, $namespace) === 0) {
-                $this->load_class($class, $namespace, $directories);
-                break;
-            }
+    public function autoload($class_name) {
+        // Only handle our namespace
+        if (strpos($class_name, 'GL_Color_Palette_Generator\\') !== 0) {
+            return;
+        }
+
+        $file_path = $this->get_file_path($class_name);
+        if (file_exists($file_path)) {
+            require_once $file_path;
         }
     }
 
     /**
-     * Load a class file
+     * Get file path from class name
      *
-     * @param string $class The fully-qualified class name.
-     * @param string $namespace The namespace prefix.
-     * @param array  $directories Directories to search in.
-     * @return void
+     * @param string $class_name Full class name.
+     * @return string File path
      */
-    private function load_class(string $class, string $namespace, array $directories): void {
-        // Remove namespace from class name
-        $class_name = str_replace($namespace, '', $class);
+    private function get_file_path($class_name) {
+        $class_name = str_replace('GL_Color_Palette_Generator\\', '', $class_name);
+        $class_path = strtolower($class_name);
+        $class_path = str_replace('_', '-', $class_path);
+        $class_path = str_replace('\\', '/', $class_path);
 
-        // Convert namespace separator to directory separator
-        $class_path = str_replace('\\', DIRECTORY_SEPARATOR, $class_name);
-
-        // Convert class name format to file name format
-        $file_name = 'class-' . strtolower(str_replace('_', '-', $class_path)) . '.php';
-
-        // Search in registered directories
-        foreach ($directories as $directory) {
-            $file = $directory . DIRECTORY_SEPARATOR . $file_name;
-            if (file_exists($file)) {
-                require_once $file;
-                return;
-            }
+        // Add 'class-' prefix if not an interface or trait
+        if (!strpos($class_path, 'interface-') && !strpos($class_path, 'trait-')) {
+            $class_parts = explode('/', $class_path);
+            $class_file = end($class_parts);
+            $class_path = str_replace($class_file, 'class-' . $class_file, $class_path);
         }
+
+        return GL_CPG_PLUGIN_DIR . 'includes/' . $class_path . '.php';
     }
-} 
+}
+
+// Register the autoloader
+Autoloader::register();

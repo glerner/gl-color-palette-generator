@@ -1,45 +1,38 @@
 <?php
 /**
- * Plugin Name:       GL Color Palette Generator
-  * Plugin URI:        https://github.com/GeorgeLerner/ gl-color-palette-generator
- * Description:       AI-powered color palette generator for WordPress
- * Version:          1.0.0
+ * Plugin Name: GL Color Palette Generator
+ * Plugin URI: https://github.com/glerner/gl-color-palette-generator
+ * Description: Advanced color palette generator with AI integration
+ * Version: 1.0.0
  * Requires at least: 6.2
- * Requires PHP:      8.0
- * Author:            George Lerner
- * Author URI:        https://website-tech.glerner.com/
- * License:          GPL v2 or later
- * License URI:      https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:      gl-color-palette-generator
- * Domain Path:      /languages
+ * Requires PHP: 8.0
+ * Author: George Lerner
+ * Author URI: https://website-tech.glerner.com/
+ * License: GPL v2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: gl-color-palette-generator
+ * Domain Path: /languages
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
  */
 
-// Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
 }
 
-// Use existing autoloader if available (e.g., through Composer)
-if (file_exists(__DIR__ . '/vendor/autoload.php')) {
-    require_once __DIR__ . '/vendor/autoload.php';
-} else {
-    // Fallback autoloader
-    spl_autoload_register(function ($class) {
-        $namespace = 'GLColorPalette\\';
-        if (strpos($class, $namespace) !== 0) {
-            return;
-        }
+// Define plugin constants
+define('GL_CPG_VERSION', '1.0.0');
+define('GL_CPG_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('GL_CPG_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-        $class = str_replace($namespace, '', $class);
-        $class = str_replace('_', '-', $class);
-        $class = strtolower($class);
+// Autoloader
+require_once GL_CPG_PLUGIN_DIR . 'includes/system/class-autoloader.php';
 
-        $file = plugin_dir_path(__FILE__) . 'includes/class-' . $class . '.php';
-
-        if (file_exists($file)) {
-            require $file;
-        }
-    });
+// Initialize the plugin
+function gl_cpg_init() {
+    $plugin = new GL_Color_Palette_Generator\Core\Setup();
+    $plugin->init();
 }
+add_action('plugins_loaded', 'gl_cpg_init');
