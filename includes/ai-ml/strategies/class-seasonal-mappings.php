@@ -2,7 +2,7 @@
 namespace GLColorPalette;
 
 class SeasonalMappings {
-    // Comprehensive seasonal color mappings
+    / Comprehensive seasonal color mappings
     private const SEASONAL_MAPPINGS = [
         'east_asian' => [
             'spring' => [

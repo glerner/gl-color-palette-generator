@@ -6,7 +6,7 @@ class PaletteValidator {
     private $accessibility_checker;
     private $settings;
 
-    // Validation rules
+    / Validation rules
     private const VALIDATION_RULES = [
         'contrast' => [
             'min_ratio' => 4.5,
@@ -56,7 +56,7 @@ class PaletteValidator {
             'suggestions' => []
         ];
 
-        // Check if any major validation failed
+        / Check if any major validation failed
         foreach ($validation_results as $key => $result) {
             if (is_array($result) && isset($result['is_valid']) && !$result['is_valid']) {
                 $validation_results['is_valid'] = false;
@@ -64,7 +64,7 @@ class PaletteValidator {
             }
         }
 
-        // Generate improvement suggestions
+        / Generate improvement suggestions
         if (!$validation_results['is_valid']) {
             $validation_results['suggestions'] = $this->generate_improvement_suggestions(
                 $validation_results,
@@ -89,7 +89,7 @@ class PaletteValidator {
         $background = $context['background'] ?? '#FFFFFF';
 
         foreach ($palette as $key => $color) {
-            if (is_string($color)) {  // Skip if not a color hex
+            if (is_string($color)) {  / Skip if not a color hex
                 $contrast_ratio = $this->accessibility_checker->calculate_contrast_ratio(
                     $color,
                     $background
@@ -125,7 +125,7 @@ class PaletteValidator {
             'measurements' => []
         ];
 
-        $colors = array_filter($palette, 'is_string');  // Get only color values
+        $colors = array_filter($palette, 'is_string');  / Get only color values
 
         foreach ($colors as $key1 => $color1) {
             foreach ($colors as $key2 => $color2) {
@@ -169,14 +169,14 @@ class PaletteValidator {
         foreach ($colors as $key => $color) {
             $hsl = $this->color_analyzer->hex_to_hsl($color);
 
-            // Check hue variance
+            / Check hue variance
             $hue_diff = abs($hsl[0] - $base_hsl[0]);
             $hue_diff = min($hue_diff, 360 - $hue_diff);
 
-            // Check saturation range
+            / Check saturation range
             $sat_diff = abs($hsl[1] - $base_hsl[1]);
 
-            // Check lightness range
+            / Check lightness range
             $light_diff = abs($hsl[2] - $base_hsl[2]);
 
             $results['measurements'][$key] = [
@@ -224,7 +224,7 @@ class PaletteValidator {
 
             $results['simulations'][$type] = $simulated_colors;
 
-            // Check distinctions between simulated colors
+            / Check distinctions between simulated colors
             foreach ($simulated_colors as $key1 => $color1) {
                 foreach ($simulated_colors as $key2 => $color2) {
                     if ($key1 !== $key2) {
@@ -256,7 +256,7 @@ class PaletteValidator {
     private function generate_improvement_suggestions($validation_results, $palette, $context) {
         $suggestions = [];
 
-        // Contrast improvements
+        / Contrast improvements
         if (!$validation_results['contrast']['is_valid']) {
             $suggestions['contrast'] = $this->suggest_contrast_improvements(
                 $validation_results['contrast']['issues'],
@@ -265,7 +265,7 @@ class PaletteValidator {
             );
         }
 
-        // Distinction improvements
+        / Distinction improvements
         if (!$validation_results['distinction']['is_valid']) {
             $suggestions['distinction'] = $this->suggest_distinction_improvements(
                 $validation_results['distinction']['issues'],
@@ -273,7 +273,7 @@ class PaletteValidator {
             );
         }
 
-        // Harmony improvements
+        / Harmony improvements
         if (!$validation_results['harmony']['is_valid']) {
             $suggestions['harmony'] = $this->suggest_harmony_improvements(
                 $validation_results['harmony']['issues'],
@@ -281,7 +281,7 @@ class PaletteValidator {
             );
         }
 
-        // Colorblind safety improvements
+        / Colorblind safety improvements
         if (!$validation_results['colorblind_safe']['is_valid']) {
             $suggestions['colorblind'] = $this->suggest_colorblind_improvements(
                 $validation_results['colorblind_safe']['issues'],

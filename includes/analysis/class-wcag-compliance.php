@@ -6,7 +6,7 @@ class WCAGCompliance {
     private $color_analyzer;
     private $accessibility_validator;
 
-    // WCAG compliance configurations
+    / WCAG compliance configurations
     private const WCAG_REQUIREMENTS = [
         'contrast_ratios' => [
             'AA' => [
@@ -111,7 +111,7 @@ class WCAGCompliance {
             'recommendations' => []
         ];
 
-        // Check contrast ratios
+        / Check contrast ratios
         $contrast_validation = $this->validate_contrast_ratios($colors, $context);
         if (!$contrast_validation['is_valid']) {
             $validation['is_compliant'] = false;
@@ -121,7 +121,7 @@ class WCAGCompliance {
             );
         }
 
-        // Check color independence
+        / Check color independence
         $independence_validation = $this->validate_color_independence($colors, $context);
         if (!$independence_validation['is_valid']) {
             $validation['warnings'] = array_merge(
@@ -130,10 +130,10 @@ class WCAGCompliance {
             );
         }
 
-        // Determine compliance level
+        / Determine compliance level
         $validation['level'] = $this->determine_compliance_level($validation);
 
-        // Generate recommendations
+        / Generate recommendations
         $validation['recommendations'] = $this->generate_compliance_recommendations($validation);
 
         return $validation;

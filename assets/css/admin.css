@@ -105,3 +105,54 @@
     border-radius: 5px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
+
+/* Export/Import Styles */
+.gl-cpg-tools-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.gl-cpg-button-group {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+/* Accessibility Checker Styles */
+.gl-cpg-color-picker-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.gl-cpg-color-input {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.gl-cpg-results {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.gl-cpg-results.pass {
+    background: #e7f5ea;
+    border: 1px solid #46b450;
+}
+
+.gl-cpg-results.fail {
+    background: #fbeaea;
+    border: 1px solid #dc3232;
+}
+
+.gl-cpg-contrast-preview {
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 4px;
+}

@@ -13,7 +13,7 @@ class ColorPaletteSearchTest extends TestCase {
     }
 
     public function test_search_returns_matching_palettes(): void {
-        // Arrange
+        / Arrange
         $criteria = [
             'colors' => ['#FF0000', '#00FF00'],
             'tags' => ['modern', 'bright'],
@@ -57,10 +57,10 @@ class ColorPaletteSearchTest extends TestCase {
             ->with($criteria)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->search->search($criteria);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('palettes', $result);
         $this->assertArrayHasKey('total', $result);
@@ -69,7 +69,7 @@ class ColorPaletteSearchTest extends TestCase {
     }
 
     public function test_find_similar_returns_similar_palettes(): void {
-        // Arrange
+        / Arrange
         $palette_id = 'pal_123';
         $options = [
             'threshold' => 0.8,
@@ -109,10 +109,10 @@ class ColorPaletteSearchTest extends TestCase {
             ->with($palette_id, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->search->find_similar($palette_id, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('matches', $result);
         $this->assertArrayHasKey('scores', $result);
@@ -121,7 +121,7 @@ class ColorPaletteSearchTest extends TestCase {
     }
 
     public function test_suggest_returns_palette_suggestions(): void {
-        // Arrange
+        / Arrange
         $preferences = [
             'colors' => ['#FF0000'],
             'style' => ['modern', 'minimal'],
@@ -163,10 +163,10 @@ class ColorPaletteSearchTest extends TestCase {
             ->with($preferences)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->search->suggest($preferences);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('suggestions', $result);
         $this->assertArrayHasKey('reasoning', $result);
@@ -175,7 +175,7 @@ class ColorPaletteSearchTest extends TestCase {
     }
 
     public function test_index_processes_palette_for_search(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'id' => 'pal_123',
             'name' => 'Test Palette',
@@ -206,10 +206,10 @@ class ColorPaletteSearchTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->search->index($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('index_id', $result);
         $this->assertArrayHasKey('indexed', $result);

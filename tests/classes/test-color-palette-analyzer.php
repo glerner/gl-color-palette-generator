@@ -94,7 +94,7 @@ class ColorPaletteAnalyzerTest extends TestCase {
 
     public function test_complementary_colors(): void {
         $palette = new ColorPalette([
-            'colors' => ['#FF0000', '#00FFFF'] // Red and Cyan
+            'colors' => ['#FF0000', '#00FFFF'] / Red and Cyan
         ]);
 
         $harmony = $this->analyzer->analyzeHarmony($palette);
@@ -103,7 +103,7 @@ class ColorPaletteAnalyzerTest extends TestCase {
 
     public function test_analogous_colors(): void {
         $palette = new ColorPalette([
-            'colors' => ['#FF0000', '#FF3300', '#FF6600'] // Red and orange shades
+            'colors' => ['#FF0000', '#FF3300', '#FF6600'] / Red and orange shades
         ]);
 
         $harmony = $this->analyzer->analyzeHarmony($palette);
@@ -112,7 +112,7 @@ class ColorPaletteAnalyzerTest extends TestCase {
 
     public function test_triadic_colors(): void {
         $palette = new ColorPalette([
-            'colors' => ['#FF0000', '#00FF00', '#0000FF'] // Red, Green, Blue
+            'colors' => ['#FF0000', '#00FF00', '#0000FF'] / Red, Green, Blue
         ]);
 
         $harmony = $this->analyzer->analyzeHarmony($palette);
@@ -121,7 +121,7 @@ class ColorPaletteAnalyzerTest extends TestCase {
 
     public function test_accessibility_levels(): void {
         $palette = new ColorPalette([
-            'colors' => ['#000000', '#FFFFFF'] // Maximum contrast
+            'colors' => ['#000000', '#FFFFFF'] / Maximum contrast
         ]);
 
         $aa_analysis = $this->analyzer->analyzeAccessibility($palette, 'AA');
@@ -133,21 +133,21 @@ class ColorPaletteAnalyzerTest extends TestCase {
 
     public function test_contrast_ratio_calculation(): void {
         $palette = new ColorPalette([
-            'colors' => ['#000000', '#FFFFFF'] // Maximum contrast
+            'colors' => ['#000000', '#FFFFFF'] / Maximum contrast
         ]);
 
         $ratios = $this->analyzer->calculateContrastRatios($palette);
-        $this->assertGreaterThan(20, $ratios[0]['ratio']); // Black/White contrast should be >21
+        $this->assertGreaterThan(20, $ratios[0]['ratio']); / Black/White contrast should be >21
     }
 
     public function test_harmony_score_calculation(): void {
-        // Test complementary harmony
+        / Test complementary harmony
         $complementary = new ColorPalette([
             'colors' => ['#FF0000', '#00FFFF']
         ]);
         $comp_harmony = $this->analyzer->analyzeHarmony($complementary);
 
-        // Test analogous harmony
+        / Test analogous harmony
         $analogous = new ColorPalette([
             'colors' => ['#FF0000', '#FF1A00', '#FF3300']
         ]);

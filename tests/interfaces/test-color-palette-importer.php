@@ -13,7 +13,7 @@ class ColorPaletteImporterTest extends TestCase {
     }
 
     public function test_import_from_file_loads_palette(): void {
-        // Arrange
+        / Arrange
         $file_path = '/imports/palette.json';
         $options = [
             'format' => 'json',
@@ -44,10 +44,10 @@ class ColorPaletteImporterTest extends TestCase {
             ->with($file_path, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->importer->import_from_file($file_path, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('palette', $result);
         $this->assertArrayHasKey('validation', $result);
@@ -56,7 +56,7 @@ class ColorPaletteImporterTest extends TestCase {
     }
 
     public function test_import_from_url_fetches_palette(): void {
-        // Arrange
+        / Arrange
         $url = 'https://api.example.com/palette';
         $options = [
             'headers' => ['Accept' => 'application/json'],
@@ -88,10 +88,10 @@ class ColorPaletteImporterTest extends TestCase {
             ->with($url, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->importer->import_from_url($url, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('palette', $result);
         $this->assertArrayHasKey('source', $result);
@@ -100,7 +100,7 @@ class ColorPaletteImporterTest extends TestCase {
     }
 
     public function test_import_from_tool_extracts_palette(): void {
-        // Arrange
+        / Arrange
         $tool_file = '/imports/design.sketch';
         $tool = 'sketch';
         $options = [
@@ -135,10 +135,10 @@ class ColorPaletteImporterTest extends TestCase {
             ->with($tool_file, $tool, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->importer->import_from_tool($tool_file, $tool, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('palette', $result);
         $this->assertArrayHasKey('assets', $result);
@@ -147,7 +147,7 @@ class ColorPaletteImporterTest extends TestCase {
     }
 
     public function test_validate_import_checks_data(): void {
-        // Arrange
+        / Arrange
         $import_data = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -174,10 +174,10 @@ class ColorPaletteImporterTest extends TestCase {
             ->with($import_data, $rules)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->importer->validate_import($import_data, $rules);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('valid', $result);
         $this->assertArrayHasKey('errors', $result);

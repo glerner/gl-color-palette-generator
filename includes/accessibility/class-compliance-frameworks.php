@@ -6,7 +6,7 @@ class ComplianceFrameworks {
     private $audit_controller;
     private $reporting_engine;
 
-    // Comprehensive compliance configurations
+    / Comprehensive compliance configurations
     private const COMPLIANCE_FRAMEWORKS = [
         'gdpr' => [
             'data_protection' => [
@@ -241,44 +241,44 @@ class ComplianceFrameworks {
         ];
     }
 
-    // Private helper methods
+    / Private helper methods
     private function check_wcag_compliance($palette) {
-        // Implementation
+        / Implementation
     }
 
     private function check_section508_compliance($palette) {
-        // Implementation
+        / Implementation
     }
 
     private function check_aoda_compliance($palette) {
-        // Implementation
+        / Implementation
     }
 
     private function check_en301549_compliance($palette) {
-        // Implementation
+        / Implementation
     }
 
     private function analyze_compliance_details($status) {
-        // Implementation
+        / Implementation
     }
 
     private function generate_compliance_recommendations($status) {
-        // Implementation
+        / Implementation
     }
 
     private function create_implementation_guide($status) {
-        // Implementation
+        / Implementation
     }
 
     private function get_historical_compliance_data($palette) {
-        // Implementation
+        / Implementation
     }
 
     private function analyze_compliance_trends($palette) {
-        // Implementation
+        / Implementation
     }
 
     private function generate_compliance_alerts($palette) {
-        // Implementation
+        / Implementation
     }
 }

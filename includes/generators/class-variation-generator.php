@@ -5,7 +5,7 @@ class VariationGenerator {
     private $color_analyzer;
     private $settings;
 
-    // Variation types
+    / Variation types
     private const VARIATION_TYPES = [
         'tints' => ['steps' => 5, 'intensity' => 0.1],
         'shades' => ['steps' => 5, 'intensity' => 0.1],
@@ -157,7 +157,7 @@ class VariationGenerator {
      */
     private function generate_warm_variations($lab, $steps) {
         $warm = [];
-        $warm_adjustment = [2, 5, -2]; // Adjust Lab values for warmer appearance
+        $warm_adjustment = [2, 5, -2]; / Adjust Lab values for warmer appearance
 
         for ($i = 1; $i <= $steps; $i++) {
             $new_lab = [
@@ -177,7 +177,7 @@ class VariationGenerator {
      */
     private function generate_cool_variations($lab, $steps) {
         $cool = [];
-        $cool_adjustment = [2, -5, 2]; // Adjust Lab values for cooler appearance
+        $cool_adjustment = [2, -5, 2]; / Adjust Lab values for cooler appearance
 
         for ($i = 1; $i <= $steps; $i++) {
             $new_lab = [
@@ -276,13 +276,13 @@ class VariationGenerator {
 
         switch ($type) {
             case 'success':
-                return $this->shift_towards_hue($lab, 120, 0.7); // Shift towards green
+                return $this->shift_towards_hue($lab, 120, 0.7); / Shift towards green
             case 'warning':
-                return $this->shift_towards_hue($lab, 45, 0.7);  // Shift towards orange
+                return $this->shift_towards_hue($lab, 45, 0.7);  / Shift towards orange
             case 'error':
-                return $this->shift_towards_hue($lab, 0, 0.7);   // Shift towards red
+                return $this->shift_towards_hue($lab, 0, 0.7);   / Shift towards red
             case 'info':
-                return $this->shift_towards_hue($lab, 200, 0.7); // Shift towards blue
+                return $this->shift_towards_hue($lab, 200, 0.7); / Shift towards blue
             case 'disabled':
                 return $this->desaturate_and_lighten($lab, 0.5);
             default:
@@ -321,13 +321,13 @@ class VariationGenerator {
         $accessibility = new AccessibilityChecker();
         $variations = [];
 
-        // Generate variations for different contrast ratios
+        / Generate variations for different contrast ratios
         $variations['aa_normal'] = $this->generate_aa_compliant_variations($base_color, 'normal');
         $variations['aa_large'] = $this->generate_aa_compliant_variations($base_color, 'large');
         $variations['aaa_normal'] = $this->generate_aaa_compliant_variations($base_color, 'normal');
         $variations['aaa_large'] = $this->generate_aaa_compliant_variations($base_color, 'large');
 
-        // Check accessibility for each variation
+        / Check accessibility for each variation
         foreach ($variations as $type => $colors) {
             foreach ($colors as &$color) {
                 $color['contrast_ratio'] = $accessibility->check_contrast_ratio($base_color, $color['hex']);

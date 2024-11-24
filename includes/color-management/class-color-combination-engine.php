@@ -6,7 +6,7 @@ class ColorCombinationEngine {
     private $harmony_calculator;
     private $context_evaluator;
 
-    // Advanced combination configurations
+    / Advanced combination configurations
     private const COMBINATION_RULES = [
         'harmony_algorithms' => [
             'advanced_complementary' => [

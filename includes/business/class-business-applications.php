@@ -6,7 +6,7 @@ class BusinessApplications {
     private $cultural_data;
     private $seasonal_data;
 
-    // Industry-specific color strategies
+    / Industry-specific color strategies
     private const BUSINESS_MAPPINGS = [
         'technology' => [
             'primary_palette' => [
@@ -176,12 +176,12 @@ class BusinessApplications {
         if (isset(self::BUSINESS_MAPPINGS[$industry])) {
             $colors = self::BUSINESS_MAPPINGS[$industry];
 
-            // Adjust for cultural context if provided
+            / Adjust for cultural context if provided
             if (!empty($context['culture'])) {
                 $colors = $this->adapt_for_culture($colors, $context['culture']);
             }
 
-            // Adjust for seasonal context if provided
+            / Adjust for seasonal context if provided
             if (!empty($context['season'])) {
                 $colors = $this->adapt_for_season($colors, $context['season']);
             }

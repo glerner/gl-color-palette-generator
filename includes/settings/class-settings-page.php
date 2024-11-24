@@ -10,18 +10,18 @@ class ColorPaletteGeneratorSettings {
         add_action('admin_init', [$this, 'register_settings']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_scripts']);
 
-        // Add AJAX handlers
+        / Add AJAX handlers
         add_action('wp_ajax_clear_color_cache', [$this, 'handle_clear_cache']);
     }
 
     public function add_settings_page() {
         add_submenu_page(
-            'color-palette-generator', // parent slug
-            'Settings', // page title
-            'Settings', // menu title
-            'manage_options', // capability
-            $this->options_page, // menu slug
-            [$this, 'render_settings_page'] // callback
+            'color-palette-generator', / parent slug
+            'Settings', / page title
+            'Settings', / menu title
+            'manage_options', / capability
+            $this->options_page, / menu slug
+            [$this, 'render_settings_page'] / callback
         );
     }
 
@@ -32,7 +32,7 @@ class ColorPaletteGeneratorSettings {
             [$this, 'validate_settings']
         );
 
-        // General Settings
+        / General Settings
         add_settings_section(
             'general_settings',
             __('General Settings', 'color-palette-generator'),
@@ -40,7 +40,7 @@ class ColorPaletteGeneratorSettings {
             'color-palette-generator-settings'
         );
 
-        // API Settings
+        / API Settings
         add_settings_section(
             'api_settings',
             __('API Configuration', 'color-palette-generator'),
@@ -48,7 +48,7 @@ class ColorPaletteGeneratorSettings {
             'color-palette-generator-settings'
         );
 
-        // Add settings fields
+        / Add settings fields
         $this->add_settings_fields();
     }
 
@@ -57,7 +57,7 @@ class ColorPaletteGeneratorSettings {
             return;
         }
 
-        // Check if settings were saved
+        / Check if settings were saved
         if (isset($_GET['settings-updated'])) {
             add_settings_error(
                 'color_palette_messages',
@@ -195,7 +195,7 @@ class ColorPaletteGeneratorSettings {
             return;
         }
 
-        // Simple API check
+        / Simple API check
         $response = wp_remote_get('https://api.openai.com/v1/models', [
             'headers' => ['Authorization' => 'Bearer ' . $api_key]
         ]);
@@ -236,7 +236,7 @@ class ColorPaletteGeneratorSettings {
             return;
         }
 
-        // Enqueue CSS
+        / Enqueue CSS
         wp_enqueue_style(
             'color-palette-settings',
             plugin_dir_url(dirname(__FILE__)) . 'assets/css/admin-settings.css',
@@ -269,14 +269,14 @@ class ColorPaletteGeneratorSettings {
      * Handle AJAX cache clearing
      */
     public function handle_clear_cache() {
-        // Verify nonce
+        / Verify nonce
         if (!check_ajax_referer('color_palette_cache_nonce', 'nonce', false)) {
             wp_send_json_error([
                 'message' => 'Invalid security token'
             ]);
         }
 
-        // Verify user capabilities
+        / Verify user capabilities
         if (!current_user_can('manage_options')) {
             wp_send_json_error([
                 'message' => 'Insufficient permissions'
@@ -302,7 +302,7 @@ class ColorPaletteGeneratorSettings {
     private function clear_color_cache() {
         global $wpdb;
 
-        // Get all color name transients
+        / Get all color name transients
         $transients = $wpdb->get_results(
             "SELECT option_name
             FROM $wpdb->options
@@ -317,7 +317,7 @@ class ColorPaletteGeneratorSettings {
             }
         }
 
-        // Also clear any timeout values
+        / Also clear any timeout values
         $wpdb->query(
             "DELETE FROM $wpdb->options
             WHERE option_name LIKE '_transient_timeout_color_name_%'"
@@ -339,7 +339,7 @@ class ColorPaletteGeneratorSettings {
      * Add settings fields
      */
     private function add_settings_fields() {
-        // General Settings Fields
+        / General Settings Fields
         add_settings_field(
             'default_palette_size',
             __('Default Palette Size', 'color-palette-generator'),
@@ -354,7 +354,7 @@ class ColorPaletteGeneratorSettings {
             ]
         );
 
-        // API Settings Fields
+        / API Settings Fields
         add_settings_field(
             'api_provider',
             __('AI Provider', 'color-palette-generator'),

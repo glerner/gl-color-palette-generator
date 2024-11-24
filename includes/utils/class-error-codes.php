@@ -2,7 +2,7 @@
 namespace GLColorPalette;
 
 class ErrorCodes {
-    // Color-related errors (1000-1999)
+    / Color-related errors (1000-1999)
     const COLOR_INVALID_HEX = 1001;
     const COLOR_INVALID_RGB = 1002;
     const COLOR_INVALID_HSL = 1003;
@@ -14,7 +14,7 @@ class ErrorCodes {
     const COLOR_PALETTE_INCOMPLETE = 1009;
     const COLOR_IMPORT_FAILED = 1010;
 
-    // Accessibility errors (2000-2999)
+    / Accessibility errors (2000-2999)
     const ACCESS_CONTRAST_RATIO_LOW = 2001;
     const ACCESS_WCAG_AA_FAILED = 2002;
     const ACCESS_WCAG_AAA_FAILED = 2003;
@@ -26,7 +26,7 @@ class ErrorCodes {
     const ACCESS_MOTION_UNSAFE = 2009;
     const ACCESS_SEMANTIC_COLOR = 2010;
 
-    // API-related errors (3000-3999)
+    / API-related errors (3000-3999)
     const API_CONNECTION_FAILED = 3001;
     const API_AUTHENTICATION_FAILED = 3002;
     const API_RATE_LIMIT_EXCEEDED = 3003;
@@ -38,7 +38,7 @@ class ErrorCodes {
     const API_INVALID_ENDPOINT = 3009;
     const API_VERSION_MISMATCH = 3010;
 
-    // Validation errors (4000-4999)
+    / Validation errors (4000-4999)
     const VALIDATION_REQUIRED_FIELD = 4001;
     const VALIDATION_INVALID_FORMAT = 4002;
     const VALIDATION_OUT_OF_RANGE = 4003;
@@ -50,7 +50,7 @@ class ErrorCodes {
     const VALIDATION_LENGTH_EXCEEDED = 4009;
     const VALIDATION_SCHEMA_INVALID = 4010;
 
-    // Permission errors (5000-5999)
+    / Permission errors (5000-5999)
     const PERM_UNAUTHORIZED_ACCESS = 5001;
     const PERM_INSUFFICIENT_ROLE = 5002;
     const PERM_FILE_ACCESS_DENIED = 5003;
@@ -62,7 +62,7 @@ class ErrorCodes {
     const PERM_OPERATION_FORBIDDEN = 5009;
     const PERM_TOKEN_EXPIRED = 5010;
 
-    // File system errors (6000-6999)
+    / File system errors (6000-6999)
     const FILE_NOT_FOUND = 6001;
     const FILE_WRITE_FAILED = 6002;
     const FILE_READ_FAILED = 6003;
@@ -74,7 +74,7 @@ class ErrorCodes {
     const FILE_UPLOAD_FAILED = 6009;
     const FILE_CORRUPT = 6010;
 
-    // Performance warnings (7000-7999)
+    / Performance warnings (7000-7999)
     const PERF_SLOW_OPERATION = 7001;
     const PERF_MEMORY_WARNING = 7002;
     const PERF_CACHE_MISS = 7003;
@@ -86,7 +86,7 @@ class ErrorCodes {
     const PERF_INDEX_MISSING = 7009;
     const PERF_OPTIMIZATION_NEEDED = 7010;
 
-    // Theme compatibility errors (8000-8999)
+    / Theme compatibility errors (8000-8999)
     const THEME_INCOMPATIBLE_VERSION = 8001;
     const THEME_MISSING_FEATURE = 8002;
     const THEME_STYLE_CONFLICT = 8003;
@@ -103,7 +103,7 @@ class ErrorCodes {
      */
     public static function get_message($code) {
         $messages = [
-            // Color errors
+            / Color errors
             self::COLOR_INVALID_HEX => __('Invalid hexadecimal color code: %s', 'color-palette-generator'),
             self::COLOR_INVALID_RGB => __('Invalid RGB color value: %s', 'color-palette-generator'),
             self::COLOR_INVALID_HSL => __('Invalid HSL color value: %s', 'color-palette-generator'),
@@ -115,7 +115,7 @@ class ErrorCodes {
             self::COLOR_PALETTE_INCOMPLETE => __('Incomplete color palette: missing %s', 'color-palette-generator'),
             self::COLOR_IMPORT_FAILED => __('Failed to import color palette: %s', 'color-palette-generator'),
 
-            // Accessibility errors
+            / Accessibility errors
             self::ACCESS_CONTRAST_RATIO_LOW => __('Insufficient contrast ratio %s:1 (minimum required: %s:1)', 'color-palette-generator'),
             self::ACCESS_WCAG_AA_FAILED => __('Does not meet WCAG AA standards: %s', 'color-palette-generator'),
             self::ACCESS_WCAG_AAA_FAILED => __('Does not meet WCAG AAA standards: %s', 'color-palette-generator'),
@@ -127,7 +127,7 @@ class ErrorCodes {
             self::ACCESS_MOTION_UNSAFE => __('Motion/animation accessibility issue: %s', 'color-palette-generator'),
             self::ACCESS_SEMANTIC_COLOR => __('Semantic color usage issue: %s', 'color-palette-generator'),
 
-            // API errors
+            / API errors
             self::API_CONNECTION_FAILED => __('Failed to connect to API: %s', 'color-palette-generator'),
             self::API_AUTHENTICATION_FAILED => __('API authentication failed: %s', 'color-palette-generator'),
             self::API_RATE_LIMIT_EXCEEDED => __('API rate limit exceeded. Try again in %s seconds', 'color-palette-generator'),
@@ -139,7 +139,7 @@ class ErrorCodes {
             self::API_INVALID_ENDPOINT => __('Invalid API endpoint: %s', 'color-palette-generator'),
             self::API_VERSION_MISMATCH => __('API version mismatch: expected %s, got %s', 'color-palette-generator'),
 
-            // ... (additional error messages for other categories)
+            / ... (additional error messages for other categories)
         ];
 
         return isset($messages[$code]) ? $messages[$code] : __('Unknown error occurred', 'color-palette-generator');
@@ -214,7 +214,7 @@ class ErrorCodes {
             self::COLOR_INVALID_HEX => __('Enter a valid hexadecimal color code (e.g., #FF0000)', 'color-palette-generator'),
             self::ACCESS_CONTRAST_RATIO_LOW => __('Try using a darker/lighter color to improve contrast', 'color-palette-generator'),
             self::API_RATE_LIMIT_EXCEEDED => __('Wait for the rate limit to reset or upgrade your API plan', 'color-palette-generator'),
-            // ... additional fixes
+            / ... additional fixes
         ];
 
         return isset($fixes[$code]) ? $fixes[$code] : null;
@@ -240,7 +240,7 @@ class ErrorCodes {
                 'severity' => 'warning',
                 'solution' => __('Clear the cache and try again', 'color-palette-generator')
             ]
-            // ... more error codes
+            / ... more error codes
         ];
     }
 

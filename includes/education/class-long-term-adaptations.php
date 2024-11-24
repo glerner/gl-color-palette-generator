@@ -5,7 +5,7 @@ class LongTermAdaptations {
     private $adaptation_monitor;
     private $chronic_exposure_analyzer;
 
-    // Comprehensive long-term adaptation mapping
+    / Comprehensive long-term adaptation mapping
     private const LONG_TERM_ADAPTATIONS = [
         'neural_plasticity' => [
             'calming_environments' => [

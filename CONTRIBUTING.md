@@ -33,11 +33,11 @@ composer install
 
 ```php
 define('GL_COLOR_PALETTE_TEST_API_KEY', 'your_test_key_here');
-define('GL_COLOR_PALETTE_AI_PROVIDER', 'openai'); // Available: 'openai', 'anthropic'
+define('GL_COLOR_PALETTE_AI_PROVIDER', 'openai'); / Available: 'openai', 'anthropic'
 
-// Optional: Provider-specific settings
-define('GL_COLOR_PALETTE_OPENAI_MODEL', 'gpt-4'); // Default: gpt-4
-define('GL_COLOR_PALETTE_ANTHROPIC_MODEL', 'claude-3-sonnet'); // Default: claude-3-sonnet
+/ Optional: Provider-specific settings
+define('GL_COLOR_PALETTE_OPENAI_MODEL', 'gpt-4'); / Default: gpt-4
+define('GL_COLOR_PALETTE_ANTHROPIC_MODEL', 'claude-3-sonnet'); / Default: claude-3-sonnet
 ```
 
 ## Development Environment Details

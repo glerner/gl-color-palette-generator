@@ -13,7 +13,7 @@ class ColorPaletteOptimizerTest extends TestCase {
     }
 
     public function test_optimize_accessibility_improves_compliance(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#FFFF00']
@@ -48,10 +48,10 @@ class ColorPaletteOptimizerTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->optimizer->optimize_accessibility($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('optimized', $result);
         $this->assertArrayHasKey('improvements', $result);
@@ -60,7 +60,7 @@ class ColorPaletteOptimizerTest extends TestCase {
     }
 
     public function test_optimize_harmony_improves_relationships(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00', '#0000FF']
@@ -95,10 +95,10 @@ class ColorPaletteOptimizerTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->optimizer->optimize_harmony($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('optimized', $result);
         $this->assertArrayHasKey('improvements', $result);
@@ -107,7 +107,7 @@ class ColorPaletteOptimizerTest extends TestCase {
     }
 
     public function test_optimize_performance_improves_efficiency(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#FF0001', '#FF0002']
@@ -142,10 +142,10 @@ class ColorPaletteOptimizerTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->optimizer->optimize_performance($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('optimized', $result);
         $this->assertArrayHasKey('improvements', $result);
@@ -154,7 +154,7 @@ class ColorPaletteOptimizerTest extends TestCase {
     }
 
     public function test_optimize_display_improves_appearance(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -192,10 +192,10 @@ class ColorPaletteOptimizerTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->optimizer->optimize_display($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('optimized', $result);
         $this->assertArrayHasKey('improvements', $result);

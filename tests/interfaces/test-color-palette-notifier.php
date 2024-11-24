@@ -13,7 +13,7 @@ class ColorPaletteNotifierTest extends TestCase {
     }
 
     public function test_notify_sends_notification(): void {
-        // Arrange
+        / Arrange
         $event_type = 'palette.updated';
         $data = [
             'palette_id' => 'pal_123',
@@ -47,10 +47,10 @@ class ColorPaletteNotifierTest extends TestCase {
             ->with($event_type, $data, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->notifier->notify($event_type, $data, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('notification_id', $result);
         $this->assertArrayHasKey('sent', $result);
@@ -60,7 +60,7 @@ class ColorPaletteNotifierTest extends TestCase {
     }
 
     public function test_subscribe_creates_subscription(): void {
-        // Arrange
+        / Arrange
         $subscription = [
             'subscriber_id' => 'usr_456',
             'events' => ['palette.updated', 'palette.deleted'],
@@ -91,10 +91,10 @@ class ColorPaletteNotifierTest extends TestCase {
             ->with($subscription)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->notifier->subscribe($subscription);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('subscription_id', $result);
         $this->assertArrayHasKey('active', $result);
@@ -104,7 +104,7 @@ class ColorPaletteNotifierTest extends TestCase {
     }
 
     public function test_manage_template_handles_template_operations(): void {
-        // Arrange
+        / Arrange
         $action = 'create';
         $template = [
             'name' => 'palette_update',
@@ -134,10 +134,10 @@ class ColorPaletteNotifierTest extends TestCase {
             ->with($action, $template)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->notifier->manage_template($action, $template);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('template_id', $result);
         $this->assertArrayHasKey('success', $result);
@@ -147,7 +147,7 @@ class ColorPaletteNotifierTest extends TestCase {
     }
 
     public function test_get_history_retrieves_notification_history(): void {
-        // Arrange
+        / Arrange
         $criteria = [
             'start_date' => '2024-01-01',
             'end_date' => '2024-01-31',
@@ -181,10 +181,10 @@ class ColorPaletteNotifierTest extends TestCase {
             ->with($criteria)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->notifier->get_history($criteria);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('notifications', $result);
         $this->assertArrayHasKey('total', $result);

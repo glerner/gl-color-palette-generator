@@ -185,7 +185,7 @@ class Color_Palette_Export {
      */
     private function to_bootstrap(Color_Palette $palette, array $options = []): string {
         $colors = $palette->get_colors();
-        $scss = "// Custom color variables\n";
+        $scss = "/ Custom color variables\n";
 
         foreach ($colors as $index => $color) {
             $name = $palette->get_metadata("name_$index") ?? $index + 1;
@@ -193,7 +193,7 @@ class Color_Palette_Export {
         }
 
         if (!empty($options['generate_theme'])) {
-            $scss .= "\n// Theme color variables\n";
+            $scss .= "\n/ Theme color variables\n";
             $scss .= "\$theme-colors: (\n";
             foreach ($colors as $index => $color) {
                 $name = $palette->get_metadata("name_$index") ?? $index + 1;
@@ -203,7 +203,7 @@ class Color_Palette_Export {
         }
 
         if (!empty($options['generate_utilities'])) {
-            $scss .= "\n// Utility classes\n";
+            $scss .= "\n/ Utility classes\n";
             foreach ($colors as $index => $color) {
                 $name = $palette->get_metadata("name_$index") ?? $index + 1;
                 $scss .= ".bg-$name { background-color: \$color-$name !important; }\n";
@@ -249,30 +249,30 @@ class Color_Palette_Export {
     private function to_ase(Color_Palette $palette, array $options = []): string {
         $colors = $palette->get_colors();
         $binary = "ASEF\x00\x01\x00\x00";
-        $binary .= pack("n", count($colors)); // Number of colors
+        $binary .= pack("n", count($colors)); / Number of colors
 
         foreach ($colors as $index => $color) {
             $name = $palette->get_metadata("name_$index") ?? "Color " . ($index + 1);
             $rgb = $this->hex_to_rgb($color);
 
-            // Block start
-            $binary .= "\x00\x01"; // Color entry
+            / Block start
+            $binary .= "\x00\x01"; / Color entry
 
-            // Color name
+            / Color name
             $binary .= pack("n", strlen($name) + 1);
             $binary .= $name . "\x00";
 
-            // Color model (RGB)
+            / Color model (RGB)
             $binary .= "RGB ";
 
-            // Color values
+            / Color values
             $binary .= pack("f*",
                 $rgb[0] / 255,
                 $rgb[1] / 255,
                 $rgb[2] / 255
             );
 
-            // Color type (global)
+            / Color type (global)
             $binary .= "\x00\x00";
         }
 

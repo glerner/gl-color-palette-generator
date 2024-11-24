@@ -6,7 +6,7 @@ class ImplementationGuides {
     private $asset_manager;
     private $quality_checker;
 
-    // Implementation guidelines and specifications
+    / Implementation guidelines and specifications
     private const IMPLEMENTATION_GUIDES = [
         'digital_marketing' => [
             'social_media' => [

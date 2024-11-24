@@ -69,10 +69,10 @@ class ColorConversion {
         ];
     }
 
-    // Add private helper methods here
+    / Add private helper methods here
     private function normalize_color_value($color, $space) {
-        // Implementation
+        / Implementation
     }
 
-    // ... other helper methods
+    / ... other helper methods
 }

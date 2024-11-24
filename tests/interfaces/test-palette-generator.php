@@ -13,7 +13,7 @@ class PaletteGeneratorTest extends TestCase {
     }
 
     public function test_generate_palette_returns_valid_structure(): void {
-        // Arrange
+        / Arrange
         $criteria = [
             'base_color' => '#FF0000',
             'harmony_type' => 'complementary',
@@ -40,10 +40,10 @@ class PaletteGeneratorTest extends TestCase {
             ->with($criteria)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->generator->generate_palette($criteria);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('colors', $result);
         $this->assertArrayHasKey('color_names', $result);
@@ -52,7 +52,7 @@ class PaletteGeneratorTest extends TestCase {
     }
 
     public function test_validate_palette_returns_validation_results(): void {
-        // Arrange
+        / Arrange
         $palette = ['#FF0000', '#00FF00', '#0000FF'];
         $rules = [
             'check_contrast' => true,
@@ -72,10 +72,10 @@ class PaletteGeneratorTest extends TestCase {
             ->with($palette, $rules)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->generator->validate_palette($palette, $rules);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('is_valid', $result);
         $this->assertArrayHasKey('issues', $result);
@@ -85,7 +85,7 @@ class PaletteGeneratorTest extends TestCase {
     }
 
     public function test_generate_variations_returns_valid_variations(): void {
-        // Arrange
+        / Arrange
         $palette = ['#FF0000', '#00FF00', '#0000FF'];
         $options = [
             'variation_type' => 'lighter',
@@ -108,10 +108,10 @@ class PaletteGeneratorTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->generator->generate_variations($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('variations', $result);
         $this->assertArrayHasKey('relationships', $result);
@@ -120,7 +120,7 @@ class PaletteGeneratorTest extends TestCase {
     }
 
     public function test_get_palette_statistics_returns_comprehensive_analysis(): void {
-        // Arrange
+        / Arrange
         $palette = ['#FF0000', '#00FF00', '#0000FF'];
         $expected = [
             'color_distribution' => [
@@ -151,10 +151,10 @@ class PaletteGeneratorTest extends TestCase {
             ->with($palette)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->generator->get_palette_statistics($palette);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('color_distribution', $result);
         $this->assertArrayHasKey('harmony_analysis', $result);

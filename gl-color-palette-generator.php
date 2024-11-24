@@ -19,24 +19,24 @@
  * Text Domain:       gl-color-palette-generator
  * License:           GPL v2 or later
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Update URI:        https://website-tech.glerner.com/plugins/color-palette-generator/
+ * Update URI:        https://github.com/GeorgeLerner/gl-color-palette-generator/
  */
 
-// If this file is called directly, abort.
+/ If this file is called directly, abort.
 if (!defined('ABSPATH')) {
     exit;
 }
 
-// Plugin version
+/ Plugin version
 define('GL_CPG_VERSION', '1.0.0');
 
-// Plugin directory
+/ Plugin directory
 define('GL_CPG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 
-// Plugin URL
+/ Plugin URL
 define('GL_CPG_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-// Autoloader
+/ Autoloader
 require_once GL_CPG_PLUGIN_DIR . 'includes/system/class-autoloader.php';
 \GL_Color_Palette_Generator\System\Autoloader::register();
 
@@ -44,11 +44,11 @@ require_once GL_CPG_PLUGIN_DIR . 'includes/system/class-autoloader.php';
  * Initialize the plugin
  */
 function gl_cpg_init() {
-    // Initialize error handling
+    / Initialize error handling
     $error_handler = new \GL_Color_Palette_Generator\Utils\Error_Handler();
     $error_handler->init();
 
-    // Initialize core setup
+    / Initialize core setup
     $setup = new \GL_Color_Palette_Generator\Core\Setup();
     $setup->init();
 }

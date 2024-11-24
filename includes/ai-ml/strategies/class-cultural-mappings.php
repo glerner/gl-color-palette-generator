@@ -2,7 +2,7 @@
 namespace GLColorPalette;
 
 class CulturalMappings {
-    // Comprehensive cultural color mappings
+    / Comprehensive cultural color mappings
     private const COLOR_MAPPINGS = [
         'east_asian' => [
             'red' => [

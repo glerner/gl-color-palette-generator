@@ -13,7 +13,7 @@ class Test_Ajax_Handler extends WP_UnitTestCase {
 
         $this->ajax_handler = new Ajax_Handler();
 
-        // Create and set admin user
+        / Create and set admin user
         $this->user_id = $this->factory->user->create([
             'role' => 'administrator'
         ]);
@@ -90,7 +90,7 @@ class Test_Ajax_Handler extends WP_UnitTestCase {
             $response = json_decode($e->getMessage(), true);
             $this->assertTrue($response['success']);
 
-            // Verify settings were saved
+            / Verify settings were saved
             $this->assertEquals('openai', get_option('gl_color_palette_ai_provider'));
             $this->assertEquals('sk-test123', get_option('gl_color_palette_api_key'));
             $this->assertEquals('gpt-4', get_option('gl_color_palette_openai_model'));

@@ -13,7 +13,7 @@ class ColorHarmonizerTest extends TestCase {
     }
 
     public function test_generate_harmony_returns_valid_structure(): void {
-        // Arrange
+        / Arrange
         $base_color = '#FF0000';
         $harmony_type = 'complementary';
         $options = [
@@ -38,10 +38,10 @@ class ColorHarmonizerTest extends TestCase {
             ->with($base_color, $harmony_type, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->harmonizer->generate_harmony($base_color, $harmony_type, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('colors', $result);
         $this->assertArrayHasKey('relationships', $result);
@@ -51,7 +51,7 @@ class ColorHarmonizerTest extends TestCase {
     }
 
     public function test_analyze_harmony_returns_detailed_analysis(): void {
-        // Arrange
+        / Arrange
         $colors = ['#FF0000', '#00FF00', '#0000FF'];
         $expected = [
             'harmony_type' => 'triadic',
@@ -75,10 +75,10 @@ class ColorHarmonizerTest extends TestCase {
             ->with($colors)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->harmonizer->analyze_harmony($colors);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('harmony_type', $result);
         $this->assertArrayHasKey('harmony_score', $result);
@@ -88,7 +88,7 @@ class ColorHarmonizerTest extends TestCase {
     }
 
     public function test_suggest_improvements_returns_valid_suggestions(): void {
-        // Arrange
+        / Arrange
         $colors = ['#FF0000', '#00FF00'];
         $target_harmony = 'complementary';
         $expected = [
@@ -110,10 +110,10 @@ class ColorHarmonizerTest extends TestCase {
             ->with($colors, $target_harmony)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->harmonizer->suggest_improvements($colors, $target_harmony);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('adjustments', $result);
         $this->assertArrayHasKey('alternatives', $result);
@@ -123,7 +123,7 @@ class ColorHarmonizerTest extends TestCase {
     }
 
     public function test_get_harmony_types_returns_complete_list(): void {
-        // Arrange
+        / Arrange
         $expected = [
             'complementary' => [
                 'name' => 'Complementary',
@@ -144,10 +144,10 @@ class ColorHarmonizerTest extends TestCase {
             ->method('get_harmony_types')
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->harmonizer->get_harmony_types();
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('complementary', $result);
         $this->assertArrayHasKey('analogous', $result);

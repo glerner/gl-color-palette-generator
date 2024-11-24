@@ -22,11 +22,11 @@ class Color_Utility {
      * @return float Color difference value (0-100).
      */
     public function get_color_difference($color1, $color2) {
-        // Convert hex to Lab color space
+        / Convert hex to Lab color space
         $lab1 = $this->hex_to_lab($color1);
         $lab2 = $this->hex_to_lab($color2);
 
-        // Calculate Euclidean distance in Lab space
+        / Calculate Euclidean distance in Lab space
         return sqrt(
             pow($lab2['l'] - $lab1['l'], 2) +
             pow($lab2['a'] - $lab1['a'], 2) +
@@ -41,13 +41,13 @@ class Color_Utility {
      * @return array Lab values.
      */
     private function hex_to_lab($hex_color) {
-        // First convert hex to RGB
+        / First convert hex to RGB
         $rgb = $this->hex_to_rgb($hex_color);
 
-        // Convert RGB to XYZ
+        / Convert RGB to XYZ
         $xyz = $this->rgb_to_xyz($rgb);
 
-        // Convert XYZ to Lab
+        / Convert XYZ to Lab
         return $this->xyz_to_lab($xyz);
     }
 
@@ -74,14 +74,14 @@ class Color_Utility {
      * @return array XYZ values.
      */
     private function rgb_to_xyz($rgb) {
-        // Convert RGB to linear RGB
+        / Convert RGB to linear RGB
         foreach ($rgb as &$val) {
             $val = ($val > 0.04045)
                 ? pow(($val + 0.055) / 1.055, 2.4)
                 : $val / 12.92;
         }
 
-        // Convert to XYZ using sRGB/D65 matrix
+        / Convert to XYZ using sRGB/D65 matrix
         return [
             'x' => $rgb['r'] * 0.4124 + $rgb['g'] * 0.3576 + $rgb['b'] * 0.1805,
             'y' => $rgb['r'] * 0.2126 + $rgb['g'] * 0.7152 + $rgb['b'] * 0.0722,
@@ -96,7 +96,7 @@ class Color_Utility {
      * @return array Lab values.
      */
     private function xyz_to_lab($xyz) {
-        // D65 reference white
+        / D65 reference white
         $ref_x = 0.95047;
         $ref_y = 1.00000;
         $ref_z = 1.08883;
@@ -125,7 +125,7 @@ class Color_Utility {
      * @return bool True if colors are visually distinct.
      */
     public function are_colors_distinct($colors) {
-        $min_difference = 25; // Minimum perceptual difference threshold
+        $min_difference = 25; / Minimum perceptual difference threshold
 
         foreach ($colors as $i => $color1) {
             foreach ($colors as $j => $color2) {
@@ -161,7 +161,7 @@ class Color_Utility {
             }
         }
 
-        // Return average difference, normalized to 0-100
+        / Return average difference, normalized to 0-100
         return min(100, array_sum($differences) / count($differences));
     }
 } 

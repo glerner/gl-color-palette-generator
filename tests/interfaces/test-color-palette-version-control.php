@@ -13,7 +13,7 @@ class ColorPaletteVersionControlTest extends TestCase {
     }
 
     public function test_create_version_returns_valid_version(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'colors' => ['#FF0000', '#00FF00', '#0000FF'],
             'name' => 'Test Palette'
@@ -49,10 +49,10 @@ class ColorPaletteVersionControlTest extends TestCase {
             ->with($palette, $metadata)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->versionControl->create_version($palette, $metadata);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('version_id', $result);
         $this->assertArrayHasKey('snapshot', $result);
@@ -61,7 +61,7 @@ class ColorPaletteVersionControlTest extends TestCase {
     }
 
     public function test_get_version_history_returns_complete_history(): void {
-        // Arrange
+        / Arrange
         $palette_id = 'pal_123';
         $options = [
             'limit' => 10,
@@ -104,10 +104,10 @@ class ColorPaletteVersionControlTest extends TestCase {
             ->with($palette_id, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->versionControl->get_version_history($palette_id, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('versions', $result);
         $this->assertArrayHasKey('timeline', $result);
@@ -116,7 +116,7 @@ class ColorPaletteVersionControlTest extends TestCase {
     }
 
     public function test_compare_versions_returns_detailed_comparison(): void {
-        // Arrange
+        / Arrange
         $version1_id = 'v1.0.0_abc123';
         $version2_id = 'v1.1.0_def456';
         $options = [
@@ -162,10 +162,10 @@ class ColorPaletteVersionControlTest extends TestCase {
             ->with($version1_id, $version2_id, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->versionControl->compare_versions($version1_id, $version2_id, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('differences', $result);
         $this->assertArrayHasKey('statistics', $result);
@@ -174,7 +174,7 @@ class ColorPaletteVersionControlTest extends TestCase {
     }
 
     public function test_restore_version_returns_restore_results(): void {
-        // Arrange
+        / Arrange
         $palette_id = 'pal_123';
         $version_id = 'v1.0.0_abc123';
         $options = [
@@ -207,10 +207,10 @@ class ColorPaletteVersionControlTest extends TestCase {
             ->with($palette_id, $version_id, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->versionControl->restore_version($palette_id, $version_id, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('restored_palette', $result);
         $this->assertArrayHasKey('backup_data', $result);

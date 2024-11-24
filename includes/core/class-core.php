@@ -8,7 +8,7 @@ class GLColorPaletteCore {
      * Initialize the core system
      */
     public function init() {
-        // Initialize dependency manager
+        / Initialize dependency manager
         $this->dependency_manager = new GLColorPaletteDependencyManager();
 
         if (!$this->dependency_manager->init()) {
@@ -16,10 +16,10 @@ class GLColorPaletteCore {
             return false;
         }
 
-        // Load core components
+        / Load core components
         $this->load_core_components();
 
-        // Register hooks if components loaded successfully
+        / Register hooks if components loaded successfully
         if (empty($this->dependency_manager->get_errors())) {
             $this->register_hooks();
             return true;
@@ -72,20 +72,20 @@ class GLColorPaletteCore {
      * Register WordPress hooks
      */
     private function register_hooks() {
-        // Admin hooks
+        / Admin hooks
         add_action('admin_menu', [$this->components['admin_interface'], 'register_menus']);
         add_action('admin_notices', [$this->components['admin_notices'], 'display_notices']);
         add_action('admin_enqueue_scripts', [$this->components['admin_interface'], 'enqueue_assets']);
 
-        // AJAX handlers
+        / AJAX handlers
         add_action('wp_ajax_gl_generate_palette', [$this->components['palette_generator'], 'ajax_generate']);
         add_action('wp_ajax_gl_analyze_palette', [$this->components['color_analytics'], 'ajax_analyze']);
         add_action('wp_ajax_gl_export_palette', [$this->components['color_exporter'], 'ajax_export']);
 
-        // REST API endpoints
+        / REST API endpoints
         add_action('rest_api_init', [$this, 'register_rest_routes']);
 
-        // Cron jobs
+        / Cron jobs
         add_action('gl_daily_cleanup', [$this->components['color_cache'], 'cleanup']);
         add_action('gl_process_analytics', [$this->components['color_analytics'], 'process_queue']);
     }
@@ -94,7 +94,7 @@ class GLColorPaletteCore {
      * Register REST API routes
      */
     private function register_rest_routes() {
-        // Register routes for each component that needs them
+        / Register routes for each component that needs them
         $this->components['palette_manager']->register_routes();
         $this->components['color_analytics']->register_routes();
         $this->components['documentation_generator']->register_routes();
@@ -121,7 +121,7 @@ class GLColorPaletteCore {
             'palette_manager',
             'admin_interface',
             'settings_manager',
-            // ... other core components
+            / ... other core components
         ];
 
         foreach ($core_components as $component) {

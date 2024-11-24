@@ -6,7 +6,7 @@ class ColorExportSystem {
     private $asset_generator;
     private $batch_processor;
 
-    // Export system configurations
+    / Export system configurations
     private const EXPORT_CONFIGURATIONS = [
         'format_handlers' => [
             'vector_formats' => [
@@ -189,7 +189,7 @@ class ColorExportSystem {
      */
     public function export_palette($palette, $format, $options = []) {
         if (is_string($format)) {
-            // Original single-format export logic
+            / Original single-format export logic
             return [
                 'exported_files' => $this->generate_exports($palette, $format),
                 'metadata' => $this->generate_metadata($palette),
@@ -198,7 +198,7 @@ class ColorExportSystem {
             ];
         }
 
-        // Multi-format export logic
+        / Multi-format export logic
         $results = [];
         $exporter = new ColorExporter();
 

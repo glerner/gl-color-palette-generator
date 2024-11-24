@@ -14,6 +14,8 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
 use GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator;
+use GL_Color_Palette_Generator\Color_Management\Color_Palette_Exporter;
+use GL_Color_Palette_Generator\Color_Management\Accessibility_Checker;
 
 /**
  * Class Rest_Controller
@@ -90,6 +92,55 @@ class Rest_Controller {
                     'id' => [
                         'required' => true,
                         'type' => 'integer',
+                    ],
+                ],
+            ]
+        );
+
+        register_rest_route(
+            $this->namespace,
+            '/export',
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$this, 'export_palettes'],
+                'permission_callback' => [$this, 'check_permission'],
+                'args' => [
+                    'format' => [
+                        'required' => true,
+                        'type' => 'string',
+                        'enum' => ['json', 'csv'],
+                    ],
+                ],
+            ]
+        );
+
+        register_rest_route(
+            $this->namespace,
+            '/import',
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'import_palettes'],
+                'permission_callback' => [$this, 'check_permission'],
+            ]
+        );
+
+        register_rest_route(
+            $this->namespace,
+            '/check-contrast',
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'check_contrast'],
+                'permission_callback' => [$this, 'check_permission'],
+                'args' => [
+                    'text_color' => [
+                        'required' => true,
+                        'type' => 'string',
+                        'pattern' => '^#[0-9a-fA-F]{6}$',
+                    ],
+                    'bg_color' => [
+                        'required' => true,
+                        'type' => 'string',
+                        'pattern' => '^#[0-9a-fA-F]{6}$',
                     ],
                 ],
             ]
@@ -229,5 +280,161 @@ class Rest_Controller {
         return new WP_REST_Response([
             'message' => __('Palette deleted successfully.', 'gl-color-palette-generator'),
         ], 200);
+    }
+
+    /**
+     * Export palettes
+     *
+     * @param WP_REST_Request $request Request object.
+     * @return WP_REST_Response|WP_Error Response object.
+     */
+    public function export_palettes($request) {
+        try {
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'gl_color_palettes';
+
+            $palettes = $wpdb->get_results(
+                "SELECT * FROM {$table_name} ORDER BY created_at DESC",
+                ARRAY_A
+            );
+
+            if ($palettes === false) {
+                return new WP_Error(
+                    'database_error',
+                    __('Error retrieving palettes.', 'gl-color-palette-generator'),
+                    ['status' => 500]
+                );
+            }
+
+            $exporter = new Color_Palette_Exporter();
+            $format = $request->get_param('format');
+
+            if ($format === 'csv') {
+                $content = $exporter->export_to_csv($palettes);
+                $mime_type = 'text/csv';
+                $filename = 'color-palettes.csv';
+            } else {
+                $content = $exporter->export_to_json($palettes);
+                $mime_type = 'application/json';
+                $filename = 'color-palettes.json';
+            }
+
+            $response = new WP_REST_Response([
+                'content' => $content,
+                'filename' => $filename,
+                'mime_type' => $mime_type
+            ]);
+
+            $response->header('Content-Type', $mime_type);
+            $response->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+            return $response;
+
+        } catch (\Exception $e) {
+            return new WP_Error(
+                'export_error',
+                $e->getMessage(),
+                ['status' => 500]
+            );
+        }
+    }
+
+    /**
+     * Import palettes
+     *
+     * @param WP_REST_Request $request Request object.
+     * @return WP_REST_Response|WP_Error Response object.
+     */
+    public function import_palettes($request) {
+        try {
+            $file = $request->get_file_params()['file'];
+            if (!$file || $file['error']) {
+                return new WP_Error(
+                    'upload_error',
+                    __('Error uploading file.', 'gl-color-palette-generator'),
+                    ['status' => 400]
+                );
+            }
+
+            $content = file_get_contents($file['tmp_name']);
+            $exporter = new Color_Palette_Exporter();
+
+            // Determine format from file extension
+            $format = pathinfo($file['name'], PATHINFO_EXTENSION);
+            if ($format === 'csv') {
+                $palettes = $exporter->import_from_csv($content);
+            } else {
+                $palettes = $exporter->import_from_json($content);
+            }
+
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'gl_color_palettes';
+            $imported = 0;
+
+            foreach ($palettes as $palette) {
+                $result = $wpdb->insert(
+                    $table_name,
+                    [
+                        'name' => $palette['name'],
+                        'colors' => wp_json_encode($palette['colors']),
+                        'created_at' => current_time('mysql'),
+                        'updated_at' => current_time('mysql')
+                    ],
+                    ['%s', '%s', '%s', '%s']
+                );
+
+                if ($result) {
+                    $imported++;
+                }
+            }
+
+            return new WP_REST_Response([
+                'message' => sprintf(
+                    __('Successfully imported %d palettes.', 'gl-color-palette-generator'),
+                    $imported
+                ),
+                'imported_count' => $imported
+            ], 200);
+
+        } catch (\Exception $e) {
+            return new WP_Error(
+                'import_error',
+                $e->getMessage(),
+                ['status' => 500]
+            );
+        }
+    }
+
+    /**
+     * Check color contrast
+     *
+     * @param WP_REST_Request $request Request object.
+     * @return WP_REST_Response|WP_Error Response object.
+     */
+    public function check_contrast($request) {
+        try {
+            $text_color = $request->get_param('text_color');
+            $bg_color = $request->get_param('bg_color');
+
+            if (!$text_color || !$bg_color) {
+                return new WP_Error(
+                    'missing_colors',
+                    __('Both text and background colors are required.', 'gl-color-palette-generator'),
+                    ['status' => 400]
+                );
+            }
+
+            $checker = new Accessibility_Checker();
+            $results = $checker->check_combination($text_color, $bg_color);
+
+            return new WP_REST_Response($results, 200);
+
+        } catch (\Exception $e) {
+            return new WP_Error(
+                'contrast_check_error',
+                $e->getMessage(),
+                ['status' => 500]
+            );
+        }
     }
 } 

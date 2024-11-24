@@ -2,10 +2,10 @@
 namespace GLColorPalette;
 
 class PsychologicalEffects {
-    // Adding to the existing PSYCHOLOGICAL_EFFECTS constant
+    / Adding to the existing PSYCHOLOGICAL_EFFECTS constant
     private const PSYCHOLOGICAL_EFFECTS = [
         'cognitive_impacts' => [
-            // ... (previous effects remain) ...
+            / ... (previous effects remain) ...
 
             'problem_solving' => [
                 'blue' => [
@@ -161,5 +161,5 @@ class PsychologicalEffects {
         ]
     ];
 
-    // ... (existing methods remain the same) ...
+    / ... (existing methods remain the same) ...
 }

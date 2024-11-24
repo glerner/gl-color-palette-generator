@@ -6,7 +6,7 @@ class DocumentationGenerator {
     private $template_engine;
     private $asset_compiler;
 
-    // Documentation generator configurations
+    / Documentation generator configurations
     private const DOCUMENTATION_CONFIGURATIONS = [
         'style_guides' => [
             'brand_guidelines' => [

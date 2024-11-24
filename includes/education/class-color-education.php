@@ -6,7 +6,7 @@ class ColorEducation {
     private $progress_analyzer;
     private $interaction_manager;
 
-    // Comprehensive education system structure
+    / Comprehensive education system structure
     private const EDUCATION_MODULES = [
         'fundamentals' => [
             'color_theory_basics' => [

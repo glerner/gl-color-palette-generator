@@ -11,10 +11,10 @@
  * @example
  * $storage = new Color_Palette_Storage();
  *
- * // Store a palette
+ * / Store a palette
  * $id = $storage->store($palette);
  *
- * // Retrieve a palette
+ * / Retrieve a palette
  * $palette = $storage->get($id);
  */
 
@@ -172,7 +172,7 @@ class Color_Palette_Storage {
      * @return Color_Palette|WP_Error Palette on success, WP_Error if not found.
      */
     public function get(string $id): Color_Palette|WP_Error {
-        // Check cache first
+        / Check cache first
         $cached = $this->cache->get($id);
         if ($cached instanceof Color_Palette) {
             return $cached;
@@ -336,7 +336,7 @@ class Color_Palette_Storage {
         $where = "1=1";
         $params = [];
 
-        // Handle meta query
+        / Handle meta query
         if (!empty($args['meta'])) {
             foreach ($args['meta'] as $key => $value) {
                 $where .= " AND metadata LIKE %s";
@@ -594,7 +594,7 @@ class Color_Palette_Storage {
             ));
         }
 
-        // If we have meta filters, we need to count matching palettes
+        / If we have meta filters, we need to count matching palettes
         $palettes = $this->list(['limit' => PHP_INT_MAX]);
         $count = 0;
 

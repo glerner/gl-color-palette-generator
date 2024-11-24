@@ -8,7 +8,7 @@ class ProviderSelector {
     private $availability_checker;
     private $quality_tracker;
 
-    // Provider capabilities and characteristics
+    / Provider capabilities and characteristics
     private $provider_specs = [
         'openai' => [
             'models' => [
@@ -51,7 +51,7 @@ class ProviderSelector {
                 'tpm' => 100000
             ]
         ],
-        // ... additional providers
+        / ... additional providers
     ];
 
     public function __construct() {
@@ -66,25 +66,25 @@ class ProviderSelector {
      * Select optimal provider based on requirements
      */
     public function select_provider($requirements = []) {
-        // Get available providers
+        / Get available providers
         $available_providers = $this->get_available_providers();
 
-        // Filter by requirements
+        / Filter by requirements
         $eligible_providers = $this->filter_eligible_providers(
             $available_providers,
             $requirements
         );
 
-        // Score providers
+        / Score providers
         $scored_providers = $this->score_providers(
             $eligible_providers,
             $requirements
         );
 
-        // Select best provider
+        / Select best provider
         $selected_provider = $this->select_best_provider($scored_providers);
 
-        // Log selection
+        / Log selection
         $this->log_provider_selection($selected_provider, $requirements);
 
         return $selected_provider;
@@ -112,21 +112,21 @@ class ProviderSelector {
      */
     private function filter_eligible_providers($providers, $requirements) {
         return array_filter($providers, function($provider_data) use ($requirements) {
-            // Check budget constraints
+            / Check budget constraints
             if (isset($requirements['max_cost'])) {
                 if ($provider_data['current_costs']['cost_per_request'] > $requirements['max_cost']) {
                     return false;
                 }
             }
 
-            // Check quality requirements
+            / Check quality requirements
             if (isset($requirements['min_quality'])) {
                 if ($provider_data['quality_metrics']['average_score'] < $requirements['min_quality']) {
                     return false;
                 }
             }
 
-            // Check feature requirements
+            / Check feature requirements
             if (isset($requirements['required_features'])) {
                 foreach ($requirements['required_features'] as $feature) {
                     if (!in_array($feature, $provider_data['features'])) {
@@ -135,7 +135,7 @@ class ProviderSelector {
                 }
             }
 
-            // Check response time requirements
+            / Check response time requirements
             if (isset($requirements['max_response_time'])) {
                 if ($provider_data['current_performance']['avg_response_time'] >
                     $requirements['max_response_time']) {
@@ -143,7 +143,7 @@ class ProviderSelector {
                 }
             }
 
-            // Check token requirements
+            / Check token requirements
             if (isset($requirements['required_tokens'])) {
                 $has_suitable_model = false;
                 foreach ($provider_data['models'] as $model) {
@@ -170,22 +170,22 @@ class ProviderSelector {
         foreach ($providers as $provider => $data) {
             $score = 0;
 
-            // Quality score (0-40 points)
+            / Quality score (0-40 points)
             $score += $data['quality_metrics']['average_score'] * 40;
 
-            // Performance score (0-20 points)
+            / Performance score (0-20 points)
             $performance_score = $this->calculate_performance_score($data['current_performance']);
             $score += $performance_score * 20;
 
-            // Cost efficiency score (0-20 points)
+            / Cost efficiency score (0-20 points)
             $cost_score = $this->calculate_cost_efficiency_score($data['current_costs']);
             $score += $cost_score * 20;
 
-            // Reliability score (0-20 points)
+            / Reliability score (0-20 points)
             $reliability_score = $this->calculate_reliability_score($data);
             $score += $reliability_score * 20;
 
-            // Apply requirement-specific weights
+            / Apply requirement-specific weights
             $score = $this->apply_requirement_weights($score, $data, $requirements);
 
             $scored[$provider] = [
@@ -287,7 +287,7 @@ class ProviderSelector {
             ]
         ];
 
-        // Log to database or monitoring system
+        / Log to database or monitoring system
         do_action('color_palette_provider_selection', $log_data);
     }
 

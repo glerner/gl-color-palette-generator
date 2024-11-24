@@ -6,13 +6,13 @@ class AccessibilityChecker {
     private $error_handler;
     private $cache;
 
-    // WCAG 2.1 contrast ratios
+    / WCAG 2.1 contrast ratios
     const WCAG_AAA_NORMAL = 7.0;
     const WCAG_AAA_LARGE = 4.5;
     const WCAG_AA_NORMAL = 4.5;
     const WCAG_AA_LARGE = 3.0;
 
-    // Color blindness types
+    / Color blindness types
     private $color_vision_types = [
         'protanopia' => 'red-blind',
         'deuteranopia' => 'green-blind',
@@ -39,7 +39,7 @@ class AccessibilityChecker {
                 'distinguishability' => $this->check_distinguishability($foreground, $background)
             ];
 
-            // Add recommendations if needed
+            / Add recommendations if needed
             if (!$results['wcag_compliance']['passes_aa'] || !$results['color_blindness']['is_safe']) {
                 $results['recommendations'] = $this->generate_recommendations($foreground, $background, $results);
             }
@@ -75,12 +75,12 @@ class AccessibilityChecker {
     private function get_relative_luminance($hex) {
         $rgb = $this->hex_to_rgb($hex);
 
-        // Convert to sRGB
+        / Convert to sRGB
         $r = $this->to_srgb($rgb['r'] / 255);
         $g = $this->to_srgb($rgb['g'] / 255);
         $b = $this->to_srgb($rgb['b'] / 255);
 
-        // Calculate luminance
+        / Calculate luminance
         return 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
     }
 
@@ -163,17 +163,17 @@ class AccessibilityChecker {
     private function generate_recommendations($foreground, $background, $results) {
         $recommendations = [];
 
-        // Check contrast ratio
+        / Check contrast ratio
         if ($results['contrast_ratio'] < self::WCAG_AA_NORMAL) {
             $recommendations[] = $this->suggest_contrast_improvement($foreground, $background);
         }
 
-        // Check color blindness issues
+        / Check color blindness issues
         if (!$results['color_blindness']['is_safe']) {
             $recommendations[] = $this->suggest_color_blind_safe_alternatives($foreground, $background);
         }
 
-        // Check readability
+        / Check readability
         if ($results['readability']['brightness_difference'] < 125) {
             $recommendations[] = $this->suggest_brightness_adjustment($foreground, $background);
         }
@@ -211,10 +211,10 @@ class AccessibilityChecker {
     }
 
     private function simulate_color_blindness($hex, $type) {
-        // Implement color blindness simulation algorithms
-        // This would use color vision deficiency simulation matrices
-        // Return simulated color in hex
-        return $hex; // Placeholder
+        / Implement color blindness simulation algorithms
+        / This would use color vision deficiency simulation matrices
+        / Return simulated color in hex
+        return $hex; / Placeholder
     }
 
     /**

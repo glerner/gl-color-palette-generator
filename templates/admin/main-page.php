@@ -72,4 +72,44 @@ if (!defined('ABSPATH')) {
             <?php endif; ?>
         </div>
     </div>
+
+    <div class="gl-cpg-tools-section">
+        <h2><?php esc_html_e('Palette Tools', 'gl-color-palette-generator'); ?></h2>
+
+        <!-- Export/Import Section -->
+        <div class="gl-cpg-export-import">
+            <h3><?php esc_html_e('Export/Import', 'gl-color-palette-generator'); ?></h3>
+            <div class="gl-cpg-button-group">
+                <button class="button gl-cpg-export" data-format="json">
+                    <?php esc_html_e('Export JSON', 'gl-color-palette-generator'); ?>
+                </button>
+                <button class="button gl-cpg-export" data-format="csv">
+                    <?php esc_html_e('Export CSV', 'gl-color-palette-generator'); ?>
+                </button>
+                <button class="button gl-cpg-import">
+                    <?php esc_html_e('Import Palettes', 'gl-color-palette-generator'); ?>
+                </button>
+            </div>
+            <input type="file" id="gl-cpg-import-file" accept=".json,.csv" style="display: none;">
+        </div>
+
+        <!-- Accessibility Checker Section -->
+        <div class="gl-cpg-accessibility">
+            <h3><?php esc_html_e('Accessibility Checker', 'gl-color-palette-generator'); ?></h3>
+            <div class="gl-cpg-color-picker-group">
+                <div class="gl-cpg-color-input">
+                    <label><?php esc_html_e('Text Color', 'gl-color-palette-generator'); ?></label>
+                    <input type="color" id="gl-cpg-text-color" value="#000000">
+                </div>
+                <div class="gl-cpg-color-input">
+                    <label><?php esc_html_e('Background Color', 'gl-color-palette-generator'); ?></label>
+                    <input type="color" id="gl-cpg-bg-color" value="#ffffff">
+                </div>
+                <button class="button gl-cpg-check-contrast">
+                    <?php esc_html_e('Check Contrast', 'gl-color-palette-generator'); ?>
+                </button>
+            </div>
+            <div id="gl-cpg-accessibility-results" class="gl-cpg-results hidden"></div>
+        </div>
+    </div>
 </div>

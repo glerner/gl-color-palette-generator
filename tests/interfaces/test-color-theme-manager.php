@@ -13,7 +13,7 @@ class ColorThemeManagerTest extends TestCase {
     }
 
     public function test_create_theme_returns_valid_structure(): void {
-        // Arrange
+        / Arrange
         $scheme = [
             'primary' => '#FF0000',
             'secondary' => '#00FF00',
@@ -54,10 +54,10 @@ class ColorThemeManagerTest extends TestCase {
             ->with($scheme, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->manager->create_theme($scheme, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('id', $result);
         $this->assertArrayHasKey('light', $result);
@@ -66,7 +66,7 @@ class ColorThemeManagerTest extends TestCase {
     }
 
     public function test_apply_theme_returns_formatted_output(): void {
-        // Arrange
+        / Arrange
         $theme = [
             'light' => [
                 'primary' => '#FF0000',
@@ -99,10 +99,10 @@ class ColorThemeManagerTest extends TestCase {
             ->with($theme, $platform, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->manager->apply_theme($theme, $platform, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('content', $result);
         $this->assertArrayHasKey('filename', $result);
@@ -110,7 +110,7 @@ class ColorThemeManagerTest extends TestCase {
     }
 
     public function test_validate_theme_performs_comprehensive_validation(): void {
-        // Arrange
+        / Arrange
         $theme = [
             'light' => ['primary' => '#FF0000'],
             'dark' => ['primary' => '#CC0000']
@@ -136,10 +136,10 @@ class ColorThemeManagerTest extends TestCase {
             ->with($theme, $platforms)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->manager->validate_theme($theme, $platforms);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('is_valid', $result);
         $this->assertArrayHasKey('compatibility', $result);
@@ -148,7 +148,7 @@ class ColorThemeManagerTest extends TestCase {
     }
 
     public function test_generate_variations_returns_valid_variants(): void {
-        // Arrange
+        / Arrange
         $theme = [
             'light' => ['primary' => '#FF0000']
         ];
@@ -184,10 +184,10 @@ class ColorThemeManagerTest extends TestCase {
             ->with($theme, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->manager->generate_variations($theme, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('variants', $result);
         $this->assertArrayHasKey('relationships', $result);

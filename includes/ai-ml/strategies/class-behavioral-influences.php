@@ -6,7 +6,7 @@ class BehavioralInfluences {
     private $response_tracker;
     private $context_evaluator;
 
-    // Comprehensive behavioral influence mapping
+    / Comprehensive behavioral influence mapping
     private const BEHAVIORAL_INFLUENCES = [
         'decision_making' => [
             'purchase_behavior' => [

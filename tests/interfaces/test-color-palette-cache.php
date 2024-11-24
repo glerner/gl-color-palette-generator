@@ -13,7 +13,7 @@ class ColorPaletteCacheTest extends TestCase {
     }
 
     public function test_store_caches_palette_data(): void {
-        // Arrange
+        / Arrange
         $key = 'palette:123';
         $data = [
             'colors' => ['#FF0000', '#00FF00'],
@@ -47,10 +47,10 @@ class ColorPaletteCacheTest extends TestCase {
             ->with($key, $data, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->cache->store($key, $data, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('cached', $result);
         $this->assertArrayHasKey('cache_key', $result);
@@ -60,7 +60,7 @@ class ColorPaletteCacheTest extends TestCase {
     }
 
     public function test_retrieve_returns_cached_data(): void {
-        // Arrange
+        / Arrange
         $key = 'palette:123';
         $options = [
             'refresh' => false,
@@ -90,10 +90,10 @@ class ColorPaletteCacheTest extends TestCase {
             ->with($key, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->cache->retrieve($key, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('data', $result);
         $this->assertArrayHasKey('found', $result);
@@ -103,7 +103,7 @@ class ColorPaletteCacheTest extends TestCase {
     }
 
     public function test_invalidate_removes_cached_data(): void {
-        // Arrange
+        / Arrange
         $identifier = 'palette:123';
         $options = [
             'scope' => 'key',
@@ -126,10 +126,10 @@ class ColorPaletteCacheTest extends TestCase {
             ->with($identifier, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->cache->invalidate($identifier, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('invalidated', $result);
         $this->assertArrayHasKey('affected', $result);
@@ -139,7 +139,7 @@ class ColorPaletteCacheTest extends TestCase {
     }
 
     public function test_manage_returns_cache_statistics(): void {
-        // Arrange
+        / Arrange
         $operation = 'stats';
         $params = [
             'metrics' => ['hits', 'size', 'efficiency'],
@@ -172,10 +172,10 @@ class ColorPaletteCacheTest extends TestCase {
             ->with($operation, $params)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->cache->manage($operation, $params);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('statistics', $result);
         $this->assertArrayHasKey('health', $result);

@@ -13,7 +13,7 @@ class ColorPaletteValidatorTest extends TestCase {
     }
 
     public function test_validate_colors_checks_values(): void {
-        // Arrange
+        / Arrange
         $colors = ['#FF0000', '#00FF00', '#0000FF'];
         $rules = [
             'formats' => ['hex'],
@@ -38,10 +38,10 @@ class ColorPaletteValidatorTest extends TestCase {
             ->with($colors, $rules)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->validator->validate_colors($colors, $rules);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('valid', $result);
         $this->assertArrayHasKey('errors', $result);
@@ -51,7 +51,7 @@ class ColorPaletteValidatorTest extends TestCase {
     }
 
     public function test_validate_structure_checks_schema(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00'],
@@ -79,10 +79,10 @@ class ColorPaletteValidatorTest extends TestCase {
             ->with($palette, $schema)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->validator->validate_structure($palette, $schema);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('valid', $result);
         $this->assertArrayHasKey('errors', $result);
@@ -92,7 +92,7 @@ class ColorPaletteValidatorTest extends TestCase {
     }
 
     public function test_validate_relationships_checks_harmony(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00', '#0000FF']
@@ -121,10 +121,10 @@ class ColorPaletteValidatorTest extends TestCase {
             ->with($palette, $rules)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->validator->validate_relationships($palette, $rules);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('valid', $result);
         $this->assertArrayHasKey('errors', $result);
@@ -134,7 +134,7 @@ class ColorPaletteValidatorTest extends TestCase {
     }
 
     public function test_validate_accessibility_checks_standards(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#FFFFFF']
@@ -163,10 +163,10 @@ class ColorPaletteValidatorTest extends TestCase {
             ->with($palette, $standards)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->validator->validate_accessibility($palette, $standards);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('compliant', $result);
         $this->assertArrayHasKey('violations', $result);

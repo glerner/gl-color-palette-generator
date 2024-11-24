@@ -13,7 +13,7 @@ class ColorSchemeGeneratorTest extends TestCase {
     }
 
     public function test_generate_scheme_returns_complete_scheme(): void {
-        // Arrange
+        / Arrange
         $criteria = [
             'base_color' => '#FF0000',
             'style' => 'modern',
@@ -56,10 +56,10 @@ class ColorSchemeGeneratorTest extends TestCase {
             ->with($criteria)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->generator->generate_scheme($criteria);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('primary', $result);
         $this->assertArrayHasKey('secondary', $result);
@@ -69,7 +69,7 @@ class ColorSchemeGeneratorTest extends TestCase {
     }
 
     public function test_get_color_variations_returns_valid_variations(): void {
-        // Arrange
+        / Arrange
         $base_color = '#FF0000';
         $role = 'primary';
         $options = [
@@ -97,10 +97,10 @@ class ColorSchemeGeneratorTest extends TestCase {
             ->with($base_color, $role, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->generator->get_color_variations($base_color, $role, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('colors', $result);
         $this->assertArrayHasKey('metadata', $result);
@@ -108,7 +108,7 @@ class ColorSchemeGeneratorTest extends TestCase {
     }
 
     public function test_generate_semantic_colors_returns_valid_assignments(): void {
-        // Arrange
+        / Arrange
         $base_scheme = [
             'primary' => '#FF0000',
             'secondary' => '#00FF00'
@@ -141,10 +141,10 @@ class ColorSchemeGeneratorTest extends TestCase {
             ->with($base_scheme, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->generator->generate_semantic_colors($base_scheme, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('colors', $result);
         $this->assertArrayHasKey('rationale', $result);
@@ -152,7 +152,7 @@ class ColorSchemeGeneratorTest extends TestCase {
     }
 
     public function test_analyze_scheme_returns_comprehensive_analysis(): void {
-        // Arrange
+        / Arrange
         $scheme = [
             'primary' => '#FF0000',
             'secondary' => '#00FF00',
@@ -185,10 +185,10 @@ class ColorSchemeGeneratorTest extends TestCase {
             ->with($scheme)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->generator->analyze_scheme($scheme);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('is_valid', $result);
         $this->assertArrayHasKey('accessibility', $result);

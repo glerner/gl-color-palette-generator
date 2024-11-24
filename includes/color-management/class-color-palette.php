@@ -70,7 +70,7 @@ class Color_Palette {
     public function set_metadata(array $metadata): void {
         $this->metadata = array_merge($this->metadata, $metadata);
 
-        // Ensure timestamps are set
+        / Ensure timestamps are set
         if (empty($this->metadata['created'])) {
             $this->metadata['created'] = current_time('mysql');
         }

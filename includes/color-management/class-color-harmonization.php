@@ -6,7 +6,7 @@ class ColorHarmonization {
     private $harmony_calculator;
     private $context_evaluator;
 
-    // Advanced harmony configurations
+    / Advanced harmony configurations
     private const HARMONY_RULES = [
         'classical_harmonies' => [
             'complementary' => [
@@ -154,7 +154,7 @@ class ColorHarmonization {
             'recommendations' => []
         ];
 
-        // Add specific recommendations if needed
+        / Add specific recommendations if needed
         if ($validation['contrast_scores']['minimum'] < 4.5) {
             $validation['is_valid'] = false;
             $validation['recommendations'][] = [

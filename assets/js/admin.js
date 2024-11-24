@@ -22,6 +22,8 @@
         init: function() {
             this.bindEvents();
             this.initColorPicker();
+            this.exportImport.init();
+            this.accessibilityChecker.init();
         },
 
         /**
@@ -239,6 +241,150 @@
                     $(this).remove();
                 });
             }, 3000);
+        },
+
+        /**
+         * Export/Import functionality
+         */
+        exportImport: {
+            init: function() {
+                $('.gl-cpg-export').on('click', this.handleExport);
+                $('.gl-cpg-import').on('click', this.handleImportClick);
+                $('#gl-cpg-import-file').on('change', this.handleImportFile);
+            },
+
+            handleExport: function(e) {
+                const format = $(this).data('format');
+
+                $.ajax({
+                    url: ajaxurl,
+                    method: 'POST',
+                    data: {
+                        action: 'gl_cpg_export_palettes',
+                        format: format,
+                        nonce: gl_cpg_vars.nonce
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            const blob = new Blob([response.data], {
+                                type: format === 'json' ? 'application/json' : 'text/csv'
+                            });
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `color-palettes.${format}`;
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                        }
+                    }
+                });
+            },
+
+            handleImportClick: function() {
+                $('#gl-cpg-import-file').click();
+            },
+
+            handleImportFile: function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const formData = new FormData();
+                    formData.append('action', 'gl_cpg_import_palettes');
+                    formData.append('file', file);
+                    formData.append('nonce', gl_cpg_vars.nonce);
+
+                    $.ajax({
+                        url: ajaxurl,
+                        method: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            if (response.success) {
+                                location.reload();
+                            }
+                        }
+                    });
+                };
+                reader.readAsText(file);
+            }
+        },
+
+        /**
+         * Accessibility checker functionality
+         */
+        accessibilityChecker: {
+            init: function() {
+                $('.gl-cpg-check-contrast').on('click', this.checkContrast);
+                $('#gl-cpg-text-color, #gl-cpg-bg-color').on('change', this.updatePreview);
+            },
+
+            checkContrast: function() {
+                const textColor = $('#gl-cpg-text-color').val();
+                const bgColor = $('#gl-cpg-bg-color').val();
+
+                $.ajax({
+                    url: ajaxurl,
+                    method: 'POST',
+                    data: {
+                        action: 'gl_cpg_check_contrast',
+                        text_color: textColor,
+                        bg_color: bgColor,
+                        nonce: gl_cpg_vars.nonce
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            const results = response.data;
+                            const $results = $('#gl-cpg-accessibility-results');
+
+                            $results.removeClass('hidden pass fail')
+                                   .addClass(results.aa_large ? 'pass' : 'fail');
+
+                            let html = `
+                                <h4>${__('Contrast Ratio', 'gl-color-palette-generator')}: ${results.contrast_ratio}</h4>
+                                <ul>
+                                    <li>WCAG AA (Large Text): ${results.aa_large ? '✓' : '✗'}</li>
+                                    <li>WCAG AA (Small Text): ${results.aa_small ? '✓' : '✗'}</li>
+                                    <li>WCAG AAA (Large Text): ${results.aaa_large ? '✓' : '✗'}</li>
+                                    <li>WCAG AAA (Small Text): ${results.aaa_small ? '✓' : '✗'}</li>
+                                </ul>
+                            `;
+
+                            if (results.recommendations.length > 0) {
+                                html += `
+                                    <h4>${__('Recommendations', 'gl-color-palette-generator')}:</h4>
+                                    <ul>
+                                        ${results.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                                    </ul>
+                                `;
+                            }
+
+                            $results.html(html);
+                        }
+                    }
+                });
+            },
+
+            updatePreview: function() {
+                const textColor = $('#gl-cpg-text-color').val();
+                const bgColor = $('#gl-cpg-bg-color').val();
+
+                const $preview = $('.gl-cpg-contrast-preview');
+                if (!$preview.length) {
+                    $('#gl-cpg-accessibility-results').before(`
+                        <div class="gl-cpg-contrast-preview">
+                            <p style="margin: 0;">${__('Preview Text', 'gl-color-palette-generator')}</p>
+                        </div>
+                    `);
+                }
+
+                $('.gl-cpg-contrast-preview').css({
+                    color: textColor,
+                    backgroundColor: bgColor
+                });
+            }
         }
     };
 

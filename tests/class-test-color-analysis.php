@@ -13,22 +13,22 @@ class Test_Color_Analysis extends WP_UnitTestCase {
         parent::setUp();
         $this->analyzer = new Color_Analysis();
 
-        // Test palette with known properties
+        / Test palette with known properties
         $this->test_colors = [
             'primary' => [
-                'hex' => '#2C3E50', // Cool, dark blue
+                'hex' => '#2C3E50', / Cool, dark blue
                 'name' => 'Deep Blue'
             ],
             'secondary' => [
-                'hex' => '#E74C3C', // Warm red
+                'hex' => '#E74C3C', / Warm red
                 'name' => 'Bright Red'
             ],
             'tertiary' => [
-                'hex' => '#3498DB', // Cool blue
+                'hex' => '#3498DB', / Cool blue
                 'name' => 'Sky Blue'
             ],
             'accent' => [
-                'hex' => '#F1C40F', // Warm yellow
+                'hex' => '#F1C40F', / Warm yellow
                 'name' => 'Sunny Yellow'
             ]
         ];
@@ -40,19 +40,19 @@ class Test_Color_Analysis extends WP_UnitTestCase {
     public function test_harmony_analysis(): void {
         $harmony = $this->analyzer->analyze_harmony($this->test_colors);
 
-        // Test structure
+        / Test structure
         $this->assertArrayHasKey('scheme_type', $harmony);
         $this->assertArrayHasKey('balance', $harmony);
         $this->assertArrayHasKey('temperature', $harmony);
         $this->assertArrayHasKey('recommendations', $harmony);
 
-        // Test temperature analysis
+        / Test temperature analysis
         $temp = $harmony['temperature'];
         $this->assertArrayHasKey('dominant', $temp);
         $this->assertArrayHasKey('distribution', $temp);
-        $this->assertEquals('mixed', $temp['balance']); // Should be mixed warm/cool
+        $this->assertEquals('mixed', $temp['balance']); / Should be mixed warm/cool
 
-        // Test balance
+        / Test balance
         $balance = $harmony['balance'];
         $this->assertArrayHasKey('lightness', $balance);
         $this->assertArrayHasKey('saturation', $balance);
@@ -67,15 +67,15 @@ class Test_Color_Analysis extends WP_UnitTestCase {
         $harmony = $this->analyzer->analyze_harmony($this->test_colors);
         $contrast = $harmony['contrast_levels'];
 
-        // Test structure
+        / Test structure
         $this->assertArrayHasKey('pairs', $contrast);
         $this->assertArrayHasKey('average', $contrast);
         $this->assertArrayHasKey('min', $contrast);
         $this->assertArrayHasKey('max', $contrast);
 
-        // Test contrast calculations
+        / Test contrast calculations
         $this->assertGreaterThan(0, $contrast['min']);
-        $this->assertLessThanOrEqual(21, $contrast['max']); // Max possible contrast is 21
+        $this->assertLessThanOrEqual(21, $contrast['max']); / Max possible contrast is 21
         $this->assertGreaterThan($contrast['min'], $contrast['max']);
     }
 
@@ -99,8 +99,8 @@ class Test_Color_Analysis extends WP_UnitTestCase {
      */
     public function test_complementary_detection(): void {
         $complementary_colors = [
-            ['hex' => '#FF0000'], // Red
-            ['hex' => '#00FFFF']  // Cyan
+            ['hex' => '#FF0000'], / Red
+            ['hex' => '#00FFFF']  / Cyan
         ];
 
         $harmony = $this->analyzer->analyze_harmony($complementary_colors);
@@ -114,13 +114,13 @@ class Test_Color_Analysis extends WP_UnitTestCase {
         $harmony = $this->analyzer->analyze_harmony($this->test_colors);
         $temp = $harmony['temperature'];
 
-        // Test warm colors are detected
+        / Test warm colors are detected
         $this->assertArrayHasKey('warm', $temp['distribution']);
 
-        // Test cool colors are detected
+        / Test cool colors are detected
         $this->assertArrayHasKey('cool', $temp['distribution']);
 
-        // Test mixed temperature balance
+        / Test mixed temperature balance
         $this->assertEquals('mixed', $temp['balance']);
     }
 } 

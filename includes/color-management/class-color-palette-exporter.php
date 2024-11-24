@@ -1,260 +1,135 @@
 <?php
 /**
- * Color Palette Exporter
+ * Color Palette Exporter Class
  *
- * @package GLColorPalette
- * @since 1.0.0
+ * @package GL_Color_Palette_Generator
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
  */
 
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator\Color_Management;
 
 /**
  * Class Color_Palette_Exporter
- *
- * Exports color palettes in various formats:
- * - CSS Variables
- * - SCSS Variables
- * - JSON
- * - Adobe ASE
- * - Sketch Palette
- * - SVG Swatches
- *
- * @since 1.0.0
  */
-class Color_Palette_Exporter {
+class Color_Palette_Exporter implements \GL_Color_Palette_Generator\Interfaces\Color_Palette_Exporter {
     /**
-     * Export formats supported by the exporter
-     * @var array
+     * Export palettes to JSON
+     *
+     * @param array $palettes Array of palettes to export.
+     * @return string JSON string.
      */
-    private $supported_formats = [
-        'css',
-        'scss',
-        'json',
-        'ase',
-        'sketch',
-        'svg'
-    ];
+    public function export_to_json($palettes) {
+        $export_data = [
+            'version' => GL_CPG_VERSION,
+            'exported_at' => current_time('mysql'),
+            'palettes' => $palettes
+        ];
+
+        return wp_json_encode($export_data, JSON_PRETTY_PRINT);
+    }
 
     /**
-     * Export a palette to a specific format
+     * Export palettes to CSV
      *
-     * @param Color_Palette $palette Palette to export
-     * @param string       $format  Format to export to
-     * @param array        $options Optional export options
-     * @return string|array|WP_Error Exported palette or error
+     * @param array $palettes Array of palettes to export.
+     * @return string CSV string.
      */
-    public function export(Color_Palette $palette, string $format, array $options = []) {
-        if (!in_array($format, $this->supported_formats)) {
-            return new \WP_Error(
-                'invalid_format',
-                sprintf(
-                    __('Unsupported format: %s. Supported formats: %s', 'gl-color-palette-generator'),
-                    $format,
-                    implode(', ', $this->supported_formats)
-                )
+    public function export_to_csv($palettes) {
+        $csv = "Name,Colors,Created At\n";
+
+        foreach ($palettes as $palette) {
+            $csv .= sprintf(
+                '"%s","%s","%s"' . "\n",
+                esc_csv($palette['name']),
+                esc_csv(implode(', ', $palette['colors'])),
+                esc_csv($palette['created_at'])
             );
         }
 
-        $method = "to_{$format}";
-        return $this->$method($palette, $options);
+        return $csv;
     }
 
     /**
-     * Export to CSS variables
+     * Import palettes from JSON
      *
-     * @param Color_Palette $palette Palette to export
-     * @param array        $options Export options
-     * @return string CSS variables
+     * @param string $json JSON string to import.
+     * @return array Imported palettes.
+     * @throws \Exception If import fails.
      */
-    private function to_css(Color_Palette $palette, array $options = []): string {
-        $prefix = $options['prefix'] ?? 'color';
-        $colors = $palette->get_colors();
-        $css = ":root {\n";
+    public function import_from_json($json) {
+        $data = json_decode($json, true);
 
-        foreach ($colors as $index => $color) {
-            $name = $this->generate_color_name($color, $index, $palette);
-            $css .= "    --{$prefix}-{$name}: {$color};\n";
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception(__('Invalid JSON format', 'gl-color-palette-generator'));
         }
 
-        $css .= "}\n";
-        return $css;
-    }
-
-    /**
-     * Export to SCSS variables
-     *
-     * @param Color_Palette $palette Palette to export
-     * @param array        $options Export options
-     * @return string SCSS variables
-     */
-    private function to_scss(Color_Palette $palette, array $options = []): string {
-        $prefix = $options['prefix'] ?? 'color';
-        $colors = $palette->get_colors();
-        $scss = "";
-
-        foreach ($colors as $index => $color) {
-            $name = $this->generate_color_name($color, $index, $palette);
-            $scss .= "\${$prefix}-{$name}: {$color};\n";
+        if (!isset($data['version']) || !isset($data['palettes'])) {
+            throw new \Exception(__('Invalid export file format', 'gl-color-palette-generator'));
         }
 
-        return $scss;
+        return $this->validate_imported_palettes($data['palettes']);
     }
 
     /**
-     * Export to JSON format
+     * Import palettes from CSV
      *
-     * @param Color_Palette $palette Palette to export
-     * @param array        $options Export options
-     * @return string JSON representation
+     * @param string $csv CSV string to import.
+     * @return array Imported palettes.
+     * @throws \Exception If import fails.
      */
-    private function to_json(Color_Palette $palette, array $options = []): string {
-        $data = [
-            'name' => $palette->get_metadata('name'),
-            'colors' => array_map(function($color, $index) use ($palette) {
-                return [
-                    'name' => $this->generate_color_name($color, $index, $palette),
-                    'hex' => $color,
-                    'rgb' => $this->hex_to_rgb($color)
-                ];
-            }, $palette->get_colors(), array_keys($palette->get_colors())),
-            'metadata' => $palette->get_metadata()
-        ];
+    public function import_from_csv($csv) {
+        $lines = array_map('str_getcsv', explode("\n", $csv));
+        $headers = array_shift($lines);
 
-        return wp_json_encode($data, JSON_PRETTY_PRINT);
-    }
-
-    /**
-     * Export to Adobe ASE format
-     *
-     * @param Color_Palette $palette Palette to export
-     * @param array        $options Export options
-     * @return string Binary ASE file content
-     */
-    private function to_ase(Color_Palette $palette, array $options = []): string {
-        // ASE file header
-        $content = "ASEF"; // Signature
-        $content .= pack("n", 1); // Version
-        $content .= pack("N", count($palette->get_colors())); // Blocks count
-
-        foreach ($palette->get_colors() as $index => $color) {
-            $name = $this->generate_color_name($color, $index, $palette);
-            $rgb = $this->hex_to_rgb($color);
-
-            // Block header
-            $content .= pack("n", 0x0001); // Color entry
-            $content .= pack("N", 24 + strlen($name)); // Block length
-
-            // Color name (Unicode)
-            $content .= pack("n", strlen($name)); // String length
-            $content .= mb_convert_encoding($name, 'UTF-16BE', 'UTF-8');
-            $content .= pack("n", 0); // Null terminator
-
-            // Color model (RGB)
-            $content .= "RGB ";
-
-            // Color values (32-bit float)
-            $content .= pack("f", $rgb['r'] / 255);
-            $content .= pack("f", $rgb['g'] / 255);
-            $content .= pack("f", $rgb['b'] / 255);
-
-            // Color type (global)
-            $content .= pack("n", 0);
+        if ($headers !== ['Name', 'Colors', 'Created At']) {
+            throw new \Exception(__('Invalid CSV format', 'gl-color-palette-generator'));
         }
 
-        return $content;
-    }
+        $palettes = [];
+        foreach ($lines as $line) {
+            if (count($line) !== 3) continue;
 
-    /**
-     * Export to Sketch palette format
-     *
-     * @param Color_Palette $palette Palette to export
-     * @param array        $options Export options
-     * @return string JSON for Sketch
-     */
-    private function to_sketch(Color_Palette $palette, array $options = []): string {
-        $data = [
-            'compatibleVersion' => '2.0',
-            'pluginVersion' => '2.29',
-            'colors' => array_map(function($color) {
-                $rgb = $this->hex_to_rgb($color);
-                return [
-                    'red' => $rgb['r'] / 255,
-                    'green' => $rgb['g'] / 255,
-                    'blue' => $rgb['b'] / 255,
-                    'alpha' => 1
-                ];
-            }, $palette->get_colors()),
-            'gradients' => [],
-            'images' => []
-        ];
-
-        return wp_json_encode($data);
-    }
-
-    /**
-     * Export to SVG swatches
-     *
-     * @param Color_Palette $palette Palette to export
-     * @param array        $options Export options
-     * @return string SVG content
-     */
-    private function to_svg(Color_Palette $palette, array $options = []): string {
-        $width = $options['width'] ?? 100;
-        $height = $options['height'] ?? 100;
-        $spacing = $options['spacing'] ?? 10;
-        $colors = $palette->get_colors();
-        $total_width = count($colors) * ($width + $spacing) - $spacing;
-
-        $svg = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-        $svg .= '<svg xmlns="http://www.w3.org/2000/svg" ';
-        $svg .= 'width="' . $total_width . '" height="' . $height . '">' . "\n";
-
-        foreach ($colors as $index => $color) {
-            $x = $index * ($width + $spacing);
-            $name = $this->generate_color_name($color, $index, $palette);
-
-            $svg .= '  <rect x="' . $x . '" y="0" ';
-            $svg .= 'width="' . $width . '" height="' . $height . '" ';
-            $svg .= 'fill="' . $color . '">';
-            $svg .= '<title>' . esc_html($name) . '</title>';
-            $svg .= '</rect>' . "\n";
+            $palettes[] = [
+                'name' => $line[0],
+                'colors' => array_map('trim', explode(',', $line[1])),
+                'created_at' => $line[2]
+            ];
         }
 
-        $svg .= '</svg>';
-        return $svg;
+        return $this->validate_imported_palettes($palettes);
     }
 
     /**
-     * Generate a semantic color name
+     * Validate imported palettes
      *
-     * @param string        $color   Hex color
-     * @param int          $index   Color index
-     * @param Color_Palette $palette Palette object
-     * @return string Generated name
+     * @param array $palettes Palettes to validate.
+     * @return array Validated palettes.
+     * @throws \Exception If validation fails.
      */
-    private function generate_color_name(string $color, int $index, Color_Palette $palette): string {
-        $metadata = $palette->get_metadata();
-        $theme = sanitize_title($metadata['theme'] ?? '');
+    private function validate_imported_palettes($palettes) {
+        $color_utility = new Color_Utility();
 
-        if (empty($theme)) {
-            return "color-" . ($index + 1);
+        foreach ($palettes as $palette) {
+            if (!isset($palette['name']) || !isset($palette['colors'])) {
+                throw new \Exception(__('Invalid palette format', 'gl-color-palette-generator'));
+            }
+
+            if (!is_array($palette['colors']) || count($palette['colors']) !== 5) {
+                throw new \Exception(__('Invalid number of colors', 'gl-color-palette-generator'));
+            }
+
+            foreach ($palette['colors'] as $color) {
+                if (!preg_match('/^#[0-9a-f]{6}$/i', $color)) {
+                    throw new \Exception(__('Invalid color format', 'gl-color-palette-generator'));
+                }
+            }
+
+            if (!$color_utility->are_colors_distinct($palette['colors'])) {
+                throw new \Exception(__('Colors are not visually distinct', 'gl-color-palette-generator'));
+            }
         }
 
-        return $theme . "-" . ($index + 1);
-    }
-
-    /**
-     * Convert hex color to RGB values
-     *
-     * @param string $color Hex color
-     * @return array RGB values
-     */
-    private function hex_to_rgb(string $color): array {
-        $color = ltrim($color, '#');
-        return [
-            'r' => hexdec(substr($color, 0, 2)),
-            'g' => hexdec(substr($color, 2, 2)),
-            'b' => hexdec(substr($color, 4, 2))
-        ];
+        return $palettes;
     }
 }

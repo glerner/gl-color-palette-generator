@@ -7,7 +7,7 @@ class ColorNameValidator {
     private $trademark_checker;
     private $language_detector;
 
-    // Validation rules configuration
+    / Validation rules configuration
     private $default_rules = [
         'max_words' => 3,
         'min_length' => 3,
@@ -38,34 +38,34 @@ class ColorNameValidator {
         $validation_results = [];
 
         try {
-            // Basic validation
+            / Basic validation
             $validation_results['basic'] = $this->validate_basic_rules($name, $rules);
 
-            // Language validation
+            / Language validation
             $validation_results['language'] = $this->validate_language($name, $rules);
 
-            // Content validation
+            / Content validation
             $validation_results['content'] = $this->validate_content($name, $rules);
 
-            // Context validation
+            / Context validation
             $validation_results['context'] = $this->validate_context($name, $context, $rules);
 
-            // Trademark validation
+            / Trademark validation
             $validation_results['trademark'] = $this->validate_trademark($name, $rules);
 
-            // Cultural validation
+            / Cultural validation
             $validation_results['cultural'] = $this->validate_cultural_sensitivity($name, $context, $rules);
 
-            // Readability validation
+            / Readability validation
             $validation_results['readability'] = $this->validate_readability($name, $rules);
 
-            // Pronunciation validation
+            / Pronunciation validation
             $validation_results['pronunciation'] = $this->validate_pronunciation($name, $rules);
 
-            // Uniqueness validation
+            / Uniqueness validation
             $validation_results['uniqueness'] = $this->validate_uniqueness($name, $context, $rules);
 
-            // Check if any validation failed
+            / Check if any validation failed
             foreach ($validation_results as $type => $result) {
                 if (!$result['valid']) {
                     throw new ValidationException(
@@ -94,7 +94,7 @@ class ColorNameValidator {
     private function validate_basic_rules($name, $rules) {
         $result = ['valid' => true, 'message' => ''];
 
-        // Check length
+        / Check length
         if (strlen($name) < $rules['min_length']) {
             return [
                 'valid' => false,
@@ -115,7 +115,7 @@ class ColorNameValidator {
             ];
         }
 
-        // Check word count
+        / Check word count
         $word_count = str_word_count($name);
         if ($word_count > $rules['max_words']) {
             return [
@@ -127,7 +127,7 @@ class ColorNameValidator {
             ];
         }
 
-        // Check allowed characters
+        / Check allowed characters
         if (!preg_match('/^[' . $rules['allowed_characters'] . ']+$/u', $name)) {
             return [
                 'valid' => false,
@@ -166,7 +166,7 @@ class ColorNameValidator {
      * Validate content
      */
     private function validate_content($name, $rules) {
-        // Check profanity
+        / Check profanity
         if ($rules['check_profanity'] && $this->profanity_filter->contains_profanity($name)) {
             return [
                 'valid' => false,
@@ -174,7 +174,7 @@ class ColorNameValidator {
             ];
         }
 
-        // Check forbidden words
+        / Check forbidden words
         $forbidden_words = $rules['forbidden_words'];
         foreach ($forbidden_words as $word) {
             if (stripos($name, $word) !== false) {
@@ -250,7 +250,7 @@ class ColorNameValidator {
         $readability_checker = new ReadabilityChecker();
         $readability_score = $readability_checker->analyze($name);
 
-        if ($readability_score < 0.7) { // 70% readability threshold
+        if ($readability_score < 0.7) { / 70% readability threshold
             return [
                 'valid' => false,
                 'message' => __('Name is difficult to read', 'color-palette-generator')
@@ -291,7 +291,7 @@ class ColorNameValidator {
 
         global $wpdb;
 
-        // Check existing color names in the database
+        / Check existing color names in the database
         $existing = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM {$wpdb->prefix}color_names
              WHERE name LIKE %s AND context = %s",

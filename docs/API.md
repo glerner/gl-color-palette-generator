@@ -14,7 +14,7 @@ class New_Provider_Config extends Provider_Config {
 public function get_name(): string {
 return 'new_provider';
 }
-// Implement other required methods...
+/ Implement other required methods...
 }
 ```
 
@@ -97,34 +97,34 @@ namespace YourNamespace;
 use GLColorPalette\Interfaces\Color_Generator;
 class Custom_Generator implements Color_Generator {
 public function generate_palette(): array {
-// Your custom generation logic
+/ Your custom generation logic
 return [
 'primary' => ['hex' => '#000000'],
 'secondary' => ['hex' => '#FFFFFF']
 ];
 }
 public function set_context(array $context): void {
-// Handle context data
+/ Handle context data
 }
 }
 php
-// Convert hex to RGB
+/ Convert hex to RGB
 $rgb = Color_Utils::hex_to_rgb('#FF0000');
-// Returns: ['r' => 255, 'g' => 0, 'b' => 0]
-// Calculate relative luminance
+/ Returns: ['r' => 255, 'g' => 0, 'b' => 0]
+/ Calculate relative luminance
 $luminance = Color_Utils::get_relative_luminance('#FF0000');
-// Convert RGB to HSL
+/ Convert RGB to HSL
 $hsl = Color_Utils::rgb_to_hsl(255, 0, 0);
-// Returns: ['h' => 0, 's' => 100, 'l' => 50]
+/ Returns: ['h' => 0, 's' => 100, 'l' => 50]
 php
-// Register a custom event handler
+/ Register a custom event handler
 add_action('gl_color_palette_before_generate', function($context) {
-// Log generation attempt
+/ Log generation attempt
 error_log('Generating palette with context: ' . print_r($context, true));
 });
-// Modify the generated palette
+/ Modify the generated palette
 add_filter('gl_color_palette_generated_palette', function($palette, $context) {
-// Add custom metadata
+/ Add custom metadata
 $palette['metadata'] = [
 'generated_at' => current_time('mysql'),
 'context' => $context
@@ -132,7 +132,7 @@ $palette['metadata'] = [
 return $palette;
 }, 10, 2);
 php
-// Generate a palette
+/ Generate a palette
 POST /wp-json/gl-color-palette/v1/generate
 {
 "context": {
@@ -140,7 +140,7 @@ POST /wp-json/gl-color-palette/v1/generate
 "mood": "professional"
 }
 }
-// Analyze existing colors
+/ Analyze existing colors
 POST /wp-json/gl-color-palette/v1/analyze
 {
 "colors": [
@@ -154,9 +154,9 @@ use GLColorPalette\Exceptions\Validation_Exception;
 try {
 $generator->generate_palette();
 } catch (Provider_Exception $e) {
-// Handle API provider errors
+/ Handle API provider errors
 } catch (Validation_Exception $e) {
-// Handle validation errors
+/ Handle validation errors
 }
 php:tests/test-ajax-handler.php
 <?php
@@ -169,7 +169,7 @@ private $user_id;
 public function setUp(): void {
 parent::setUp();
 $this->ajax_handler = new Ajax_Handler();
-// Create and set admin user
+/ Create and set admin user
 $this->user_id = $this->factory->user->create([
 'role' => 'administrator'
 ]);
@@ -234,7 +234,7 @@ $this->handleAjax('gl_save_settings');
 } catch (\WPAjaxDieContinueException $e) {
 $response = json_decode($e->getMessage(), true);
 $this->assertTrue($response['success']);
-// Verify settings were saved
+/ Verify settings were saved
 $this->assertEquals('openai', get_option('gl_color_palette_ai_provider'));
 $this->assertEquals('sk-test123', get_option('gl_color_palette_api_key'));
 $this->assertEquals('gpt-4', get_option('gl_color_palette_openai_model'));
@@ -386,14 +386,14 @@ to { transform: translateX(0); }
 The `Color_Utils` class provides several helper methods:
 
 ```php
-// Convert hex to RGB
+/ Convert hex to RGB
 $rgb = Color_Utils::hex_to_rgb('#FF0000');
-// Returns: ['r' => 255, 'g' => 0, 'b' => 0]
-// Calculate relative luminance
+/ Returns: ['r' => 255, 'g' => 0, 'b' => 0]
+/ Calculate relative luminance
 $luminance = Color_Utils::get_relative_luminance('#FF0000');
-// Convert RGB to HSL
+/ Convert RGB to HSL
 $hsl = Color_Utils::rgb_to_hsl(255, 0, 0);
-// Returns: ['h' => 0, 's' => 100, 'l' => 50]
+/ Returns: ['h' => 0, 's' => 100, 'l' => 50]
 ```
 
 ### Event System
@@ -401,14 +401,14 @@ $hsl = Color_Utils::rgb_to_hsl(255, 0, 0);
 #### Custom Events
 
 ```php
-// Register a custom event handler
+/ Register a custom event handler
 add_action('gl_color_palette_before_generate', function($context) {
-// Log generation attempt
+/ Log generation attempt
 error_log('Generating palette with context: ' . print_r($context, true));
 });
-// Modify the generated palette
+/ Modify the generated palette
 add_filter('gl_color_palette_generated_palette', function($palette, $context) {
-// Add custom metadata
+/ Add custom metadata
 $palette['metadata'] = [
 'generated_at' => current_time('mysql'),
 'context' => $context
@@ -430,7 +430,7 @@ POST /wp-json/gl-color-palette/v1/generate
 "mood": "professional"
 }
 }
-// Analyze existing colors
+/ Analyze existing colors
 POST /wp-json/gl-color-palette/v1/analyze
 {
 "colors": [
@@ -450,8 +450,8 @@ use GLColorPalette\Exceptions\Validation_Exception;
 try {
 $generator->generate_palette();
 } catch (Provider_Exception $e) {
-// Handle API provider errors
+/ Handle API provider errors
 } catch (Validation_Exception $e) {
-// Handle validation errors
+/ Handle validation errors
 }
 ```

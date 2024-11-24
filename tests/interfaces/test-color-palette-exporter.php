@@ -13,7 +13,7 @@ class ColorPaletteExporterTest extends TestCase {
     }
 
     public function test_export_to_file_creates_file(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -47,10 +47,10 @@ class ColorPaletteExporterTest extends TestCase {
             ->with($palette, $format, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->exporter->export_to_file($palette, $format, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('file', $result);
         $this->assertArrayHasKey('stats', $result);
@@ -59,7 +59,7 @@ class ColorPaletteExporterTest extends TestCase {
     }
 
     public function test_export_to_code_generates_code(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -93,10 +93,10 @@ class ColorPaletteExporterTest extends TestCase {
             ->with($palette, $language, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->exporter->export_to_code($palette, $language, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('code', $result);
         $this->assertArrayHasKey('variables', $result);
@@ -105,7 +105,7 @@ class ColorPaletteExporterTest extends TestCase {
     }
 
     public function test_export_to_tool_creates_tool_file(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -141,10 +141,10 @@ class ColorPaletteExporterTest extends TestCase {
             ->with($palette, $tool, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->exporter->export_to_tool($palette, $tool, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('file', $result);
         $this->assertArrayHasKey('swatches', $result);
@@ -153,7 +153,7 @@ class ColorPaletteExporterTest extends TestCase {
     }
 
     public function test_validate_export_checks_format(): void {
-        // Arrange
+        / Arrange
         $export = [
             'format' => 'json',
             'data' => ['colors' => ['#FF0000']]
@@ -180,10 +180,10 @@ class ColorPaletteExporterTest extends TestCase {
             ->with($export, $rules)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->exporter->validate_export($export, $rules);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('valid', $result);
         $this->assertArrayHasKey('errors', $result);

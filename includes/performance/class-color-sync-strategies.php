@@ -6,7 +6,7 @@ class ColorSyncStrategies {
     private $data_validator;
     private $performance_monitor;
 
-    // Enhanced synchronization strategies
+    / Enhanced synchronization strategies
     private const SYNC_STRATEGIES = [
         'intelligent_sync' => [
             'differential_sync' => [

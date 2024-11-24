@@ -250,7 +250,7 @@ class ColorPaletteImporter implements ColorPaletteImporterInterface {
      * @return ColorPalette Imported palette.
      */
     private function importFromAse(string $data): ColorPalette {
-        // ASE format implementation...
+        / ASE format implementation...
         throw new \RuntimeException('ASE import not yet implemented');
     }
 
@@ -261,7 +261,7 @@ class ColorPaletteImporter implements ColorPaletteImporterInterface {
      * @return ColorPalette Imported palette.
      */
     private function importFromAct(string $data): ColorPalette {
-        // ACT format implementation...
+        / ACT format implementation...
         throw new \RuntimeException('ACT import not yet implemented');
     }
 
@@ -272,7 +272,7 @@ class ColorPaletteImporter implements ColorPaletteImporterInterface {
      * @return ColorPalette Imported palette.
      */
     private function importFromGpl(string $data): ColorPalette {
-        // GPL format implementation...
+        / GPL format implementation...
         throw new \RuntimeException('GPL import not yet implemented');
     }
 
@@ -315,11 +315,11 @@ class ColorPaletteImporter implements ColorPaletteImporterInterface {
      * @return array Extracted colors.
      */
     private function extractColorsFromImage($image, array $options): array {
-        // Basic implementation - could be improved with different algorithms
+        / Basic implementation - could be improved with different algorithms
         $width = imagesx($image);
         $height = imagesy($image);
         $colors = [];
-        $samples = min($width * $height, 1000); // Sample up to 1000 pixels
+        $samples = min($width * $height, 1000); / Sample up to 1000 pixels
 
         for ($i = 0; $i < $samples; $i++) {
             $x = rand(0, $width - 1);
@@ -331,7 +331,7 @@ class ColorPaletteImporter implements ColorPaletteImporterInterface {
             $colors[] = sprintf('#%02X%02X%02X', $r, $g, $b);
         }
 
-        // Remove duplicates and limit to max_colors
+        / Remove duplicates and limit to max_colors
         $colors = array_unique($colors);
         $colors = array_slice($colors, 0, $options['max_colors']);
 

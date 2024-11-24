@@ -6,7 +6,7 @@ class MLColorEngine {
     private $training_controller;
     private $inference_engine;
 
-    // Machine Learning configurations
+    / Machine Learning configurations
     private const ML_CONFIGURATIONS = [
         'models' => [
             'color_pattern_recognition' => [

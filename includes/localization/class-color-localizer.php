@@ -7,7 +7,7 @@ class ColorLocalizer {
     private $settings;
     private $cache;
 
-    // Cultural color mappings
+    / Cultural color mappings
     private const CULTURAL_MAPPINGS = [
         'western' => [
             'red' => ['passion', 'danger', 'love'],
@@ -27,7 +27,7 @@ class ColorLocalizer {
             'white' => ['death', 'mourning', 'purity'],
             'black' => ['career', 'knowledge', 'power']
         ]
-        // Additional cultural mappings...
+        / Additional cultural mappings...
     ];
 
     public function __construct() {
@@ -202,7 +202,7 @@ class ColorLocalizer {
     }
 
     private function get_base_color_name($hex) {
-        // Convert hex to closest basic color name
+        / Convert hex to closest basic color name
         $color_map = [
             '#FF0000' => 'red',
             '#0000FF' => 'blue',
@@ -218,8 +218,8 @@ class ColorLocalizer {
     }
 
     private function find_closest_color($hex, $color_list) {
-        // Implementation of color distance calculation
-        // Returns the closest matching color from the list
-        return $color_list[0]; // Placeholder
+        / Implementation of color distance calculation
+        / Returns the closest matching color from the list
+        return $color_list[0]; / Placeholder
     }
 }

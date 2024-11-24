@@ -2,11 +2,11 @@
 namespace GLColorPalette;
 
 class ContrastChecker {
-    // WCAG 2.1 minimum contrast requirements
-    const WCAG_AA_NORMAL_MIN = 4.5;  // Normal text (Level AA)
-    const WCAG_AA_LARGE_MIN = 3.0;   // Large text (Level AA)
-    const WCAG_AAA_NORMAL_MIN = 7.0; // Normal text (Level AAA)
-    const WCAG_AAA_LARGE_MIN = 4.5;  // Large text (Level AAA)
+    / WCAG 2.1 minimum contrast requirements
+    const WCAG_AA_NORMAL_MIN = 4.5;  / Normal text (Level AA)
+    const WCAG_AA_LARGE_MIN = 3.0;   / Large text (Level AA)
+    const WCAG_AAA_NORMAL_MIN = 7.0; / Normal text (Level AAA)
+    const WCAG_AAA_LARGE_MIN = 4.5;  / Large text (Level AAA)
 
     /**
      * Calculate relative luminance
@@ -29,9 +29,9 @@ class ContrastChecker {
     private function hex_to_rgb($hex) {
         $hex = ltrim($hex, '#');
         return [
-            hexdec(substr($hex, 0, 2)), // R
-            hexdec(substr($hex, 2, 2)), // G
-            hexdec(substr($hex, 4, 2))  // B
+            hexdec(substr($hex, 0, 2)), / R
+            hexdec(substr($hex, 2, 2)), / G
+            hexdec(substr($hex, 4, 2))  / B
         ];
     }
 

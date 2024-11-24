@@ -6,7 +6,7 @@ class ColorWheel {
     private $harmony_analyzer;
     private $conversion_utils;
 
-    // Advanced color wheel configurations
+    / Advanced color wheel configurations
     private const COLOR_WHEEL = [
         'primary_colors' => [
             'red' => ['hue' => 0, 'hex' => '#FF0000'],
@@ -28,7 +28,7 @@ class ColorWheel {
         ]
     ];
 
-    // Color harmony patterns
+    / Color harmony patterns
     private const HARMONY_PATTERNS = [
         'complementary' => [
             'angle' => 180,

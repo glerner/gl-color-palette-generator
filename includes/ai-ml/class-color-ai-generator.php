@@ -159,10 +159,10 @@ class Color_AI_Generator {
             ];
         }
 
-        // Analyze palette harmony
+        / Analyze palette harmony
         $analysis['palette_harmony'] = $this->analyze_palette_harmony($colors);
 
-        // Check cultural appropriateness
+        / Check cultural appropriateness
         $analysis['cultural_fit'] = $this->check_cultural_fit(
             $colors,
             $this->context['cultural_context']['target_regions']
@@ -178,7 +178,7 @@ class Color_AI_Generator {
      * @return array Psychological effects
      */
     private function get_psychological_effects(float $hue): array {
-        // Define color ranges and their effects
+        / Define color ranges and their effects
         $color_effects = [
             'red' => [
                 'range' => [0, 15],
@@ -238,20 +238,20 @@ class Color_AI_Generator {
             ]
         ];
 
-        // Normalize hue to 0-360 range
+        / Normalize hue to 0-360 range
         $hue = $hue % 360;
         if ($hue < 0) {
             $hue += 360;
         }
 
-        // Find matching color range
+        / Find matching color range
         foreach ($color_effects as $color => $data) {
             if ($hue >= $data['range'][0] && $hue <= $data['range'][1]) {
                 return $data['effects'];
             }
         }
 
-        // Default to red if no match found (shouldn't happen with normalized hue)
+        / Default to red if no match found (shouldn't happen with normalized hue)
         return $color_effects['red']['effects'];
     }
 
@@ -272,24 +272,24 @@ class Color_AI_Generator {
 
         $psychological_effects = $this->get_psychological_effects($this->hex_to_hsl($color['hex'])['h']);
 
-        // Check industry alignment
+        / Check industry alignment
         if (in_array($context['industry_context']['industry_type'], $psychological_effects['business_contexts'])) {
             $alignment['industry_fit'] = 1;
         }
 
-        // Check audience alignment
+        / Check audience alignment
         $audience_emotions = $this->map_audience_emotions($context['audience']);
         $alignment['audience_fit'] = count(
             array_intersect($psychological_effects['primary'], $audience_emotions)
         ) / count($audience_emotions);
 
-        // Check business goals alignment
+        / Check business goals alignment
         $goal_emotions = $this->map_goal_emotions($context['business_goals']);
         $alignment['goal_fit'] = count(
             array_intersect($psychological_effects['primary'], $goal_emotions)
         ) / count($goal_emotions);
 
-        // Generate recommendations
+        / Generate recommendations
         if ($alignment['industry_fit'] < 0.5) {
             $alignment['recommendations'][] = sprintf(
                 __('Consider adjusting %s to better align with industry expectations', 'gl-color-palette-generator'),
@@ -342,7 +342,7 @@ class Color_AI_Generator {
         $analyzer = new Color_Analysis();
         $base_hsl = $analyzer->hex_to_hsl($base_hex);
 
-        // Initialize variations
+        / Initialize variations
         $variations = [
             'lighter' => ['l' => min($base_hsl['l'] + 40, 95)],
             'light' => ['l' => min($base_hsl['l'] + 20, 85)],
@@ -357,20 +357,20 @@ class Color_AI_Generator {
 
             $hex = $analyzer->hsl_to_hex($variation_hsl);
 
-            // Verify contrast
+            / Verify contrast
             $black_contrast = $analyzer->calculate_contrast_ratio($hex, '#000000');
             $white_contrast = $analyzer->calculate_contrast_ratio($hex, '#FFFFFF');
 
-            // Adjust if needed
+            / Adjust if needed
             if ($name === 'lighter' || $name === 'light') {
-                // Should contrast with black text
+                / Should contrast with black text
                 while ($black_contrast < 4.5 && $variation_hsl['l'] < 95) {
                     $variation_hsl['l'] += 5;
                     $hex = $analyzer->hsl_to_hex($variation_hsl);
                     $black_contrast = $analyzer->calculate_contrast_ratio($hex, '#000000');
                 }
             } else {
-                // Should contrast with white text
+                / Should contrast with white text
                 while ($white_contrast < 4.5 && $variation_hsl['l'] > 5) {
                     $variation_hsl['l'] -= 5;
                     $hex = $analyzer->hsl_to_hex($variation_hsl);
@@ -407,23 +407,23 @@ class Color_AI_Generator {
                 'lasting_impression' => 0,
                 'trust_factors' => 0
             ],
-            'strength' => min(100, max(0, $hsl['s'])), // Saturation indicates emotional intensity
-            'clarity' => min(100, max(0, 100 - abs(50 - $hsl['l']) * 2)), // How clear the emotion is
+            'strength' => min(100, max(0, $hsl['s'])), / Saturation indicates emotional intensity
+            'clarity' => min(100, max(0, 100 - abs(50 - $hsl['l']) * 2)), / How clear the emotion is
             'effects' => []
         ];
 
-        // Match psychological effects with desired impacts
+        / Match psychological effects with desired impacts
         foreach (['first_impression', 'lasting_impression'] as $impact_type) {
             $desired_feeling = strtolower($context[$impact_type]);
             $response['alignment'][$impact_type] = in_array($desired_feeling, $base_effects['primary']) ? 1 : 0;
         }
 
-        // Analyze trust factors
+        / Analyze trust factors
         $trust_keywords = array_map('strtolower', explode(',', $context['trust_factors']));
         $trust_matches = array_intersect($trust_keywords, $base_effects['primary']);
         $response['alignment']['trust_factors'] = count($trust_matches) / count($trust_keywords);
 
-        // Add predicted effects
+        / Add predicted effects
         $response['effects'] = $base_effects['primary'];
 
         return $response;
@@ -481,5 +481,5 @@ class Color_AI_Generator {
         ];
     }
 
-    // ... (to be continued)
+    / ... (to be continued)
 }

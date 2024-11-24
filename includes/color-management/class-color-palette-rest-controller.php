@@ -10,14 +10,14 @@
  * @since   1.0.0
  *
  * @example
- * // Generate a new palette
+ * / Generate a new palette
  * POST /wp-json/gl-color-palette/v1/palettes
  * {
  *     "theme": "modern",
  *     "count": 5
  * }
  *
- * // Analyze a palette
+ * / Analyze a palette
  * GET /wp-json/gl-color-palette/v1/palettes/{id}/analyze
  */
 
@@ -121,7 +121,7 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
             ]
         ]);
 
-        // Add list endpoint
+        / Add list endpoint
         register_rest_route($this->namespace, '/palettes', [
             [
                 'methods' => WP_REST_Server::READABLE,
@@ -131,7 +131,7 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
             ]
         ]);
 
-        // Add search endpoint
+        / Add search endpoint
         register_rest_route($this->namespace, '/palettes/search', [
             [
                 'methods' => WP_REST_Server::READABLE,
@@ -444,7 +444,7 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
         $palette_id = $request->get_param('id');
         $aspects = $request->get_param('aspects');
 
-        // Get palette from storage/cache
+        / Get palette from storage/cache
         $palette = $this->get_palette($palette_id);
         if (is_wp_error($palette)) {
             return $palette;
@@ -481,7 +481,7 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
             'preserve_relationships' => $request->get_param('preserve_relationships')
         ];
 
-        // Get palette from storage/cache
+        / Get palette from storage/cache
         $palette = $this->get_palette($palette_id);
         if (is_wp_error($palette)) {
             return $palette;
@@ -510,7 +510,7 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
         $format = $request->get_param('format');
         $options = $request->get_param('options');
 
-        // Get palette from storage/cache
+        / Get palette from storage/cache
         $palette = $this->get_palette($palette_id);
         if (is_wp_error($palette)) {
             return $palette;
@@ -534,8 +534,8 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
      * @return Color_Palette|WP_Error Palette object or error
      */
     private function get_palette(string $id) {
-        // Implementation depends on storage mechanism
-        // This is a placeholder
+        / Implementation depends on storage mechanism
+        / This is a placeholder
         return new \WP_Error(
             'not_implemented',
             __('Palette retrieval not implemented', 'gl-color-palette-generator')

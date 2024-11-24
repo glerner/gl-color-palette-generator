@@ -5,27 +5,40 @@
  */
 
 $uris = [
-    'old_plugin_uri' => [
-        'https://website-tech.glerner.com/plugins/color-palette-generator',
-        'https://glerner.com/wordpress/plugins/color-palette-generator'
+    'plugin_uri' => [
+        'old' => [
+            'https://github.com/GeorgeLerner/gl-color-palette-generator',
+            'https://github.com/GeorgeLerner/gl-color-palette-generator',
+            'https://github.com/GeorgeLerner/gl-color-palette-generator'
+        ],
+        'new' => 'https://github.com/GeorgeLerner/gl-color-palette-generator'
     ],
-    'new_plugin_uri' => 'https://github.com/GeorgeLerner/gl-color-palette-generator',
 
-    'old_author_uri' => [
-        'https://glerner.com',
-        'https://website-tech.glerner.com'
+    'author_uri' => [
+        'old' => [
+            'https://website-tech.glerner.com/',
+            'https://website-tech.glerner.com/',
+            'https://website-tech.glerner.com/'
+        ],
+        'new' => 'https://website-tech.glerner.com/'
     ],
-    'new_author_uri' => 'https://website-tech.glerner.com/',
 
-    'old_update_uri' => [
-        'https://github.com/glerner/gl-color-palette-generator',
-        'https://website-tech.glerner.com/plugins/color-palette-generator'
-    ],
-    'new_update_uri' => 'https://website-tech.glerner.com/plugins/color-palette-generator/'
+    'update_uri' => [
+        'old' => [
+            'https://website-tech.glerner.com/plugins/color-palette-generator/',
+            'https://github.com/GeorgeLerner/gl-color-palette-generator/',
+            'https://github.com/GeorgeLerner/gl-color-palette-generator'
+        ],
+        'new' => 'https://github.com/GeorgeLerner/gl-color-palette-generator/'
+    ]
 ];
 
 $plugin_root = dirname(__DIR__);
 $file_extensions = ['php', 'pot', 'txt', 'md'];
+
+function normalizeUrl($url) {
+    return preg_replace('#([^:])/+#', '$1/', $url);
+}
 
 function updateFiles($dir, $uris, $extensions) {
     $files = new RecursiveIteratorIterator(
@@ -42,18 +55,19 @@ function updateFiles($dir, $uris, $extensions) {
             $content = file_get_contents($file->getPathname());
             $original = $content;
 
-            // Replace old URIs with new ones
+            / Replace old URIs with new ones
             foreach ($uris as $type => $uri_data) {
-                if (is_array($uri_data['old_' . $type])) {
-                    foreach ($uri_data['old_' . $type] as $old_uri) {
-                        $content = str_replace(
-                            $old_uri,
-                            $uri_data['new_' . $type],
-                            $content
-                        );
-                    }
+                foreach ($uri_data['old'] as $old_uri) {
+                    $content = str_replace(
+                        $old_uri,
+                        normalizeUrl($uri_data['new']),
+                        $content
+                    );
                 }
             }
+
+            / Additional pass to fix any remaining double slashes
+            $content = preg_replace('#([^:])/+#', '$1/', $content);
 
             if ($content !== $original) {
                 file_put_contents($file->getPathname(), $content);
@@ -65,6 +79,6 @@ function updateFiles($dir, $uris, $extensions) {
     return $updates;
 }
 
-// Run the update
+/ Run the update
 $total_updates = updateFiles($plugin_root, $uris, $file_extensions);
-echo "Total files updated: " . $total_updates . PHP_EOL; 
+echo "Total files updated: " . $total_updates . PHP_EOL;

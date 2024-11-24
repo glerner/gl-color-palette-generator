@@ -7,7 +7,7 @@ class VisualizationHelper {
     private $image_processor;
     private $settings;
 
-    // Preview types
+    / Preview types
     private const PREVIEW_TYPES = [
         'text' => ['paragraph', 'heading', 'button'],
         'ui' => ['card', 'alert', 'form'],
@@ -52,7 +52,7 @@ class VisualizationHelper {
     private function generate_text_previews($foreground, $background) {
         $html = '';
 
-        // Heading preview
+        / Heading preview
         $html .= $this->generate_text_sample(
             $foreground,
             $background,
@@ -61,7 +61,7 @@ class VisualizationHelper {
             ['font-size' => '32px', 'font-weight' => 'bold']
         );
 
-        // Paragraph preview
+        / Paragraph preview
         $html .= $this->generate_text_sample(
             $foreground,
             $background,
@@ -70,7 +70,7 @@ class VisualizationHelper {
             ['font-size' => '16px', 'line-height' => '1.5']
         );
 
-        // Button preview
+        / Button preview
         $html .= $this->generate_text_sample(
             $foreground,
             $background,
@@ -92,7 +92,7 @@ class VisualizationHelper {
     private function generate_ui_previews($foreground, $background) {
         $previews = [];
 
-        // Card preview
+        / Card preview
         $previews['card'] = $this->generate_ui_component(
             'card',
             $foreground,
@@ -105,7 +105,7 @@ class VisualizationHelper {
             ]
         );
 
-        // Alert preview
+        / Alert preview
         $previews['alert'] = $this->generate_ui_component(
             'alert',
             $foreground,
@@ -117,7 +117,7 @@ class VisualizationHelper {
             ]
         );
 
-        // Form elements preview
+        / Form elements preview
         $previews['form'] = $this->generate_ui_component(
             'form',
             $foreground,

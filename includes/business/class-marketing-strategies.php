@@ -6,7 +6,7 @@ class MarketingStrategies {
     private $audience_data;
     private $trend_analyzer;
 
-    // Marketing strategy frameworks
+    / Marketing strategy frameworks
     private const MARKETING_FRAMEWORKS = [
         'brand_positioning' => [
             'luxury' => [
@@ -189,7 +189,7 @@ class MarketingStrategies {
         if (isset(self::MARKETING_FRAMEWORKS[$type])) {
             $strategy = self::MARKETING_FRAMEWORKS[$type];
 
-            // Adapt strategy based on context
+            / Adapt strategy based on context
             $strategy = $this->adapt_to_audience($strategy, $context['audience'] ?? null);
             $strategy = $this->adapt_to_season($strategy, $context['season'] ?? null);
             $strategy = $this->adapt_to_market($strategy, $context['market'] ?? null);

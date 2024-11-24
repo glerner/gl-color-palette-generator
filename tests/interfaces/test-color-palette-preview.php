@@ -13,7 +13,7 @@ class ColorPalettePreviewTest extends TestCase {
     }
 
     public function test_generate_ui_preview_creates_interface(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00', '#0000FF']
@@ -54,10 +54,10 @@ class ColorPalettePreviewTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->preview->generate_ui_preview($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('preview', $result);
         $this->assertArrayHasKey('components', $result);
@@ -66,7 +66,7 @@ class ColorPalettePreviewTest extends TestCase {
     }
 
     public function test_generate_design_preview_creates_mockup(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Brand Colors',
             'colors' => ['#FF0000', '#00FF00']
@@ -100,10 +100,10 @@ class ColorPalettePreviewTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->preview->generate_design_preview($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('preview', $result);
         $this->assertArrayHasKey('elements', $result);
@@ -112,7 +112,7 @@ class ColorPalettePreviewTest extends TestCase {
     }
 
     public function test_generate_code_preview_creates_snippets(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Theme Colors',
             'colors' => ['#FF0000', '#00FF00']
@@ -146,10 +146,10 @@ class ColorPalettePreviewTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->preview->generate_code_preview($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('preview', $result);
         $this->assertArrayHasKey('syntax', $result);
@@ -158,7 +158,7 @@ class ColorPalettePreviewTest extends TestCase {
     }
 
     public function test_generate_mockup_preview_creates_visualization(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'App Theme',
             'colors' => ['#FF0000', '#00FF00']
@@ -198,10 +198,10 @@ class ColorPalettePreviewTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->preview->generate_mockup_preview($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('preview', $result);
         $this->assertArrayHasKey('context', $result);

@@ -9,12 +9,12 @@ class ColorConverterTest extends TestCase {
     private $converter;
 
     protected function setUp(): void {
-        // Create a mock implementation of the interface
+        / Create a mock implementation of the interface
         $this->converter = $this->createMock(ColorConverter::class);
     }
 
     public function test_rgb_to_hex_returns_valid_format(): void {
-        // Arrange
+        / Arrange
         $rgb = [255, 0, 0];
         $expected = '#FF0000';
 
@@ -24,17 +24,17 @@ class ColorConverterTest extends TestCase {
             ->with($rgb)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->converter->rgb_to_hex($rgb);
 
-        // Assert
+        / Assert
         $this->assertIsString($result);
         $this->assertMatchesRegularExpression('/^#[A-F0-9]{6}$/', $result);
         $this->assertEquals($expected, $result);
     }
 
     public function test_hex_to_rgb_returns_valid_array(): void {
-        // Arrange
+        / Arrange
         $hex = '#FF0000';
         $expected = [255, 0, 0];
 
@@ -44,17 +44,17 @@ class ColorConverterTest extends TestCase {
             ->with($hex)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->converter->hex_to_rgb($hex);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertEquals($expected, $result);
     }
 
     public function test_rgb_to_hsl_returns_valid_array(): void {
-        // Arrange
+        / Arrange
         $rgb = [255, 0, 0];
         $expected = [0, 100, 50];
 
@@ -64,17 +64,17 @@ class ColorConverterTest extends TestCase {
             ->with($rgb)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->converter->rgb_to_hsl($rgb);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertEquals($expected, $result);
     }
 
     public function test_hsl_to_rgb_returns_valid_array(): void {
-        // Arrange
+        / Arrange
         $hsl = [0, 100, 50];
         $expected = [255, 0, 0];
 
@@ -84,10 +84,10 @@ class ColorConverterTest extends TestCase {
             ->with($hsl)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->converter->hsl_to_rgb($hsl);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertCount(3, $result);
         $this->assertEquals($expected, $result);

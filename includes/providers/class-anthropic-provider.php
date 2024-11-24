@@ -101,7 +101,7 @@ class Anthropic_Provider extends AI_Provider_Base {
             return new \WP_Error('invalid_response', 'Invalid API response format');
         }
 
-        // Extract JSON array from response
+        / Extract JSON array from response
         preg_match('/\[.*\]/', $response['content'], $matches);
         if (empty($matches[0])) {
             return new \WP_Error('invalid_colors', 'No color array found in response');
@@ -112,7 +112,7 @@ class Anthropic_Provider extends AI_Provider_Base {
             return new \WP_Error('invalid_colors', 'Invalid color data received');
         }
 
-        // Validate each color is a proper hex code
+        / Validate each color is a proper hex code
         foreach ($colors as $color) {
             if (!preg_match('/^#[a-fA-F0-9]{6}$/', $color)) {
                 return new \WP_Error('invalid_color_format', 'Invalid color format in response');

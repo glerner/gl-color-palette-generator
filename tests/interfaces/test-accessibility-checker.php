@@ -13,7 +13,7 @@ class AccessibilityCheckerTest extends TestCase {
     }
 
     public function test_check_contrast_ratio_returns_valid_analysis(): void {
-        // Arrange
+        / Arrange
         $foreground = '#000000';
         $background = '#FFFFFF';
         $expected = [
@@ -30,10 +30,10 @@ class AccessibilityCheckerTest extends TestCase {
             ->with($foreground, $background)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->checker->check_contrast_ratio($foreground, $background);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('ratio', $result);
         $this->assertArrayHasKey('wcag_aa_normal', $result);
@@ -42,7 +42,7 @@ class AccessibilityCheckerTest extends TestCase {
     }
 
     public function test_validate_palette_accessibility_returns_complete_analysis(): void {
-        // Arrange
+        / Arrange
         $palette = ['#000000', '#FFFFFF', '#FF0000'];
         $options = ['standard' => 'AA', 'check_all' => true];
         $expected = [
@@ -61,10 +61,10 @@ class AccessibilityCheckerTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->checker->validate_palette_accessibility($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('passes_wcag', $result);
         $this->assertArrayHasKey('combinations', $result);
@@ -73,7 +73,7 @@ class AccessibilityCheckerTest extends TestCase {
     }
 
     public function test_get_accessibility_score_returns_valid_score(): void {
-        // Arrange
+        / Arrange
         $foreground = '#000000';
         $background = '#FFFFFF';
         $expected = 1.0;
@@ -84,17 +84,17 @@ class AccessibilityCheckerTest extends TestCase {
             ->with($foreground, $background)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->checker->get_accessibility_score($foreground, $background);
 
-        // Assert
+        / Assert
         $this->assertIsFloat($result);
         $this->assertGreaterThanOrEqual(0, $result);
         $this->assertLessThanOrEqual(1, $result);
     }
 
     public function test_suggest_accessible_alternatives_returns_valid_suggestions(): void {
-        // Arrange
+        / Arrange
         $color = '#FF0000';
         $constraints = [
             'min_contrast' => 4.5,
@@ -116,10 +116,10 @@ class AccessibilityCheckerTest extends TestCase {
             ->with($color, $constraints)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->checker->suggest_accessible_alternatives($color, $constraints);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('colors', $result);
         $this->assertArrayHasKey('scores', $result);

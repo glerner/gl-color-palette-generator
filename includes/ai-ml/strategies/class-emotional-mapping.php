@@ -6,7 +6,7 @@ class EmotionalMapping {
     private $cultural_context;
     private $psychological_data;
 
-    // Comprehensive emotional color mappings
+    / Comprehensive emotional color mappings
     private const EMOTIONAL_MAPPINGS = [
         'primary_emotions' => [
             'joy' => [

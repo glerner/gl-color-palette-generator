@@ -13,7 +13,7 @@ class ColorPaletteAnalyzerTest extends TestCase {
     }
 
     public function test_analyze_harmony_evaluates_relationships(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00', '#0000FF']
@@ -54,10 +54,10 @@ class ColorPaletteAnalyzerTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->analyzer->analyze_harmony($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('relationships', $result);
         $this->assertArrayHasKey('scores', $result);
@@ -66,7 +66,7 @@ class ColorPaletteAnalyzerTest extends TestCase {
     }
 
     public function test_analyze_contrast_evaluates_ratios(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FFFFFF', '#000000']
@@ -99,10 +99,10 @@ class ColorPaletteAnalyzerTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->analyzer->analyze_contrast($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('ratios', $result);
         $this->assertArrayHasKey('compliance', $result);
@@ -111,7 +111,7 @@ class ColorPaletteAnalyzerTest extends TestCase {
     }
 
     public function test_analyze_distribution_evaluates_balance(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00', '#0000FF']
@@ -148,10 +148,10 @@ class ColorPaletteAnalyzerTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->analyzer->analyze_distribution($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('metrics', $result);
         $this->assertArrayHasKey('balance', $result);
@@ -160,7 +160,7 @@ class ColorPaletteAnalyzerTest extends TestCase {
     }
 
     public function test_analyze_psychology_evaluates_meanings(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#0000FF']
@@ -195,10 +195,10 @@ class ColorPaletteAnalyzerTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->analyzer->analyze_psychology($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('meanings', $result);
         $this->assertArrayHasKey('emotions', $result);

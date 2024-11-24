@@ -10,6 +10,6 @@ abstract class BaseColorProcessor {
     abstract public function validate_color(string $color): bool;
 
     protected function normalize_color_value($value, string $type): float {
-        // Implementation
+        / Implementation
     }
 } 

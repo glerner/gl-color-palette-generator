@@ -5,7 +5,7 @@ class ColorExporter {
     private $validator;
     private $settings;
 
-    // Export formats
+    / Export formats
     private const EXPORT_FORMATS = [
         'css' => ['variables', 'tailwind', 'sass', 'less'],
         'design' => ['sketch', 'figma', 'adobe_xd', 'invision'],
@@ -25,7 +25,7 @@ class ColorExporter {
      */
     public function export_palette($palette, $format, $options = []) {
         try {
-            // Validate palette before export
+            / Validate palette before export
             if (!$this->validator->validate_palette($palette)) {
                 throw new ExportException('Invalid palette for export');
             }

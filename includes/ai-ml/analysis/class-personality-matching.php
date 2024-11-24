@@ -6,7 +6,7 @@ class PersonalityMatching {
     private $preference_calculator;
     private $context_evaluator;
 
-    // Comprehensive personality-color mapping
+    / Comprehensive personality-color mapping
     private const PERSONALITY_COLOR_MAPPING = [
         'personality_dimensions' => [
             'openness' => [

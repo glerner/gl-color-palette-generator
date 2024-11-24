@@ -43,7 +43,7 @@ class Test_Color_Palette_Generator extends TestCase {
         parent::setUp();
         \Brain\Monkey\setUp();
 
-        // Mock settings
+        / Mock settings
         $this->settings = Mockery::mock(Settings_Manager::class);
         $this->settings->shouldReceive('get_setting')
             ->with('ai_provider', 'openai')
@@ -52,7 +52,7 @@ class Test_Color_Palette_Generator extends TestCase {
             ->with('api_key')
             ->andReturn('test_key');
 
-        // Mock cache functions
+        / Mock cache functions
         Functions\when('wp_cache_get')->justReturn(false);
         Functions\when('wp_cache_set')->justReturn(true);
     }
@@ -78,14 +78,14 @@ class Test_Color_Palette_Generator extends TestCase {
             '#ff00ff'
         ];
 
-        // Mock AI response
+        / Mock AI response
         $ai_response = implode("\n", $expected_colors);
         $this->ai_provider = Mockery::mock(AI_Provider_Interface::class);
         $this->ai_provider->shouldReceive('generate_response')
             ->once()
             ->andReturn($ai_response);
 
-        // Create generator with mocked dependencies
+        / Create generator with mocked dependencies
         $generator = $this->createGeneratorWithMocks();
 
         $palette = $generator->generate_from_prompt('Create a vibrant color scheme');

@@ -7,7 +7,7 @@ class PaletteGenerator {
     private $settings;
     private $cache;
 
-    // Color harmony types
+    / Color harmony types
     private const HARMONY_TYPES = [
         'monochromatic',
         'analogous',
@@ -19,7 +19,7 @@ class PaletteGenerator {
         'compound'
     ];
 
-    // Palette sizes
+    / Palette sizes
     private const PALETTE_SIZES = [
         'minimal' => 3,
         'standard' => 5,
@@ -43,26 +43,26 @@ class PaletteGenerator {
         $context = $options['context'] ?? [];
 
         try {
-            // Get base color properties
+            / Get base color properties
             $base_properties = $this->color_analyzer->analyze_color($base_color);
 
-            // Generate harmony colors
+            / Generate harmony colors
             $harmony_colors = $this->generate_harmony_colors(
                 $base_color,
                 $harmony_type,
                 self::PALETTE_SIZES[$palette_size]
             );
 
-            // Adjust for accessibility
+            / Adjust for accessibility
             $accessible_colors = $this->ensure_accessibility($harmony_colors, $context);
 
-            // Generate shades and tints
+            / Generate shades and tints
             $extended_colors = $this->generate_variations($accessible_colors);
 
-            // Organize palette
+            / Organize palette
             $palette = $this->organize_palette($extended_colors, $options);
 
-            // Add metadata
+            / Add metadata
             $palette['metadata'] = $this->generate_palette_metadata(
                 $base_color,
                 $harmony_type,
@@ -207,7 +207,7 @@ class PaletteGenerator {
         $hsl = $this->color_analyzer->hex_to_hsl($color);
         $variations = [];
 
-        // Generate shades (darker)
+        / Generate shades (darker)
         for ($i = 1; $i <= 4; $i++) {
             $lightness = max(0, $hsl[2] - ($i * 0.1));
             $variations['shade_' . $i] = $this->color_analyzer->hsl_to_hex([
@@ -217,7 +217,7 @@ class PaletteGenerator {
             ]);
         }
 
-        // Generate tints (lighter)
+        / Generate tints (lighter)
         for ($i = 1; $i <= 4; $i++) {
             $lightness = min(1, $hsl[2] + ($i * 0.1));
             $variations['tint_' . $i] = $this->color_analyzer->hsl_to_hex([

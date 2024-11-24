@@ -5,7 +5,7 @@ class NeurologicalResponses {
     private $brain_activity_analyzer;
     private $neural_pattern_mapper;
 
-    // Comprehensive neurological response mapping
+    / Comprehensive neurological response mapping
     private const NEUROLOGICAL_RESPONSES = [
         'visual_processing' => [
             'primary_visual_cortex' => [

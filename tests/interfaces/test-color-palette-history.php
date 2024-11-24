@@ -13,7 +13,7 @@ class ColorPaletteHistoryTest extends TestCase {
     }
 
     public function test_record_version_creates_version(): void {
-        // Arrange
+        / Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -49,10 +49,10 @@ class ColorPaletteHistoryTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->history->record_version($palette, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('version_id', $result);
         $this->assertArrayHasKey('version_info', $result);
@@ -61,7 +61,7 @@ class ColorPaletteHistoryTest extends TestCase {
     }
 
     public function test_get_history_retrieves_versions(): void {
-        // Arrange
+        / Arrange
         $palette_id = 123;
         $options = [
             'limit' => 10,
@@ -101,10 +101,10 @@ class ColorPaletteHistoryTest extends TestCase {
             ->with($palette_id, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->history->get_history($palette_id, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('versions', $result);
         $this->assertArrayHasKey('timeline', $result);
@@ -113,7 +113,7 @@ class ColorPaletteHistoryTest extends TestCase {
     }
 
     public function test_restore_version_reverts_to_previous(): void {
-        // Arrange
+        / Arrange
         $palette_id = 123;
         $version_id = 1;
         $options = [
@@ -143,10 +143,10 @@ class ColorPaletteHistoryTest extends TestCase {
             ->with($palette_id, $version_id, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->history->restore_version($palette_id, $version_id, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('success', $result);
         $this->assertArrayHasKey('restored', $result);
@@ -156,7 +156,7 @@ class ColorPaletteHistoryTest extends TestCase {
     }
 
     public function test_compare_versions_shows_differences(): void {
-        // Arrange
+        / Arrange
         $palette_id = 123;
         $version_1 = 1;
         $version_2 = 2;
@@ -193,10 +193,10 @@ class ColorPaletteHistoryTest extends TestCase {
             ->with($palette_id, $version_1, $version_2, $options)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->history->compare_versions($palette_id, $version_1, $version_2, $options);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('differences', $result);
         $this->assertArrayHasKey('summary', $result);

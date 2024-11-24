@@ -8,7 +8,7 @@ class ColorNamer {
     private $local_database;
     private $openai_client;
 
-    // Basic color name mapping for local processing
+    / Basic color name mapping for local processing
     private $basic_colors = [
         'red' => ['#FF0000', '#FF4444', '#CC0000'],
         'blue' => ['#0000FF', '#4444FF', '#0000CC'],
@@ -41,20 +41,20 @@ class ColorNamer {
      */
     public function get_color_name($hex, $context = 'general') {
         try {
-            // Check cache first
+            / Check cache first
             $cached_name = $this->cache->get_color_name($hex, $context);
             if ($cached_name) {
                 return $cached_name;
             }
 
-            // Get name based on selected service
+            / Get name based on selected service
             $name = match($this->settings->get_setting('naming_service')) {
                 'openai' => $this->get_ai_color_name($hex, $context),
                 'custom' => $this->get_custom_api_color_name($hex, $context),
                 default => $this->get_local_color_name($hex, $context)
             };
 
-            // Cache the result
+            / Cache the result
             $this->cache->set_color_name($hex, $name, $context);
 
             return $name;
@@ -66,7 +66,7 @@ class ColorNamer {
                 ['hex' => $hex, 'context' => $context]
             );
 
-            // Fallback to basic color naming
+            / Fallback to basic color naming
             return $this->get_basic_color_name($hex);
         }
     }
@@ -133,7 +133,7 @@ class ColorNamer {
             }
         }
 
-        // If distance is too large, fall back to basic naming
+        / If distance is too large, fall back to basic naming
         if ($min_distance > 50) {
             return $this->get_basic_color_name($hex);
         }
@@ -170,11 +170,11 @@ class ColorNamer {
      * Calculate color distance (using CIEDE2000)
      */
     private function calculate_color_distance($rgb1, $rgb2) {
-        // Convert to Lab color space for more accurate comparison
+        / Convert to Lab color space for more accurate comparison
         $lab1 = $this->rgb_to_lab($rgb1);
         $lab2 = $this->rgb_to_lab($rgb2);
 
-        // Calculate CIEDE2000 color difference
+        / Calculate CIEDE2000 color difference
         return $this->calculate_ciede2000($lab1, $lab2);
     }
 
@@ -248,18 +248,18 @@ class ColorNamer {
     }
 
     private function rgb_to_lab($rgb) {
-        // RGB to XYZ
+        / RGB to XYZ
         $xyz = $this->rgb_to_xyz($rgb);
 
-        // XYZ to Lab
+        / XYZ to Lab
         return $this->xyz_to_lab($xyz);
     }
 
     private function calculate_ciede2000($lab1, $lab2) {
-        // Implementation of CIEDE2000 color difference formula
-        // This is a complex calculation that provides very accurate
-        // color difference measurements
-        // ... (implementation details omitted for brevity)
+        / Implementation of CIEDE2000 color difference formula
+        / This is a complex calculation that provides very accurate
+        / color difference measurements
+        / ... (implementation details omitted for brevity)
 
         return $delta_e;
     }

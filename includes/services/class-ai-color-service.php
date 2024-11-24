@@ -46,24 +46,24 @@ class AIColorService {
      */
     public function generate_color_name($hex, $context = [], $options = []) {
         try {
-            // Check rate limits
+            / Check rate limits
             if (!$this->rate_limiter->can_process()) {
                 throw new Exception("Rate limit exceeded");
             }
 
-            // Generate prompt
+            / Generate prompt
             $prompt = $this->create_prompt($hex, $context, $options);
 
-            // Get AI response
+            / Get AI response
             $response = $this->current_provider->generate(
                 $prompt,
                 $this->get_generation_parameters($options)
             );
 
-            // Process and validate response
+            / Process and validate response
             $processed_name = $this->process_response($response, $hex, $context);
 
-            // Update rate limiter
+            / Update rate limiter
             $this->rate_limiter->record_request();
 
             return $processed_name;
@@ -161,7 +161,7 @@ PROMPT;
             throw new Exception("Generated name failed validation");
         }
 
-        // Store additional data for future reference
+        / Store additional data for future reference
         $this->store_name_metadata([
             'hex' => $hex,
             'name' => $parsed['name'],

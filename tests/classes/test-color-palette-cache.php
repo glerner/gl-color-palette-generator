@@ -102,7 +102,7 @@ class ColorPaletteCacheTest extends TestCase {
             ->times(2)
             ->andReturn(['some' => 'data'], false);
 
-        // Generate some stats
+        / Generate some stats
         $this->cache->has('exists');
         $this->cache->has('nonexistent');
 
@@ -139,13 +139,13 @@ class ColorPaletteCacheTest extends TestCase {
         Functions\expect('wp_cache_get')
             ->times(4)
             ->andReturnValues([
-                ['some' => 'data'],  // hit
-                false,               // miss
-                ['some' => 'data'],  // hit
-                ['some' => 'data']   // hit
+                ['some' => 'data'],  / hit
+                false,               / miss
+                ['some' => 'data'],  / hit
+                ['some' => 'data']   / hit
             ]);
 
-        // Generate some stats
+        / Generate some stats
         $this->cache->has('key1');
         $this->cache->has('key2');
         $this->cache->has('key3');

@@ -40,7 +40,7 @@ class OpenAI_Provider_Test extends WP_UnitTestCase {
             'mode' => 'analogous',
             'count' => 5
         ]);
-        // Note: This would actually make an API call, so we should mock it
+        / Note: This would actually make an API call, so we should mock it
         $this->assertNotWPError($result);
     }
 

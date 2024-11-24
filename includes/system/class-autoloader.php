@@ -26,7 +26,7 @@ class Autoloader {
      * @param string $class_name Full class name.
      */
     public function autoload($class_name) {
-        // Only handle our namespace
+        / Only handle our namespace
         if (strpos($class_name, 'GL_Color_Palette_Generator\\') !== 0) {
             return;
         }
@@ -49,7 +49,7 @@ class Autoloader {
         $class_path = str_replace('_', '-', $class_path);
         $class_path = str_replace('\\', '/', $class_path);
 
-        // Add 'class-' prefix if not an interface or trait
+        / Add 'class-' prefix if not an interface or trait
         if (!strpos($class_path, 'interface-') && !strpos($class_path, 'trait-')) {
             $class_parts = explode('/', $class_path);
             $class_file = end($class_parts);
@@ -60,5 +60,5 @@ class Autoloader {
     }
 }
 
-// Register the autoloader
+/ Register the autoloader
 Autoloader::register();

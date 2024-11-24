@@ -6,7 +6,7 @@ class VisualizationEngine {
     private $interaction_handler;
     private $data_processor;
 
-    // Enhanced visualization configurations
+    / Enhanced visualization configurations
     private const VISUALIZATION_OPTIONS = [
         'interactive_charts' => [
             'color_spectrum' => [

@@ -17,7 +17,7 @@ class GLColorPaletteDeletion {
      */
     public function add_deletion_page() {
         add_submenu_page(
-            null, // Hidden from menu
+            null, / Hidden from menu
             __('Delete Plugin', 'gl-color-palette-generator'),
             __('Delete Plugin', 'gl-color-palette-generator'),
             'activate_plugins',
@@ -46,7 +46,7 @@ class GLColorPaletteDeletion {
      * Render deletion confirmation page
      */
     public function render_deletion_page() {
-        // Get statistics
+        / Get statistics
         $stats = $this->get_plugin_statistics();
         ?>
         <div class="wrap">
@@ -147,26 +147,26 @@ class GLColorPaletteDeletion {
      * Handle deletion confirmation
      */
     public function handle_confirmation() {
-        // Verify nonce
+        / Verify nonce
         if (!wp_verify_nonce($_POST['gl_deletion_nonce'], 'gl_delete_plugin')) {
             wp_die(__('Security check failed', 'gl-color-palette-generator'));
         }
 
-        // Verify user capabilities
+        / Verify user capabilities
         if (!current_user_can('activate_plugins')) {
             wp_die(__('You do not have permission to perform this action', 'gl-color-palette-generator'));
         }
 
-        // Export data if requested
+        / Export data if requested
         if (isset($_POST['export_data']) && $_POST['export_data'] == '1') {
             require_once GL_COLOR_PALETTE_PLUGIN_DIR . 'includes/class-data-exporter.php';
             GLColorPaletteExporter::export_all_data();
         }
 
-        // Deactivate plugin
+        / Deactivate plugin
         deactivate_plugins(GL_COLOR_PALETTE_PLUGIN_BASENAME);
 
-        // Redirect to plugins page with message
+        / Redirect to plugins page with message
         wp_safe_redirect(add_query_arg(
             'gl_plugin_deleted',
             '1',
@@ -242,7 +242,7 @@ class GLColorPaletteDeletion {
     private function delete_plugin_data() {
         global $wpdb;
 
-        // Delete database tables
+        / Delete database tables
         $tables = [
             $wpdb->prefix . 'color_palettes',
             $wpdb->prefix . 'color_analytics',
@@ -253,7 +253,7 @@ class GLColorPaletteDeletion {
             $wpdb->query("DROP TABLE IF EXISTS $table");
         }
 
-        // Delete options
+        / Delete options
         $options = [
             'color_palette_generator_version',
             'color_palette_generator_settings',
@@ -264,7 +264,7 @@ class GLColorPaletteDeletion {
             delete_option($option);
         }
 
-        // Delete transients
+        / Delete transients
         $this->delete_transients();
     }
 
@@ -279,7 +279,7 @@ class GLColorPaletteDeletion {
             $this->recursively_delete_directory($plugin_upload_dir);
         }
 
-        // Clean up any temporary files
+        / Clean up any temporary files
         $temp_files = glob(WP_TEMP_DIR . '/color-palette-*');
         if (is_array($temp_files)) {
             foreach ($temp_files as $file) {

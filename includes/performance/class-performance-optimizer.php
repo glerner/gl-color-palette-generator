@@ -6,7 +6,7 @@ class PerformanceOptimizer {
     private $settings;
     private $metrics;
 
-    // Cache configuration
+    / Cache configuration
     private const CACHE_CONFIG = [
         'palette' => ['ttl' => 3600, 'prefix' => 'pal_'],
         'contrast' => ['ttl' => 7200, 'prefix' => 'con_'],
@@ -14,7 +14,7 @@ class PerformanceOptimizer {
         'validation' => ['ttl' => 3600, 'prefix' => 'val_']
     ];
 
-    // Batch processing limits
+    / Batch processing limits
     private const BATCH_LIMITS = [
         'colors' => 100,
         'variations' => 50,
@@ -35,11 +35,11 @@ class PerformanceOptimizer {
         $batch_operations = [];
         $cached_results = [];
 
-        // Start performance monitoring
+        / Start performance monitoring
         $this->metrics->start_monitoring();
 
         try {
-            // Group operations by type
+            / Group operations by type
             foreach ($operations as $operation) {
                 if ($this->can_use_cache($operation)) {
                     $cache_key = $this->generate_cache_key($operation);
@@ -54,7 +54,7 @@ class PerformanceOptimizer {
                 $batch_operations[$operation['type']][] = $operation;
             }
 
-            // Process batches efficiently
+            / Process batches efficiently
             foreach ($batch_operations as $type => $ops) {
                 $optimized = array_merge(
                     $optimized,
@@ -62,16 +62,16 @@ class PerformanceOptimizer {
                 );
             }
 
-            // Merge cached and new results
+            / Merge cached and new results
             $results = array_merge($cached_results, $optimized);
 
-            // Cache new results
+            / Cache new results
             $this->cache_results($optimized);
 
             return $results;
 
         } finally {
-            // Record metrics
+            / Record metrics
             $this->metrics->end_monitoring();
         }
     }
@@ -127,20 +127,20 @@ class PerformanceOptimizer {
         $base_colors = [];
         $shared_calculations = [];
 
-        // Group by base color to avoid redundant calculations
+        / Group by base color to avoid redundant calculations
         foreach ($operations as $operation) {
             $base_colors[$operation['base_color']][] = $operation;
         }
 
         foreach ($base_colors as $color => $ops) {
-            // Perform shared calculations once
+            / Perform shared calculations once
             $shared_calculations[$color] = [
                 'lab' => $this->color_analyzer->hex_to_lab($color),
                 'hsl' => $this->color_analyzer->hex_to_hsl($color),
                 'analysis' => $this->color_analyzer->analyze_color($color)
             ];
 
-            // Generate palettes using shared calculations
+            / Generate palettes using shared calculations
             foreach ($ops as $op) {
                 $results[$op['id']] = $this->generate_optimized_palette(
                     $op,
@@ -161,7 +161,7 @@ class PerformanceOptimizer {
         $color_pairs = [];
         $luminance_cache = [];
 
-        // Group by color pairs and cache luminance
+        / Group by color pairs and cache luminance
         foreach ($operations as $operation) {
             $color1 = $operation['color1'];
             $color2 = $operation['color2'];
@@ -180,7 +180,7 @@ class PerformanceOptimizer {
             ];
         }
 
-        // Calculate contrasts using cached luminance
+        / Calculate contrasts using cached luminance
         foreach ($color_pairs as $pair) {
             $results[$pair['id']] = $this->calculate_contrast_ratio(
                 $luminance_cache[$pair['color1']],
@@ -199,17 +199,17 @@ class PerformanceOptimizer {
         $unique_colors = [];
         $analysis_cache = [];
 
-        // Collect unique colors
+        / Collect unique colors
         foreach ($operations as $operation) {
             $unique_colors[$operation['color']] = true;
         }
 
-        // Analyze unique colors once
+        / Analyze unique colors once
         foreach (array_keys($unique_colors) as $color) {
             $analysis_cache[$color] = $this->color_analyzer->analyze_color($color);
         }
 
-        // Map results using cached analysis
+        / Map results using cached analysis
         foreach ($operations as $operation) {
             $results[$operation['id']] = $analysis_cache[$operation['color']];
         }
@@ -251,7 +251,7 @@ class PerformanceOptimizer {
      * Monitor specific performance callback
      */
     private function monitor_specific_performance($callback, $type) {
-        // Implementation for monitoring specific performance metrics
+        / Implementation for monitoring specific performance metrics
         return [
             'callback' => $callback,
             'type' => $type,
@@ -337,108 +337,108 @@ class PerformanceOptimizer {
         ];
     }
 
-    // Private helper methods
+    / Private helper methods
     private function optimize_tables() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function update_indices() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function clean_cache() {
-        // Implementation
+        / Implementation
         return true;
     }
 
     private function analyze_query_performance() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function generate_optimization_recommendations() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function schedule_next_optimization() {
-        // Implementation
+        / Implementation
         return date('Y-m-d H:i:s', strtotime('+1 day'));
     }
 
     private function measure_response_times() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function measure_memory_usage() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function measure_query_performance() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function measure_cache_efficiency() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function store_performance_metrics($metrics) {
-        // Implementation
+        / Implementation
     }
 
     private function get_historical_metrics() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function analyze_performance_trends() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function generate_performance_alerts($metrics) {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function setup_object_cache() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function setup_transient_cache() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function setup_static_cache() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function setup_query_cache() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function get_cache_status() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function measure_caching_impact() {
-        // Implementation
+        / Implementation
         return [];
     }
 
     private function get_cache_maintenance_schedule() {
-        // Implementation
+        / Implementation
         return [];
     }
 }

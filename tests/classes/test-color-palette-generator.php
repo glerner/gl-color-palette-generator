@@ -26,7 +26,7 @@ class ColorPaletteGeneratorTest extends TestCase {
     public function test_generate_palette_default(): void {
         $palette = $this->generator->generatePalette();
 
-        $this->assertCount(5, $palette->getColors()); // Default count
+        $this->assertCount(5, $palette->getColors()); / Default count
         $this->assertNotEmpty($palette->getName());
         $this->assertArrayHasKey('algorithm', $palette->getMetadata());
     }
@@ -60,7 +60,7 @@ class ColorPaletteGeneratorTest extends TestCase {
         $colors = $palette->getColors();
 
         $this->assertContains($base_color, $colors);
-        $this->assertContains('#00FFFF', $colors); // Cyan is complement of Red
+        $this->assertContains('#00FFFF', $colors); / Cyan is complement of Red
     }
 
     public function test_generate_analogous(): void {
@@ -89,7 +89,7 @@ class ColorPaletteGeneratorTest extends TestCase {
         $this->assertContains($base_color, $colors);
         $this->assertCount(5, $colors);
 
-        // All colors should have same hue
+        / All colors should have same hue
         $base_hsl = $this->formatter->formatColor($base_color, 'hsl');
         foreach ($colors as $color) {
             $color_hsl = $this->formatter->formatColor($color, 'hsl');

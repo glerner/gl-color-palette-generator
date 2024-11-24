@@ -13,7 +13,7 @@ class ColorValidatorTest extends TestCase {
     }
 
     public function test_validate_color_returns_valid_structure(): void {
-        // Arrange
+        / Arrange
         $color = '#FF0000';
         $format = 'hex';
         $expected = [
@@ -33,10 +33,10 @@ class ColorValidatorTest extends TestCase {
             ->with($color, $format)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->validator->validate_color($color, $format);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('is_valid', $result);
         $this->assertArrayHasKey('format', $result);
@@ -46,7 +46,7 @@ class ColorValidatorTest extends TestCase {
     }
 
     public function test_validate_combination_returns_analysis(): void {
-        // Arrange
+        / Arrange
         $colors = ['#FF0000', '#00FF00', '#0000FF'];
         $rules = [
             'min_contrast' => 4.5,
@@ -73,10 +73,10 @@ class ColorValidatorTest extends TestCase {
             ->with($colors, $rules)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->validator->validate_combination($colors, $rules);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('passes_rules', $result);
         $this->assertArrayHasKey('harmony_scores', $result);
@@ -85,7 +85,7 @@ class ColorValidatorTest extends TestCase {
     }
 
     public function test_get_color_info_returns_detailed_information(): void {
-        // Arrange
+        / Arrange
         $color = '#FF0000';
         $expected = [
             'formats' => [
@@ -111,10 +111,10 @@ class ColorValidatorTest extends TestCase {
             ->with($color)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->validator->get_color_info($color);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('formats', $result);
         $this->assertArrayHasKey('properties', $result);
@@ -123,7 +123,7 @@ class ColorValidatorTest extends TestCase {
     }
 
     public function test_validate_against_guidelines_checks_compliance(): void {
-        // Arrange
+        / Arrange
         $color = '#FF0000';
         $guidelines = [
             'allowed_colors' => ['#FF0000', '#00FF00'],
@@ -148,10 +148,10 @@ class ColorValidatorTest extends TestCase {
             ->with($color, $guidelines)
             ->willReturn($expected);
 
-        // Act
+        / Act
         $result = $this->validator->validate_against_guidelines($color, $guidelines);
 
-        // Assert
+        / Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('compliant', $result);
         $this->assertArrayHasKey('matches', $result);

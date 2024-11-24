@@ -32,11 +32,11 @@ class Setup {
      * Load required dependencies
      */
     private function load_dependencies() {
-        // Load Settings Manager
+        / Load Settings Manager
         $settings = new Settings_Manager();
         $settings->init();
 
-        // Initialize error handling
+        / Initialize error handling
         $this->init_error_handling();
     }
 
@@ -89,13 +89,13 @@ class Setup {
      * Plugin activation hook
      */
     public function activate() {
-        // Create necessary database tables
+        / Create necessary database tables
         $this->create_tables();
 
-        // Set default options
+        / Set default options
         $this->set_default_options();
 
-        // Clear any existing caches
+        / Clear any existing caches
         $this->clear_caches();
     }
 
@@ -103,7 +103,7 @@ class Setup {
      * Plugin deactivation hook
      */
     public function deactivate() {
-        // Clean up any temporary data
+        / Clean up any temporary data
         $this->cleanup_temporary_data();
     }
 
@@ -156,7 +156,7 @@ class Setup {
      * Clean up temporary data
      */
     private function cleanup_temporary_data() {
-        // Clean up any temporary files
+        / Clean up any temporary files
         $upload_dir = wp_upload_dir();
         $temp_dir = $upload_dir['basedir'] . '/gl-color-palette-generator/temp';
         if (is_dir($temp_dir)) {

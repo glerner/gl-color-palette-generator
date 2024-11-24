@@ -120,7 +120,7 @@ class Color_Palette_Analyzer {
         foreach ($colors as $color) {
             $rgb = $this->hex_to_rgb($color);
 
-            // Calculate relative warmth based on red vs blue components
+            / Calculate relative warmth based on red vs blue components
             $warmth = ($rgb['r'] - $rgb['b']) / 255;
 
             $temperatures[] = [
@@ -333,24 +333,24 @@ class Color_Palette_Analyzer {
      * @return bool Whether the palette is balanced
      */
     private function is_palette_balanced(array $hues, array $saturations, array $values): bool {
-        // Check hue distribution
+        / Check hue distribution
         $hue_variance = $this->calculate_variance($hues);
-        if ($hue_variance > 2000) { // High variance indicates poor distribution
+        if ($hue_variance > 2000) { / High variance indicates poor distribution
             return false;
         }
 
-        // Check saturation consistency
+        / Check saturation consistency
         $saturation_variance = $this->calculate_variance($saturations);
-        if ($saturation_variance > 0.1) { // High variance indicates inconsistent saturation
+        if ($saturation_variance > 0.1) { / High variance indicates inconsistent saturation
             return false;
         }
 
-        // Check value/brightness range
+        / Check value/brightness range
         $value_range = max($values) - min($values);
-        if ($value_range < 0.2) { // Too little contrast
+        if ($value_range < 0.2) { / Too little contrast
             return false;
         }
-        if ($value_range > 0.8) { // Too much contrast
+        if ($value_range > 0.8) { / Too much contrast
             return false;
         }
 

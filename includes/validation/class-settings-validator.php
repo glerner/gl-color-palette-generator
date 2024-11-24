@@ -5,7 +5,7 @@ class SettingsValidator {
     private $errors = [];
     private $warnings = [];
 
-    // Validation rules and constraints
+    / Validation rules and constraints
     private $rules = [
         'naming_service' => [
             'allowed_values' => ['local', 'openai', 'custom'],
@@ -23,8 +23,8 @@ class SettingsValidator {
             ]
         ],
         'cache_duration' => [
-            'min' => 3600, // 1 hour
-            'max' => 2592000, // 30 days
+            'min' => 3600, / 1 hour
+            'max' => 2592000, / 30 days
             'required' => true
         ],
         'max_variations' => [
@@ -42,30 +42,30 @@ class SettingsValidator {
         $this->warnings = [];
 
         try {
-            // Basic structure validation
+            / Basic structure validation
             if (!is_array($input)) {
                 throw new Exception(__('Invalid settings format', 'color-palette-generator'));
             }
 
-            // Validate naming service and API key
+            / Validate naming service and API key
             $this->validate_naming_service($input);
 
-            // Validate accessibility settings
+            / Validate accessibility settings
             $this->validate_accessibility_settings($input);
 
-            // Validate export options
+            / Validate export options
             $this->validate_export_options($input);
 
-            // Validate default colors
+            / Validate default colors
             $this->validate_default_colors($input);
 
-            // Validate cache and performance settings
+            / Validate cache and performance settings
             $this->validate_performance_settings($input);
 
-            // Check for potential conflicts
+            / Check for potential conflicts
             $this->check_settings_conflicts($input);
 
-            // Validate custom API settings if applicable
+            / Validate custom API settings if applicable
             if (isset($input['naming_service']) && $input['naming_service'] === 'custom') {
                 $this->validate_custom_api_settings($input);
             }
@@ -96,7 +96,7 @@ class SettingsValidator {
             return;
         }
 
-        // API key validation for services that require it
+        / API key validation for services that require it
         if (in_array($input['naming_service'], ['openai', 'custom'])) {
             if (empty($input['api_key'])) {
                 $this->errors[] = __('API key is required for the selected naming service', 'color-palette-generator');
@@ -117,7 +117,7 @@ class SettingsValidator {
 
         $accessibility = $input['accessibility'];
 
-        // Validate contrast ratio
+        / Validate contrast ratio
         if (isset($accessibility['min_contrast_ratio'])) {
             $ratio = floatval($accessibility['min_contrast_ratio']);
             if ($ratio < $this->rules['accessibility']['min_contrast_ratio']['min'] ||
@@ -126,7 +126,7 @@ class SettingsValidator {
             }
         }
 
-        // Check for potential accessibility conflicts
+        / Check for potential accessibility conflicts
         if (isset($accessibility['enforce_wcag_aaa']) && $accessibility['enforce_wcag_aaa'] &&
             (!isset($accessibility['enforce_wcag_aa']) || !$accessibility['enforce_wcag_aa'])) {
             $this->warnings[] = __('WCAG AAA compliance requires WCAG AA compliance', 'color-palette-generator');
@@ -162,7 +162,7 @@ class SettingsValidator {
             }
         }
 
-        // Check color contrast for default combinations
+        / Check color contrast for default combinations
         if ($this->should_check_contrast($input)) {
             $this->validate_default_color_contrast($input['default_colors']);
         }
@@ -193,7 +193,7 @@ class SettingsValidator {
             }
         }
 
-        // Ensure at least one export format is selected
+        / Ensure at least one export format is selected
         if (empty(array_filter($input['export_options']))) {
             $this->errors[] = __('At least one export format must be selected', 'color-palette-generator');
         }
@@ -203,7 +203,7 @@ class SettingsValidator {
      * Validate performance settings
      */
     private function validate_performance_settings($input) {
-        // Validate cache duration
+        / Validate cache duration
         if (isset($input['cache_duration'])) {
             $duration = intval($input['cache_duration']);
             if ($duration < $this->rules['cache_duration']['min'] ||
@@ -212,7 +212,7 @@ class SettingsValidator {
             }
         }
 
-        // Validate max variations
+        / Validate max variations
         if (isset($input['max_variations'])) {
             $max = intval($input['max_variations']);
             if ($max < $this->rules['max_variations']['min'] ||
@@ -235,7 +235,7 @@ class SettingsValidator {
             $this->errors[] = __('Invalid custom API URL', 'color-palette-generator');
         }
 
-        // Validate API endpoint format
+        / Validate API endpoint format
         if (!$this->is_valid_api_endpoint($input['custom_api_url'])) {
             $this->warnings[] = __('Custom API URL may not follow REST API conventions', 'color-palette-generator');
         }
@@ -245,7 +245,7 @@ class SettingsValidator {
      * Check for potential conflicts between settings
      */
     private function check_settings_conflicts($input) {
-        // Check for performance vs quality conflicts
+        / Check for performance vs quality conflicts
         if (isset($input['export_options']['minify_output']) &&
             $input['export_options']['minify_output'] &&
             isset($input['accessibility']['enforce_wcag_aaa']) &&
@@ -253,7 +253,7 @@ class SettingsValidator {
             $this->warnings[] = __('Minification may affect WCAG AAA compliance validation', 'color-palette-generator');
         }
 
-        // Check for cache duration vs API rate limits
+        / Check for cache duration vs API rate limits
         if (isset($input['naming_service']) &&
             $input['naming_service'] === 'openai' &&
             isset($input['cache_duration']) &&
@@ -273,7 +273,7 @@ class SettingsValidator {
      * Utility function to validate API endpoints
      */
     private function is_valid_api_endpoint($url) {
-        return preg_match('/^https?:\/\/[^\/]+\/[^\/]+\/v\d+\//', $url);
+        return preg_match('/^https?:\/\/[^\/]+\/[^\/]+\/v\d+\/', $url);
     }
 
     /**
@@ -301,7 +301,7 @@ class SettingsValidator {
                 $colors[$pair[1]]
             );
 
-            if ($ratio < 4.5) { // WCAG AA standard
+            if ($ratio < 4.5) { / WCAG AA standard
                 $this->warnings[] = sprintf(
                     __('Low contrast ratio (%s) between %s and %s colors', 'color-palette-generator'),
                     number_format($ratio, 2),
@@ -355,11 +355,11 @@ class SettingsValidator {
     private function sanitize_input($input) {
         $sanitized = [];
 
-        // Sanitize basic fields
+        / Sanitize basic fields
         $sanitized['naming_service'] = sanitize_text_field($input['naming_service']);
         $sanitized['api_key'] = sanitize_text_field($input['api_key']);
 
-        // Sanitize accessibility settings
+        / Sanitize accessibility settings
         $sanitized['accessibility'] = [
             'min_contrast_ratio' => floatval($input['accessibility']['min_contrast_ratio']),
             'check_color_blindness' => (bool) $input['accessibility']['check_color_blindness'],
@@ -367,13 +367,13 @@ class SettingsValidator {
             'enforce_wcag_aaa' => (bool) $input['accessibility']['enforce_wcag_aaa']
         ];
 
-        // Sanitize export options
+        / Sanitize export options
         $sanitized['export_options'] = array_map('boolval', $input['export_options']);
 
-        // Sanitize default colors
+        / Sanitize default colors
         $sanitized['default_colors'] = array_map('sanitize_hex_color', $input['default_colors']);
 
-        // Sanitize performance settings
+        / Sanitize performance settings
         $sanitized['cache_duration'] = absint($input['cache_duration']);
         $sanitized['max_variations'] = absint($input['max_variations']);
 
@@ -387,12 +387,12 @@ class SettingsValidator {
         $validated = [];
         $errors = new WP_Error();
 
-        // Validate General Settings
+        / Validate General Settings
         $validated['default_palette_size'] = $this->validate_palette_size(
             $input['default_palette_size'] ?? 5
         );
 
-        // Validate API Settings
+        / Validate API Settings
         $validated['api_provider'] = $this->validate_api_provider(
             $input['api_provider'] ?? ''
         );
