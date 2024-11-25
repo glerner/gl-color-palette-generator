@@ -3,6 +3,11 @@ jQuery(document).ready(function($) {
     const statusContainer = $('<div class="cache-status-message"></div>')
         .insertAfter(clearCacheBtn);
 
+    /**
+     * Display a message in the status container.
+     * @param {string} message - The message to display.
+     * @param {string} [type='info'] - The type of message (info, success, error).
+     */
     function showMessage(message, type = 'info') {
         statusContainer
             .removeClass('notice-success notice-error notice-info')
@@ -11,10 +16,17 @@ jQuery(document).ready(function($) {
             .show();
     }
 
+    /**
+     * Clear the message from the status container.
+     */
     function clearMessage() {
         statusContainer.hide().empty();
     }
 
+    /**
+     * Handle the click event for the clear cache button.
+     * @param {Event} e - The event object.
+     */
     clearCacheBtn.on('click', function(e) {
         e.preventDefault();
         const button = $(this);
@@ -74,6 +86,9 @@ jQuery(document).ready(function($) {
     'use strict';
 
     const GLColorPaletteSettings = {
+        /**
+         * Initialize the settings page functionality.
+         */
         init: function() {
             this.providerSelect = $('#gl_color_palette_ai_provider');
             this.modelSelect = $('#gl_color_palette_model');
@@ -84,12 +99,18 @@ jQuery(document).ready(function($) {
             this.updateModelOptions();
         },
 
+        /**
+         * Bind event handlers to UI elements.
+         */
         bindEvents: function() {
             this.providerSelect.on('change', this.updateModelOptions.bind(this));
             this.testButton.on('click', this.testApiConnection.bind(this));
             this.apiKeyField.on('change', this.validateApiKey.bind(this));
         },
 
+        /**
+         * Update the model options based on the selected provider.
+         */
         updateModelOptions: function() {
             const provider = this.providerSelect.val();
             const models = this.getModelsForProvider(provider);
@@ -105,6 +126,11 @@ jQuery(document).ready(function($) {
             });
         },
 
+        /**
+         * Get available models for the selected provider.
+         * @param {string} provider - The selected provider.
+         * @return {Object} An object containing model options.
+         */
         getModelsForProvider: function(provider) {
             const models = {
                 openai: {
@@ -121,6 +147,9 @@ jQuery(document).ready(function($) {
             return models[provider] || {};
         },
 
+        /**
+         * Validate the API key format based on the selected provider.
+         */
         validateApiKey: function() {
             const provider = this.providerSelect.val();
             const apiKey = this.apiKeyField.val();
@@ -137,6 +166,10 @@ jQuery(document).ready(function($) {
             this.testButton.prop('disabled', !isValid);
         },
 
+        /**
+         * Test the API connection with the provided credentials.
+         * @param {Event} e - The event object.
+         */
         testApiConnection: function(e) {
             e.preventDefault();
             const self = this;
@@ -160,6 +193,11 @@ jQuery(document).ready(function($) {
             });
         },
 
+        /**
+         * Display a notice message on the settings page.
+         * @param {string} type - The type of notice (success, error).
+         * @param {string} message - The message to display.
+         */
         showNotice: function(type, message) {
             const notice = $('<div></div>')
                 .addClass(`notice notice-${type} is-dismissible`)
@@ -184,4 +222,4 @@ jQuery(document).ready(function($) {
     $(document).ready(function() {
         GLColorPaletteSettings.init();
     });
-})(jQuery); 
+})(jQuery);

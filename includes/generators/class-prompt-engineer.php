@@ -1,5 +1,5 @@
 <?php
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator\Generators;
 
 class PromptEngineer {
     private $settings;
@@ -7,7 +7,7 @@ class PromptEngineer {
     private $context_processor;
     private $emotion_mapper;
 
-    / Creative direction templates
+    // Creative direction templates
     private $creative_directions = [
         'natural' => [
             'style' => 'organic, earthy, inspired by nature',
@@ -179,25 +179,25 @@ PROMPT;
     private function generate_inspiration_sources($color_analysis, $context) {
         $sources = [];
 
-        / Nature-based inspirations
+        // Nature-based inspirations
         if ($this->should_include_nature_references($color_analysis, $context)) {
             $sources[] = $this->get_nature_inspirations($color_analysis);
         }
 
-        / Cultural references
+        // Cultural references
         if ($context['include_cultural_references']) {
             $sources[] = $this->get_cultural_inspirations($context['culture']);
         }
 
-        / Industry-specific references
+        // Industry-specific references
         if ($context['industry'] !== 'general') {
             $sources[] = $this->get_industry_inspirations($context['industry']);
         }
 
-        / Emotional associations
+        // Emotional associations
         $sources[] = $this->get_emotional_inspirations($color_analysis['characteristics']);
 
-        / Seasonal influences
+        // Seasonal influences
         if ($context['season'] !== 'any') {
             $sources[] = $this->get_seasonal_inspirations($context['season']);
         }
@@ -213,14 +213,14 @@ PROMPT;
     private function format_semantic_relationships($color_analysis, $context) {
         $relationships = [];
 
-        / Color family relationships
+        // Color family relationships
         $relationships[] = sprintf(
             "Primary Color Family: %s (%.1f%% confidence)",
             $color_analysis['relationships']['family'],
             $color_analysis['relationships']['family_confidence']
         );
 
-        / Contextual relationships
+        // Contextual relationships
         if ($context['category']) {
             $relationships[] = sprintf(
                 "Common in %s: %s",
@@ -229,7 +229,7 @@ PROMPT;
             );
         }
 
-        / Cultural significance
+        // Cultural significance
         if ($context['culture']) {
             $relationships[] = sprintf(
                 "Cultural Significance in %s: %s",
@@ -280,7 +280,7 @@ VOICE;
     private function generate_examples($color_analysis, $context) {
         $examples = [];
 
-        / Find similar colors and their successful names
+        // Find similar colors and their successful names
         $similar_colors = $this->find_similar_successful_colors(
             $color_analysis['base']['lab'],
             $context

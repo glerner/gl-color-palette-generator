@@ -1,12 +1,12 @@
 <?php
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator;
 
 class MLColorEngine {
     private $model_manager;
     private $training_controller;
     private $inference_engine;
 
-    / Machine Learning configurations
+    // Machine Learning configurations
     private const ML_CONFIGURATIONS = [
         'models' => [
             'color_pattern_recognition' => [
@@ -159,9 +159,15 @@ class MLColorEngine {
         ]
     ];
 
+
     /**
-     * Generate color recommendations
+     * Generate color recommendations based on the given context and constraints.
+     *
+     * @param array $context The context for generating recommendations.
+     * @param array $constraints Optional constraints to apply to the recommendations.
+     * @return array An array containing recommendations, explanations, confidence scores, and alternative options.
      */
+
     public function generate_recommendations($context, $constraints = []) {
         return [
             'recommendations' => $this->process_recommendations($context),
@@ -171,8 +177,14 @@ class MLColorEngine {
         ];
     }
 
+
     /**
-     * Apply style transfer
+     * Apply style transfer from a source to a target with optional settings.
+     *
+     * @param mixed $source The source data for style transfer.
+     * @param mixed $target The target data for style transfer.
+     * @param array $options Optional settings for the style transfer process.
+     * @return array An array containing the transferred style, color mapping, quality metrics, and adjustments.
      */
     public function apply_style_transfer($source, $target, $options = []) {
         return [
@@ -184,7 +196,10 @@ class MLColorEngine {
     }
 
     /**
-     * Train model on color preferences
+     * Train the model using the provided training data.
+     *
+     * @param array $training_data The data used for training the model.
+     * @return array An array containing the training results, including epochs completed, loss history, and accuracy history.
      */
     public function train_model($training_data) {
         $processed_data = $this->preprocess_training_data($training_data);
@@ -213,7 +228,10 @@ class MLColorEngine {
     }
 
     /**
-     * Predict color combinations
+     * Predict color combinations based on a base color.
+     *
+     * @param string $base_color The base color for generating predictions.
+     * @return array An array of processed predictions.
      */
     public function predict_combinations($base_color) {
         $model = $this->load_model();
@@ -224,7 +242,10 @@ class MLColorEngine {
     }
 
     /**
-     * Update model with new data
+     * Update the model with new data.
+     *
+     * @param array $new_data The new data to update the model with.
+     * @return array An array containing the update status, performance delta, model metrics, and recommendations.
      */
     public function update_model($new_data) {
         $model = $this->load_model();
@@ -247,7 +268,10 @@ class MLColorEngine {
     }
 
     /**
-     * Generate color predictions
+     * Generate color predictions based on input data.
+     *
+     * @param array $input_data The input data for generating predictions.
+     * @return array An array containing raw and processed predictions, confidence scores, and alternative suggestions.
      */
     public function generate_predictions($input_data) {
         $model = $this->load_model();

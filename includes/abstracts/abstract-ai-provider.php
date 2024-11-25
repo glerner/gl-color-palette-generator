@@ -7,9 +7,9 @@
  * @since 1.0.0
  */
 
-namespace GLColorPalette\Abstracts;
+namespace GL_Color_Palette_Generator\Abstracts;
 
-use GLColorPalette\Interfaces\AI_Provider;
+use GL_Color_Palette_Generator\Interfaces\AI_Provider;
 
 /**
  * Abstract class AI_Provider_Base
@@ -87,4 +87,4 @@ abstract class AI_Provider_Base implements AI_Provider {
      * @return array Headers array.
      */
     abstract protected function get_headers(): array;
-} 
+}

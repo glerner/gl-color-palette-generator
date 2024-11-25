@@ -35,8 +35,8 @@ class Test_Color_Utility extends TestCase {
      * Test color difference calculation for similar colors
      */
     public function test_similar_colors_have_small_difference() {
-        $color1 = '#ff0000';  / Red
-        $color2 = '#ff0505';  / Very slightly different red
+        $color1 = '#ff0000';  // Red
+        $color2 = '#ff0505';  // Very slightly different red
 
         $difference = $this->color_util->get_color_difference($color1, $color2);
 
@@ -51,8 +51,8 @@ class Test_Color_Utility extends TestCase {
      * Test color difference calculation for distinct colors
      */
     public function test_distinct_colors_have_large_difference() {
-        $color1 = '#ff0000';  / Red
-        $color2 = '#00ff00';  / Green
+        $color1 = '#ff0000';  // Red
+        $color2 = '#00ff00';  // Green
 
         $difference = $this->color_util->get_color_difference($color1, $color2);
 
@@ -68,11 +68,11 @@ class Test_Color_Utility extends TestCase {
      */
     public function test_similar_colors_are_not_distinct() {
         $colors = [
-            '#ff0000',  / Red
-            '#ff0505',  / Very similar red
-            '#ff0a0a',  / Similar red
-            '#ff0f0f',  / Similar red
-            '#ff1414',  / Similar red
+            '#ff0000',  // Red
+            '#ff0505',  // Very similar red
+            '#ff0a0a',  // Similar red
+            '#ff0f0f',  // Similar red
+            '#ff1414',  // Similar red
         ];
 
         $this->assertFalse(
@@ -86,11 +86,11 @@ class Test_Color_Utility extends TestCase {
      */
     public function test_distinct_colors_are_distinct() {
         $colors = [
-            '#ff0000',  / Red
-            '#00ff00',  / Green
-            '#0000ff',  / Blue
-            '#ffff00',  / Yellow
-            '#ff00ff',  / Magenta
+            '#ff0000',  // Red
+            '#00ff00',  // Green
+            '#0000ff',  // Blue
+            '#ffff00',  // Yellow
+            '#ff00ff',  // Magenta
         ];
 
         $this->assertTrue(
@@ -125,11 +125,11 @@ class Test_Color_Utility extends TestCase {
      */
     public function test_distinct_colors_have_high_distinctiveness_score() {
         $colors = [
-            '#ff0000',  / Red
-            '#00ff00',  / Green
-            '#0000ff',  / Blue
-            '#ffff00',  / Yellow
-            '#ff00ff',  / Magenta
+            '#ff0000',  // Red
+            '#00ff00',  // Green
+            '#0000ff',  // Blue
+            '#ffff00',  // Yellow
+            '#ff00ff',  // Magenta
         ];
 
         $score = $this->color_util->get_distinctiveness_score($colors);
@@ -176,4 +176,4 @@ class Test_Color_Utility extends TestCase {
             'Color difference should be the same regardless of order'
         );
     }
-} 
+}

@@ -247,12 +247,19 @@
          * Export/Import functionality
          */
         exportImport: {
+            /**
+             * Initialize export/import functionality
+             */
             init: function() {
                 $('.gl-cpg-export').on('click', this.handleExport);
                 $('.gl-cpg-import').on('click', this.handleImportClick);
                 $('#gl-cpg-import-file').on('change', this.handleImportFile);
             },
 
+            /**
+             * Handle export action
+             * @param {Event} e Click event
+             */
             handleExport: function(e) {
                 const format = $(this).data('format');
 
@@ -280,10 +287,17 @@
                 });
             },
 
+            /**
+             * Handle import button click
+             */
             handleImportClick: function() {
                 $('#gl-cpg-import-file').click();
             },
 
+            /**
+             * Handle import file selection
+             * @param {Event} e Change event
+             */
             handleImportFile: function(e) {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -316,11 +330,17 @@
          * Accessibility checker functionality
          */
         accessibilityChecker: {
+            /**
+             * Initialize accessibility checker
+             */
             init: function() {
                 $('.gl-cpg-check-contrast').on('click', this.checkContrast);
                 $('#gl-cpg-text-color, #gl-cpg-bg-color').on('change', this.updatePreview);
             },
 
+            /**
+             * Check contrast between text and background colors
+             */
             checkContrast: function() {
                 const textColor = $('#gl-cpg-text-color').val();
                 const bgColor = $('#gl-cpg-bg-color').val();
@@ -367,6 +387,9 @@
                 });
             },
 
+            /**
+             * Update preview of text and background colors
+             */
             updatePreview: function() {
                 const textColor = $('#gl-cpg-text-color').val();
                 const bgColor = $('#gl-cpg-bg-color').val();

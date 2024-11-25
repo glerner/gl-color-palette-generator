@@ -26,7 +26,7 @@ class GLColorPaletteUninstall {
     private static function delete_tables() {
         global $wpdb;
 
-        / Drop tables in correct order (due to foreign key constraints)
+        // Drop tables in correct order (due to foreign key constraints)
         $tables = [
             $wpdb->prefix . 'gl_color_history',
             $wpdb->prefix . 'gl_color_preferences',
@@ -42,13 +42,13 @@ class GLColorPaletteUninstall {
      * Delete plugin options
      */
     private static function delete_options() {
-        / Delete main options
+        // Delete main options
         delete_option('gl_color_palette_db_version');
         delete_option('gl_color_palette_settings');
         delete_option('gl_color_palette_last_sync');
         delete_option('gl_color_palette_api_key');
 
-        / Delete all options with our prefix
+        // Delete all options with our prefix
         global $wpdb;
         $wpdb->query(
             $wpdb->prepare(
@@ -64,7 +64,7 @@ class GLColorPaletteUninstall {
     private static function delete_transients() {
         global $wpdb;
 
-        / Delete all transients and their timeout entries
+        // Delete all transients and their timeout entries
         $wpdb->query(
             $wpdb->prepare(
                 "DELETE FROM `{$wpdb->options}` WHERE option_name LIKE %s OR option_name LIKE %s",
@@ -73,7 +73,7 @@ class GLColorPaletteUninstall {
             )
         );
 
-        / Delete network transients if in multisite
+        // Delete network transients if in multisite
         if (is_multisite()) {
             $wpdb->query(
                 $wpdb->prepare(
@@ -89,17 +89,17 @@ class GLColorPaletteUninstall {
      * Delete plugin files
      */
     private static function delete_files() {
-        / Get WordPress uploads directory
+        // Get WordPress uploads directory
         $upload_dir = wp_upload_dir();
 
-        / Define directories to clean
+        // Define directories to clean
         $directories = [
             $upload_dir['basedir'] . '/gl-color-palettes',
             $upload_dir['basedir'] . '/gl-color-exports',
             $upload_dir['basedir'] . '/gl-color-cache'
         ];
 
-        / Delete directories and their contents
+        // Delete directories and their contents
         foreach ($directories as $directory) {
             if (is_dir($directory)) {
                 self::delete_directory($directory);
@@ -144,7 +144,7 @@ class GLColorPaletteUninstall {
             $wp_roles = new WP_Roles();
         }
 
-        / List of capabilities to remove
+        // List of capabilities to remove
         $caps_to_remove = [
             'manage_color_palettes',
             'edit_color_palettes',
@@ -153,7 +153,7 @@ class GLColorPaletteUninstall {
             'export_color_palettes'
         ];
 
-        / Remove capabilities from all roles
+        // Remove capabilities from all roles
         foreach ($wp_roles->roles as $role_name => $role_info) {
             $role = get_role($role_name);
             if ($role) {
@@ -170,7 +170,7 @@ class GLColorPaletteUninstall {
     private static function cleanup_user_meta() {
         global $wpdb;
 
-        / Delete all user meta with our prefix
+        // Delete all user meta with our prefix
         $wpdb->query(
             $wpdb->prepare(
                 "DELETE FROM `{$wpdb->usermeta}` WHERE meta_key LIKE %s",
@@ -180,5 +180,5 @@ class GLColorPaletteUninstall {
     }
 }
 
-/ Run the uninstaller
+// Run the uninstaller
 GLColorPaletteUninstall::uninstall();

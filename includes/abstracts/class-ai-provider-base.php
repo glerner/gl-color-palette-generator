@@ -9,7 +9,7 @@
  * @since      1.0.0
  */
 
-namespace GLColorPalette\Abstracts;
+namespace GL_Color_Palette_Generator\Abstracts;
 
 abstract class AI_Provider_Base {
     /**
@@ -160,4 +160,4 @@ abstract class AI_Provider_Base {
             return new \WP_Error('invalid_colors', $e->getMessage());
         }
     }
-} 
+}

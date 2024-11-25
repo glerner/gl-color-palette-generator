@@ -4,15 +4,25 @@ namespace GLColorPalette;
 class ColorNameGenerator {
     private $naming_preference;
     private $openai_api_key;
-    private $cache_duration = 2592000; / 30 days in seconds
+    private $cache_duration = 2592000; // 30 days in seconds
 
+    /**
+     * Constructor for ColorNameGenerator.
+     *
+     * @param string $preference The naming preference ('both', 'creative', 'descriptive').
+     * @param string|null $openai_api_key The API key for OpenAI, if available.
+     */
     public function __construct($preference = 'both', $openai_api_key = null) {
         $this->naming_preference = $preference;
         $this->openai_api_key = $openai_api_key;
     }
 
     /**
-     * Generate names for a color and its variations
+     * Generate names for a color and its variations.
+     *
+     * @param string $hex The base color in hex format.
+     * @param array $variations An array of color variations.
+     * @return array An array of generated names for each variation.
      */
     public function generate_names($hex, $variations) {
         $base_name = $this->get_color_name($hex);
@@ -31,25 +41,28 @@ class ColorNameGenerator {
     }
 
     /**
-     * Get color name using various APIs
+     * Get color name using various APIs.
+     *
+     * @param string $hex The color in hex format.
+     * @return string The determined color name.
      */
     private function get_color_name($hex) {
         $hex = ltrim($hex, '#');
 
-        / First check the cache
+        // First check the cache
         $cached_name = get_transient('color_name_' . $hex);
         if ($cached_name !== false) {
             return $cached_name;
         }
 
-        / Try ColorNames.org API first
+        // Try ColorNames.org API first
         $colornames_result = $this->get_colornames_api($hex);
         if ($colornames_result) {
             $this->cache_color_name($hex, $colornames_result);
             return $colornames_result;
         }
 
-        / If ColorNames.org fails and OpenAI is configured, try that
+        // If ColorNames.org fails and OpenAI is configured, try that
         if ($this->openai_api_key) {
             $ai_result = $this->get_ai_color_name($hex);
             if ($ai_result) {
@@ -58,7 +71,7 @@ class ColorNameGenerator {
             }
         }
 
-        / Fallback to basic color name
+        // Fallback to basic color name
         return $this->get_basic_color_name($hex);
     }
 
@@ -146,7 +159,7 @@ class ColorNameGenerator {
     private function get_basic_color_name($hex) {
         $rgb = $this->hex_to_rgb($hex);
 
-        / Basic color detection logic
+        // Basic color detection logic
         $r = $rgb[0];
         $g = $rgb[1];
         $b = $rgb[2];

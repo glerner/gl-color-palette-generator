@@ -55,7 +55,7 @@ function updateFiles($dir, $uris, $extensions) {
             $content = file_get_contents($file->getPathname());
             $original = $content;
 
-            / Replace old URIs with new ones
+            // Replace old URIs with new ones
             foreach ($uris as $type => $uri_data) {
                 foreach ($uri_data['old'] as $old_uri) {
                     $content = str_replace(
@@ -66,7 +66,7 @@ function updateFiles($dir, $uris, $extensions) {
                 }
             }
 
-            / Additional pass to fix any remaining double slashes
+            // Additional pass to fix any remaining double slashes
             $content = preg_replace('#([^:])/+#', '$1/', $content);
 
             if ($content !== $original) {
@@ -79,6 +79,6 @@ function updateFiles($dir, $uris, $extensions) {
     return $updates;
 }
 
-/ Run the update
+// Run the update
 $total_updates = updateFiles($plugin_root, $uris, $file_extensions);
 echo "Total files updated: " . $total_updates . PHP_EOL;

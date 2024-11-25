@@ -1,11 +1,11 @@
 <?php
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator;
 
 class VariationGenerator {
     private $color_analyzer;
     private $settings;
 
-    / Variation types
+    // Variation types
     private const VARIATION_TYPES = [
         'tints' => ['steps' => 5, 'intensity' => 0.1],
         'shades' => ['steps' => 5, 'intensity' => 0.1],
@@ -23,7 +23,11 @@ class VariationGenerator {
     }
 
     /**
-     * Generate comprehensive color variations
+     * Generate comprehensive color variations.
+     *
+     * @param string $base_color The base color in hex format.
+     * @param array $variation_types The types of variations to generate.
+     * @return array An array containing the base color, variations, and metadata.
      */
     public function generate_variations($base_color, $variation_types = []) {
         $variations = [];
@@ -56,7 +60,11 @@ class VariationGenerator {
     }
 
     /**
-     * Generate tints (lighter variations)
+     * Generate tints (lighter variations).
+     *
+     * @param array $lab The LAB color values.
+     * @param array $options Options for generating tints.
+     * @return array An array of tints in hex format.
      */
     private function generate_tints($lab, $options) {
         $steps = $options['tint_steps'] ?? self::VARIATION_TYPES['tints']['steps'];
@@ -77,7 +85,11 @@ class VariationGenerator {
     }
 
     /**
-     * Generate shades (darker variations)
+     * Generate shades (darker variations).
+     *
+     * @param array $lab The LAB color values.
+     * @param array $options Options for generating shades.
+     * @return array An array of shades in hex format.
      */
     private function generate_shades($lab, $options) {
         $steps = $options['shade_steps'] ?? self::VARIATION_TYPES['shades']['steps'];
@@ -98,7 +110,11 @@ class VariationGenerator {
     }
 
     /**
-     * Generate tones (saturation variations)
+     * Generate tones (saturation variations).
+     *
+     * @param array $lab The LAB color values.
+     * @param array $options Options for generating tones.
+     * @return array An array of tones in hex format.
      */
     private function generate_tones($lab, $options) {
         $steps = $options['tone_steps'] ?? self::VARIATION_TYPES['tones']['steps'];
@@ -119,7 +135,11 @@ class VariationGenerator {
     }
 
     /**
-     * Generate saturated variations
+     * Generate saturated variations.
+     *
+     * @param array $lab The LAB color values.
+     * @param array $options Options for generating saturated variations.
+     * @return array An array of saturated variations in hex format.
      */
     private function generate_saturated($lab, $options) {
         $steps = $options['saturated_steps'] ?? self::VARIATION_TYPES['saturated']['steps'];
@@ -140,7 +160,11 @@ class VariationGenerator {
     }
 
     /**
-     * Generate temperature variations
+     * Generate temperature variations.
+     *
+     * @param array $lab The LAB color values.
+     * @param array $options Options for generating temperature variations.
+     * @return array An array containing warm and cool variations.
      */
     private function generate_temperature_variations($lab, $options) {
         $warm_steps = $options['warm_steps'] ?? self::VARIATION_TYPES['temperature']['warm'];
@@ -153,11 +177,15 @@ class VariationGenerator {
     }
 
     /**
-     * Generate warm variations
+     * Generate warm variations.
+     *
+     * @param array $lab The LAB color values.
+     * @param int $steps Number of steps for generating warm variations.
+     * @return array An array of warm variations in hex format.
      */
     private function generate_warm_variations($lab, $steps) {
         $warm = [];
-        $warm_adjustment = [2, 5, -2]; / Adjust Lab values for warmer appearance
+        $warm_adjustment = [2, 5, -2]; // Adjust Lab values for warmer appearance
 
         for ($i = 1; $i <= $steps; $i++) {
             $new_lab = [
@@ -173,11 +201,15 @@ class VariationGenerator {
     }
 
     /**
-     * Generate cool variations
+     * Generate cool variations.
+     *
+     * @param array $lab The LAB color values.
+     * @param int $steps Number of steps for generating cool variations.
+     * @return array An array of cool variations in hex format.
      */
     private function generate_cool_variations($lab, $steps) {
         $cool = [];
-        $cool_adjustment = [2, -5, 2]; / Adjust Lab values for cooler appearance
+        $cool_adjustment = [2, -5, 2]; // Adjust Lab values for cooler appearance
 
         for ($i = 1; $i <= $steps; $i++) {
             $new_lab = [
@@ -193,7 +225,11 @@ class VariationGenerator {
     }
 
     /**
-     * Generate neutral variations
+     * Generate neutral variations.
+     *
+     * @param array $lab The LAB color values.
+     * @param array $options Options for generating neutral variations.
+     * @return array An array of neutral variations in hex format.
      */
     private function generate_neutrals($lab, $options) {
         $steps = $options['neutral_steps'] ?? self::VARIATION_TYPES['neutrals']['steps'];
@@ -214,7 +250,11 @@ class VariationGenerator {
     }
 
     /**
-     * Generate accent variations
+     * Generate accent variations.
+     *
+     * @param array $lab The LAB color values.
+     * @param array $options Options for generating accent variations.
+     * @return array An array containing bright and muted accent variations.
      */
     private function generate_accents($lab, $options) {
         return [
@@ -224,7 +264,10 @@ class VariationGenerator {
     }
 
     /**
-     * Generate semantic variations
+     * Generate semantic variations.
+     *
+     * @param string $base_color The base color in hex format.
+     * @return array An array of semantic variations.
      */
     private function generate_semantic_variations($base_color) {
         return [
@@ -237,7 +280,11 @@ class VariationGenerator {
     }
 
     /**
-     * Generate custom variations
+     * Generate custom variations.
+     *
+     * @param string $base_color The base color in hex format.
+     * @param array $parameters Parameters for generating custom variations.
+     * @return array An array containing custom variations and preview data.
      */
     public function generate_custom_variations($base_color, $parameters) {
         $custom_variations = [];
@@ -269,20 +316,24 @@ class VariationGenerator {
     }
 
     /**
-     * Adjust color for semantic meaning
+     * Adjust color for semantic meaning.
+     *
+     * @param string $color The color in hex format.
+     * @param string $type The semantic type (e.g., 'success', 'warning').
+     * @return string The adjusted color in hex format.
      */
     private function adjust_for_semantic($color, $type) {
         $lab = $this->color_analyzer->hex_to_lab($color);
 
         switch ($type) {
             case 'success':
-                return $this->shift_towards_hue($lab, 120, 0.7); / Shift towards green
+                return $this->shift_towards_hue($lab, 120, 0.7); // Shift towards green
             case 'warning':
-                return $this->shift_towards_hue($lab, 45, 0.7);  / Shift towards orange
+                return $this->shift_towards_hue($lab, 45, 0.7);  // Shift towards orange
             case 'error':
-                return $this->shift_towards_hue($lab, 0, 0.7);   / Shift towards red
+                return $this->shift_towards_hue($lab, 0, 0.7);   // Shift towards red
             case 'info':
-                return $this->shift_towards_hue($lab, 200, 0.7); / Shift towards blue
+                return $this->shift_towards_hue($lab, 200, 0.7); // Shift towards blue
             case 'disabled':
                 return $this->desaturate_and_lighten($lab, 0.5);
             default:
@@ -291,7 +342,12 @@ class VariationGenerator {
     }
 
     /**
-     * Utility methods for color adjustments
+     * Shift color towards a target hue.
+     *
+     * @param array $lab The LAB color values.
+     * @param int $target_hue The target hue to shift towards.
+     * @param float $strength The strength of the hue shift.
+     * @return string The adjusted color in hex format.
      */
     private function shift_towards_hue($lab, $target_hue, $strength) {
         $current_hue = $this->color_analyzer->lab_to_hue($lab);
@@ -305,6 +361,13 @@ class VariationGenerator {
         return $this->color_analyzer->lab_to_hex($new_lab);
     }
 
+    /**
+     * Desaturate and lighten a color.
+     *
+     * @param array $lab The LAB color values.
+     * @param float $amount The amount to desaturate and lighten.
+     * @return string The adjusted color in hex format.
+     */
     private function desaturate_and_lighten($lab, $amount) {
         $new_lab = [
             $lab[0],
@@ -315,19 +378,22 @@ class VariationGenerator {
     }
 
     /**
-     * Generate accessibility variations
+     * Generate accessibility variations.
+     *
+     * @param string $base_color The base color in hex format.
+     * @return array An array containing accessibility variations and report.
      */
     public function generate_accessibility_variations($base_color) {
         $accessibility = new AccessibilityChecker();
         $variations = [];
 
-        / Generate variations for different contrast ratios
+        // Generate variations for different contrast ratios
         $variations['aa_normal'] = $this->generate_aa_compliant_variations($base_color, 'normal');
         $variations['aa_large'] = $this->generate_aa_compliant_variations($base_color, 'large');
         $variations['aaa_normal'] = $this->generate_aaa_compliant_variations($base_color, 'normal');
         $variations['aaa_large'] = $this->generate_aaa_compliant_variations($base_color, 'large');
 
-        / Check accessibility for each variation
+        // Check accessibility for each variation
         foreach ($variations as $type => $colors) {
             foreach ($colors as &$color) {
                 $color['contrast_ratio'] = $accessibility->check_contrast_ratio($base_color, $color['hex']);

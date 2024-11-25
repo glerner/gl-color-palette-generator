@@ -57,19 +57,19 @@ class Color_Palette_Generator {
      * @throws \Exception If palette generation fails.
      */
     public function generate_from_prompt($prompt) {
-        / Check cache first
+        // Check cache first
         $cached_palette = $this->get_cached_palette($prompt);
         if ($cached_palette !== false) {
             return $cached_palette;
         }
 
-        / Generate palette using AI
+        // Generate palette using AI
         $colors = $this->generate_colors($prompt);
 
-        / Validate and process colors
+        // Validate and process colors
         $palette = $this->process_colors($colors);
 
-        / Cache the result
+        // Cache the result
         $this->cache_palette($prompt, $palette);
 
         return $palette;
@@ -158,10 +158,10 @@ EOT;
     private function process_colors($colors) {
         $processed = array_map(
             function($color) {
-                / Ensure lowercase hex format
+                // Ensure lowercase hex format
                 $color = strtolower($color);
 
-                / Validate hex format
+                // Validate hex format
                 if (!preg_match('/^#[0-9a-f]{6}$/', $color)) {
                     throw new \Exception(
                         sprintf(
@@ -176,7 +176,7 @@ EOT;
             $colors
         );
 
-        / Check color distinctiveness
+        // Check color distinctiveness
         $color_util = new Color_Utility();
         if (!$color_util->are_colors_distinct($processed)) {
             throw new \Exception(

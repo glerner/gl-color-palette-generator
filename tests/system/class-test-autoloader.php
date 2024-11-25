@@ -67,7 +67,7 @@ class Test_Autoloader extends TestCase {
     public function test_autoload_valid_namespace() {
         $class_name = 'GL_Color_Palette_Generator\Core\Setup';
 
-        / Create a mock file
+        // Create a mock file
         $file_path = GL_CPG_PLUGIN_DIR . 'includes/core/class-setup.php';
         $dir_path = dirname($file_path);
 
@@ -81,7 +81,7 @@ class Test_Autoloader extends TestCase {
 
         $this->assertTrue(class_exists($class_name, false));
 
-        / Cleanup
+        // Cleanup
         unlink($file_path);
         rmdir($dir_path);
     }
@@ -113,4 +113,4 @@ class Test_Autoloader extends TestCase {
 
         $this->assertEquals($expected, $result);
     }
-} 
+}

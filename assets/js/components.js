@@ -2,6 +2,9 @@
     'use strict';
 
     const GLColorPaletteComponents = {
+        /**
+         * Initialize all component functionalities.
+         */
         init: function() {
             this.initVariationSlider();
             this.initHarmonyWheel();
@@ -9,6 +12,9 @@
             this.initToasts();
         },
 
+        /**
+         * Initialize the variation slider functionality.
+         */
         initVariationSlider: function() {
             const slider = $('.variation-slider');
             const handle = slider.find('.variation-handle');
@@ -40,6 +46,9 @@
             });
         },
 
+        /**
+         * Initialize the harmony wheel functionality.
+         */
         initHarmonyWheel: function() {
             const wheel = $('.harmony-wheel');
             const markers = wheel.find('.harmony-marker');
@@ -67,6 +76,9 @@
             }.bind(this));
         },
 
+        /**
+         * Initialize the scheme preview functionality.
+         */
         initSchemePreview: function() {
             $('.scheme-color').on('click', function() {
                 const color = $(this).css('background-color');
@@ -75,12 +87,20 @@
             }.bind(this));
         },
 
+        /**
+         * Initialize toast notifications.
+         */
         initToasts: function() {
             if (!$('.toast-container').length) {
                 $('body').append('<div class="toast-container"></div>');
             }
         },
 
+        /**
+         * Display a toast notification.
+         * @param {string} message - The message to display.
+         * @param {string} [type='success'] - The type of toast (success, error, etc.).
+         */
         showToast: function(message, type = 'success') {
             const toast = $('<div></div>')
                 .addClass(`toast ${type}`)
@@ -95,20 +115,86 @@
             }, 3000);
         },
 
+        /**
+         * Interpolate color based on position.
+         * @param {number} position - The position on the slider (0 to 1).
+         * @param {string} baseColor - The base color in CSS format.
+         * @return {string} The interpolated color.
+         */
         interpolateColor: function(position, baseColor) {
-            // Color interpolation logic here
-            return baseColor;
+            const targetColor = [255, 255, 255]; // Interpolating towards white
+            const baseRgb = this.extractRgbValues(baseColor);
+
+            const interpolatedRgb = baseRgb.map((baseValue, index) => {
+                return Math.round(baseValue + (targetColor[index] - baseValue) * position);
+            });
+
+            return `rgb(${interpolatedRgb.join(', ')})`;
         },
 
+        /**
+         * Update the color preview display.
+         * @param {string} color - The color to display.
+         */
         updateColorPreview: function(color) {
             $('.color-swatch').css('background-color', color);
             $('.color-hex').text(this.rgbToHex(color));
         },
 
+        /**
+         * Update harmony colors based on hue and saturation.
+         * @param {number} hue - The hue value (0 to 360).
+         * @param {number} saturation - The saturation percentage (0 to 100).
+         */
         updateHarmonyColors: function(hue, saturation) {
-            // Update harmony colors logic here
+            const baseLightness = 50; // Assuming a fixed lightness for simplicity
+            const rgbColor = this.hslToRgb(hue, saturation, baseLightness);
+
+            $('.harmony-color-preview').css('background-color', rgbColor);
         },
 
+        /**
+         * Convert HSL to RGB color format.
+         * @param {number} h - The hue (0 to 360).
+         * @param {number} s - The saturation (0 to 100).
+         * @param {number} l - The lightness (0 to 100).
+         * @return {string} The RGB color string.
+         */
+        hslToRgb: function(h, s, l) {
+            s /= 100;
+            l /= 100;
+
+            const c = (1 - Math.abs(2 * l - 1)) * s;
+            const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+            const m = l - c / 2;
+            let r = 0, g = 0, b = 0;
+
+            if (0 <= h && h < 60) {
+                r = c; g = x; b = 0;
+            } else if (60 <= h && h < 120) {
+                r = x; g = c; b = 0;
+            } else if (120 <= h && h < 180) {
+                r = 0; g = c; b = x;
+            } else if (180 <= h && h < 240) {
+                r = 0; g = x; b = c;
+            } else if (240 <= h && h < 300) {
+                r = x; g = 0; b = c;
+            } else if (300 <= h && h < 360) {
+                r = c; g = 0; b = x;
+            }
+
+            r = Math.round((r + m) * 255);
+            g = Math.round((g + m) * 255);
+            b = Math.round((b + m) * 255);
+
+            return `rgb(${r}, ${g}, ${b})`;
+        },
+
+        /**
+         * Convert an RGB color to HEX format.
+         * @param {string} rgb - The RGB color string.
+         * @return {string} The HEX color string.
+         */
         rgbToHex: function(rgb) {
             // Convert RGB to HEX
             const match = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
@@ -121,17 +207,26 @@
             return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
         },
 
+        /**
+         * Copy text to the clipboard.
+         * @param {string} text - The text to copy.
+         */
         copyToClipboard: function(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
+            try {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                this.showToast('Text copied to clipboard!', 'success');
+            } catch (error) {
+                this.showToast('Failed to copy text.', 'error');
+            }
         }
     };
 
     $(document).ready(function() {
         GLColorPaletteComponents.init();
     });
-})(jQuery); 
+})(jQuery);

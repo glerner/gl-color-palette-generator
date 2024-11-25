@@ -1,0 +1,29 @@
+Make the code functional, executable. Make the code documented and all code have PHPUnit tests.
+Update the Existing code, to make the plugin functional. Don't start over!
+Update existing code, using existing files, with code documentation and testing. Write missing code.
+The plugin follows WordPress coding standards with hyphenated filenames.
+Use PHP Namespaces throughout the code
+Add code documentation and tests for all code
+Use minimum PHP version 8.0, and minimum WordPress version 6.0
+Use these throughout the plugin
+ * Plugin URI:        https://github.com/GeorgeLerner/gl-color-palette-generator
+ * Requires at least: 6.2
+ * Requires PHP:      8.0
+ * Author:            George Lerner
+ * Author URI:        https://website-tech.glerner.com/
+ * Update URI:        https://website-tech.glerner.com/plugins/color-palette-generator/
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+
+## To align with WordPress coding standards for a plugin, especially for version 6.7, we should follow the guidelines for naming conventions, which typically include:
+1. File Names: Use lowercase letters with hyphens to separate words.
+2. Class Names: Use PascalCase (also known as UpperCamelCase).
+3. Function Names: Use snake_case (lowercase letters with underscores).
+
+## Rules for Markown .md edits
+- When proposing an edit to a markdown file, first decide if there will be code snippets in the markdown file.
+- If there are no code snippets, wrap the beginning and end of your answer in backticks, and specify markdown as the language.
+- If there are code snippets, wrap the beginning and end of your answers inside 5 backticks. output the markdown content as free text. You may use backticks for code snippets within the markdown content.
+
+Please consult the @Codebase for overall details and locate the information or file you need. You may be able to access them directly.
+Refer to the @project_structure.txt file for a structured view of the project’s relevant files (.ts, .js, .json, .md, .ps1) and directories. Note that standard development folders (node_modules, .git, .vscode), hidden files, and package-lock.json are excluded from this view.
