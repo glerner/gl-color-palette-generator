@@ -1,7 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ColorPicker } from './ColorPicker';
 import { ErrorBoundary } from './ErrorBoundary';
-import { ColorPaletteProps } from '../types';
+import { Color, PaletteAnalysis } from '../types';
+
+interface ExportFormat {
+    id: string;
+    name: string;
+    extension: string;
+}
+
+const EXPORT_FORMATS: ExportFormat[] = [
+    { id: 'css', name: 'CSS Variables', extension: 'css' },
+    { id: 'scss', name: 'SCSS Variables', extension: 'scss' },
+    { id: 'json', name: 'JSON', extension: 'json' },
+    { id: 'theme.json', name: 'WordPress Theme', extension: 'json' }
+];
+
+interface ColorPaletteProps {
+    colors: string[];
+    onChange?: (colors: string[]) => void;
+    onColorClick?: (color: string, index: number) => void;
+    onAnalyze?: (paletteId: string) => Promise<PaletteAnalysis>;
+    className?: string;
+    readonly?: boolean;
+}
 
 /**
  * ColorPalette component displays a collection of color swatches that can be interactive
@@ -10,14 +32,74 @@ import { ColorPaletteProps } from '../types';
  * @param {ColorPaletteProps} props - Component props
  * @returns {JSX.Element} Rendered color palette
  */
-export const ColorPalette: React.FC<ColorPaletteProps> = ({
+export function ColorPalette({
     colors,
     onChange,
     onColorClick,
+    onAnalyze,
     className = '',
-    readonly = false,
-    ariaLabel = 'Color Palette',
-}) => {
+    readonly = false
+}: ColorPaletteProps) {
+    const [analyzing, setAnalyzing] = useState(false);
+    const [analysis, setAnalysis] = useState<PaletteAnalysis | null>(null);
+    const [exportFormat, setExportFormat] = useState<string>('css');
+    const [exportLoading, setExportLoading] = useState(false);
+
+    const handleAnalyze = async () => {
+        if (!onAnalyze) return;
+
+        setAnalyzing(true);
+        try {
+            const result = await onAnalyze(colors.join(','));
+            setAnalysis(result);
+        } catch (error) {
+            console.error('Analysis failed:', error);
+        } finally {
+            setAnalyzing(false);
+        }
+    };
+
+    const handleExport = async () => {
+        setExportLoading(true);
+        try {
+            const response = await fetch('/wp-json/gl-color-palette/v1/palettes/export', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': (window as any).glCpgVars?.nonce || ''
+                },
+                body: JSON.stringify({
+                    colors,
+                    format: exportFormat,
+                    options: {
+                        variable_prefix: '--gl-color',
+                        include_metadata: true,
+                        naming_convention: 'kebab',
+                        minify: false
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Export failed');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `palette.${EXPORT_FORMATS.find(f => f.id === exportFormat)?.extension || 'txt'}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Export failed:', error);
+        } finally {
+            setExportLoading(false);
+        }
+    };
+
     const handleColorChange = (newColor: string, index: number) => {
         if (onChange && !readonly) {
             const newColors = [...colors];
@@ -75,7 +157,7 @@ export const ColorPalette: React.FC<ColorPaletteProps> = ({
             <div
                 className={`color-palette ${className}`}
                 role="group"
-                aria-label={ariaLabel}
+                aria-label="Color Palette"
                 style={styles.wrapper}
             >
                 {colors.map((color, index) => (
@@ -116,9 +198,50 @@ export const ColorPalette: React.FC<ColorPaletteProps> = ({
                         >
                             {color}
                         </span>
+                        {analysis && (
+                            <div className="gl-cpg-color-analysis">
+                                <span className={`gl-cpg-wcag ${analysis.contrast.passes_aa ? 'pass' : 'fail'}`}>
+                                    AA {analysis.contrast.passes_aa ? '✓' : '✗'}
+                                </span>
+                                <span className={`gl-cpg-wcag ${analysis.contrast.passes_aaa ? 'pass' : 'fail'}`}>
+                                    AAA {analysis.contrast.passes_aaa ? '✓' : '✗'}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
+
+            <div className="gl-cpg-actions">
+                <button
+                    onClick={handleAnalyze}
+                    disabled={analyzing || !onAnalyze}
+                    className="gl-cpg-analyze-btn"
+                >
+                    {analyzing ? 'Analyzing...' : 'Analyze Palette'}
+                </button>
+
+                <div className="gl-cpg-export">
+                    <select
+                        value={exportFormat}
+                        onChange={(e) => setExportFormat(e.target.value)}
+                        disabled={exportLoading}
+                    >
+                        {EXPORT_FORMATS.map(format => (
+                            <option key={format.id} value={format.id}>
+                                {format.name}
+                            </option>
+                        ))}
+                    </select>
+                    <button
+                        onClick={handleExport}
+                        disabled={exportLoading}
+                        className="gl-cpg-export-btn"
+                    >
+                        {exportLoading ? 'Exporting...' : 'Export'}
+                    </button>
+                </div>
+            </div>
         </ErrorBoundary>
     );
-};
+}
