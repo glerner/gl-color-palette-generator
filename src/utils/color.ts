@@ -1,40 +1,87 @@
 import { Color } from '../types';
 
 /**
- * Color utility class for color manipulations and conversions
+ * Color utility class for color manipulations and conversions.
+ * Provides a comprehensive set of methods for working with colors in different formats (HEX, RGB, HSL),
+ * performing color calculations, and ensuring accessibility compliance.
  */
+export interface RGBColor {
+    r: number;
+    g: number;
+    b: number;
+}
+
+export interface HSLColor {
+    h: number;
+    s: number;
+    l: number;
+}
+
+export interface ParsedColor {
+    hex: string;
+    rgb: RGBColor;
+    hsl: HSLColor;
+}
+
 export class ColorUtils {
     /**
-     * Converts hex to RGB
+     * Convert hex color to RGB
+     * @param hex - The hexadecimal color string (e.g., "#FF0000" or "#F00")
+     * @returns Object containing RGB values (0-255)
+     * @throws Error if the hex color format is invalid
      */
-    static hexToRgb(hex: string): { r: number; g: number; b: number } {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        if (!result) {
-            throw new Error(`Invalid hex color: ${hex}`);
+    static hexToRgb(hex: string): RGBColor {
+        // Ensure hex starts with #
+        if (!hex.startsWith('#')) {
+            throw new Error('Invalid hex color: must start with #');
         }
-        return {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16)
-        };
+
+        // Remove # and validate length
+        const cleanHex = hex.substring(1);
+        if (![3, 6].includes(cleanHex.length)) {
+            throw new Error('Invalid hex color length');
+        }
+
+        // Validate hex characters
+        if (!/^[0-9A-Fa-f]+$/.test(cleanHex)) {
+            throw new Error('Invalid hex color characters');
+        }
+
+        // Convert 3-digit hex to 6-digit
+        const fullHex = cleanHex.length === 3
+            ? cleanHex.split('').map(c => c + c).join('')
+            : cleanHex;
+
+        const r = parseInt(fullHex.substring(0, 2), 16);
+        const g = parseInt(fullHex.substring(2, 4), 16);
+        const b = parseInt(fullHex.substring(4, 6), 16);
+
+        return { r, g, b };
     }
 
     /**
-     * Converts RGB to hex
+     * Convert RGB values to hex color
+     * @param r - Red component (0-255)
+     * @param g - Green component (0-255)
+     * @param b - Blue component (0-255)
+     * @returns Hex color string (e.g., "#FF0000")
      */
     static rgbToHex(r: number, g: number, b: number): string {
-        return '#' + [r, g, b]
-            .map(x => {
-                const hex = x.toString(16);
-                return hex.length === 1 ? '0' + hex : hex;
-            })
-            .join('');
+        const toHex = (n: number) => {
+            const hex = Math.max(0, Math.min(255, Math.round(n))).toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        };
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
     }
 
     /**
-     * Converts RGB to HSL
+     * Convert RGB values to HSL color space.
+     * @param r - Red component (0-255)
+     * @param g - Green component (0-255)
+     * @param b - Blue component (0-255)
+     * @returns Object containing HSL values (h: 0-360, s: 0-100, l: 0-100)
      */
-    static rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
+    static rgbToHsl(r: number, g: number, b: number): HSLColor {
         r /= 255;
         g /= 255;
         b /= 255;
@@ -72,9 +119,13 @@ export class ColorUtils {
     }
 
     /**
-     * Converts HSL to RGB
+     * Convert HSL values to RGB color space.
+     * @param h - Hue (0-360)
+     * @param s - Saturation (0-100)
+     * @param l - Lightness (0-100)
+     * @returns Object containing RGB values (0-255)
      */
-    static hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: number } {
+    static hslToRgb(h: number, s: number, l: number): RGBColor {
         h /= 360;
         s /= 100;
         l /= 100;
@@ -109,68 +160,180 @@ export class ColorUtils {
     }
 
     /**
-     * Calculates relative luminance
+     * Calculate relative luminance of a color
+     * Uses the formula from WCAG 2.0
+     * @param r - Red component (0-255)
+     * @param g - Green component (0-255)
+     * @param b - Blue component (0-255)
+     * @returns Relative luminance value (0-1)
      */
     static getLuminance(r: number, g: number, b: number): number {
-        const [rs, gs, bs] = [r, g, b].map(c => {
-            c = c / 255;
-            return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+        const [sR, sG, sB] = [r, g, b].map(c => {
+            const sRGB = c / 255;
+            return sRGB <= 0.03928
+                ? sRGB / 12.92
+                : Math.pow((sRGB + 0.055) / 1.055, 2.4);
         });
-        return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+        return 0.2126 * sR + 0.7152 * sG + 0.0722 * sB;
     }
 
     /**
-     * Calculates contrast ratio between two colors
+     * Calculate relative luminance of a hex color
+     * @param color - Color in hex format
+     * @returns Relative luminance value (0-1)
+     */
+    private static getLuminanceFromHex(color: string): number {
+        const rgb = this.hexToRgb(color);
+        return this.getLuminance(rgb.r, rgb.g, rgb.b);
+    }
+
+    /**
+     * Calculate contrast ratio between two colors according to WCAG 2.0
+     * @param color1 - First color in hex format
+     * @param color2 - Second color in hex format
+     * @returns Contrast ratio (1-21)
      */
     static getContrastRatio(color1: string, color2: string): number {
+        const l1 = this.getLuminanceFromHex(color1);
+        const l2 = this.getLuminanceFromHex(color2);
+        const lightest = Math.max(l1, l2);
+        const darkest = Math.min(l1, l2);
+        return (lightest + 0.05) / (darkest + 0.05);
+    }
+
+    /**
+     * Check if colors meet WCAG accessibility standards
+     * @param color1 - First color in hex format
+     * @param color2 - Second color in hex format
+     * @param level - WCAG compliance level ('AA' or 'AAA')
+     * @returns boolean indicating if the combination is accessible
+     */
+    static isColorAccessible(color1: string, color2: string, level: 'AA' | 'AAA' = 'AA'): boolean {
+        const ratio = this.getContrastRatio(color1, color2);
+        const threshold = level === 'AAA' ? 7.0 : 4.5;
+        return ratio >= threshold;
+    }
+
+    /**
+     * Parse color string in various formats (hex, rgb, hsl)
+     * @param color - Color string in hex, rgb(), or hsl() format
+     * @returns ParsedColor object with RGB, hex, and HSL values
+     * @throws Error if color format is invalid
+     */
+    static parseColor(color: string): ParsedColor {
+        let rgb: RGBColor;
+
+        // Handle hex colors
+        if (color.startsWith('#')) {
+            rgb = this.hexToRgb(color);
+            return {
+                hex: color.toUpperCase(),
+                rgb,
+                hsl: this.rgbToHsl(rgb.r, rgb.g, rgb.b)
+            };
+        }
+
+        // Handle rgb/rgba
+        const rgbMatch = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (rgbMatch) {
+            const [_, r, g, b] = rgbMatch.map(Number);
+            if (r > 255 || g > 255 || b > 255) {
+                throw new Error('RGB values must be between 0 and 255');
+            }
+            rgb = { r, g, b };
+            return {
+                hex: this.rgbToHex(r, g, b),
+                rgb,
+                hsl: this.rgbToHsl(r, g, b)
+            };
+        }
+
+        // Handle hsl/hsla
+        const hslMatch = color.match(/^hsla?\((\d+),\s*(\d+)%,\s*(\d+)%/);
+        if (hslMatch) {
+            const [_, h, s, l] = hslMatch.map(Number);
+            if (h >= 360 || s > 100 || l > 100) {
+                throw new Error('Invalid HSL values');
+            }
+            rgb = this.hslToRgb(h, s, l);
+            return {
+                hex: this.rgbToHex(rgb.r, rgb.g, rgb.b),
+                rgb,
+                hsl: { h, s, l }
+            };
+        }
+
+        throw new Error('Invalid color format');
+    }
+
+    /**
+     * Check if a color is dark based on luminance
+     * @param color - Color in hex format
+     * @returns boolean indicating if the color is dark
+     */
+    static isDark(color: string): boolean {
+        const luminance = this.getLuminanceFromHex(color);
+        return luminance <= 0.5;
+    }
+
+    /**
+     * Get appropriate text color (black or white) for a background color
+     * @param backgroundColor - Background color in hex format
+     * @returns Appropriate text color (#000000 or #FFFFFF)
+     */
+    static getReadableTextColor(backgroundColor: string): string {
+        const white = '#FFFFFF';
+        const black = '#000000';
+
+        const whiteContrast = this.getContrastRatio(white, backgroundColor);
+        const blackContrast = this.getContrastRatio(black, backgroundColor);
+
+        return whiteContrast >= blackContrast ? white : black;
+    }
+
+    /**
+     * Mix two colors together
+     * @param color1 - First color in hex format
+     * @param color2 - Second color in hex format
+     * @param weight - Weight of the first color (0-1)
+     * @returns Mixed color in hex format
+     */
+    static mix(color1: string, color2: string, weight: number = 0.5): string {
         const rgb1 = this.hexToRgb(color1);
         const rgb2 = this.hexToRgb(color2);
 
-        const l1 = this.getLuminance(rgb1.r, rgb1.g, rgb1.b);
-        const l2 = this.getLuminance(rgb2.r, rgb2.g, rgb2.b);
+        const w = Math.max(0, Math.min(1, weight));
+        const w2 = 1 - w;
 
-        const lighter = Math.max(l1, l2);
-        const darker = Math.min(l1, l2);
+        const r = Math.round(rgb1.r * w + rgb2.r * w2);
+        const g = Math.round(rgb1.g * w + rgb2.g * w2);
+        const b = Math.round(rgb1.b * w + rgb2.b * w2);
 
-        return (lighter + 0.05) / (darker + 0.05);
+        return this.rgbToHex(r, g, b);
     }
 
     /**
-     * Creates a complete Color object with all properties
-     */
-    static createColor(hex: string, name?: string): Color {
-        const rgb = this.hexToRgb(hex);
-        const hsl = this.rgbToHsl(rgb.r, rgb.g, rgb.b);
-
-        return {
-            hex,
-            name,
-            rgb,
-            hsl
-        };
-    }
-
-    /**
-     * Checks if a color combination meets WCAG accessibility standards
-     */
-    static isColorAccessible(foreground: string, background: string, level: 'AA' | 'AAA' = 'AA'): boolean {
-        const ratio = this.getContrastRatio(foreground, background);
-        return level === 'AA' ? ratio >= 4.5 : ratio >= 7;
-    }
-
-    /**
-     * Adjusts color brightness
+     * Adjust color brightness
+     * @param color - Color in hex format
+     * @param amount - Amount to adjust (-100 to 100)
+     * @returns Adjusted color in hex format
      */
     static adjustBrightness(color: string, amount: number): string {
         const rgb = this.hexToRgb(color);
-        const hsl = this.rgbToHsl(rgb.r, rgb.g, rgb.b);
-        hsl.l = Math.max(0, Math.min(100, hsl.l + amount));
-        const newRgb = this.hslToRgb(hsl.h, hsl.s, hsl.l);
-        return this.rgbToHex(newRgb.r, newRgb.g, newRgb.b);
+        const factor = 1 + Math.max(-1, Math.min(1, amount / 100));
+
+        return this.rgbToHex(
+            rgb.r * factor,
+            rgb.g * factor,
+            rgb.b * factor
+        );
     }
 
     /**
-     * Adjusts color saturation
+     * Adjust color saturation
+     * @param color - Color in hex format
+     * @param amount - Amount to adjust (-100 to 100)
+     * @returns Adjusted color in hex format
      */
     static saturate(color: string, amount: number): string {
         const rgb = this.hexToRgb(color);
@@ -181,11 +344,31 @@ export class ColorUtils {
     }
 
     /**
-     * Converts a color to grayscale
+     * Convert color to grayscale
+     * @param color - Color in hex format
+     * @returns Grayscale color in hex format
      */
     static grayscale(color: string): string {
         const rgb = this.hexToRgb(color);
         const gray = Math.round(0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b);
         return this.rgbToHex(gray, gray, gray);
+    }
+
+    /**
+     * Creates a complete Color object with all properties.
+     * @param hex - Hexadecimal color string
+     * @param name - Optional color name
+     * @returns Complete color object with all properties
+     */
+    static createColor(hex: string, name?: string): { hex: string, name?: string, rgb: RGBColor, hsl: HSLColor, isDark: boolean } {
+        const rgb = this.hexToRgb(hex);
+        const hsl = this.rgbToHsl(rgb.r, rgb.g, rgb.b);
+        return {
+            hex: hex.toUpperCase(),
+            name,
+            rgb,
+            hsl,
+            isDark: this.isDark(hex)
+        };
     }
 }

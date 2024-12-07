@@ -26,6 +26,66 @@ export interface Color {
      * Optional descriptive name of the color
      */
     name?: string;
+    /**
+     * Cultural significance of the color
+     */
+    culturalMeaning?: {
+        /**
+         * Primary cultural meaning
+         */
+        meaning: string;
+        /**
+         * Associated cultural context
+         */
+        culture: string;
+        /**
+         * Traditional or modern interpretation
+         */
+        traditional?: boolean;
+        /**
+         * Specific occasions or uses
+         */
+        occasions?: string[];
+    };
+}
+
+/**
+ * Cultural context for color generation
+ */
+export interface CulturalContext {
+    /**
+     * Primary culture/region for color interpretation
+     */
+    culture: string;
+    /**
+     * Language for color names and descriptions
+     */
+    language: string;
+    /**
+     * Additional cultural preferences
+     */
+    preferences?: {
+        /**
+         * Use traditional color interpretations
+         */
+        traditional?: boolean;
+        /**
+         * Specific region within the culture
+         */
+        region?: string;
+        /**
+         * Consider colors' auspicious meanings
+         */
+        auspicious?: boolean;
+        /**
+         * Specific occasions (e.g., "wedding", "festival")
+         */
+        occasions?: string[];
+        /**
+         * Other culture-specific preferences
+         */
+        [key: string]: any;
+    };
 }
 
 /**
@@ -75,6 +135,27 @@ export interface PaletteAnalysis {
          */
         color_blindness_safe: boolean;
     };
+    /**
+     * Cultural analysis results
+     */
+    cultural?: {
+        /**
+         * Overall cultural harmony score
+         */
+        harmony_score: number;
+        /**
+         * Cultural appropriateness by context
+         */
+        context_scores: {
+            [context: string]: number;
+        };
+        /**
+         * Cultural meanings and associations
+         */
+        meanings: {
+            [color: string]: string[];
+        };
+    };
 }
 
 /**
@@ -106,12 +187,52 @@ export interface PaletteResponse {
          */
         created_at: string;
         /**
-         * Last update timestamp
+         * Generation method used
          */
-        updated_at: string;
+        generation_method: string;
         /**
-         * API version used
+         * Cultural context if applicable
          */
-        version: string;
+        cultural_context?: CulturalContext;
+        /**
+         * AI provider used if applicable
+         */
+        ai_provider?: string;
     };
+}
+
+/**
+ * Error Boundary component props
+ */
+export interface ErrorBoundaryProps {
+    /**
+     * Child components to render
+     */
+    children: React.ReactNode;
+    /**
+     * Optional fallback component to render when error occurs
+     */
+    fallback?: React.ReactNode;
+    /**
+     * Optional error handler callback
+     */
+    onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+}
+
+/**
+ * Error Boundary component state
+ */
+export interface ErrorBoundaryState {
+    /**
+     * Whether an error has occurred
+     */
+    hasError: boolean;
+    /**
+     * The error that occurred, if any
+     */
+    error?: Error;
+    /**
+     * Additional error information
+     */
+    errorInfo?: React.ErrorInfo;
 }
