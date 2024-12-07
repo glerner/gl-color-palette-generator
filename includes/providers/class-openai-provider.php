@@ -2,131 +2,229 @@
 /**
  * OpenAI Provider Class
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Providers
  * @since 1.0.0
  */
 
-namespace GLColorPalette\Providers;
+namespace GL_Color_Palette_Generator\Providers;
 
-use GLColorPalette\Abstracts\AI_Provider_Base;
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 /**
- * Class OpenAI_Provider
- *
- * OpenAI-specific implementation of the AI provider interface.
+ * OpenAI Provider class
  */
-class OpenAI_Provider extends AI_Provider_Base {
+class OpenAI_Provider implements AI_Provider {
     /**
-     * Constructor.
+     * API base URL
      *
-     * @param array $credentials API credentials.
+     * @var string
+     */
+    private string $api_url = 'https://api.openai.com/v1/';
+
+    /**
+     * API credentials
+     *
+     * @var array
+     */
+    private array $credentials;
+
+    /**
+     * Constructor
+     *
+     * @param array $credentials API credentials
      */
     public function __construct(array $credentials) {
-        $this->api_url = 'https://api.openai.com/v1/';
         $this->credentials = $credentials;
     }
 
     /**
-     * Generate color palette.
+     * Generate a color palette based on a prompt
      *
-     * @param array $params Generation parameters.
-     * @return array|WP_Error Color array or error.
+     * @param string $prompt     Text prompt describing desired palette
+     * @param int    $num_colors Number of colors to generate (2-10)
+     * @param array  $options    Additional provider-specific options
+     * @return array{colors: array<string>, metadata: array} Generated palette data
+     * @throws \Exception If generation fails
      */
-    public function generate_palette(array $params) {
-        $validation = $this->validate_params($params);
-        if (is_wp_error($validation)) {
-            return $validation;
+    public function generate_palette(string $prompt, int $num_colors = 5, array $options = []): array {
+        if ($num_colors < 2 || $num_colors > 10) {
+            throw new \InvalidArgumentException(
+                sprintf(__('Number of colors must be between 2 and 10, got %d', 'gl-color-palette-generator'), $num_colors)
+            );
         }
 
-        $prompt = $this->format_prompt($params);
+        if (empty($prompt)) {
+            throw new \InvalidArgumentException(
+                __('Prompt cannot be empty', 'gl-color-palette-generator')
+            );
+        }
+
+        $system_prompt = 'You are a color palette generator. Generate aesthetically pleasing and harmonious color combinations. ' .
+                        'Respond with a JSON object containing two properties: ' .
+                        '"colors" (array of hex color codes) and ' .
+                        '"metadata" (object with properties: theme, mood, description).';
+
+        $user_prompt = sprintf(
+            'Generate a color palette with %d colors based on this description: %s',
+            $num_colors,
+            $prompt
+        );
+
         $response = $this->make_request('chat/completions', [
-            'model' => 'gpt-4',
+            'model' => $options['model'] ?? 'gpt-4',
             'messages' => [
                 [
                     'role' => 'system',
-                    'content' => 'You are a color palette generator. Respond only with JSON array of hex colors.'
+                    'content' => $system_prompt
                 ],
                 [
                     'role' => 'user',
-                    'content' => $prompt
+                    'content' => $user_prompt
                 ]
-            ]
+            ],
+            'temperature' => $options['temperature'] ?? 0.7,
         ]);
 
-        if (is_wp_error($response)) {
-            return $response;
+        if (empty($response['choices'][0]['message']['content'])) {
+            throw new \Exception(__('Invalid API response format', 'gl-color-palette-generator'));
         }
 
-        return $this->parse_response($response);
+        $result = json_decode($response['choices'][0]['message']['content'], true);
+        if (!is_array($result) || !isset($result['colors'], $result['metadata'])) {
+            throw new \Exception(__('Invalid color data received', 'gl-color-palette-generator'));
+        }
+
+        return $result;
     }
 
     /**
-     * Get headers for API requests.
+     * Get provider name
      *
-     * @return array Headers array.
+     * @return string Provider identifier
      */
-    protected function get_headers(): array {
+    public function get_name(): string {
+        return 'openai';
+    }
+
+    /**
+     * Get provider display name
+     *
+     * @return string Provider display name
+     */
+    public function get_display_name(): string {
+        return 'OpenAI';
+    }
+
+    /**
+     * Check if provider is configured and ready
+     *
+     * @return bool True if ready, false otherwise
+     */
+    public function is_ready(): bool {
+        return !empty($this->credentials['api_key']);
+    }
+
+    /**
+     * Get provider configuration requirements
+     *
+     * @return array Configuration field definitions
+     */
+    public function get_config_fields(): array {
         return [
-            'Authorization' => 'Bearer ' . $this->credentials['api_key'],
-            'Content-Type' => 'application/json',
+            'api_key' => [
+                'type' => 'password',
+                'label' => __('API Key', 'gl-color-palette-generator'),
+                'description' => __('Your OpenAI API key', 'gl-color-palette-generator'),
+                'required' => true,
+            ],
+            'model' => [
+                'type' => 'select',
+                'label' => __('Model', 'gl-color-palette-generator'),
+                'description' => __('OpenAI model to use', 'gl-color-palette-generator'),
+                'required' => false,
+                'default' => 'gpt-4',
+                'options' => [
+                    'gpt-4' => 'GPT-4',
+                    'gpt-3.5-turbo' => 'GPT-3.5 Turbo',
+                ],
+            ],
+            'temperature' => [
+                'type' => 'number',
+                'label' => __('Temperature', 'gl-color-palette-generator'),
+                'description' => __('Controls randomness (0.0 to 1.0)', 'gl-color-palette-generator'),
+                'required' => false,
+                'default' => 0.7,
+                'min' => 0,
+                'max' => 1,
+                'step' => 0.1,
+            ],
         ];
     }
 
     /**
-     * Format prompt for the API.
+     * Validate provider configuration
      *
-     * @param array $params Generation parameters.
-     * @return string Formatted prompt.
+     * @param array $config Configuration to validate
+     * @return bool True if valid, false otherwise
      */
-    private function format_prompt(array $params): string {
-        return sprintf(
-            'Generate a %s color palette with %d colors, based on the color %s.',
-            $params['mode'],
-            $params['count'],
-            $params['base_color']
-        );
-    }
-
-    /**
-     * Parse API response.
-     *
-     * @param array $response API response.
-     * @return array|WP_Error Parsed colors or error.
-     */
-    private function parse_response(array $response) {
-        if (empty($response['choices'][0]['message']['content'])) {
-            return new \WP_Error('invalid_response', 'Invalid API response format');
+    public function validate_config(array $config): bool {
+        if (empty($config['api_key'])) {
+            return false;
         }
 
-        $colors = json_decode($response['choices'][0]['message']['content'], true);
-        if (!is_array($colors)) {
-            return new \WP_Error('invalid_colors', 'Invalid color data received');
+        if (isset($config['model']) && !in_array($config['model'], ['gpt-4', 'gpt-3.5-turbo'])) {
+            return false;
         }
 
-        return $colors;
-    }
-
-    /**
-     * Validate credentials.
-     *
-     * @return bool|WP_Error True if valid, error if not.
-     */
-    public function validate_credentials() {
-        if (empty($this->credentials['api_key'])) {
-            return new \WP_Error('missing_api_key', 'OpenAI API key is required');
+        if (isset($config['temperature'])) {
+            $temp = (float) $config['temperature'];
+            if ($temp < 0 || $temp > 1) {
+                return false;
+            }
         }
+
         return true;
     }
 
     /**
-     * Get provider requirements.
+     * Make an API request
      *
-     * @return array Configuration requirements.
+     * @param string $endpoint API endpoint
+     * @param array  $data     Request data
+     * @return array Response data
+     * @throws \Exception If request fails
      */
-    public function get_requirements(): array {
-        return [
-            'api_key' => 'OpenAI API key',
-        ];
+    private function make_request(string $endpoint, array $data): array {
+        $response = wp_remote_post(
+            $this->api_url . $endpoint,
+            [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->credentials['api_key'],
+                    'Content-Type' => 'application/json',
+                ],
+                'body' => wp_json_encode($data),
+                'timeout' => 30,
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            throw new \Exception($response->get_error_message());
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+
+        if (empty($data)) {
+            throw new \Exception(__('Empty response from API', 'gl-color-palette-generator'));
+        }
+
+        if (isset($data['error'])) {
+            throw new \Exception($data['error']['message'] ?? __('Unknown API error', 'gl-color-palette-generator'));
+        }
+
+        return $data;
     }
-} 
+}
