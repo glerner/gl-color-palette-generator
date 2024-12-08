@@ -20,7 +20,7 @@ interface ColorPaletteProps {
     colors: string[];
     onChange?: (colors: string[]) => void;
     onColorClick?: (color: string, index: number) => void;
-    onAnalyze?: (paletteId: string) => Promise<PaletteAnalysis>;
+    onAnalyze?: (colors: string[]) => Promise<PaletteAnalysis>;
     className?: string;
     readonly?: boolean;
 }
@@ -50,7 +50,7 @@ export function ColorPalette({
 
         setAnalyzing(true);
         try {
-            const result = await onAnalyze(colors.join(','));
+            const result = await onAnalyze(colors);
             setAnalysis(result);
         } catch (error) {
             console.error('Analysis failed:', error);
@@ -100,7 +100,7 @@ export function ColorPalette({
         }
     };
 
-    const handleColorChange = (newColor: string, index: number) => {
+    const handleColorChange = (index: number, newColor: string) => {
         if (onChange && !readonly) {
             const newColors = [...colors];
             newColors[index] = newColor;
@@ -119,113 +119,70 @@ export function ColorPalette({
         throw new Error('ColorPalette requires a non-empty array of colors');
     }
 
-    const styles: Record<string, React.CSSProperties> = {
-        wrapper: {
+    return (
+        <div className={`color-palette ${className}`} role="group" aria-label="Color Palette" style={{
             display: 'flex',
             flexWrap: 'wrap',
             gap: '16px',
             padding: '16px',
             background: '#FFFFFF',
             borderRadius: '8px',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-        },
-        colorBox: {
-            width: '80px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '8px',
-        },
-        colorSwatch: {
-            width: '80px',
-            height: '80px',
-            borderRadius: '8px',
-            border: '2px solid #E0E0E0',
-            cursor: readonly ? 'pointer' : 'default',
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-        },
-        colorHex: {
-            fontSize: '14px',
-            fontFamily: 'monospace',
-            color: '#666',
-            userSelect: 'all',
-        },
-    };
-
-    return (
-        <ErrorBoundary>
-            <div
-                className={`color-palette ${className}`}
-                role="group"
-                aria-label="Color Palette"
-                style={styles.wrapper}
-            >
-                {colors.map((color, index) => (
-                    <div
-                        key={`${color}-${index}`}
-                        className="color-box"
-                        style={styles.colorBox}
-                    >
-                        {readonly ? (
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+        }}>
+            {colors.map((color, index) => (
+                <div key={`${color}-${index}`} className="color-box" style={{
+                    width: '80px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '8px'
+                }}>
+                    <div className="" style={{ display: 'inline-flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ display: 'inline-block', position: 'relative' }}>
                             <div
-                                style={{
-                                    ...styles.colorSwatch,
-                                    background: color,
-                                }}
-                                onClick={() => handleColorClick(color, index)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                        handleColorClick(color, index);
-                                    }
-                                }}
                                 role="button"
-                                tabIndex={0}
-                                aria-label={`Color ${color}`}
+                                aria-label={`Color ${index + 1}: ${color}`}
+                                aria-disabled={readonly}
+                                tabIndex={readonly ? -1 : 0}
+                                onClick={() => !readonly && onColorClick?.(color, index)}
+                                style={{
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: '4px',
+                                    border: '2px solid #e0e0e0',
+                                    background: color,
+                                    cursor: readonly ? 'default' : 'pointer',
+                                    transition: 'border-color 0.2s ease',
+                                }}
                             />
-                        ) : (
-                            <ColorPicker
-                                color={color}
-                                onChange={(newColor) => handleColorChange(newColor, index)}
-                                onClick={() => handleColorClick(color, index)}
-                                disabled={readonly}
-                                ariaLabel={`Color ${index + 1}: ${color}`}
-                            />
-                        )}
-                        <span
-                            className="color-value"
-                            aria-label={`Color value: ${color}`}
-                            style={styles.colorHex}
-                        >
-                            {color}
-                        </span>
-                        {analysis && (
-                            <div className="gl-cpg-color-analysis">
-                                <span className={`gl-cpg-wcag ${analysis.contrast.passes_aa ? 'pass' : 'fail'}`}>
-                                    AA {analysis.contrast.passes_aa ? '✓' : '✗'}
-                                </span>
-                                <span className={`gl-cpg-wcag ${analysis.contrast.passes_aaa ? 'pass' : 'fail'}`}>
-                                    AAA {analysis.contrast.passes_aaa ? '✓' : '✗'}
-                                </span>
-                            </div>
-                        )}
+                        </div>
                     </div>
-                ))}
-            </div>
-
+                    <span
+                        className="color-value"
+                        aria-label={`Color value: ${color}`}
+                        style={{
+                            fontSize: '14px',
+                            fontFamily: 'monospace',
+                            color: '#666666',
+                            userSelect: 'all'
+                        }}
+                    >
+                        {color}
+                    </span>
+                </div>
+            ))}
             <div className="gl-cpg-actions">
                 <button
+                    className="gl-cpg-analyze-btn"
                     onClick={handleAnalyze}
                     disabled={analyzing || !onAnalyze}
-                    className="gl-cpg-analyze-btn"
                 >
                     {analyzing ? 'Analyzing...' : 'Analyze Palette'}
                 </button>
-
                 <div className="gl-cpg-export">
                     <select
                         value={exportFormat}
                         onChange={(e) => setExportFormat(e.target.value)}
-                        disabled={exportLoading}
                     >
                         {EXPORT_FORMATS.map(format => (
                             <option key={format.id} value={format.id}>
@@ -234,14 +191,16 @@ export function ColorPalette({
                         ))}
                     </select>
                     <button
+                        className="gl-cpg-export-btn"
                         onClick={handleExport}
                         disabled={exportLoading}
-                        className="gl-cpg-export-btn"
                     >
                         {exportLoading ? 'Exporting...' : 'Export'}
                     </button>
                 </div>
             </div>
-        </ErrorBoundary>
+        </div>
     );
 }
+
+export default ColorPalette;

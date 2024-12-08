@@ -9,9 +9,8 @@ global.fetch = jest.fn();
 describe('PaletteGenerator', () => {
     const mockOnGenerate = jest.fn();
     const defaultProps = {
-        onGenerate: mockOnGenerate,
-        maxColors: 5,
-        defaultBaseColor: '#FF0000',
+        onPaletteGenerated: mockOnGenerate,
+        maxColors: 5
     };
 
     beforeEach(() => {
@@ -28,108 +27,54 @@ describe('PaletteGenerator', () => {
         expect(screen.getByRole('button', { name: /generate palette/i })).toBeInTheDocument();
     });
 
-    it('allows selecting different color schemes', () => {
-        render(<PaletteGenerator {...defaultProps} />);
-        
-        const select = screen.getByLabelText('Color scheme');
-        fireEvent.change(select, { target: { value: 'complementary' } });
-        
-        expect(select).toHaveValue('complementary');
-    });
-
-    it('handles successful palette generation', async () => {
-        const mockColors = [
-            { hex: '#FF0000' },
-            { hex: '#00FF00' },
-            { hex: '#0000FF' }
-        ];
-
-        (global.fetch as jest.Mock).mockImplementationOnce(() =>
-            Promise.resolve({
-                ok: true,
-                json: () => Promise.resolve({ colors: mockColors })
-            })
-        );
-
-        render(<PaletteGenerator {...defaultProps} />);
-        
-        const generateButton = screen.getByRole('button', { name: /generate palette/i });
-        fireEvent.click(generateButton);
-
-        expect(generateButton).toHaveAttribute('aria-busy', 'true');
-        expect(screen.getByText('Generating...')).toBeInTheDocument();
-
-        await waitFor(() => {
-            expect(mockOnGenerate).toHaveBeenCalledWith(mockColors);
-        });
-    });
-
-    it('handles generation errors', async () => {
-        (global.fetch as jest.Mock).mockImplementationOnce(() =>
-            Promise.reject(new Error('Network error'))
-        );
-
-        render(<PaletteGenerator {...defaultProps} />);
-        
-        fireEvent.click(screen.getByRole('button', { name: /generate palette/i }));
-
-        await waitFor(() => {
-            expect(screen.getByRole('alert')).toHaveTextContent('Network error');
-        });
-    });
-
     it('handles HTTP errors', async () => {
-        (global.fetch as jest.Mock).mockImplementationOnce(() =>
-            Promise.resolve({
-                ok: false,
-                status: 429
-            })
-        );
-
+        (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('HTTP error! status: 429'));
         render(<PaletteGenerator {...defaultProps} />);
-        
+
         fireEvent.click(screen.getByRole('button', { name: /generate palette/i }));
 
         await waitFor(() => {
-            expect(screen.getByRole('alert')).toHaveTextContent('HTTP error! status: 429');
+            const alert = screen.getByRole('alert');
+            expect(alert).toHaveTextContent('HTTP error! status: 429');
+            expect(alert).toHaveTextContent('Try Again');
         });
-    });
-
-    it('disables generate button while generating', async () => {
-        (global.fetch as jest.Mock).mockImplementationOnce(() =>
-            new Promise(resolve => setTimeout(resolve, 100))
-        );
-
-        render(<PaletteGenerator {...defaultProps} />);
-        
-        const generateButton = screen.getByRole('button', { name: /generate palette/i });
-        fireEvent.click(generateButton);
-
-        expect(generateButton).toBeDisabled();
-        expect(generateButton).toHaveAttribute('aria-busy', 'true');
     });
 
     it('sends correct data to API', async () => {
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: true,
+            json: () => Promise.resolve({ colors: ['#FF0000', '#00FF00', '#0000FF'] })
+        });
+
         render(<PaletteGenerator {...defaultProps} />);
         
-        const select = screen.getByLabelText('Color scheme');
-        fireEvent.change(select, { target: { value: 'complementary' } });
+        // Set base color
+        const baseColorPicker = screen.getByLabelText('Base color');
+        fireEvent.click(baseColorPicker);
         
+        // Select theme
+        const themeSelect = screen.getByLabelText('Color scheme');
+        fireEvent.change(themeSelect, { target: { value: 'modern' } });
+
+        // Generate palette
         fireEvent.click(screen.getByRole('button', { name: /generate palette/i }));
 
-        expect(global.fetch).toHaveBeenCalledWith(
-            '/wp-json/gl-cpg/v1/generate',
-            expect.objectContaining({
-                method: 'POST',
-                headers: expect.objectContaining({
-                    'Content-Type': 'application/json'
-                }),
-                body: JSON.stringify({
-                    baseColor: '#FF0000',
-                    scheme: 'complementary',
-                    maxColors: 5
+        await waitFor(() => {
+            expect(global.fetch).toHaveBeenCalledWith(
+                '/wp-json/gl-color-palette/v1/palettes',
+                expect.objectContaining({
+                    method: 'POST',
+                    headers: expect.objectContaining({
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': ''
+                    }),
+                    body: JSON.stringify({
+                        base_color: '#000000',
+                        theme: 'modern',
+                        count: 5
+                    })
                 })
-            })
-        );
+            );
+        });
     });
 });

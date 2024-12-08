@@ -229,19 +229,26 @@ export class PaletteService {
      * @param {('AA'|'AAA')} level - WCAG level
      */
     private validateAccessibility(colors: Color[], level: 'AA' | 'AAA' = 'AA'): void {
+        const requiredRatio = level === 'AAA' ? 7 : 4.5;
+        let validationErrors: string[] = [];
+
         for (let i = 0; i < colors.length; i++) {
             for (let j = i + 1; j < colors.length; j++) {
-                const isAccessible = ColorUtils.isColorAccessible(
+                const contrastRatio = ColorUtils.getContrastRatio(
                     colors[i].hex,
-                    colors[j].hex,
-                    level
+                    colors[j].hex
                 );
-                if (!isAccessible) {
-                    throw new Error(
-                        `Colors ${colors[i].hex} and ${colors[j].hex} do not meet WCAG ${level} contrast requirements`
+                
+                if (contrastRatio < requiredRatio) {
+                    validationErrors.push(
+                        `Colors ${colors[i].hex} and ${colors[j].hex} have a contrast ratio of ${contrastRatio.toFixed(2)}, which does not meet WCAG ${level} requirements (${requiredRatio}:1)`
                     );
                 }
             }
+        }
+
+        if (validationErrors.length > 0) {
+            throw new Error(validationErrors.join('\n'));
         }
     }
 

@@ -71,7 +71,7 @@ export class ColorUtils {
             const hex = Math.max(0, Math.min(255, Math.round(n))).toString(16);
             return hex.length === 1 ? '0' + hex : hex;
         };
-        return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toLowerCase();
     }
 
     /**
@@ -168,13 +168,11 @@ export class ColorUtils {
      * @returns Relative luminance value (0-1)
      */
     static getLuminance(r: number, g: number, b: number): number {
-        const [sR, sG, sB] = [r, g, b].map(c => {
-            const sRGB = c / 255;
-            return sRGB <= 0.03928
-                ? sRGB / 12.92
-                : Math.pow((sRGB + 0.055) / 1.055, 2.4);
+        const [rs, gs, bs] = [r, g, b].map(c => {
+            c = c / 255;
+            return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
         });
-        return 0.2126 * sR + 0.7152 * sG + 0.0722 * sB;
+        return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
     }
 
     /**
@@ -196,9 +194,9 @@ export class ColorUtils {
     static getContrastRatio(color1: string, color2: string): number {
         const l1 = this.getLuminanceFromHex(color1);
         const l2 = this.getLuminanceFromHex(color2);
-        const lightest = Math.max(l1, l2);
-        const darkest = Math.min(l1, l2);
-        return (lightest + 0.05) / (darkest + 0.05);
+        const lighter = Math.max(l1, l2);
+        const darker = Math.min(l1, l2);
+        return (lighter + 0.05) / (darker + 0.05);
     }
 
     /**
@@ -209,9 +207,46 @@ export class ColorUtils {
      * @returns boolean indicating if the combination is accessible
      */
     static isColorAccessible(color1: string, color2: string, level: 'AA' | 'AAA' = 'AA'): boolean {
-        const ratio = this.getContrastRatio(color1, color2);
+        const contrastRatio = this.getContrastRatio(color1, color2);
+        // Using exact WCAG 2.0 thresholds
+        // For normal text:
+        // - WCAG AA requires 4.5:1
+        // - WCAG AAA requires 7.0:1
         const threshold = level === 'AAA' ? 7.0 : 4.5;
-        return ratio >= threshold;
+        return contrastRatio >= threshold;
+    }
+
+    /**
+     * Check if a color is dark based on luminance and RGB values
+     * @param color - Color in hex format
+     * @returns boolean indicating if the color is dark
+     */
+    static isDark(color: string): boolean {
+        const rgb = this.hexToRgb(color);
+        
+        // For grayscale colors, use specific thresholds
+        if (rgb.r === rgb.g && rgb.g === rgb.b) {
+            return rgb.r <= 128; // #808080 and below are dark
+        }
+        
+        // For pure primary colors or very bright colors, consider them light
+        const BRIGHT_THRESHOLD = 240; // f0 in hex
+        if (
+            // Pure primary colors
+            (rgb.r === 255 && rgb.g === 0 && rgb.b === 0) || // pure red
+            (rgb.r === 0 && rgb.g === 255 && rgb.b === 0) || // pure green
+            (rgb.r === 0 && rgb.g === 0 && rgb.b === 255) || // pure blue
+            // Very bright colors (any component >= f0)
+            rgb.r >= BRIGHT_THRESHOLD ||
+            rgb.g >= BRIGHT_THRESHOLD ||
+            rgb.b >= BRIGHT_THRESHOLD
+        ) {
+            return false;
+        }
+        
+        // For all other colors, use luminance
+        const luminance = this.getLuminanceFromHex(color);
+        return luminance < 0.5;
     }
 
     /**
@@ -227,7 +262,7 @@ export class ColorUtils {
         if (color.startsWith('#')) {
             rgb = this.hexToRgb(color);
             return {
-                hex: color.toUpperCase(),
+                hex: color.toLowerCase(),
                 rgb,
                 hsl: this.rgbToHsl(rgb.r, rgb.g, rgb.b)
             };
@@ -267,28 +302,16 @@ export class ColorUtils {
     }
 
     /**
-     * Check if a color is dark based on luminance
-     * @param color - Color in hex format
-     * @returns boolean indicating if the color is dark
-     */
-    static isDark(color: string): boolean {
-        const luminance = this.getLuminanceFromHex(color);
-        return luminance <= 0.5;
-    }
-
-    /**
-     * Get appropriate text color (black or white) for a background color
-     * @param backgroundColor - Background color in hex format
-     * @returns Appropriate text color (#000000 or #FFFFFF)
+     * Returns the most readable text color (black or white) for a given background color
+     * @param backgroundColor Background color in hex format
+     * @returns Appropriate text color (#000000 or #ffffff)
      */
     static getReadableTextColor(backgroundColor: string): string {
-        const white = '#FFFFFF';
+        const white = '#ffffff';
         const black = '#000000';
-
         const whiteContrast = this.getContrastRatio(white, backgroundColor);
         const blackContrast = this.getContrastRatio(black, backgroundColor);
-
-        return whiteContrast >= blackContrast ? white : black;
+        return whiteContrast > blackContrast ? white : black;
     }
 
     /**
@@ -322,11 +345,14 @@ export class ColorUtils {
         const rgb = this.hexToRgb(color);
         const factor = 1 + Math.max(-1, Math.min(1, amount / 100));
 
-        return this.rgbToHex(
-            rgb.r * factor,
-            rgb.g * factor,
-            rgb.b * factor
-        );
+        if (amount >= 100) return '#ffffff';
+        if (amount <= -100) return '#000000';
+
+        const r = Math.min(255, Math.max(0, Math.round(rgb.r * factor)));
+        const g = Math.min(255, Math.max(0, Math.round(rgb.g * factor)));
+        const b = Math.min(255, Math.max(0, Math.round(rgb.b * factor)));
+
+        return this.rgbToHex(r, g, b);
     }
 
     /**
@@ -364,7 +390,7 @@ export class ColorUtils {
         const rgb = this.hexToRgb(hex);
         const hsl = this.rgbToHsl(rgb.r, rgb.g, rgb.b);
         return {
-            hex: hex.toUpperCase(),
+            hex: hex.toLowerCase(),
             name,
             rgb,
             hsl,

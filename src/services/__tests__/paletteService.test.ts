@@ -157,11 +157,11 @@ describe('PaletteService', () => {
         it('should generate palette from prompt', async () => {
             const mockResponse = {
                 colors: [
-                    { hex: '#FF0000', name: 'Red' },
-                    { hex: '#00FF00', name: 'Green' },
-                    { hex: '#0000FF', name: 'Blue' },
-                    { hex: '#FFFF00', name: 'Yellow' },
-                    { hex: '#800080', name: 'Purple' },
+                    { hex: '#000000', name: 'Black' },
+                    { hex: '#FFFFFF', name: 'White' },
+                    { hex: '#003366', name: 'Dark Blue' },
+                    { hex: '#990000', name: 'Dark Red' },
+                    { hex: '#006600', name: 'Dark Green' },
                 ],
             };
 
@@ -188,46 +188,42 @@ describe('PaletteService', () => {
         });
 
         it('should validate accessibility when required', async () => {
-            const mockResponse = {
-                colors: [
-                    { hex: '#000000', name: 'Black' },
-                    { hex: '#FFFFFF', name: 'White' },
-                    { hex: '#FF0000', name: 'Red' },
-                    { hex: '#00FF00', name: 'Green' },
-                    { hex: '#0000FF', name: 'Blue' },
-                ],
-            };
-
             mockFetch.mockResolvedValueOnce({
                 ok: true,
-                json: () => Promise.resolve(mockResponse),
+                json: () => Promise.resolve({
+                    colors: [
+                        { hex: '#000000' },
+                        { hex: '#003366' },
+                        { hex: '#990000' },
+                        { hex: '#006600' },
+                        { hex: '#333333' }  
+                    ]
+                })
             } as Response);
 
-            const result = await service.generateFromPrompt('high contrast', {
-                count: 5,
-                accessibility: {
-                    level: 'AAA',
-                    ensureReadability: true,
-                },
-            });
-
-            expect(result).toEqual(mockResponse);
+            await expect(
+                service.generateFromPrompt('high contrast', {
+                    count: 5,
+                    accessibility: {
+                        level: 'AAA',
+                        ensureReadability: true
+                    }
+                })
+            ).rejects.toThrow(/have a contrast ratio of .* which does not meet WCAG AAA requirements/);
         });
 
         it('should throw error for invalid accessibility', async () => {
-            const mockResponse = {
-                colors: [
-                    { hex: '#777777', name: 'Gray' },
-                    { hex: '#888888', name: 'Gray2' },
-                    { hex: '#999999', name: 'Gray3' },
-                    { hex: '#AAAAAA', name: 'Gray4' },
-                    { hex: '#BBBBBB', name: 'Gray5' },
-                ],
-            };
-
             mockFetch.mockResolvedValueOnce({
                 ok: true,
-                json: () => Promise.resolve(mockResponse),
+                json: () => Promise.resolve({
+                    colors: [
+                        { hex: '#777777' },
+                        { hex: '#888888' },
+                        { hex: '#999999' },
+                        { hex: '#AAAAAA' },
+                        { hex: '#BBBBBB' }
+                    ]
+                })
             } as Response);
 
             await expect(
@@ -235,10 +231,10 @@ describe('PaletteService', () => {
                     count: 5,
                     accessibility: {
                         level: 'AAA',
-                        ensureReadability: true,
-                    },
+                        ensureReadability: true
+                    }
                 })
-            ).rejects.toThrow(/do not meet WCAG AAA contrast requirements/);
+            ).rejects.toThrow(/have a contrast ratio of .* which does not meet WCAG AAA requirements/);
         });
     });
 
@@ -307,11 +303,11 @@ describe('PaletteService', () => {
         it('should not cache POST requests', async () => {
             const mockResponse = {
                 colors: [
-                    { hex: '#FF0000', name: 'Red' },
-                    { hex: '#00FF00', name: 'Green' },
-                    { hex: '#0000FF', name: 'Blue' },
-                    { hex: '#FFFF00', name: 'Yellow' },
-                    { hex: '#800080', name: 'Purple' },
+                    { hex: '#000000', name: 'Black' },
+                    { hex: '#FFFFFF', name: 'White' },
+                    { hex: '#003366', name: 'Dark Blue' },
+                    { hex: '#990000', name: 'Dark Red' },
+                    { hex: '#006600', name: 'Dark Green' },
                 ],
             };
 
@@ -370,9 +366,9 @@ describe('PaletteService', () => {
                 colors: [
                     { hex: '#000000', name: 'Black' },
                     { hex: '#FFFFFF', name: 'White' },
-                    { hex: '#FF0000', name: 'Red' },
-                    { hex: '#00FF00', name: 'Green' },
-                    { hex: '#0000FF', name: 'Blue' },
+                    { hex: '#003366', name: 'Dark Blue' },
+                    { hex: '#990000', name: 'Dark Red' },
+                    { hex: '#006600', name: 'Dark Green' },
                 ],
             };
 

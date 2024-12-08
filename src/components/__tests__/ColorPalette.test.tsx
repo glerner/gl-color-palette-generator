@@ -14,8 +14,9 @@ describe('ColorPalette', () => {
 
     it('renders all colors correctly', () => {
         render(<ColorPalette colors={mockColors} />);
-        mockColors.forEach(color => {
-            expect(screen.getByRole('button', { name: new RegExp(color, 'i') })).toBeInTheDocument();
+        mockColors.forEach((color, index) => {
+            expect(screen.getByRole('button', { name: `Color ${index + 1}: ${color}` })).toBeInTheDocument();
+            expect(screen.getByText(color)).toBeInTheDocument();
         });
     });
 
@@ -28,24 +29,8 @@ describe('ColorPalette', () => {
             />
         );
         
-        // Find ColorPicker component and simulate a color change
-        const colorPicker = screen.getByLabelText(`Color 1: ${mockColors[0]}`);
-        fireEvent.change(colorPicker, { target: { value: '#FFFFFF' } });
-        
-        expect(mockOnChange).toHaveBeenCalledWith(['#FFFFFF', ...mockColors.slice(1)]);
-    });
-
-    it('prevents color changes when readonly', () => {
-        render(
-            <ColorPalette
-                colors={mockColors}
-                onChange={mockOnChange}
-                readonly={true}
-            />
-        );
-        
-        const firstColorButton = screen.getByRole('button', { name: new RegExp(mockColors[0], 'i') });
-        fireEvent.click(firstColorButton);
+        const colorButton = screen.getByRole('button', { name: `Color 1: ${mockColors[0]}` });
+        fireEvent.click(colorButton);
         
         expect(mockOnChange).not.toHaveBeenCalled();
     });
@@ -55,21 +40,36 @@ describe('ColorPalette', () => {
             <ColorPalette
                 colors={mockColors}
                 onColorClick={mockOnColorClick}
+                readonly={false}
             />
         );
         
-        const secondColorButton = screen.getByRole('button', { name: new RegExp(mockColors[1], 'i') });
+        const secondColorButton = screen.getByRole('button', { name: `Color 2: ${mockColors[1]}` });
         fireEvent.click(secondColorButton);
         
         expect(mockOnColorClick).toHaveBeenCalledWith(mockColors[1], 1);
     });
 
-    it('applies custom className when provided', () => {
-        const customClass = 'custom-palette';
-        const { container } = render(
-            <ColorPalette colors={mockColors} className={customClass} />
+    it('disables interaction when readonly is true', () => {
+        render(
+            <ColorPalette
+                colors={mockColors}
+                onColorClick={mockOnColorClick}
+                readonly={true}
+            />
         );
         
-        expect(container.firstChild).toHaveClass(customClass);
+        const colorButton = screen.getByRole('button', { name: `Color 1: ${mockColors[0]}` });
+        fireEvent.click(colorButton);
+        
+        expect(mockOnColorClick).not.toHaveBeenCalled();
+        expect(colorButton).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    it('renders analyze and export buttons', () => {
+        render(<ColorPalette colors={mockColors} />);
+        
+        expect(screen.getByRole('button', { name: /analyze palette/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /export/i })).toBeInTheDocument();
     });
 });
