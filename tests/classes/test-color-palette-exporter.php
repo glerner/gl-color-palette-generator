@@ -78,7 +78,7 @@ class ColorPaletteExporterTest extends TestCase {
     public function test_export_act(): void {
         $output = $this->exporter->exportPalette($this->test_palette, 'act');
 
-        $this->assertEquals(768, strlen($output)); / 256 colors * 3 bytes
+        $this->assertEquals(768, strlen($output)); // 256 colors * 3 bytes
     }
 
     public function test_export_gpl(): void {
@@ -195,7 +195,7 @@ class ColorPaletteExporterTest extends TestCase {
     }
 
     protected function tearDown(): void {
-        / Clean up any temporary files if they exist
+        // Clean up any temporary files if they exist
         $temp_files = glob($this->temp_dir . '/test_palette.*');
         foreach ($temp_files as $file) {
             if (file_exists($file)) {

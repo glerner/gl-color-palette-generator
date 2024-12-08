@@ -22,10 +22,10 @@ class ColorPaletteConverterTest extends TestCase {
     }
 
     public function test_convert_to_css_format(): void {
-        / Act
+        // Act
         $result = $this->converter->convert_palette($this->palette, 'css');
 
-        / Assert
+        // Assert
         $this->assertStringContainsString(':root {', $result);
         $this->assertStringContainsString('--color-1: #FF0000;', $result);
         $this->assertStringContainsString('--color-2: #00FF00;', $result);
@@ -33,31 +33,31 @@ class ColorPaletteConverterTest extends TestCase {
     }
 
     public function test_convert_to_scss_format(): void {
-        / Act
+        // Act
         $result = $this->converter->convert_palette($this->palette, 'scss');
 
-        / Assert
+        // Assert
         $this->assertStringContainsString('$color-1: #FF0000;', $result);
         $this->assertStringContainsString('$color-2: #00FF00;', $result);
         $this->assertStringContainsString('$color-3: #0000FF;', $result);
     }
 
     public function test_convert_to_less_format(): void {
-        / Act
+        // Act
         $result = $this->converter->convert_palette($this->palette, 'less');
 
-        / Assert
+        // Assert
         $this->assertStringContainsString('@color-1: #FF0000;', $result);
         $this->assertStringContainsString('@color-2: #00FF00;', $result);
         $this->assertStringContainsString('@color-3: #0000FF;', $result);
     }
 
     public function test_convert_to_json_format(): void {
-        / Act
+        // Act
         $result = $this->converter->convert_palette($this->palette, 'json');
         $data = json_decode($result, true);
 
-        / Assert
+        // Assert
         $this->assertIsArray($data);
         $this->assertEquals('Test Palette', $data['name']);
         $this->assertCount(3, $data['colors']);
@@ -67,10 +67,10 @@ class ColorPaletteConverterTest extends TestCase {
     }
 
     public function test_convert_to_svg_format(): void {
-        / Act
+        // Act
         $result = $this->converter->convert_palette($this->palette, 'svg');
 
-        / Assert
+        // Assert
         $this->assertStringContainsString('<?xml version="1.0"', $result);
         $this->assertStringContainsString('<svg', $result);
         $this->assertStringContainsString('fill="#FF0000"', $result);
@@ -79,20 +79,20 @@ class ColorPaletteConverterTest extends TestCase {
     }
 
     public function test_convert_to_ase_format(): void {
-        / Act
+        // Act
         $result = $this->converter->convert_palette($this->palette, 'ase');
 
-        / Assert
+        // Assert
         $this->assertStringStartsWith('ASEF', $result);
         $this->assertGreaterThan(20, strlen($result));
-        / Additional binary format checks could be added
+        // Additional binary format checks could be added
     }
 
     public function test_convert_to_gpl_format(): void {
-        / Act
+        // Act
         $result = $this->converter->convert_palette($this->palette, 'gpl');
 
-        / Assert
+        // Assert
         $this->assertStringContainsString('GIMP Palette', $result);
         $this->assertStringContainsString('255   0   0', $result);
         $this->assertStringContainsString('0   255   0', $result);
@@ -100,20 +100,20 @@ class ColorPaletteConverterTest extends TestCase {
     }
 
     public function test_convert_to_act_format(): void {
-        / Act
+        // Act
         $result = $this->converter->convert_palette($this->palette, 'act');
 
-        / Assert
-        $this->assertEquals(768, strlen($result)); / 256 colors * 3 bytes
-        $this->assertEquals("\xFF\x00\x00", substr($result, 0, 3)); / First color (red)
+        // Assert
+        $this->assertEquals(768, strlen($result)); // 256 colors * 3 bytes
+        $this->assertEquals("\xFF\x00\x00", substr($result, 0, 3)); // First color (red)
     }
 
     public function test_convert_to_sketchpalette_format(): void {
-        / Act
+        // Act
         $result = $this->converter->convert_palette($this->palette, 'sketchpalette');
         $data = json_decode($result, true);
 
-        / Assert
+        // Assert
         $this->assertIsArray($data);
         $this->assertArrayHasKey('colors', $data);
         $this->assertCount(3, $data['colors']);
@@ -123,7 +123,7 @@ class ColorPaletteConverterTest extends TestCase {
     }
 
     public function test_convert_with_custom_options(): void {
-        / Arrange
+        // Arrange
         $options = [
             'prefix' => 'theme',
             'names' => ['primary', 'secondary', 'accent'],
@@ -131,24 +131,24 @@ class ColorPaletteConverterTest extends TestCase {
             'height' => 150
         ];
 
-        / Test CSS format with options
+        // Test CSS format with options
         $css = $this->converter->convert_palette($this->palette, 'css', $options);
         $this->assertStringContainsString('--theme-primary:', $css);
 
-        / Test SVG format with options
+        // Test SVG format with options
         $svg = $this->converter->convert_palette($this->palette, 'svg', $options);
         $this->assertStringContainsString('width="200"', $svg);
         $this->assertStringContainsString('height="150"', $svg);
     }
 
     public function test_convert_handles_empty_palette(): void {
-        / Arrange
+        // Arrange
         $empty_palette = new ColorPalette([
             'name' => 'Empty',
             'colors' => []
         ]);
 
-        / Test various formats
+        // Test various formats
         $formats = ['css', 'scss', 'less', 'json', 'svg', 'gpl'];
         foreach ($formats as $format) {
             $result = $this->converter->convert_palette($empty_palette, $format);
@@ -157,13 +157,13 @@ class ColorPaletteConverterTest extends TestCase {
     }
 
     public function test_convert_handles_single_color(): void {
-        / Arrange
+        // Arrange
         $single_color = new ColorPalette([
             'name' => 'Single',
             'colors' => ['#FF0000']
         ]);
 
-        / Test various formats
+        // Test various formats
         $formats = ['css', 'scss', 'less', 'json', 'svg', 'gpl'];
         foreach ($formats as $format) {
             $result = $this->converter->convert_palette($single_color, $format);
@@ -183,10 +183,10 @@ class ColorPaletteConverterTest extends TestCase {
         array $options,
         array $expected_names
     ): void {
-        / Act
+        // Act
         $css = $this->converter->convert_palette($this->palette, 'css', $options);
 
-        / Assert
+        // Assert
         foreach ($expected_names as $name) {
             $this->assertStringContainsString("--{$options['prefix']}-{$name}:", $css);
         }
@@ -216,18 +216,18 @@ class ColorPaletteConverterTest extends TestCase {
     }
 
     public function test_binary_format_integrity(): void {
-        / Test ASE format
+        // Test ASE format
         $ase = $this->converter->convert_palette($this->palette, 'ase');
         $this->assertEquals('ASEF', substr($ase, 0, 4));
-        $this->assertEquals(pack('N', 3), substr($ase, 8, 4)); / 3 colors
+        $this->assertEquals(pack('N', 3), substr($ase, 8, 4)); // 3 colors
 
-        / Test ACT format
+        // Test ACT format
         $act = $this->converter->convert_palette($this->palette, 'act');
-        $this->assertEquals(768, strlen($act)); / 256 colors * 3 bytes
+        $this->assertEquals(768, strlen($act)); // 256 colors * 3 bytes
     }
 
     public function test_format_specific_features(): void {
-        / Test JSON with metadata
+        // Test JSON with metadata
         $palette_with_meta = new ColorPalette([
             'name' => 'Meta Test',
             'colors' => ['#FF0000'],
@@ -238,7 +238,7 @@ class ColorPaletteConverterTest extends TestCase {
         $this->assertArrayHasKey('metadata', $data);
         $this->assertEquals('Test User', $data['metadata']['author']);
 
-        / Test Sketch palette version info
+        // Test Sketch palette version info
         $sketch = $this->converter->convert_palette($this->palette, 'sketchpalette');
         $data = json_decode($sketch, true);
         $this->assertArrayHasKey('compatibleVersion', $data);

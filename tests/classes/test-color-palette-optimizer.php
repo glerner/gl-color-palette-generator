@@ -46,7 +46,7 @@ class ColorPaletteOptimizerTest extends TestCase {
         $analysis = $this->analyzer->analyzeAccessibility($optimized, 'AA');
 
         $this->assertGreaterThan(
-            0.5, / At least 50% of color pairs should meet AA standards
+            0.5, // At least 50% of color pairs should meet AA standards
             $analysis['compliance_rate']
         );
     }
@@ -199,7 +199,7 @@ class ColorPaletteOptimizerTest extends TestCase {
 
         $this->assertGreaterThan($original_contrast, $new_contrast);
         if ($expected_improvement) {
-            $this->assertGreaterThanOrEqual(4.5, $new_contrast); / WCAG AA minimum
+            $this->assertGreaterThanOrEqual(4.5, $new_contrast); // WCAG AA minimum
         }
     }
 
@@ -216,16 +216,16 @@ class ColorPaletteOptimizerTest extends TestCase {
      */
     public function it_maintains_color_relationships() {
         $palette = new Color_Palette([
-            '#FF0000', / Red
-            '#00FF00', / Green (complementary)
-            '#0000FF'  / Blue (triadic)
+            '#FF0000', // Red
+            '#00FF00', // Green (complementary)
+            '#0000FF'  // Blue (triadic)
         ]);
 
         $optimized = $this->optimizer->optimize($palette, [
             'preserve_hues' => true
         ]);
 
-        / Check that color relationships are maintained
+        // Check that color relationships are maintained
         $original_relationships = $this->get_color_relationships($palette->get_colors());
         $optimized_relationships = $this->get_color_relationships($optimized->get_colors());
 
@@ -240,9 +240,9 @@ class ColorPaletteOptimizerTest extends TestCase {
      */
     public function it_improves_saturation_consistency() {
         $palette = new Color_Palette([
-            '#FF0000', / Fully saturated red
-            '#FF9999', / Light pink (low saturation)
-            '#990000'  / Dark red (medium saturation)
+            '#FF0000', // Fully saturated red
+            '#FF9999', // Light pink (low saturation)
+            '#990000'  // Dark red (medium saturation)
         ]);
 
         $optimized = $this->optimizer->optimize($palette);
@@ -269,11 +269,11 @@ class ColorPaletteOptimizerTest extends TestCase {
             'target_wcag' => 'AAA'
         ]);
 
-        / Check that optimized palette maintains monochromatic nature
+        // Check that optimized palette maintains monochromatic nature
         $optimized_colors = $optimized->get_colors();
         $this->assertCount(5, $optimized_colors);
 
-        / Verify colors are still grayscale
+        // Verify colors are still grayscale
         foreach ($optimized_colors as $color) {
             $rgb = $this->hex_to_rgb($color);
             $this->assertEquals($rgb['r'], $rgb['g']);
@@ -298,7 +298,7 @@ class ColorPaletteOptimizerTest extends TestCase {
             'target_wcag' => 'AAA'
         ]);
 
-        / AAA should have higher contrast than AA
+        // AAA should have higher contrast than AA
         $aa_contrast = $this->get_contrast_ratio(
             $aa_optimized->get_colors()[0],
             $aa_optimized->get_colors()[1]
@@ -397,6 +397,6 @@ class ColorPaletteOptimizerTest extends TestCase {
     }
 
     private function hex_to_rgb($color) {
-        / Implementation of hex to RGB conversion
+        // Implementation of hex to RGB conversion
     }
 }

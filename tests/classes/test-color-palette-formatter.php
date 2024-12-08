@@ -143,27 +143,27 @@ class ColorPaletteFormatterTest extends TestCase {
     }
 
     public function test_edge_cases(): void {
-        / Black
+        // Black
         $this->assertEquals('#000000', $this->formatter->formatColor('rgb(0, 0, 0)', 'hex'));
         $this->assertEquals('hsl(0, 0%, 0%)', $this->formatter->formatColor('#000000', 'hsl'));
 
-        / White
+        // White
         $this->assertEquals('#FFFFFF', $this->formatter->formatColor('rgb(255, 255, 255)', 'hex'));
         $this->assertEquals('hsl(0, 0%, 100%)', $this->formatter->formatColor('#FFFFFF', 'hsl'));
 
-        / Gray (no saturation)
+        // Gray (no saturation)
         $this->assertEquals('hsl(0, 0%, 50%)', $this->formatter->formatColor('#808080', 'hsl'));
     }
 
     public function test_color_conversion_precision(): void {
-        / Test RGB to HSL to RGB conversion maintains color accuracy
+        // Test RGB to HSL to RGB conversion maintains color accuracy
         $original = '#FF0000';
         $hsl = $this->formatter->formatColor($original, 'hsl');
         $back_to_hex = $this->formatter->formatColor($hsl, 'hex');
         $this->assertEquals($original, $back_to_hex);
 
-        / Test with a more complex color
-        $original = '#8A2BE2'; / Blue Violet
+        // Test with a more complex color
+        $original = '#8A2BE2'; // Blue Violet
         $rgb = $this->formatter->formatColor($original, 'rgb');
         $back_to_hex = $this->formatter->formatColor($rgb, 'hex');
         $this->assertEquals($original, $back_to_hex);
@@ -178,7 +178,7 @@ class ColorPaletteFormatterTest extends TestCase {
         array_shift($matches);
         $actual_hsl = array_map('intval', $matches);
 
-        / Allow for small rounding differences
+        // Allow for small rounding differences
         foreach ($actual_hsl as $i => $value) {
             $this->assertEqualsWithDelta($expected_hsl[$i], $value, 1);
         }

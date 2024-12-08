@@ -8,17 +8,6 @@
  *
  * @package GLColorPalette
  * @since   1.0.0
- *
- * @example
- * / Generate a new palette
- * POST /wp-json/gl-color-palette/v1/palettes
- * {
- *     "theme": "modern",
- *     "count": 5
- * }
- *
- * / Analyze a palette
- * GET /wp-json/gl-color-palette/v1/palettes/{id}/analyze
  */
 
 namespace GLColorPalette;
@@ -28,12 +17,9 @@ use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
+use GL_Color_Palette_Generator\Core\Rate_Limiter;
+use GL_Color_Palette_Generator\Core\Logger;
 
-/**
- * Class Color_Palette_REST_Controller
- *
- * @since 1.0.0
- */
 class Color_Palette_REST_Controller extends WP_REST_Controller {
     /**
      * API namespace
@@ -72,6 +58,20 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
     private $exporter;
 
     /**
+     * Rate limiter instance
+     *
+     * @var Rate_Limiter
+     */
+    private $rate_limiter;
+
+    /**
+     * Logger instance
+     *
+     * @var Logger
+     */
+    private $logger;
+
+    /**
      * Constructor
      */
     public function __construct() {
@@ -79,6 +79,8 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
         $this->analyzer = new Color_Palette_Analyzer();
         $this->optimizer = new Color_Palette_Optimizer();
         $this->exporter = new Color_Palette_Exporter();
+        $this->rate_limiter = new Rate_Limiter();
+        $this->logger = new Logger();
     }
 
     /**
@@ -121,7 +123,7 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
             ]
         ]);
 
-        / Add list endpoint
+        // Add list endpoint
         register_rest_route($this->namespace, '/palettes', [
             [
                 'methods' => WP_REST_Server::READABLE,
@@ -131,7 +133,7 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
             ]
         ]);
 
-        / Add search endpoint
+        // Add search endpoint
         register_rest_route($this->namespace, '/palettes/search', [
             [
                 'methods' => WP_REST_Server::READABLE,
@@ -435,6 +437,46 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
     }
 
     /**
+     * Check rate limit before processing request
+     *
+     * @param WP_REST_Request $request Request object.
+     * @return bool|WP_Error True if rate limit not exceeded, WP_Error otherwise.
+     */
+    private function check_rate_limit($request) {
+        $user_id = get_current_user_id();
+        $ip = $request->get_header('X-Forwarded-For') ?: $_SERVER['REMOTE_ADDR'];
+        $identifier = $user_id ? "user_{$user_id}" : "ip_{$ip}";
+
+        if (!$this->rate_limiter->check_limit($identifier)) {
+            $this->logger->warning("Rate limit exceeded for {$identifier}");
+            return new WP_Error(
+                'rate_limit_exceeded',
+                'API rate limit exceeded. Please try again later.',
+                array('status' => 429)
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Add rate limit headers to response
+     *
+     * @param WP_REST_Response $response Response object.
+     * @param string          $identifier User/IP identifier.
+     * @return WP_REST_Response Response with rate limit headers.
+     */
+    private function add_rate_limit_headers($response, $identifier) {
+        $limit_info = $this->rate_limiter->get_limit_info($identifier);
+
+        $response->header('X-RateLimit-Limit', $limit_info['limit']);
+        $response->header('X-RateLimit-Remaining', $limit_info['remaining']);
+        $response->header('X-RateLimit-Reset', $limit_info['reset']);
+
+        return $response;
+    }
+
+    /**
      * Analyze a palette
      *
      * @param WP_REST_Request $request Request object
@@ -444,7 +486,7 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
         $palette_id = $request->get_param('id');
         $aspects = $request->get_param('aspects');
 
-        / Get palette from storage/cache
+        // Get palette from storage/cache
         $palette = $this->get_palette($palette_id);
         if (is_wp_error($palette)) {
             return $palette;
@@ -481,7 +523,7 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
             'preserve_relationships' => $request->get_param('preserve_relationships')
         ];
 
-        / Get palette from storage/cache
+        // Get palette from storage/cache
         $palette = $this->get_palette($palette_id);
         if (is_wp_error($palette)) {
             return $palette;
@@ -510,7 +552,7 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
         $format = $request->get_param('format');
         $options = $request->get_param('options');
 
-        / Get palette from storage/cache
+        // Get palette from storage/cache
         $palette = $this->get_palette($palette_id);
         if (is_wp_error($palette)) {
             return $palette;
@@ -534,11 +576,41 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
      * @return Color_Palette|WP_Error Palette object or error
      */
     private function get_palette(string $id) {
-        / Implementation depends on storage mechanism
-        / This is a placeholder
+        // Implementation depends on storage mechanism
+        // This is a placeholder
         return new \WP_Error(
             'not_implemented',
             __('Palette retrieval not implemented', 'gl-color-palette-generator')
         );
+    }
+
+    /**
+     * Generate a palette
+     *
+     * @param WP_REST_Request $request Request object.
+     * @return WP_REST_Response|WP_Error Response object or error.
+     */
+    public function generate_palette($request) {
+        $rate_check = $this->check_rate_limit($request);
+        if (is_wp_error($rate_check)) {
+            return $rate_check;
+        }
+
+        $user_id = get_current_user_id();
+        $ip = $request->get_header('X-Forwarded-For') ?: $_SERVER['REMOTE_ADDR'];
+        $identifier = $user_id ? "user_{$user_id}" : "ip_{$ip}";
+
+        try {
+            // Existing palette generation code...
+            $response = new WP_REST_Response($data);
+            return $this->add_rate_limit_headers($response, $identifier);
+        } catch (\Exception $e) {
+            $this->logger->error("Palette generation failed: " . $e->getMessage());
+            return new WP_Error(
+                'palette_generation_failed',
+                $e->getMessage(),
+                array('status' => 500)
+            );
+        }
     }
 }

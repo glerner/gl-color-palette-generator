@@ -38,7 +38,7 @@ class HuggingFace_Provider_Test extends WP_UnitTestCase {
             'mode' => 'analogous',
             'count' => 5
         ]);
-        / Would make API call in real scenario
+        // Would make API call in real scenario
         $this->assertNotWPError($result);
     }
 
