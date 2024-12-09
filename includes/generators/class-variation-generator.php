@@ -1,410 +1,287 @@
 <?php
-namespace GL_Color_Palette_Generator;
+namespace GL_Color_Palette_Generator\Generators;
 
-class VariationGenerator {
-    private $color_analyzer;
+class Variation_Generator {
     private $settings;
-
-    // Variation types
-    private const VARIATION_TYPES = [
-        'tints' => ['steps' => 5, 'intensity' => 0.1],
-        'shades' => ['steps' => 5, 'intensity' => 0.1],
-        'tones' => ['steps' => 5, 'intensity' => 0.1],
-        'saturated' => ['steps' => 3, 'intensity' => 0.15],
-        'desaturated' => ['steps' => 3, 'intensity' => 0.15],
-        'temperature' => ['warm' => 2, 'cool' => 2],
-        'neutrals' => ['steps' => 3, 'intensity' => 0.2],
-        'accents' => ['bright' => 2, 'muted' => 2]
-    ];
+    private $cache_duration = 3600; // 1 hour in seconds
 
     public function __construct() {
-        $this->color_analyzer = new ColorAnalyzer();
-        $this->settings = new SettingsManager();
+        $this->settings = get_option('gl_color_palette_generator_settings', []);
     }
 
-    /**
-     * Generate comprehensive color variations.
-     *
-     * @param string $base_color The base color in hex format.
-     * @param array $variation_types The types of variations to generate.
-     * @return array An array containing the base color, variations, and metadata.
-     */
-    public function generate_variations($base_color, $variation_types = []) {
-        $variations = [];
+    public function generate_variations($colors, $options = []) {
+        if (empty($colors)) {
+            return [];
+        }
 
-        foreach ($variation_types as $type) {
+        $type = $options['type'] ?? 'all';
+        $count = $options['count'] ?? 3;
+
+        $variations = [];
+        foreach ($colors as $color) {
             switch ($type) {
-                case 'shades':
-                    $variations['shades'] = $this->generate_shades($base_color);
-                    break;
-                case 'tints':
-                    $variations['tints'] = $this->generate_tints($base_color);
-                    break;
-                case 'tones':
-                    $variations['tones'] = $this->generate_tones($base_color);
+                case 'monochromatic':
+                    $variations[] = $this->generate_monochromatic_variations($color);
                     break;
                 case 'analogous':
-                    $variations['analogous'] = $this->generate_analogous($base_color);
+                    $variations[] = $this->generate_analogous_variations($color);
                     break;
-                case 'monochromatic':
-                    $variations['monochromatic'] = $this->generate_monochromatic($base_color);
+                case 'complementary':
+                    $variations[] = $this->generate_complementary_variations($color);
                     break;
+                case 'split_complementary':
+                    $variations[] = $this->generate_split_complementary_variations($color);
+                    break;
+                case 'triadic':
+                    $variations[] = $this->generate_triadic_variations($color);
+                    break;
+                case 'tetradic':
+                    $variations[] = $this->generate_tetradic_variations($color);
+                    break;
+                case 'all':
+                default:
+                    $variations[] = array_merge(
+                        $this->generate_monochromatic_variations($color),
+                        $this->generate_analogous_variations($color),
+                        $this->generate_complementary_variations($color)
+                    );
             }
         }
 
-        return [
-            'base_color' => $base_color,
-            'variations' => $variations,
-            'metadata' => $this->generate_variation_metadata($variations)
-        ];
+        return array_slice(array_merge(...$variations), 0, $count);
     }
 
-    /**
-     * Generate tints (lighter variations).
-     *
-     * @param array $lab The LAB color values.
-     * @param array $options Options for generating tints.
-     * @return array An array of tints in hex format.
-     */
-    private function generate_tints($lab, $options) {
-        $steps = $options['tint_steps'] ?? self::VARIATION_TYPES['tints']['steps'];
-        $intensity = $options['tint_intensity'] ?? self::VARIATION_TYPES['tints']['intensity'];
-        $tints = [];
-
-        for ($i = 1; $i <= $steps; $i++) {
-            $new_lab = [
-                min(100, $lab[0] + ($i * $intensity * 100)),
-                $lab[1] * (1 - ($i * $intensity * 0.5)),
-                $lab[2] * (1 - ($i * $intensity * 0.5))
-            ];
-
-            $tints[$i * 100] = $this->color_analyzer->lab_to_hex($new_lab);
-        }
-
-        return $tints;
-    }
-
-    /**
-     * Generate shades (darker variations).
-     *
-     * @param array $lab The LAB color values.
-     * @param array $options Options for generating shades.
-     * @return array An array of shades in hex format.
-     */
-    private function generate_shades($lab, $options) {
-        $steps = $options['shade_steps'] ?? self::VARIATION_TYPES['shades']['steps'];
-        $intensity = $options['shade_intensity'] ?? self::VARIATION_TYPES['shades']['intensity'];
-        $shades = [];
-
-        for ($i = 1; $i <= $steps; $i++) {
-            $new_lab = [
-                max(0, $lab[0] - ($i * $intensity * 100)),
-                $lab[1] * (1 - ($i * $intensity * 0.3)),
-                $lab[2] * (1 - ($i * $intensity * 0.3))
-            ];
-
-            $shades[$i * 100] = $this->color_analyzer->lab_to_hex($new_lab);
-        }
-
-        return $shades;
-    }
-
-    /**
-     * Generate tones (saturation variations).
-     *
-     * @param array $lab The LAB color values.
-     * @param array $options Options for generating tones.
-     * @return array An array of tones in hex format.
-     */
-    private function generate_tones($lab, $options) {
-        $steps = $options['tone_steps'] ?? self::VARIATION_TYPES['tones']['steps'];
-        $intensity = $options['tone_intensity'] ?? self::VARIATION_TYPES['tones']['intensity'];
-        $tones = [];
-
-        for ($i = 1; $i <= $steps; $i++) {
-            $new_lab = [
-                $lab[0],
-                $lab[1] * (1 - ($i * $intensity)),
-                $lab[2] * (1 - ($i * $intensity))
-            ];
-
-            $tones[$i * 100] = $this->color_analyzer->lab_to_hex($new_lab);
-        }
-
-        return $tones;
-    }
-
-    /**
-     * Generate saturated variations.
-     *
-     * @param array $lab The LAB color values.
-     * @param array $options Options for generating saturated variations.
-     * @return array An array of saturated variations in hex format.
-     */
-    private function generate_saturated($lab, $options) {
-        $steps = $options['saturated_steps'] ?? self::VARIATION_TYPES['saturated']['steps'];
-        $intensity = $options['saturated_intensity'] ?? self::VARIATION_TYPES['saturated']['intensity'];
-        $saturated = [];
-
-        for ($i = 1; $i <= $steps; $i++) {
-            $new_lab = [
-                $lab[0],
-                $lab[1] * (1 + ($i * $intensity)),
-                $lab[2] * (1 + ($i * $intensity))
-            ];
-
-            $saturated[$i * 100] = $this->color_analyzer->lab_to_hex($new_lab);
-        }
-
-        return $saturated;
-    }
-
-    /**
-     * Generate temperature variations.
-     *
-     * @param array $lab The LAB color values.
-     * @param array $options Options for generating temperature variations.
-     * @return array An array containing warm and cool variations.
-     */
-    private function generate_temperature_variations($lab, $options) {
-        $warm_steps = $options['warm_steps'] ?? self::VARIATION_TYPES['temperature']['warm'];
-        $cool_steps = $options['cool_steps'] ?? self::VARIATION_TYPES['temperature']['cool'];
-
-        return [
-            'warm' => $this->generate_warm_variations($lab, $warm_steps),
-            'cool' => $this->generate_cool_variations($lab, $cool_steps)
-        ];
-    }
-
-    /**
-     * Generate warm variations.
-     *
-     * @param array $lab The LAB color values.
-     * @param int $steps Number of steps for generating warm variations.
-     * @return array An array of warm variations in hex format.
-     */
-    private function generate_warm_variations($lab, $steps) {
-        $warm = [];
-        $warm_adjustment = [2, 5, -2]; // Adjust Lab values for warmer appearance
-
-        for ($i = 1; $i <= $steps; $i++) {
-            $new_lab = [
-                $lab[0] + ($warm_adjustment[0] * $i),
-                $lab[1] + ($warm_adjustment[1] * $i),
-                $lab[2] + ($warm_adjustment[2] * $i)
-            ];
-
-            $warm[$i * 100] = $this->color_analyzer->lab_to_hex($new_lab);
-        }
-
-        return $warm;
-    }
-
-    /**
-     * Generate cool variations.
-     *
-     * @param array $lab The LAB color values.
-     * @param int $steps Number of steps for generating cool variations.
-     * @return array An array of cool variations in hex format.
-     */
-    private function generate_cool_variations($lab, $steps) {
-        $cool = [];
-        $cool_adjustment = [2, -5, 2]; // Adjust Lab values for cooler appearance
-
-        for ($i = 1; $i <= $steps; $i++) {
-            $new_lab = [
-                $lab[0] + ($cool_adjustment[0] * $i),
-                $lab[1] + ($cool_adjustment[1] * $i),
-                $lab[2] + ($cool_adjustment[2] * $i)
-            ];
-
-            $cool[$i * 100] = $this->color_analyzer->lab_to_hex($new_lab);
-        }
-
-        return $cool;
-    }
-
-    /**
-     * Generate neutral variations.
-     *
-     * @param array $lab The LAB color values.
-     * @param array $options Options for generating neutral variations.
-     * @return array An array of neutral variations in hex format.
-     */
-    private function generate_neutrals($lab, $options) {
-        $steps = $options['neutral_steps'] ?? self::VARIATION_TYPES['neutrals']['steps'];
-        $intensity = $options['neutral_intensity'] ?? self::VARIATION_TYPES['neutrals']['intensity'];
-        $neutrals = [];
-
-        for ($i = 1; $i <= $steps; $i++) {
-            $new_lab = [
-                $lab[0],
-                $lab[1] * (1 - ($i * $intensity * 1.5)),
-                $lab[2] * (1 - ($i * $intensity * 1.5))
-            ];
-
-            $neutrals[$i * 100] = $this->color_analyzer->lab_to_hex($new_lab);
-        }
-
-        return $neutrals;
-    }
-
-    /**
-     * Generate accent variations.
-     *
-     * @param array $lab The LAB color values.
-     * @param array $options Options for generating accent variations.
-     * @return array An array containing bright and muted accent variations.
-     */
-    private function generate_accents($lab, $options) {
-        return [
-            'bright' => $this->generate_bright_accents($lab, $options),
-            'muted' => $this->generate_muted_accents($lab, $options)
-        ];
-    }
-
-    /**
-     * Generate semantic variations.
-     *
-     * @param string $base_color The base color in hex format.
-     * @return array An array of semantic variations.
-     */
-    private function generate_semantic_variations($base_color) {
-        return [
-            'success' => $this->adjust_for_semantic($base_color, 'success'),
-            'warning' => $this->adjust_for_semantic($base_color, 'warning'),
-            'error' => $this->adjust_for_semantic($base_color, 'error'),
-            'info' => $this->adjust_for_semantic($base_color, 'info'),
-            'disabled' => $this->adjust_for_semantic($base_color, 'disabled')
-        ];
-    }
-
-    /**
-     * Generate custom variations.
-     *
-     * @param string $base_color The base color in hex format.
-     * @param array $parameters Parameters for generating custom variations.
-     * @return array An array containing custom variations and preview data.
-     */
-    public function generate_custom_variations($base_color, $parameters) {
-        $custom_variations = [];
-
-        if (isset($parameters['lightness'])) {
-            $custom_variations['lightness'] = $this->vary_lightness(
-                $base_color,
-                $parameters['lightness']['start'],
-                $parameters['lightness']['end'],
-                $parameters['lightness']['steps']
-            );
-        }
-
-        if (isset($parameters['saturation'])) {
-            $custom_variations['saturation'] = $this->vary_saturation(
-                $base_color,
-                $parameters['saturation']['start'],
-                $parameters['saturation']['end'],
-                $parameters['saturation']['steps']
-            );
-        }
-
-        return [
-            'base_color' => $base_color,
-            'parameters' => $parameters,
-            'variations' => $custom_variations,
-            'preview_data' => $this->generate_preview_data($custom_variations)
-        ];
-    }
-
-    /**
-     * Adjust color for semantic meaning.
-     *
-     * @param string $color The color in hex format.
-     * @param string $type The semantic type (e.g., 'success', 'warning').
-     * @return string The adjusted color in hex format.
-     */
-    private function adjust_for_semantic($color, $type) {
-        $lab = $this->color_analyzer->hex_to_lab($color);
-
-        switch ($type) {
-            case 'success':
-                return $this->shift_towards_hue($lab, 120, 0.7); // Shift towards green
-            case 'warning':
-                return $this->shift_towards_hue($lab, 45, 0.7);  // Shift towards orange
-            case 'error':
-                return $this->shift_towards_hue($lab, 0, 0.7);   // Shift towards red
-            case 'info':
-                return $this->shift_towards_hue($lab, 200, 0.7); // Shift towards blue
-            case 'disabled':
-                return $this->desaturate_and_lighten($lab, 0.5);
-            default:
-                return $color;
-        }
-    }
-
-    /**
-     * Shift color towards a target hue.
-     *
-     * @param array $lab The LAB color values.
-     * @param int $target_hue The target hue to shift towards.
-     * @param float $strength The strength of the hue shift.
-     * @return string The adjusted color in hex format.
-     */
-    private function shift_towards_hue($lab, $target_hue, $strength) {
-        $current_hue = $this->color_analyzer->lab_to_hue($lab);
-        $new_hue = $current_hue + ($target_hue - $current_hue) * $strength;
-        $new_lab = [
-            $lab[0],
-            $lab[1],
-            $lab[2]
-        ];
-        $new_lab[0] = $new_hue;
-        return $this->color_analyzer->lab_to_hex($new_lab);
-    }
-
-    /**
-     * Desaturate and lighten a color.
-     *
-     * @param array $lab The LAB color values.
-     * @param float $amount The amount to desaturate and lighten.
-     * @return string The adjusted color in hex format.
-     */
-    private function desaturate_and_lighten($lab, $amount) {
-        $new_lab = [
-            $lab[0],
-            $lab[1] * (1 - $amount),
-            $lab[2] * (1 - $amount)
-        ];
-        return $this->color_analyzer->lab_to_hex($new_lab);
-    }
-
-    /**
-     * Generate accessibility variations.
-     *
-     * @param string $base_color The base color in hex format.
-     * @return array An array containing accessibility variations and report.
-     */
-    public function generate_accessibility_variations($base_color) {
-        $accessibility = new AccessibilityChecker();
+    public function generate_monochromatic_variations($color) {
+        $rgb = $this->hex_to_rgb($color);
+        $hsv = $this->rgb_to_hsv($rgb);
         $variations = [];
 
-        // Generate variations for different contrast ratios
-        $variations['aa_normal'] = $this->generate_aa_compliant_variations($base_color, 'normal');
-        $variations['aa_large'] = $this->generate_aa_compliant_variations($base_color, 'large');
-        $variations['aaa_normal'] = $this->generate_aaa_compliant_variations($base_color, 'normal');
-        $variations['aaa_large'] = $this->generate_aaa_compliant_variations($base_color, 'large');
+        // Generate lighter and darker variations
+        for ($i = -2; $i <= 2; $i++) {
+            if ($i === 0) continue;
+            
+            $new_hsv = [
+                'h' => $hsv['h'],
+                's' => $hsv['s'],
+                'v' => max(0, min(1, $hsv['v'] + ($i * 0.2)))
+            ];
+            
+            $variations[] = $this->hsv_to_hex($new_hsv);
+        }
 
-        // Check accessibility for each variation
-        foreach ($variations as $type => $colors) {
-            foreach ($colors as &$color) {
-                $color['contrast_ratio'] = $accessibility->check_contrast_ratio($base_color, $color['hex']);
-                $color['wcag_status'] = $accessibility->check_wcag_compliance($color['contrast_ratio']);
+        return $variations;
+    }
+
+    public function generate_analogous_variations($color) {
+        $rgb = $this->hex_to_rgb($color);
+        $hsv = $this->rgb_to_hsv($rgb);
+        $variations = [];
+
+        // Generate variations with hue shifts
+        $angles = [-30, -15, 15, 30];
+        foreach ($angles as $angle) {
+            $new_hsv = [
+                'h' => fmod(($hsv['h'] + $angle + 360), 360),
+                's' => $hsv['s'],
+                'v' => $hsv['v']
+            ];
+            
+            $variations[] = $this->hsv_to_hex($new_hsv);
+        }
+
+        return $variations;
+    }
+
+    public function generate_complementary_variations($color) {
+        $rgb = $this->hex_to_rgb($color);
+        $hsv = $this->rgb_to_hsv($rgb);
+        $variations = [];
+
+        // Generate complementary color and variations
+        $complementary_h = fmod(($hsv['h'] + 180), 360);
+        
+        for ($i = -1; $i <= 1; $i++) {
+            $new_hsv = [
+                'h' => $complementary_h,
+                's' => max(0, min(1, $hsv['s'] + ($i * 0.1))),
+                'v' => max(0, min(1, $hsv['v'] + ($i * 0.1)))
+            ];
+            
+            $variations[] = $this->hsv_to_hex($new_hsv);
+        }
+
+        return $variations;
+    }
+
+    public function generate_split_complementary_variations($color) {
+        $rgb = $this->hex_to_rgb($color);
+        $hsv = $this->rgb_to_hsv($rgb);
+        $variations = [];
+
+        // Generate split complementary colors
+        $angles = [150, 210];
+        foreach ($angles as $angle) {
+            $new_hsv = [
+                'h' => fmod(($hsv['h'] + $angle), 360),
+                's' => $hsv['s'],
+                'v' => $hsv['v']
+            ];
+            
+            $variations[] = $this->hsv_to_hex($new_hsv);
+        }
+
+        return $variations;
+    }
+
+    public function generate_triadic_variations($color) {
+        $rgb = $this->hex_to_rgb($color);
+        $hsv = $this->rgb_to_hsv($rgb);
+        $variations = [];
+
+        // Generate triadic colors
+        $angles = [120, 240];
+        foreach ($angles as $angle) {
+            $new_hsv = [
+                'h' => fmod(($hsv['h'] + $angle), 360),
+                's' => $hsv['s'],
+                'v' => $hsv['v']
+            ];
+            
+            $variations[] = $this->hsv_to_hex($new_hsv);
+        }
+
+        return $variations;
+    }
+
+    public function generate_tetradic_variations($color) {
+        $rgb = $this->hex_to_rgb($color);
+        $hsv = $this->rgb_to_hsv($rgb);
+        $variations = [];
+
+        // Generate tetradic (double complementary) colors
+        $angles = [90, 180, 270];
+        foreach ($angles as $angle) {
+            $new_hsv = [
+                'h' => fmod(($hsv['h'] + $angle), 360),
+                's' => $hsv['s'],
+                'v' => $hsv['v']
+            ];
+            
+            $variations[] = $this->hsv_to_hex($new_hsv);
+        }
+
+        return $variations;
+    }
+
+    public function adjust_saturation($color, $amount) {
+        $rgb = $this->hex_to_rgb($color);
+        $hsv = $this->rgb_to_hsv($rgb);
+        
+        $new_hsv = [
+            'h' => $hsv['h'],
+            's' => max(0, min(1, $hsv['s'] + $amount)),
+            'v' => $hsv['v']
+        ];
+        
+        return $this->hsv_to_hex($new_hsv);
+    }
+
+    public function adjust_lightness($color, $amount) {
+        $rgb = $this->hex_to_rgb($color);
+        $hsv = $this->rgb_to_hsv($rgb);
+        
+        $new_hsv = [
+            'h' => $hsv['h'],
+            's' => $hsv['s'],
+            'v' => max(0, min(1, $hsv['v'] + $amount))
+        ];
+        
+        return $this->hsv_to_hex($new_hsv);
+    }
+
+    public function rotate_hue($color, $degrees) {
+        $rgb = $this->hex_to_rgb($color);
+        $hsv = $this->rgb_to_hsv($rgb);
+        
+        $new_hsv = [
+            'h' => fmod(($hsv['h'] + $degrees + 360), 360),
+            's' => $hsv['s'],
+            'v' => $hsv['v']
+        ];
+        
+        return $this->hsv_to_hex($new_hsv);
+    }
+
+    private function hex_to_rgb($hex) {
+        $hex = ltrim($hex, '#');
+        return [
+            hexdec(substr($hex, 0, 2)),
+            hexdec(substr($hex, 2, 2)),
+            hexdec(substr($hex, 4, 2))
+        ];
+    }
+
+    private function rgb_to_hsv($rgb) {
+        $r = $rgb[0] / 255;
+        $g = $rgb[1] / 255;
+        $b = $rgb[2] / 255;
+
+        $max = max($r, $g, $b);
+        $min = min($r, $g, $b);
+        $diff = $max - $min;
+
+        $h = 0;
+        $s = ($max == 0) ? 0 : ($diff / $max);
+        $v = $max;
+
+        if ($diff != 0) {
+            if ($max == $r) {
+                $h = 60 * fmod(($g - $b) / $diff, 6);
+            } elseif ($max == $g) {
+                $h = 60 * (($b - $r) / $diff + 2);
+            } elseif ($max == $b) {
+                $h = 60 * (($r - $g) / $diff + 4);
             }
         }
 
+        if ($h < 0) {
+            $h += 360;
+        }
+
         return [
-            'base_color' => $base_color,
-            'variations' => $variations,
-            'accessibility_report' => $this->generate_accessibility_report($variations)
+            'h' => $h,
+            's' => $s,
+            'v' => $v
         ];
+    }
+
+    private function hsv_to_hex($hsv) {
+        $h = $hsv['h'];
+        $s = $hsv['s'];
+        $v = $hsv['v'];
+
+        $c = $v * $s;
+        $x = $c * (1 - abs(fmod($h / 60, 2) - 1));
+        $m = $v - $c;
+
+        if ($h >= 0 && $h < 60) {
+            $r = $c; $g = $x; $b = 0;
+        } elseif ($h >= 60 && $h < 120) {
+            $r = $x; $g = $c; $b = 0;
+        } elseif ($h >= 120 && $h < 180) {
+            $r = 0; $g = $c; $b = $x;
+        } elseif ($h >= 180 && $h < 240) {
+            $r = 0; $g = $x; $b = $c;
+        } elseif ($h >= 240 && $h < 300) {
+            $r = $x; $g = 0; $b = $c;
+        } else {
+            $r = $c; $g = 0; $b = $x;
+        }
+
+        $r = round(($r + $m) * 255);
+        $g = round(($g + $m) * 255);
+        $b = round(($b + $m) * 255);
+
+        return sprintf('#%02X%02X%02X', $r, $g, $b);
     }
 }

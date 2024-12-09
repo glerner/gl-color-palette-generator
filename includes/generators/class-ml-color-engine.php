@@ -1,290 +1,341 @@
 <?php
-namespace GL_Color_Palette_Generator;
+namespace GL_Color_Palette_Generator\Generators;
 
-class MLColorEngine {
-    private $model_manager;
-    private $training_controller;
-    private $inference_engine;
+class ML_Color_Engine {
+    private $settings;
+    private $cache_duration = 3600; // 1 hour in seconds
 
-    // Machine Learning configurations
-    private const ML_CONFIGURATIONS = [
-        'models' => [
-            'color_pattern_recognition' => [
-                'neural_network' => [
-                    'architecture' => [
-                        'type' => 'convolutional',
-                        'layers' => [
-                            'input' => [
-                                'shape' => [224, 224, 3],
-                                'preprocessing' => ['normalization', 'color_space_conversion']
-                            ],
-                            'feature_extraction' => [
-                                'conv_layers' => [
-                                    ['filters' => 64, 'kernel_size' => 3, 'activation' => 'relu'],
-                                    ['filters' => 128, 'kernel_size' => 3, 'activation' => 'relu']
-                                ],
-                                'pooling' => ['type' => 'max', 'size' => 2]
-                            ],
-                            'color_analysis' => [
-                                'dense_layers' => [
-                                    ['units' => 512, 'activation' => 'relu'],
-                                    ['units' => 256, 'activation' => 'relu']
-                                ],
-                                'dropout' => 0.3
-                            ]
-                        ],
-                        'training_params' => [
-                            'optimizer' => 'adam',
-                            'loss' => 'categorical_crossentropy',
-                            'metrics' => ['accuracy', 'precision', 'recall']
-                        ]
-                    ]
-                ],
-                'feature_extraction' => [
-                    'color_features' => [
-                        'histogram' => ['bins' => 256, 'channels' => ['rgb', 'hsv', 'lab']],
-                        'spatial_distribution' => ['grid_size' => 8, 'statistics' => true],
-                        'texture_analysis' => ['glcm', 'local_binary_patterns']
-                    ]
-                ]
-            ],
+    public function __construct() {
+        $this->settings = get_option('gl_color_palette_generator_settings', []);
+    }
 
-            'recommendation_system' => [
-                'collaborative_filtering' => [
-                    'user_based' => [
-                        'similarity_metrics' => ['cosine', 'pearson'],
-                        'neighborhood_size' => 50,
-                        'min_interactions' => 5
-                    ],
-                    'item_based' => [
-                        'similarity_computation' => 'offline',
-                        'update_frequency' => 'daily'
-                    ]
-                ],
-                'content_based' => [
-                    'color_attributes' => [
-                        'features' => ['hue', 'saturation', 'value', 'harmony_scores'],
-                        'weights' => ['learned', 'adjustable']
-                    ],
-                    'context_features' => [
-                        'industry' => ['embedding_size' => 32],
-                        'purpose' => ['embedding_size' => 16],
-                        'season' => ['cyclical_encoding' => true]
-                    ]
-                ]
-            ],
+    public function generate_palette($input) {
+        $theme = $input['theme'] ?? '';
+        $mood = $input['mood'] ?? '';
+        $count = $input['count'] ?? 5;
+        $constraints = $input['constraints'] ?? [];
 
-            'style_transfer' => [
-                'gan_model' => [
-                    'generator' => [
-                        'architecture' => 'unet',
-                        'attention_layers' => true,
-                        'color_preservation' => [
-                            'method' => 'histogram_matching',
-                            'constraints' => ['brand_colors', 'accessibility']
-                        ]
-                    ],
-                    'discriminator' => [
-                        'architecture' => 'patch_gan',
-                        'feature_matching' => true
-                    ],
-                    'training' => [
-                        'loss_functions' => [
-                            'adversarial' => 'wasserstein',
-                            'content' => 'perceptual',
-                            'style' => 'gram_matrix'
-                        ]
-                    ]
-                ]
-            ],
+        $colors = $this->generate_base_colors($count, $theme, $mood);
+        
+        if (!empty($constraints)) {
+            $colors = $this->apply_constraints($colors, $constraints);
+        }
 
-            'harmony_optimization' => [
-                'reinforcement_learning' => [
-                    'state_space' => [
-                        'color_attributes' => ['current_palette', 'target_metrics'],
-                        'context_features' => ['purpose', 'constraints']
-                    ],
-                    'action_space' => [
-                        'adjustments' => ['hue', 'saturation', 'value'],
-                        'granularity' => 'continuous'
-                    ],
-                    'reward_function' => [
-                        'components' => [
-                            'harmony_score' => ['weight' => 0.4],
-                            'contrast_ratio' => ['weight' => 0.3],
-                            'brand_alignment' => ['weight' => 0.3]
-                        ]
-                    ]
-                ]
-            ]
-        ],
+        return $colors;
+    }
 
-        'training_pipeline' => [
-            'data_preprocessing' => [
-                'augmentation' => [
-                    'color_space' => ['rgb_shift', 'hsv_rotation'],
-                    'intensity' => ['brightness', 'contrast'],
-                    'noise' => ['gaussian', 'salt_pepper']
-                ],
-                'normalization' => [
-                    'method' => 'standard',
-                    'per_channel' => true
-                ]
-            ],
-            'validation' => [
-                'cross_validation' => [
-                    'folds' => 5,
-                    'stratification' => true
-                ],
-                'metrics_tracking' => [
-                    'frequency' => 'epoch',
-                    'early_stopping' => ['patience' => 10]
-                ]
-            ]
-        ],
+    public function validate_color($color) {
+        if (!is_string($color)) {
+            return false;
+        }
 
-        'inference_optimization' => [
-            'model_quantization' => [
-                'precision' => 'fp16',
-                'optimization' => ['memory', 'speed']
-            ],
-            'caching' => [
-                'predictions' => ['ttl' => '1 hour'],
-                'feature_vectors' => ['ttl' => '1 day']
-            ],
-            'batch_processing' => [
-                'size' => 'dynamic',
-                'priority_queue' => true
-            ]
-        ]
-    ];
+        return preg_match('/^#[0-9A-F]{6}$/i', $color) === 1;
+    }
 
+    public function calculate_contrast($color1, $color2) {
+        $l1 = $this->get_relative_luminance($color1);
+        $l2 = $this->get_relative_luminance($color2);
 
-    /**
-     * Generate color recommendations based on the given context and constraints.
-     *
-     * @param array $context The context for generating recommendations.
-     * @param array $constraints Optional constraints to apply to the recommendations.
-     * @return array An array containing recommendations, explanations, confidence scores, and alternative options.
-     */
+        $ratio = ($l1 > $l2) 
+            ? ($l1 + 0.05) / ($l2 + 0.05)
+            : ($l2 + 0.05) / ($l1 + 0.05);
 
-    public function generate_recommendations($context, $constraints = []) {
+        return round($ratio, 2);
+    }
+
+    public function analyze_color_harmony($colors) {
+        if (empty($colors)) {
+            return ['type' => 'unknown', 'score' => 0];
+        }
+
+        $harmony_types = $this->detect_harmony_types($colors);
+        $harmony_score = $this->calculate_harmony_score($colors);
+
         return [
-            'recommendations' => $this->process_recommendations($context),
-            'explanation' => $this->generate_explanation(),
-            'confidence_scores' => $this->calculate_confidence(),
-            'alternative_options' => $this->generate_alternatives($constraints)
+            'type' => $harmony_types[0] ?? 'custom',
+            'score' => $harmony_score
         ];
     }
 
+    public function get_color_properties($color) {
+        $rgb = $this->hex_to_rgb($color);
+        $hsv = $this->rgb_to_hsv($rgb);
 
-    /**
-     * Apply style transfer from a source to a target with optional settings.
-     *
-     * @param mixed $source The source data for style transfer.
-     * @param mixed $target The target data for style transfer.
-     * @param array $options Optional settings for the style transfer process.
-     * @return array An array containing the transferred style, color mapping, quality metrics, and adjustments.
-     */
-    public function apply_style_transfer($source, $target, $options = []) {
         return [
-            'transferred_style' => $this->process_style_transfer($source, $target),
-            'color_mapping' => $this->generate_color_mapping(),
-            'quality_metrics' => $this->evaluate_transfer_quality(),
-            'adjustments' => $this->suggest_refinements()
+            'hue' => round($hsv['h']),
+            'saturation' => round($hsv['s'] * 100),
+            'lightness' => round($hsv['v'] * 100)
         ];
     }
 
-    /**
-     * Train the model using the provided training data.
-     *
-     * @param array $training_data The data used for training the model.
-     * @return array An array containing the training results, including epochs completed, loss history, and accuracy history.
-     */
-    public function train_model($training_data) {
-        $processed_data = $this->preprocess_training_data($training_data);
-        $model = $this->initialize_model();
+    public function generate_variations($base_color, $count = 3) {
+        $variations = [];
+        $rgb = $this->hex_to_rgb($base_color);
+        $hsv = $this->rgb_to_hsv($rgb);
 
-        $training_results = [
-            'epochs_completed' => 0,
-            'loss_history' => [],
-            'accuracy_history' => []
+        for ($i = 0; $i < $count; $i++) {
+            $new_hsv = [
+                'h' => ($hsv['h'] + (360 / $count) * $i) % 360,
+                's' => $hsv['s'],
+                'v' => $hsv['v']
+            ];
+            $variations[] = $this->hsv_to_hex($new_hsv);
+        }
+
+        return $variations;
+    }
+
+    public function get_color_name($color) {
+        $cached = get_transient('color_name_' . $color);
+        if ($cached !== false) {
+            return $cached;
+        }
+
+        $properties = $this->get_color_properties($color);
+        $name = $this->generate_color_name($properties);
+        
+        set_transient('color_name_' . $color, $name, $this->cache_duration);
+        return $name;
+    }
+
+    public function get_complementary_color($color) {
+        $rgb = $this->hex_to_rgb($color);
+        $hsv = $this->rgb_to_hsv($rgb);
+        
+        $complementary_hsv = [
+            'h' => ($hsv['h'] + 180) % 360,
+            's' => $hsv['s'],
+            'v' => $hsv['v']
         ];
 
-        for ($epoch = 0; $epoch < $this->config['epochs']; $epoch++) {
-            $batch_results = $this->train_epoch($model, $processed_data);
+        return $this->hsv_to_hex($complementary_hsv);
+    }
 
-            $training_results['epochs_completed']++;
-            $training_results['loss_history'][] = $batch_results['loss'];
-            $training_results['accuracy_history'][] = $batch_results['accuracy'];
+    public function get_analogous_colors($color) {
+        $rgb = $this->hex_to_rgb($color);
+        $hsv = $this->rgb_to_hsv($rgb);
+        
+        $analogous = [];
+        $angles = [-30, 30];
 
-            if ($this->should_stop_training($training_results)) {
-                break;
+        foreach ($angles as $angle) {
+            $new_hsv = [
+                'h' => ($hsv['h'] + $angle + 360) % 360,
+                's' => $hsv['s'],
+                'v' => $hsv['v']
+            ];
+            $analogous[] = $this->hsv_to_hex($new_hsv);
+        }
+
+        return $analogous;
+    }
+
+    private function generate_base_colors($count, $theme, $mood) {
+        $colors = [];
+        $base_hue = rand(0, 360);
+        
+        for ($i = 0; $i < $count; $i++) {
+            $hue = ($base_hue + (360 / $count) * $i) % 360;
+            $saturation = 0.7 + (rand(-20, 20) / 100);
+            $value = 0.8 + (rand(-20, 20) / 100);
+            
+            $colors[] = $this->hsv_to_hex([
+                'h' => $hue,
+                's' => max(0, min(1, $saturation)),
+                'v' => max(0, min(1, $value))
+            ]);
+        }
+
+        return $colors;
+    }
+
+    private function apply_constraints($colors, $constraints) {
+        if (!empty($constraints['include_colors'])) {
+            $colors = array_merge($constraints['include_colors'], $colors);
+            $colors = array_slice($colors, 0, count($colors));
+        }
+
+        if (!empty($constraints['exclude_colors'])) {
+            $colors = array_diff($colors, $constraints['exclude_colors']);
+        }
+
+        if (!empty($constraints['min_contrast'])) {
+            $colors = $this->ensure_minimum_contrast($colors, $constraints['min_contrast']);
+        }
+
+        return array_values($colors);
+    }
+
+    private function ensure_minimum_contrast($colors, $min_contrast) {
+        $result = [];
+        foreach ($colors as $color) {
+            $valid = true;
+            foreach ($result as $existing) {
+                if ($this->calculate_contrast($color, $existing) < $min_contrast) {
+                    $valid = false;
+                    break;
+                }
+            }
+            if ($valid) {
+                $result[] = $color;
+            }
+        }
+        return $result;
+    }
+
+    private function get_relative_luminance($color) {
+        $rgb = $this->hex_to_rgb($color);
+        $rgb = array_map(function($val) {
+            $val = $val / 255;
+            return $val <= 0.03928 
+                ? $val / 12.92 
+                : pow(($val + 0.055) / 1.055, 2.4);
+        }, $rgb);
+        
+        return $rgb[0] * 0.2126 + $rgb[1] * 0.7152 + $rgb[2] * 0.0722;
+    }
+
+    private function hex_to_rgb($hex) {
+        $hex = ltrim($hex, '#');
+        return [
+            hexdec(substr($hex, 0, 2)),
+            hexdec(substr($hex, 2, 2)),
+            hexdec(substr($hex, 4, 2))
+        ];
+    }
+
+    private function rgb_to_hsv($rgb) {
+        $r = $rgb[0] / 255;
+        $g = $rgb[1] / 255;
+        $b = $rgb[2] / 255;
+
+        $max = max($r, $g, $b);
+        $min = min($r, $g, $b);
+        $diff = $max - $min;
+
+        $h = 0;
+        $s = ($max == 0) ? 0 : ($diff / $max);
+        $v = $max;
+
+        if ($diff != 0) {
+            if ($max == $r) {
+                $h = 60 * fmod(($g - $b) / $diff, 6);
+            } elseif ($max == $g) {
+                $h = 60 * (($b - $r) / $diff + 2);
+            } elseif ($max == $b) {
+                $h = 60 * (($r - $g) / $diff + 4);
             }
         }
 
-        $this->save_model($model);
-        return $training_results;
-    }
-
-    /**
-     * Predict color combinations based on a base color.
-     *
-     * @param string $base_color The base color for generating predictions.
-     * @return array An array of processed predictions.
-     */
-    public function predict_combinations($base_color) {
-        $model = $this->load_model();
-        $color_features = $this->extract_color_features($base_color);
-
-        $predictions = $model->predict($color_features);
-        return $this->process_predictions($predictions);
-    }
-
-    /**
-     * Update the model with new data.
-     *
-     * @param array $new_data The new data to update the model with.
-     * @return array An array containing the update status, performance delta, model metrics, and recommendations.
-     */
-    public function update_model($new_data) {
-        $model = $this->load_model();
-        $processed_data = $this->preprocess_training_data($new_data);
-
-        $update_results = [
-            'initial_performance' => $this->evaluate_model($model),
-            'update_metrics' => $this->perform_model_update($model, $processed_data),
-            'final_performance' => $this->evaluate_model($model)
-        ];
-
-        $this->save_model($model);
+        if ($h < 0) {
+            $h += 360;
+        }
 
         return [
-            'update_status' => 'success',
-            'performance_delta' => $this->calculate_performance_delta($update_results),
-            'model_metrics' => $this->generate_model_metrics($model),
-            'recommendations' => $this->generate_model_recommendations($update_results)
+            'h' => $h,
+            's' => $s,
+            'v' => $v
         ];
     }
 
-    /**
-     * Generate color predictions based on input data.
-     *
-     * @param array $input_data The input data for generating predictions.
-     * @return array An array containing raw and processed predictions, confidence scores, and alternative suggestions.
-     */
-    public function generate_predictions($input_data) {
-        $model = $this->load_model();
-        $processed_input = $this->preprocess_input($input_data);
+    private function hsv_to_hex($hsv) {
+        $h = $hsv['h'];
+        $s = $hsv['s'];
+        $v = $hsv['v'];
 
-        $predictions = $model->predict($processed_input);
-        $processed_predictions = $this->postprocess_predictions($predictions);
+        $c = $v * $s;
+        $x = $c * (1 - abs(fmod($h / 60, 2) - 1));
+        $m = $v - $c;
 
-        return [
-            'raw_predictions' => $predictions,
-            'processed_predictions' => $processed_predictions,
-            'confidence_scores' => $this->calculate_confidence_scores($predictions),
-            'alternative_suggestions' => $this->generate_alternatives($predictions)
+        if ($h >= 0 && $h < 60) {
+            $r = $c; $g = $x; $b = 0;
+        } elseif ($h >= 60 && $h < 120) {
+            $r = $x; $g = $c; $b = 0;
+        } elseif ($h >= 120 && $h < 180) {
+            $r = 0; $g = $c; $b = $x;
+        } elseif ($h >= 180 && $h < 240) {
+            $r = 0; $g = $x; $b = $c;
+        } elseif ($h >= 240 && $h < 300) {
+            $r = $x; $g = 0; $b = $c;
+        } else {
+            $r = $c; $g = 0; $b = $x;
+        }
+
+        $r = round(($r + $m) * 255);
+        $g = round(($g + $m) * 255);
+        $b = round(($b + $m) * 255);
+
+        return sprintf('#%02X%02X%02X', $r, $g, $b);
+    }
+
+    private function detect_harmony_types($colors) {
+        $types = [];
+        $hues = array_map(function($color) {
+            return $this->rgb_to_hsv($this->hex_to_rgb($color))['h'];
+        }, $colors);
+
+        sort($hues);
+        $differences = [];
+        for ($i = 0; $i < count($hues) - 1; $i++) {
+            $differences[] = $hues[$i + 1] - $hues[$i];
+        }
+
+        if (count(array_unique($differences)) === 1) {
+            $types[] = 'equidistant';
+        }
+
+        if (count($colors) === 2 && abs($hues[1] - $hues[0]) === 180) {
+            $types[] = 'complementary';
+        }
+
+        if (empty($types)) {
+            $types[] = 'custom';
+        }
+
+        return $types;
+    }
+
+    private function calculate_harmony_score($colors) {
+        $score = 0;
+        $total_comparisons = 0;
+
+        for ($i = 0; $i < count($colors); $i++) {
+            for ($j = $i + 1; $j < count($colors); $j++) {
+                $contrast = $this->calculate_contrast($colors[$i], $colors[$j]);
+                $score += min($contrast, 7) / 7;
+                $total_comparisons++;
+            }
+        }
+
+        return $total_comparisons > 0 ? round(($score / $total_comparisons) * 100) : 0;
+    }
+
+    private function generate_color_name($properties) {
+        $base_names = [
+            [0, 30] => 'Red',
+            [30, 60] => 'Orange',
+            [60, 120] => 'Yellow',
+            [120, 180] => 'Green',
+            [180, 240] => 'Blue',
+            [240, 300] => 'Purple',
+            [300, 360] => 'Pink'
         ];
+
+        foreach ($base_names as $range => $name) {
+            if ($properties['hue'] >= $range[0] && $properties['hue'] < $range[1]) {
+                if ($properties['saturation'] < 10) {
+                    return 'Gray';
+                }
+                if ($properties['lightness'] > 90) {
+                    return 'Light ' . $name;
+                }
+                if ($properties['lightness'] < 20) {
+                    return 'Dark ' . $name;
+                }
+                return $name;
+            }
+        }
+
+        return 'Custom';
     }
 }
