@@ -1,1 +1,8 @@
-<?php / Silence is golden
+<?php
+/**
+ * Business logic components
+ *
+ * @package GLColorPalette
+ */
+
+// Silence is golden

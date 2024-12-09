@@ -59,25 +59,119 @@ class Test_Theme_Json_Generator extends WP_UnitTestCase {
     }
 
     public function test_generate_style_variations() {
-        $base_colors = ['#0066cc', '#33cc33', '#ff6600', '#9933cc'];
+        $base_colors = [
+            '#FF0000', // Red
+            '#00FF00', // Green
+            '#0000FF', // Blue
+            '#800080'  // Purple
+        ];
+        
         $variations = $this->generator->generate_style_variations($base_colors);
 
-        $this->assertIsArray($variations);
-        $this->assertNotEmpty($variations);
+        // Should have 24 variations (4! permutations)
+        $this->assertCount(24, $variations);
 
-        // Test first variation
+        // Test first variation structure
         $first_variation = reset($variations);
         $this->assertArrayHasKey('title', $first_variation);
         $this->assertArrayHasKey('settings', $first_variation);
         $this->assertArrayHasKey('color', $first_variation['settings']);
         $this->assertArrayHasKey('palette', $first_variation['settings']['color']);
+        $this->assertArrayHasKey('gradients', $first_variation['settings']['color']);
 
-        // Check that each color has its variations
+        // Test palette structure
         $palette = $first_variation['settings']['color']['palette'];
-        $primary_colors = array_filter($palette, function($color) {
-            return strpos($color['name'], 'Primary') === 0;
+        
+        // Should have 19 colors: 4 roles * 4 variations + base + white + black + transparent
+        $this->assertCount(23, $palette);
+
+        // Check for color variations
+        $primary_variations = array_filter($palette, function($color) {
+            return str_contains($color['name'], 'Primary');
         });
-        $this->assertCount(5, $primary_colors); // Primary + 4 variations
+        $this->assertCount(5, $primary_variations); // lighter, light, base, dark, darker
+
+        // Check for standard colors
+        $standard_colors = ['White', 'Black', 'Transparent'];
+        foreach ($standard_colors as $color) {
+            $found = false;
+            foreach ($palette as $item) {
+                if ($item['name'] === $color) {
+                    $found = true;
+                    break;
+                }
+            }
+            $this->assertTrue($found, "Standard color $color not found in palette");
+        }
+
+        // Test gradients
+        $gradients = $first_variation['settings']['color']['gradients'];
+        $this->assertNotEmpty($gradients);
+        
+        // Test first gradient structure
+        $first_gradient = reset($gradients);
+        $this->assertArrayHasKey('name', $first_gradient);
+        $this->assertArrayHasKey('slug', $first_gradient);
+        $this->assertArrayHasKey('gradient', $first_gradient);
+        
+        // Should have linear and radial gradients
+        $has_linear = false;
+        $has_radial = false;
+        foreach ($gradients as $gradient) {
+            if (str_contains($gradient['gradient'], 'linear-gradient')) {
+                $has_linear = true;
+            }
+            if (str_contains($gradient['gradient'], 'radial-gradient')) {
+                $has_radial = true;
+            }
+        }
+        $this->assertTrue($has_linear, 'No linear gradients found');
+        $this->assertTrue($has_radial, 'No radial gradients found');
+    }
+
+    public function test_invalid_base_colors() {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->generator->generate_style_variations(['#FF0000', '#00FF00']); // Only 2 colors
+    }
+
+    public function test_color_variations() {
+        $reflection = new \ReflectionClass($this->generator);
+        $method = $reflection->getMethod('generate_color_variations');
+        $method->setAccessible(true);
+
+        $variations = $method->invoke($this->generator, '#FF0000');
+        
+        $this->assertCount(5, $variations);
+        $this->assertArrayHasKey('lighter', $variations);
+        $this->assertArrayHasKey('light', $variations);
+        $this->assertArrayHasKey('base', $variations);
+        $this->assertArrayHasKey('dark', $variations);
+        $this->assertArrayHasKey('darker', $variations);
+        
+        // Base color should be unchanged
+        $this->assertEquals('#FF0000', $variations['base']);
+        
+        // Variations should be different from base
+        $this->assertNotEquals($variations['base'], $variations['lighter']);
+        $this->assertNotEquals($variations['base'], $variations['light']);
+        $this->assertNotEquals($variations['base'], $variations['dark']);
+        $this->assertNotEquals($variations['base'], $variations['darker']);
+    }
+
+    public function test_variation_naming() {
+        $base_colors = [
+            '#FF0000', // Red
+            '#00FF00', // Green
+            '#0000FF', // Blue
+            '#800080'  // Purple
+        ];
+        
+        $variations = $this->generator->generate_style_variations($base_colors);
+        
+        // Check that variation names include color names
+        $first_variation = array_key_first($variations);
+        $this->assertMatchesRegularExpression('/Red|Green|Blue|Purple/', $first_variation);
+        $this->assertMatchesRegularExpression('/Primary|Secondary|Tertiary|Accent/', $first_variation);
     }
 
     public function test_save_style_variations() {

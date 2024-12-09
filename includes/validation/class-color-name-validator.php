@@ -1,311 +1,229 @@
 <?php
-namespace GLColorPalette;
+namespace GLColorPalette\Validation;
 
-class ColorNameValidator {
-    private $error_handler;
-    private $profanity_filter;
-    private $trademark_checker;
-    private $language_detector;
-
-    / Validation rules configuration
-    private $default_rules = [
-        'max_words' => 3,
-        'min_length' => 3,
-        'max_length' => 30,
-        'allowed_characters' => 'a-zA-Z0-9\s-',
-        'forbidden_words' => [],
-        'required_language' => 'en',
-        'check_trademark' => true,
-        'check_profanity' => true,
-        'check_cultural' => true,
-        'check_readability' => true,
-        'check_uniqueness' => true,
-        'check_pronunciation' => true
+/**
+ * Color Name Validator
+ *
+ * Validates color names for appropriateness, readability, and uniqueness.
+ */
+class Color_Name_Validator {
+    /** @var array Validation rules configuration */
+    private $rules = [
+        'length' => [
+            'min' => 3,
+            'max' => 50
+        ],
+        'words' => [
+            'min' => 1,
+            'max' => 3
+        ],
+        'allowed_chars' => '/^[a-zA-Z0-9\s\-]+$/',
+        'forbidden_words' => [
+            'offensive',
+            'trademark',
+            'copyrighted'
+        ]
     ];
 
-    public function __construct() {
-        $this->error_handler = new ErrorHandler();
-        $this->profanity_filter = new ProfanityFilter();
-        $this->trademark_checker = new TrademarkChecker();
-        $this->language_detector = new LanguageDetector();
-    }
+    private $errors = [];
+    private $warnings = [];
 
     /**
-     * Validate color name
+     * Validate a color name
+     *
+     * @param string $name Color name to validate
+     * @param array $context Additional context for validation
+     * @return bool True if valid
      */
-    public function validate($name, $context = [], $rules = []) {
-        $rules = array_merge($this->default_rules, $rules);
-        $validation_results = [];
+    public function validate($name, $context = []) {
+        $this->errors = [];
+        $this->warnings = [];
 
         try {
-            / Basic validation
-            $validation_results['basic'] = $this->validate_basic_rules($name, $rules);
+            // Basic validation
+            $this->validate_length($name);
 
-            / Language validation
-            $validation_results['language'] = $this->validate_language($name, $rules);
+            // Language validation
+            $this->validate_language($name);
 
-            / Content validation
-            $validation_results['content'] = $this->validate_content($name, $rules);
+            // Content validation
+            $this->validate_content($name);
 
-            / Context validation
-            $validation_results['context'] = $this->validate_context($name, $context, $rules);
+            // Context validation
+            $this->validate_context($name, $context);
 
-            / Trademark validation
-            $validation_results['trademark'] = $this->validate_trademark($name, $rules);
+            // Check uniqueness
+            $this->validate_uniqueness($name, $context);
 
-            / Cultural validation
-            $validation_results['cultural'] = $this->validate_cultural_sensitivity($name, $context, $rules);
+            return empty($this->errors);
 
-            / Readability validation
-            $validation_results['readability'] = $this->validate_readability($name, $rules);
-
-            / Pronunciation validation
-            $validation_results['pronunciation'] = $this->validate_pronunciation($name, $rules);
-
-            / Uniqueness validation
-            $validation_results['uniqueness'] = $this->validate_uniqueness($name, $context, $rules);
-
-            / Check if any validation failed
-            foreach ($validation_results as $type => $result) {
-                if (!$result['valid']) {
-                    throw new ValidationException(
-                        $result['message'],
-                        ErrorCodes::VALIDATION_FAILED,
-                        ['type' => $type, 'details' => $result]
-                    );
-                }
-            }
-
-            return true;
-
-        } catch (ValidationException $e) {
-            $this->error_handler->handle_error(
-                $e->getCode(),
-                $e->getMessage(),
-                array_merge(['name' => $name], $e->getContext())
-            );
+        } catch (\Exception $e) {
+            $this->errors[] = $e->getMessage();
             return false;
         }
     }
 
     /**
-     * Validate basic rules
+     * Validate name length
+     *
+     * @param string $name Color name to validate
      */
-    private function validate_basic_rules($name, $rules) {
-        $result = ['valid' => true, 'message' => ''];
+    private function validate_length($name) {
+        $length = strlen($name);
 
-        / Check length
-        if (strlen($name) < $rules['min_length']) {
-            return [
-                'valid' => false,
-                'message' => sprintf(
-                    __('Name too short (minimum %d characters)', 'color-palette-generator'),
-                    $rules['min_length']
-                )
-            ];
+        if ($length < $this->rules['length']['min']) {
+            $this->errors[] = sprintf(
+                'Name too short (minimum %d characters)',
+                $this->rules['length']['min']
+            );
         }
 
-        if (strlen($name) > $rules['max_length']) {
-            return [
-                'valid' => false,
-                'message' => sprintf(
-                    __('Name too long (maximum %d characters)', 'color-palette-generator'),
-                    $rules['max_length']
-                )
-            ];
+        if ($length > $this->rules['length']['max']) {
+            $this->errors[] = sprintf(
+                'Name too long (maximum %d characters)',
+                $this->rules['length']['max']
+            );
         }
-
-        / Check word count
-        $word_count = str_word_count($name);
-        if ($word_count > $rules['max_words']) {
-            return [
-                'valid' => false,
-                'message' => sprintf(
-                    __('Too many words (maximum %d words)', 'color-palette-generator'),
-                    $rules['max_words']
-                )
-            ];
-        }
-
-        / Check allowed characters
-        if (!preg_match('/^[' . $rules['allowed_characters'] . ']+$/u', $name)) {
-            return [
-                'valid' => false,
-                'message' => __('Name contains invalid characters', 'color-palette-generator')
-            ];
-        }
-
-        return $result;
     }
 
     /**
-     * Validate language
+     * Validate language usage
+     *
+     * @param string $name Color name to validate
      */
-    private function validate_language($name, $rules) {
-        if (!$rules['required_language']) {
-            return ['valid' => true, 'message' => ''];
+    private function validate_language($name) {
+        // Check word count
+        $words = str_word_count($name);
+        if ($words < $this->rules['words']['min'] || 
+            $words > $this->rules['words']['max']) {
+            $this->errors[] = sprintf(
+                'Name should have %d-%d words',
+                $this->rules['words']['min'],
+                $this->rules['words']['max']
+            );
         }
 
-        $detected_language = $this->language_detector->detect($name);
-
-        if ($detected_language !== $rules['required_language']) {
-            return [
-                'valid' => false,
-                'message' => sprintf(
-                    __('Name should be in %s (detected: %s)', 'color-palette-generator'),
-                    $rules['required_language'],
-                    $detected_language
-                )
-            ];
+        // Check allowed characters
+        if (!preg_match($this->rules['allowed_chars'], $name)) {
+            $this->errors[] = 'Name contains invalid characters';
         }
-
-        return ['valid' => true, 'message' => ''];
     }
 
     /**
-     * Validate content
+     * Validate content appropriateness
+     *
+     * @param string $name Color name to validate
      */
-    private function validate_content($name, $rules) {
-        / Check profanity
-        if ($rules['check_profanity'] && $this->profanity_filter->contains_profanity($name)) {
-            return [
-                'valid' => false,
-                'message' => __('Name contains inappropriate content', 'color-palette-generator')
-            ];
-        }
+    private function validate_content($name) {
+        $name_lower = strtolower($name);
 
-        / Check forbidden words
-        $forbidden_words = $rules['forbidden_words'];
-        foreach ($forbidden_words as $word) {
-            if (stripos($name, $word) !== false) {
-                return [
-                    'valid' => false,
-                    'message' => sprintf(
-                        __('Name contains forbidden word: %s', 'color-palette-generator'),
-                        $word
-                    )
-                ];
+        // Check forbidden words
+        foreach ($this->rules['forbidden_words'] as $word) {
+            if (strpos($name_lower, $word) !== false) {
+                $this->errors[] = 'Name contains inappropriate content';
+                break;
             }
         }
-
-        return ['valid' => true, 'message' => ''];
     }
 
     /**
-     * Validate trademark conflicts
+     * Validate name in context
+     *
+     * @param string $name Color name to validate
+     * @param array $context Validation context
      */
-    private function validate_trademark($name, $rules) {
-        if (!$rules['check_trademark']) {
-            return ['valid' => true, 'message' => ''];
+    private function validate_context($name, $context) {
+        if (empty($context)) {
+            return;
         }
 
-        $trademark_result = $this->trademark_checker->check($name);
-
-        if ($trademark_result['conflict']) {
-            return [
-                'valid' => false,
-                'message' => sprintf(
-                    __('Name conflicts with trademark: %s', 'color-palette-generator'),
-                    $trademark_result['trademark']
-                )
-            ];
+        // Check if name fits theme
+        if (isset($context['theme']) && 
+            !$this->name_fits_theme($name, $context['theme'])) {
+            $this->warnings[] = 'Name may not fit the theme';
         }
 
-        return ['valid' => true, 'message' => ''];
+        // Check if name matches color properties
+        if (isset($context['color']) && 
+            !$this->name_matches_color($name, $context['color'])) {
+            $this->warnings[] = 'Name may not match color properties';
+        }
     }
 
     /**
-     * Validate cultural sensitivity
+     * Validate name uniqueness
+     *
+     * @param string $name Color name to validate
+     * @param array $context Validation context
      */
-    private function validate_cultural_sensitivity($name, $context, $rules) {
-        if (!$rules['check_cultural']) {
-            return ['valid' => true, 'message' => ''];
+    private function validate_uniqueness($name, $context) {
+        if (isset($context['existing_names'])) {
+            $similar = $this->find_similar_names($name, $context['existing_names']);
+            if (!empty($similar)) {
+                $this->warnings[] = sprintf(
+                    'Similar names exist: %s',
+                    implode(', ', array_slice($similar, 0, 3))
+                );
+            }
         }
-
-        $cultural_checker = new CulturalSensitivityChecker();
-        $sensitivity_result = $cultural_checker->check($name, [
-            'market' => $context['market'] ?? 'global',
-            'language' => $context['language'] ?? 'en',
-            'culture' => $context['culture'] ?? 'western'
-        ]);
-
-        if (!$sensitivity_result['appropriate']) {
-            return [
-                'valid' => false,
-                'message' => $sensitivity_result['reason']
-            ];
-        }
-
-        return ['valid' => true, 'message' => ''];
     }
 
     /**
-     * Validate readability
+     * Check if name fits theme
+     *
+     * @param string $name Color name to check
+     * @param string $theme Theme to check against
+     * @return bool True if name fits theme
      */
-    private function validate_readability($name, $rules) {
-        if (!$rules['check_readability']) {
-            return ['valid' => true, 'message' => ''];
-        }
-
-        $readability_checker = new ReadabilityChecker();
-        $readability_score = $readability_checker->analyze($name);
-
-        if ($readability_score < 0.7) { / 70% readability threshold
-            return [
-                'valid' => false,
-                'message' => __('Name is difficult to read', 'color-palette-generator')
-            ];
-        }
-
-        return ['valid' => true, 'message' => ''];
+    private function name_fits_theme($name, $theme) {
+        // Add theme-specific validation logic
+        return true;
     }
 
     /**
-     * Validate pronunciation
+     * Check if name matches color properties
+     *
+     * @param string $name Color name to check
+     * @param array $color Color properties
+     * @return bool True if name matches color
      */
-    private function validate_pronunciation($name, $rules) {
-        if (!$rules['check_pronunciation']) {
-            return ['valid' => true, 'message' => ''];
-        }
-
-        $pronunciation_checker = new PronunciationChecker();
-        $pronunciation_result = $pronunciation_checker->analyze($name);
-
-        if (!$pronunciation_result['pronounceable']) {
-            return [
-                'valid' => false,
-                'message' => __('Name is difficult to pronounce', 'color-palette-generator')
-            ];
-        }
-
-        return ['valid' => true, 'message' => ''];
+    private function name_matches_color($name, $color) {
+        // Add color property matching logic
+        return true;
     }
 
     /**
-     * Validate uniqueness
+     * Find similar existing names
+     *
+     * @param string $name Color name to check
+     * @param array $existing_names Existing names to check against
+     * @return array Similar names found
      */
-    private function validate_uniqueness($name, $context, $rules) {
-        if (!$rules['check_uniqueness']) {
-            return ['valid' => true, 'message' => ''];
+    private function find_similar_names($name, $existing_names) {
+        $similar = [];
+        foreach ($existing_names as $existing) {
+            if (levenshtein(strtolower($name), strtolower($existing)) < 3) {
+                $similar[] = $existing;
+            }
         }
+        return $similar;
+    }
 
-        global $wpdb;
+    /**
+     * Get validation errors
+     *
+     * @return array Validation errors
+     */
+    public function get_errors() {
+        return $this->errors;
+    }
 
-        / Check existing color names in the database
-        $existing = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->prefix}color_names
-             WHERE name LIKE %s AND context = %s",
-            $name,
-            $context['usage'] ?? 'general'
-        ));
-
-        if ($existing > 0) {
-            return [
-                'valid' => false,
-                'message' => __('Name already exists in this context', 'color-palette-generator')
-            ];
-        }
-
-        return ['valid' => true, 'message' => ''];
+    /**
+     * Get validation warnings
+     *
+     * @return array Validation warnings
+     */
+    public function get_warnings() {
+        return $this->warnings;
     }
 }

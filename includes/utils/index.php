@@ -1,1 +1,8 @@
-<?php / Silence is golden
+<?php
+/**
+ * Utility functions and helpers
+ *
+ * @package GLColorPalette
+ */
+
+// Silence is golden

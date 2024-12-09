@@ -129,91 +129,508 @@ class ThemeJsonGenerator {
     }
 
     /**
-     * Generate variations for different color schemes
+     * Generate color variations that meet accessibility requirements
      *
-     * @param array $base_colors Array of base colors to generate variations from
-     * @return array Array of style variations
+     * @param string $base_color Base color in hex format
+     * @return array Array of color variations that meet contrast requirements
      */
-    public function generate_style_variations(array $base_colors): array {
+    private function generate_color_variations($base_color) {
+        // Convert hex to RGB
+        $hex = ltrim($base_color, '#');
+        list($r, $g, $b) = sscanf($hex, "%02x%02x%02x");
+
+        // Generate variations with increasing contrast until requirements are met
         $variations = [];
-        $color_names = ['Primary', 'Secondary', 'Tertiary', 'Accent'];
-        
-        // Generate all possible combinations of the base colors
-        $combinations = $this->generate_color_combinations($base_colors, count($color_names));
-        
-        foreach ($combinations as $index => $combo) {
-            $colors = [];
-            foreach ($combo as $i => $color) {
-                // Create variations for each color
-                $colors = array_merge($colors, [
-                    [
-                        'name' => $color_names[$i],
-                        'hex' => $color
-                    ],
-                    [
-                        'name' => $color_names[$i] . ' Lighter',
-                        'hex' => $this->color_processor->lighten($color, 40)
-                    ],
-                    [
-                        'name' => $color_names[$i] . ' Light',
-                        'hex' => $this->color_processor->lighten($color, 20)
-                    ],
-                    [
-                        'name' => $color_names[$i] . ' Dark',
-                        'hex' => $this->color_processor->darken($color, 20)
-                    ],
-                    [
-                        'name' => $color_names[$i] . ' Darker',
-                        'hex' => $this->color_processor->darken($color, 40)
-                    ]
-                ]);
+
+        // Try different brightness adjustments until we find ones that meet contrast requirements
+        for ($lighter = 40; $lighter <= 80; $lighter += 5) {
+            $lighter_color = $this->adjust_brightness([$r, $g, $b], $lighter);
+            if ($this->meets_contrast_requirements($lighter_color)) {
+                $variations['lighter'] = $lighter_color;
+                break;
             }
+        }
 
-            // Add black and white
-            $colors[] = ['name' => 'Black', 'hex' => '#000000'];
-            $colors[] = ['name' => 'White', 'hex' => '#FFFFFF'];
+        for ($light = 20; $light <= 60; $light += 5) {
+            $light_color = $this->adjust_brightness([$r, $g, $b], $light);
+            if ($this->meets_contrast_requirements($light_color)) {
+                $variations['light'] = $light_color;
+                break;
+            }
+        }
 
-            // Generate variation name based on first color of each role
-            $variation_name = implode('-', array_map(function($c) {
-                return str_replace(' ', '', $c['name']);
-            }, array_filter($colors, function($c) use ($color_names) {
-                return in_array($c['name'], $color_names);
-            })));
+        for ($dark = -20; $dark >= -60; $dark -= 5) {
+            $dark_color = $this->adjust_brightness([$r, $g, $b], $dark);
+            if ($this->meets_contrast_requirements($dark_color)) {
+                $variations['dark'] = $dark_color;
+                break;
+            }
+        }
 
-            $variations[$variation_name] = $this->generate_variation($colors, $variation_name);
+        for ($darker = -40; $darker >= -80; $darker -= 5) {
+            $darker_color = $this->adjust_brightness([$r, $g, $b], $darker);
+            if ($this->meets_contrast_requirements($darker_color)) {
+                $variations['darker'] = $darker_color;
+                break;
+            }
+        }
+
+        // Only include base color if it meets contrast requirements
+        if ($this->meets_contrast_requirements($base_color)) {
+            $variations['base'] = $base_color;
         }
 
         return $variations;
     }
 
     /**
-     * Generate all possible combinations of colors
+     * Check if a color meets WCAG contrast requirements against black or white
      *
-     * @param array $colors Array of colors to combine
-     * @param int $length Length of each combination
-     * @return array Array of color combinations
+     * @param string $color Color in hex format
+     * @return bool True if meets requirements
      */
-    private function generate_color_combinations(array $colors, int $length): array {
-        if ($length === 1) {
-            return array_map(function($color) {
-                return [$color];
-            }, $colors);
+    private function meets_contrast_requirements($color) {
+        $hex = ltrim($color, '#');
+        list($r, $g, $b) = sscanf($hex, "%02x%02x%02x");
+
+        // Calculate relative luminance
+        $r = $r / 255;
+        $g = $g / 255;
+        $b = $b / 255;
+
+        $r = $r <= 0.03928 ? $r / 12.92 : pow(($r + 0.055) / 1.055, 2.4);
+        $g = $g <= 0.03928 ? $g / 12.92 : pow(($g + 0.055) / 1.055, 2.4);
+        $b = $b <= 0.03928 ? $b / 12.92 : pow(($b + 0.055) / 1.055, 2.4);
+
+        $L = 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
+
+        // Calculate contrast with black (0) and white (1)
+        $contrast_black = ($L + 0.05) / (0 + 0.05);
+        $contrast_white = (1 + 0.05) / ($L + 0.05);
+
+        // WCAG 2.0 level AA requires contrast of at least 4.5:1 for normal text
+        return max($contrast_black, $contrast_white) >= 4.5;
+    }
+
+    /**
+     * Adjust brightness of RGB color
+     *
+     * @param array $rgb RGB color values
+     * @param int $percent Percentage to adjust (-100 to 100)
+     * @return string Hex color code
+     */
+    private function adjust_brightness($rgb, $percent) {
+        $rgb = array_map(function($color) use ($percent) {
+            return max(0, min(255, $color + ($color * ($percent / 100))));
+        }, $rgb);
+
+        return sprintf("#%02x%02x%02x", ...$rgb);
+    }
+
+    /**
+     * Creative color names from meodai/color-names (MIT License)
+     * A subset focused on web-friendly, evocative names
+     */
+    private $creative_colors = [
+        // Reds
+        '#FF0000' => 'Firecracker',
+        '#DC143C' => 'Dragon Heart',
+        '#B22222' => 'Autumn Maple',
+        '#CD5C5C' => 'Desert Rose',
+        '#FF4500' => 'Sunset Blaze',
+        
+        // Oranges
+        '#FFA500' => 'Harvest Moon',
+        '#FF8C00' => 'Amber Waves',
+        '#FF7F50' => 'Desert Dawn',
+        '#FFD700' => 'Golden Hour',
+        
+        // Yellows
+        '#FFD700' => 'Morning Light',
+        '#F0E68C' => 'Summer Wheat',
+        '#BDB76B' => 'Prairie Grass',
+        
+        // Greens
+        '#008000' => 'Forest Heart',
+        '#228B22' => 'Mountain Pine',
+        '#32CD32' => 'Spring Leaves',
+        '#90EE90' => 'Morning Dew',
+        '#98FB98' => 'Whisper Mint',
+        
+        // Blues
+        '#0000FF' => 'Ocean Deep',
+        '#1E90FF' => 'Sky Spirit',
+        '#87CEEB' => 'Cloud Dancer',
+        '#4169E1' => 'Twilight Blue',
+        
+        // Purples
+        '#800080' => 'Mystic Night',
+        '#8B008B' => 'Dream Weaver',
+        '#9932CC' => 'Evening Storm',
+        '#9400D3' => 'Midnight Bloom',
+        
+        // Browns
+        '#8B4513' => 'Earth Song',
+        '#A0522D' => 'Canyon Dust',
+        '#CD853F' => 'Desert Wind',
+        
+        // Grays
+        '#808080' => 'Mountain Mist',
+        '#A9A9A9' => 'Storm Cloud',
+        '#D3D3D3' => 'Morning Fog',
+        
+        // Special colors for specific contexts
+        '#FFB6C1' => 'Dawn Blossom',
+        '#98FF98' => 'Spring Whisper',
+        '#E6E6FA' => 'Mountain Air',
+        '#F0FFF0' => 'Morning Frost'
+    ];
+
+    /**
+     * Get artistic name for a color
+     * 
+     * @param string $hex_color Hex color code
+     * @return string Color name
+     */
+    private function get_artistic_name($hex_color) {
+        // First try exact match
+        if (isset($this->creative_colors[$hex_color])) {
+            return $this->creative_colors[$hex_color];
         }
 
-        $combinations = [];
-        for ($i = 0; $i < count($colors); $i++) {
-            $current = $colors[$i];
-            $remaining = array_slice($colors, 0);
-            unset($remaining[$i]);
-            $subCombinations = $this->generate_color_combinations($remaining, $length - 1);
+        // If no exact match, find closest color
+        $closest = null;
+        $closest_distance = PHP_FLOAT_MAX;
+        
+        list($r1, $g1, $b1) = sscanf(ltrim($hex_color, '#'), "%02x%02x%02x");
+        
+        foreach (array_keys($this->creative_colors) as $key) {
+            list($r2, $g2, $b2) = sscanf(ltrim($key, '#'), "%02x%02x%02x");
             
-            foreach ($subCombinations as $subCombo) {
-                array_unshift($subCombo, $current);
-                $combinations[] = $subCombo;
+            // Calculate color distance using CIEDE2000 formula
+            $distance = $this->calculate_color_distance(
+                [$r1, $g1, $b1],
+                [$r2, $g2, $b2]
+            );
+            
+            if ($distance < $closest_distance) {
+                $closest = $key;
+                $closest_distance = $distance;
+            }
+        }
+        
+        // Fallback to descriptive name if no good match found
+        if ($closest_distance > 50) {
+            return $this->get_descriptive_name([$r1, $g1, $b1]);
+        }
+        
+        return $this->creative_colors[$closest];
+    }
+
+    /**
+     * Get a descriptive name for a color based on its RGB values
+     * 
+     * @param array $rgb RGB color values
+     * @return string Descriptive name
+     */
+    private function get_descriptive_name($rgb) {
+        list($r, $g, $b) = $rgb;
+        
+        // Convert to HSL for better naming
+        $max = max($r, $g, $b) / 255;
+        $min = min($r, $g, $b) / 255;
+        $l = ($max + $min) / 2;
+        
+        if ($max == $min) {
+            $h = $s = 0;
+        } else {
+            $d = $max - $min;
+            $s = $l > 0.5 ? $d / (2 - $max - $min) : $d / ($max + $min);
+            
+            switch ($max) {
+                case $r / 255:
+                    $h = ($g / 255 - $b / 255) / $d + ($g < $b ? 6 : 0);
+                    break;
+                case $g / 255:
+                    $h = ($b / 255 - $r / 255) / $d + 2;
+                    break;
+                case $b / 255:
+                    $h = ($r / 255 - $g / 255) / $d + 4;
+                    break;
+            }
+            $h /= 6;
+        }
+        
+        // Generate descriptive name
+        $intensity = $l < 0.25 ? 'Deep ' : ($l > 0.75 ? 'Bright ' : '');
+        $saturation = $s < 0.25 ? 'Muted ' : ($s > 0.75 ? 'Vibrant ' : '');
+        
+        $hue = match(true) {
+            $h < 0.025 || $h >= 0.958 => 'Crimson',
+            $h < 0.042 => 'Sunset',
+            $h < 0.075 => 'Amber',
+            $h < 0.108 => 'Honey',
+            $h < 0.142 => 'Sunlight',
+            $h < 0.208 => 'Spring',
+            $h < 0.292 => 'Forest',
+            $h < 0.375 => 'Ocean',
+            $h < 0.458 => 'Sky',
+            $h < 0.542 => 'Azure',
+            $h < 0.625 => 'Twilight',
+            $h < 0.708 => 'Storm',
+            $h < 0.792 => 'Dusk',
+            $h < 0.875 => 'Evening',
+            $h < 0.958 => 'Dawn',
+            default => 'Crimson'
+        };
+        
+        return trim($intensity . $saturation . $hue);
+    }
+
+    /**
+     * Calculate color distance using a simplified CIEDE2000 formula
+     * 
+     * @param array $rgb1 First RGB color
+     * @param array $rgb2 Second RGB color
+     * @return float Distance between colors
+     */
+    private function calculate_color_distance($rgb1, $rgb2) {
+        // Simple weighted Euclidean distance that approximates human perception
+        list($r1, $g1, $b1) = $rgb1;
+        list($r2, $g2, $b2) = $rgb2;
+        
+        $r_mean = ($r1 + $r2) / 2;
+        $r = $r1 - $r2;
+        $g = $g1 - $g2;
+        $b = $b1 - $b2;
+        
+        return sqrt(
+            (2 + $r_mean / 256) * $r * $r +
+            4 * $g * $g +
+            (2 + (255 - $r_mean) / 256) * $b * $b
+        );
+    }
+
+    /**
+     * Generate style variations from base colors
+     * 
+     * @param array $base_colors Array of 4 hex color codes
+     * @return array Array of style variations
+     * 
+     * @todo Add support for different WordPress theme naming conventions:
+     *       - TwentyTwentyFour: primary/secondary/tertiary/accent with variations
+     *       - TwentyTwentyFive: accent-1 through accent-6, base/contrast system
+     * @todo Integrate with Codeium API to generate artistic color names
+     */
+    public function generate_style_variations($base_colors) {
+        if (count($base_colors) !== 4) {
+            throw new \InvalidArgumentException('Exactly 4 base colors must be provided');
+        }
+
+        // Get artistic names for all base colors at once
+        $artistic_names = [];
+        foreach ($base_colors as $hex) {
+            $artistic_names[$hex] = $this->get_artistic_name($hex);
+        }
+        $variations = [];
+        $roles = ['primary', 'secondary', 'tertiary', 'accent'];
+
+        // Generate all role combinations
+        $combinations = [];
+        for ($i = 0; $i < 4; $i++) {
+            for ($j = 0; $j < 4; $j++) {
+                if ($j !== $i) {
+                    for ($k = 0; $k < 4; $k++) {
+                        if ($k !== $i && $k !== $j) {
+                            $l = 6 - ($i + $j + $k); // Last remaining index
+                            $combinations[] = [$i, $j, $k, $l];
+                        }
+                    }
+                }
             }
         }
 
-        return $combinations;
+        // Create variations for each combination
+        foreach ($combinations as $combo) {
+            $palette = [];
+            $variation_colors = [];
+
+            // Add base colors with variations
+            for ($i = 0; $i < 4; $i++) {
+                $color = $base_colors[$combo[$i]];
+                $role = $roles[$i];
+                $color_variations = $this->generate_color_variations($color);
+                
+                // Store base color for naming the variation
+                if ($role === 'primary' && isset($color_variations['base'])) {
+                    $primary_base = $color_variations['base'];
+                }
+                
+                foreach ($color_variations as $variant => $hex) {
+                    $palette[] = $this->generate_palette_entry($role, $variant, $hex);
+                }
+            }
+
+            // Add standard colors
+            $palette[] = [
+                'name' => 'White',
+                'slug' => 'white',
+                'color' => '#FFFFFF'
+            ];
+            $palette[] = [
+                'name' => 'Black',
+                'slug' => 'black',
+                'color' => '#000000'
+            ];
+            $palette[] = [
+                'name' => 'Transparent',
+                'slug' => 'transparent',
+                'color' => 'transparent'
+            ];
+
+            // Generate gradients
+            $gradients = $this->generate_gradients($palette);
+
+            // Create variation name based on primary color's artistic name
+            $primary_color = isset($primary_base) ? $primary_base : $base_colors[0];
+            $name = $artistic_names[$primary_color];
+
+            $variations[$name] = [
+                'title' => $name,
+                'settings' => [
+                    'color' => [
+                        'palette' => $palette,
+                        'gradients' => $gradients
+                    ]
+                ]
+            ];
+        }
+
+        return $variations;
+    }
+
+    /**
+     * Generate palette entry for a color variation
+     *
+     * @param string $role Color role (primary, secondary, etc.)
+     * @param string $variant Variation type (lighter, light, etc.)
+     * @param string $color Color in hex format
+     * @return array Palette entry
+     */
+    private function generate_palette_entry($role, $variant, $color) {
+        // Generate role-based name and slug
+        $role_name = ucfirst($role);
+        if ($variant !== 'base') {
+            $role_name .= ' ' . ucfirst($variant);
+        }
+
+        $slug = $role;
+        if ($variant !== 'base') {
+            $slug .= '-' . $variant;
+        }
+
+        // Generate artistic name
+        $artistic_name = $this->get_artistic_name($color);
+        if ($variant !== 'base') {
+            $artistic_name .= ' ' . ucfirst($variant);
+        }
+
+        return [
+            'name' => $role_name, // Display name shows the role
+            'artisticName' => $artistic_name, // Custom property for artistic name
+            'slug' => $slug,
+            'color' => $color
+        ];
+    }
+
+    /**
+     * Generate gradient combinations from palette colors
+     *
+     * @param array $palette Color palette
+     * @return array Array of gradient definitions
+     */
+    private function generate_gradients($palette) {
+        $gradients = [];
+        $base_colors = array_filter($palette, function($color) {
+            return !str_contains($color['name'], 'lighter') &&
+                   !str_contains($color['name'], 'light') &&
+                   !str_contains($color['name'], 'dark') &&
+                   !str_contains($color['name'], 'darker');
+        });
+
+        // Linear gradients
+        foreach ($base_colors as $color1) {
+            foreach ($base_colors as $color2) {
+                if ($color1['slug'] !== $color2['slug']) {
+                    $gradients[] = [
+                        'name' => "{$color1['name']} to {$color2['name']}",
+                        'slug' => "{$color1['slug']}-to-{$color2['slug']}",
+                        'gradient' => "linear-gradient(135deg, {$color1['color']} 0%, {$color2['color']} 100%)"
+                    ];
+                }
+            }
+        }
+
+        // Radial gradients for accent colors
+        $accent = array_filter($base_colors, function($color) {
+            return str_contains($color['name'], 'Accent');
+        });
+
+        foreach ($accent as $color) {
+            $gradients[] = [
+                'name' => "Radial {$color['name']}",
+                'slug' => "radial-{$color['slug']}",
+                'gradient' => "radial-gradient(circle, {$color['color']} 0%, transparent 100%)"
+            ];
+        }
+
+        return $gradients;
+    }
+
+    /**
+     * Get all permutations of an array
+     *
+     * @param array $items Array to get permutations of
+     * @return array Array of all possible permutations
+     */
+    private function get_permutations($items) {
+        if (count($items) <= 1) {
+            return [$items];
+        }
+
+        $permutations = [];
+        $item = array_shift($items);
+
+        foreach ($this->get_permutations($items) as $permutation) {
+            for ($i = 0; $i <= count($permutation); $i++) {
+                $new = array_merge(
+                    array_slice($permutation, 0, $i),
+                    [$item],
+                    array_slice($permutation, $i)
+                );
+                $permutations[] = $new;
+            }
+        }
+
+        return $permutations;
+    }
+
+    /**
+     * Get a human-readable name for a color
+     *
+     * @param string $hex_color Hex color code
+     * @return string Color name
+     */
+    private function get_color_name($hex_color) {
+        $colors = [
+            '#FF0000' => 'Red',
+            '#00FF00' => 'Green',
+            '#0000FF' => 'Blue',
+            '#800080' => 'Purple',
+            // Add more mappings as needed
+        ];
+
+        return $colors[$hex_color] ?? 'Custom';
     }
 
     /**
@@ -225,7 +642,7 @@ class ThemeJsonGenerator {
      */
     public function save_style_variations(array $variations, string $theme_dir): bool {
         $styles_dir = trailingslashit($theme_dir) . 'styles';
-        
+
         // Create styles directory if it doesn't exist
         if (!file_exists($styles_dir)) {
             if (!mkdir($styles_dir, 0755, true)) {

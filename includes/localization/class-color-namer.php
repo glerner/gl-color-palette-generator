@@ -1,14 +1,25 @@
 <?php
 namespace GLColorPalette;
 
+/**
+ * Color Namer Class
+ *
+ * Handles color naming using various services including local database,
+ * OpenAI API, and color.pizza API.
+ */
 class ColorNamer {
     private $settings;
     private $cache;
     private $error_handler;
     private $local_database;
     private $openai_client;
+    private $color_pizza_client;
 
-    / Basic color name mapping for local processing
+    /**
+     * Basic color name mapping for local processing
+     *
+     * @var array
+     */
     private $basic_colors = [
         'red' => ['#FF0000', '#FF4444', '#CC0000'],
         'blue' => ['#0000FF', '#4444FF', '#0000CC'],
@@ -23,6 +34,11 @@ class ColorNamer {
         'white' => ['#FFFFFF', '#FAFAFA', '#F5F5F5']
     ];
 
+    /**
+     * Constructor
+     *
+     * @param SettingsManager|null $settings Settings manager instance
+     */
     public function __construct($settings = null) {
         $this->settings = $settings ?? new SettingsManager();
         $this->cache = new ColorCache();
@@ -33,28 +49,35 @@ class ColorNamer {
             $this->openai_client = new OpenAIClient(
                 $this->settings->get_setting('api_key')
             );
+        } elseif ($this->settings->get_setting('naming_service') === 'color_pizza') {
+            $this->color_pizza_client = new \GLColorPalette\Providers\Color_Pizza_Provider();
         }
     }
 
     /**
      * Get color name based on hex value
+     *
+     * @param string $hex Hex color code
+     * @param string $context Context for color naming
+     * @return string Color name
      */
     public function get_color_name($hex, $context = 'general') {
         try {
-            / Check cache first
+            // Check cache first
             $cached_name = $this->cache->get_color_name($hex, $context);
             if ($cached_name) {
                 return $cached_name;
             }
 
-            / Get name based on selected service
+            // Get name based on selected service
             $name = match($this->settings->get_setting('naming_service')) {
                 'openai' => $this->get_ai_color_name($hex, $context),
+                'color_pizza' => $this->get_color_pizza_name($hex, $context),
                 'custom' => $this->get_custom_api_color_name($hex, $context),
                 default => $this->get_local_color_name($hex, $context)
             };
 
-            / Cache the result
+            // Cache the result
             $this->cache->set_color_name($hex, $name, $context);
 
             return $name;
@@ -66,13 +89,17 @@ class ColorNamer {
                 ['hex' => $hex, 'context' => $context]
             );
 
-            / Fallback to basic color naming
+            // Fallback to basic color naming
             return $this->get_basic_color_name($hex);
         }
     }
 
     /**
      * Get color name using OpenAI API
+     *
+     * @param string $hex Hex color code
+     * @param string $context Context for color naming
+     * @return string Color name
      */
     private function get_ai_color_name($hex, $context) {
         try {
@@ -90,119 +117,126 @@ class ColorNamer {
 
     /**
      * Generate prompt for AI color naming
+     *
+     * @param string $hex Hex color code
+     * @param string $context Context for color naming
+     * @return string Prompt for AI color naming
      */
     private function generate_color_prompt($hex, $context) {
         $rgb = $this->hex_to_rgb($hex);
         $hsl = $this->rgb_to_hsl($rgb);
 
         return sprintf(
-            "Generate a creative and memorable name for a color with these properties:\n" .
-            "HEX: %s\n" .
-            "RGB: %d, %d, %d\n" .
-            "HSL: %d°, %d%%, %d%%\n" .
-            "Context: %s\n" .
-            "Requirements:\n" .
-            "- Name should be 1-3 words\n" .
-            "- Should be evocative and descriptive\n" .
-            "- Appropriate for the context\n" .
-            "- Easy to remember and pronounce",
+            "Generate a creative name for a color with these properties:\n" .
+            "Hex: %s\n" .
+            "RGB: r=%d, g=%d, b=%d\n" .
+            "HSL: h=%.1f, s=%.1f%%, l=%.1f%%\n" .
+            "Context: %s\n\n" .
+            "The name should be evocative and suitable for web design, " .
+            "avoiding references to specific artists or trademarks.",
             $hex,
             $rgb['r'], $rgb['g'], $rgb['b'],
-            $hsl['h'], $hsl['s'], $hsl['l'],
+            $hsl['h'], $hsl['s'] * 100, $hsl['l'] * 100,
             $context
         );
     }
 
     /**
      * Get color name from local database
+     *
+     * @param string $hex Hex color code
+     * @param string $context Context for color naming
+     * @return string Color name
      */
     private function get_local_color_name($hex, $context) {
         $rgb = $this->hex_to_rgb($hex);
-        $closest_color = null;
         $min_distance = PHP_FLOAT_MAX;
+        $closest_name = null;
 
-        foreach ($this->local_database as $name => $data) {
+        foreach ($this->local_database as $name => $color) {
             $distance = $this->calculate_color_distance(
                 $rgb,
-                $this->hex_to_rgb($data['hex'])
+                $this->hex_to_rgb($color)
             );
 
             if ($distance < $min_distance) {
                 $min_distance = $distance;
-                $closest_color = $name;
+                $closest_name = $name;
             }
         }
 
-        / If distance is too large, fall back to basic naming
+        // If distance is too large, fall back to basic naming
         if ($min_distance > 50) {
             return $this->get_basic_color_name($hex);
         }
 
-        return $closest_color;
+        return $closest_name;
     }
 
     /**
      * Get basic color name
+     *
+     * @param string $hex Hex color code
+     * @return string Color name
      */
     private function get_basic_color_name($hex) {
         $rgb = $this->hex_to_rgb($hex);
-        $closest_basic = null;
         $min_distance = PHP_FLOAT_MAX;
+        $closest_name = 'gray';
 
         foreach ($this->basic_colors as $name => $variations) {
-            foreach ($variations as $variation) {
+            foreach ($variations as $color) {
                 $distance = $this->calculate_color_distance(
                     $rgb,
-                    $this->hex_to_rgb($variation)
+                    $this->hex_to_rgb($color)
                 );
 
                 if ($distance < $min_distance) {
                     $min_distance = $distance;
-                    $closest_basic = $name;
+                    $closest_name = $name;
                 }
             }
         }
 
-        return $closest_basic;
+        return $closest_name;
     }
 
     /**
-     * Calculate color distance (using CIEDE2000)
+     * Calculate color distance using weighted Euclidean distance
+     *
+     * This is a simpler alternative to CIEDE2000 that still accounts for human
+     * color perception by weighting RGB components based on how humans perceive them.
+     *
+     * @param array $rgb1 RGB color values
+     * @param array $rgb2 RGB color values
+     * @return float Color distance
      */
     private function calculate_color_distance($rgb1, $rgb2) {
-        / Convert to Lab color space for more accurate comparison
-        $lab1 = $this->rgb_to_lab($rgb1);
-        $lab2 = $this->rgb_to_lab($rgb2);
-
-        / Calculate CIEDE2000 color difference
-        return $this->calculate_ciede2000($lab1, $lab2);
+        // Convert associative arrays to numeric arrays
+        $r1 = $rgb1['r']; $g1 = $rgb1['g']; $b1 = $rgb1['b'];
+        $r2 = $rgb2['r']; $g2 = $rgb2['g']; $b2 = $rgb2['b'];
+        
+        // Calculate weighted Euclidean distance
+        $r_mean = ($r1 + $r2) / 2;
+        $r = $r1 - $r2;
+        $g = $g1 - $g2;
+        $b = $b1 - $b2;
+        
+        return sqrt(
+            (2 + $r_mean / 256) * $r * $r +
+            4 * $g * $g +
+            (2 + (255 - $r_mean) / 256) * $b * $b
+        );
     }
 
     /**
-     * Load local color database
-     */
-    private function load_local_database() {
-        $json_file = plugin_dir_path(__FILE__) . 'data/color-names.json';
-
-        if (!file_exists($json_file)) {
-            throw new Exception("Color database not found");
-        }
-
-        $data = json_decode(file_get_contents($json_file), true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception("Invalid color database format");
-        }
-
-        return $data;
-    }
-
-    /**
-     * Color space conversion utilities
+     * Convert hex color to RGB values
+     *
+     * @param string $hex Hex color code
+     * @return array RGB values
      */
     private function hex_to_rgb($hex) {
         $hex = ltrim($hex, '#');
-
         return [
             'r' => hexdec(substr($hex, 0, 2)),
             'g' => hexdec(substr($hex, 2, 2)),
@@ -210,6 +244,12 @@ class ColorNamer {
         ];
     }
 
+    /**
+     * Convert RGB to HSL color space
+     *
+     * @param array $rgb RGB color values
+     * @return array HSL color values
+     */
     private function rgb_to_hsl($rgb) {
         $r = $rgb['r'] / 255;
         $g = $rgb['g'] / 255;
@@ -217,50 +257,72 @@ class ColorNamer {
 
         $max = max($r, $g, $b);
         $min = min($r, $g, $b);
-        $h = $s = $l = ($max + $min) / 2;
+        $l = ($max + $min) / 2;
 
-        if ($max == $min) {
+        if ($max === $min) {
             $h = $s = 0;
         } else {
             $d = $max - $min;
             $s = $l > 0.5 ? $d / (2 - $max - $min) : $d / ($max + $min);
 
-            switch($max) {
-                case $r:
-                    $h = ($g - $b) / $d + ($g < $b ? 6 : 0);
-                    break;
-                case $g:
-                    $h = ($b - $r) / $d + 2;
-                    break;
-                case $b:
-                    $h = ($r - $g) / $d + 4;
-                    break;
-            }
+            $h = match($max) {
+                $r => ($g - $b) / $d + ($g < $b ? 6 : 0),
+                $g => ($b - $r) / $d + 2,
+                $b => ($r - $g) / $d + 4
+            };
 
-            $h /= 6;
+            $h = $h / 6;
         }
 
         return [
-            'h' => round($h * 360),
-            's' => round($s * 100),
-            'l' => round($l * 100)
+            'h' => $h * 360,
+            's' => $s,
+            'l' => $l
         ];
     }
 
-    private function rgb_to_lab($rgb) {
-        / RGB to XYZ
-        $xyz = $this->rgb_to_xyz($rgb);
+    /**
+     * Get color name using color.pizza API
+     *
+     * @param string $hex Hex color code
+     * @param string $context Context for color naming
+     * @return string Color name
+     */
+    private function get_color_pizza_name($hex, $context) {
+        try {
+            $hex_without_hash = ltrim($hex, '#');
+            $name = $this->color_pizza_client->get_name($hex_without_hash);
 
-        / XYZ to Lab
-        return $this->xyz_to_lab($xyz);
+            if (!$name) {
+                throw new \Exception("No name found for color {$hex}");
+            }
+
+            return $name;
+
+        } catch (\Exception $e) {
+            throw new \Exception(
+                "Color.pizza naming service failed: " . $e->getMessage()
+            );
+        }
     }
 
-    private function calculate_ciede2000($lab1, $lab2) {
-        / Implementation of CIEDE2000 color difference formula
-        / This is a complex calculation that provides very accurate
-        / color difference measurements
-        / ... (implementation details omitted for brevity)
+    /**
+     * Load local color database
+     *
+     * @return array Local color database
+     */
+    private function load_local_database() {
+        $json_file = plugin_dir_path(__FILE__) . 'data/color-names.json';
+        if (!file_exists($json_file)) {
+            return [];
+        }
 
-        return $delta_e;
+        $json = file_get_contents($json_file);
+        if ($json === false) {
+            return [];
+        }
+
+        $data = json_decode($json, true);
+        return is_array($data) ? $data : [];
     }
 }

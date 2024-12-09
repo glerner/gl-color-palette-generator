@@ -1,341 +1,362 @@
 <?php
-namespace GLColorPalette;
+namespace GLColorPalette\Validation;
 
-class PaletteValidator {
-    private $color_analyzer;
-    private $accessibility_checker;
-    private $settings;
-
-    / Validation rules
-    private const VALIDATION_RULES = [
-        'contrast' => [
-            'min_ratio' => 4.5,
-            'preferred_ratio' => 7.0,
-            'large_text_ratio' => 3.0
-        ],
-        'distinction' => [
-            'min_difference' => 20,
-            'preferred_difference' => 40
-        ],
-        'harmony' => [
-            'max_hue_variance' => 120,
-            'saturation_range' => 30,
-            'lightness_range' => 40
-        ],
-        'colorblind' => [
-            'min_distinction' => 15,
-            'safe_types' => ['protanopia', 'deuteranopia', 'tritanopia']
-        ],
-        'web_safe' => [
-            'validate' => true,
-            'fallback_generation' => true
-        ]
+/**
+ * Palette Validator
+ *
+ * Validates color palettes for harmony, contrast, and accessibility.
+ */
+class Palette_Validator {
+    /** @var array Validation rules and thresholds */
+    private $rules = [
+        'min_colors' => 2,
+        'max_colors' => 10,
+        'min_contrast' => 4.5,
+        'min_distinction' => 20,
+        'min_hue_variance' => 30,
+        'min_saturation_range' => 20,
+        'min_lightness_range' => 30
     ];
 
-    public function __construct() {
-        $this->color_analyzer = new ColorAnalyzer();
-        $this->accessibility_checker = new AccessibilityChecker();
-        $this->settings = new SettingsManager();
+    private $errors = [];
+    private $warnings = [];
+    private $suggestions = [];
+
+    /**
+     * Validate a color palette
+     *
+     * @param array $colors Array of hex color codes
+     * @param array $context Additional context for validation
+     * @return bool True if valid
+     */
+    public function validate($colors, $context = []) {
+        $this->errors = [];
+        $this->warnings = [];
+        $this->suggestions = [];
+
+        try {
+            // Check basic requirements
+            if (!$this->validate_basic_requirements($colors)) {
+                return false;
+            }
+
+            // Check color relationships
+            $this->validate_relationships($colors);
+
+            // Check accessibility
+            $this->validate_accessibility($colors, $context);
+
+            // Generate suggestions if needed
+            if (!empty($this->warnings)) {
+                $this->generate_suggestions($colors);
+            }
+
+            return empty($this->errors);
+
+        } catch (\Exception $e) {
+            $this->errors[] = $e->getMessage();
+            return false;
+        }
     }
 
     /**
-     * Validate entire palette
+     * Validate basic palette requirements
+     *
+     * @param array $colors Colors to validate
+     * @return bool True if valid
      */
-    public function validate_palette($palette, $context = []) {
-        $validation_results = [
-            'is_valid' => true,
-            'contrast' => $this->validate_contrast($palette, $context),
-            'distinction' => $this->validate_distinction($palette),
-            'harmony' => $this->validate_harmony($palette),
-            'accessibility' => $this->validate_accessibility($palette, $context),
-            'colorblind_safe' => $this->validate_colorblind_safety($palette),
-            'web_safe' => $this->validate_web_safety($palette),
-            'brand_compliance' => $this->validate_brand_compliance($palette, $context),
-            'technical' => $this->validate_technical_requirements($palette, $context),
-            'warnings' => [],
-            'suggestions' => []
-        ];
-
-        / Check if any major validation failed
-        foreach ($validation_results as $key => $result) {
-            if (is_array($result) && isset($result['is_valid']) && !$result['is_valid']) {
-                $validation_results['is_valid'] = false;
-                break;
-            }
-        }
-
-        / Generate improvement suggestions
-        if (!$validation_results['is_valid']) {
-            $validation_results['suggestions'] = $this->generate_improvement_suggestions(
-                $validation_results,
-                $palette,
-                $context
+    private function validate_basic_requirements($colors) {
+        // Check count
+        $count = count($colors);
+        if ($count < $this->rules['min_colors']) {
+            $this->errors[] = sprintf(
+                'Not enough colors (minimum %d)',
+                $this->rules['min_colors']
             );
+            return false;
         }
 
-        return $validation_results;
-    }
+        if ($count > $this->rules['max_colors']) {
+            $this->errors[] = sprintf(
+                'Too many colors (maximum %d)',
+                $this->rules['max_colors']
+            );
+            return false;
+        }
 
-    /**
-     * Validate contrast ratios
-     */
-    private function validate_contrast($palette, $context) {
-        $results = [
-            'is_valid' => true,
-            'issues' => [],
-            'measurements' => []
-        ];
-
-        $background = $context['background'] ?? '#FFFFFF';
-
-        foreach ($palette as $key => $color) {
-            if (is_string($color)) {  / Skip if not a color hex
-                $contrast_ratio = $this->accessibility_checker->calculate_contrast_ratio(
-                    $color,
-                    $background
+        // Validate hex codes
+        foreach ($colors as $color) {
+            if (!preg_match('/^#[0-9A-F]{6}$/i', $color)) {
+                $this->errors[] = sprintf(
+                    'Invalid hex code: %s',
+                    $color
                 );
-
-                $results['measurements'][$key] = [
-                    'ratio' => $contrast_ratio,
-                    'meets_aa' => $contrast_ratio >= self::VALIDATION_RULES['contrast']['min_ratio'],
-                    'meets_aaa' => $contrast_ratio >= self::VALIDATION_RULES['contrast']['preferred_ratio']
-                ];
-
-                if ($contrast_ratio < self::VALIDATION_RULES['contrast']['min_ratio']) {
-                    $results['is_valid'] = false;
-                    $results['issues'][] = [
-                        'color' => $key,
-                        'ratio' => $contrast_ratio,
-                        'required' => self::VALIDATION_RULES['contrast']['min_ratio']
-                    ];
-                }
+                return false;
             }
         }
 
-        return $results;
+        return true;
     }
 
     /**
-     * Validate color distinction
+     * Validate color relationships
+     *
+     * @param array $colors Colors to validate
      */
-    private function validate_distinction($palette) {
-        $results = [
-            'is_valid' => true,
-            'issues' => [],
-            'measurements' => []
-        ];
+    private function validate_relationships($colors) {
+        $hsv_colors = array_map([$this, 'hex_to_hsv'], $colors);
 
-        $colors = array_filter($palette, 'is_string');  / Get only color values
+        // Check hue variance
+        $hues = array_column($hsv_colors, 'h');
+        $hue_variance = $this->calculate_variance($hues);
+        if ($hue_variance < $this->rules['min_hue_variance']) {
+            $this->warnings[] = 'Low hue variance';
+        }
 
-        foreach ($colors as $key1 => $color1) {
-            foreach ($colors as $key2 => $color2) {
-                if ($key1 !== $key2) {
-                    $difference = $this->color_analyzer->calculate_color_difference(
+        // Check saturation range
+        $saturations = array_column($hsv_colors, 's');
+        $saturation_range = max($saturations) - min($saturations);
+        if ($saturation_range < $this->rules['min_saturation_range']) {
+            $this->warnings[] = 'Limited saturation range';
+        }
+
+        // Check lightness range
+        $values = array_column($hsv_colors, 'v');
+        $value_range = max($values) - min($values);
+        if ($value_range < $this->rules['min_lightness_range']) {
+            $this->warnings[] = 'Limited lightness range';
+        }
+
+        // Check distinctions between colors
+        for ($i = 0; $i < count($colors); $i++) {
+            for ($j = $i + 1; $j < count($colors); $j++) {
+                $distinction = $this->calculate_color_distinction(
+                    $hsv_colors[$i],
+                    $hsv_colors[$j]
+                );
+                if ($distinction < $this->rules['min_distinction']) {
+                    $this->warnings[] = sprintf(
+                        'Similar colors: %s and %s',
+                        $colors[$i],
+                        $colors[$j]
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * Validate accessibility requirements
+     *
+     * @param array $colors Colors to validate
+     * @param array $context Validation context
+     */
+    private function validate_accessibility($colors, $context) {
+        if (!isset($context['accessibility_level'])) {
+            return;
+        }
+
+        $level = $context['accessibility_level'];
+        foreach ($colors as $i => $color1) {
+            foreach ($colors as $j => $color2) {
+                if ($i === $j) continue;
+
+                $contrast = $this->calculate_contrast_ratio($color1, $color2);
+                if ($contrast < $this->rules['min_contrast']) {
+                    $this->warnings[] = sprintf(
+                        'Low contrast between %s and %s (%.1f:1)',
                         $color1,
-                        $color2
-                    );
-
-                    $results['measurements']["{$key1}_vs_{$key2}"] = $difference;
-
-                    if ($difference < self::VALIDATION_RULES['distinction']['min_difference']) {
-                        $results['is_valid'] = false;
-                        $results['issues'][] = [
-                            'color1' => $key1,
-                            'color2' => $key2,
-                            'difference' => $difference,
-                            'required' => self::VALIDATION_RULES['distinction']['min_difference']
-                        ];
-                    }
-                }
-            }
-        }
-
-        return $results;
-    }
-
-    /**
-     * Validate color harmony
-     */
-    private function validate_harmony($palette) {
-        $results = [
-            'is_valid' => true,
-            'issues' => [],
-            'measurements' => []
-        ];
-
-        $colors = array_filter($palette, 'is_string');
-        $base_hsl = $this->color_analyzer->hex_to_hsl($colors['primary']);
-
-        foreach ($colors as $key => $color) {
-            $hsl = $this->color_analyzer->hex_to_hsl($color);
-
-            / Check hue variance
-            $hue_diff = abs($hsl[0] - $base_hsl[0]);
-            $hue_diff = min($hue_diff, 360 - $hue_diff);
-
-            / Check saturation range
-            $sat_diff = abs($hsl[1] - $base_hsl[1]);
-
-            / Check lightness range
-            $light_diff = abs($hsl[2] - $base_hsl[2]);
-
-            $results['measurements'][$key] = [
-                'hue_variance' => $hue_diff,
-                'saturation_diff' => $sat_diff,
-                'lightness_diff' => $light_diff
-            ];
-
-            if ($hue_diff > self::VALIDATION_RULES['harmony']['max_hue_variance'] ||
-                $sat_diff > self::VALIDATION_RULES['harmony']['saturation_range'] ||
-                $light_diff > self::VALIDATION_RULES['harmony']['lightness_range']) {
-
-                $results['is_valid'] = false;
-                $results['issues'][] = [
-                    'color' => $key,
-                    'measurements' => $results['measurements'][$key]
-                ];
-            }
-        }
-
-        return $results;
-    }
-
-    /**
-     * Validate colorblind safety
-     */
-    private function validate_colorblind_safety($palette) {
-        $results = [
-            'is_valid' => true,
-            'issues' => [],
-            'simulations' => []
-        ];
-
-        foreach (self::VALIDATION_RULES['colorblind']['safe_types'] as $type) {
-            $simulated_colors = [];
-
-            foreach ($palette as $key => $color) {
-                if (is_string($color)) {
-                    $simulated_colors[$key] = $this->color_analyzer->simulate_color_blindness(
-                        $color,
-                        $type
+                        $color2,
+                        $contrast
                     );
                 }
             }
-
-            $results['simulations'][$type] = $simulated_colors;
-
-            / Check distinctions between simulated colors
-            foreach ($simulated_colors as $key1 => $color1) {
-                foreach ($simulated_colors as $key2 => $color2) {
-                    if ($key1 !== $key2) {
-                        $difference = $this->color_analyzer->calculate_color_difference(
-                            $color1,
-                            $color2
-                        );
-
-                        if ($difference < self::VALIDATION_RULES['colorblind']['min_distinction']) {
-                            $results['is_valid'] = false;
-                            $results['issues'][] = [
-                                'type' => $type,
-                                'color1' => $key1,
-                                'color2' => $key2,
-                                'difference' => $difference
-                            ];
-                        }
-                    }
-                }
-            }
         }
-
-        return $results;
     }
 
     /**
      * Generate improvement suggestions
+     *
+     * @param array $colors Colors to analyze
      */
-    private function generate_improvement_suggestions($validation_results, $palette, $context) {
-        $suggestions = [];
-
-        / Contrast improvements
-        if (!$validation_results['contrast']['is_valid']) {
-            $suggestions['contrast'] = $this->suggest_contrast_improvements(
-                $validation_results['contrast']['issues'],
-                $palette,
-                $context
-            );
+    private function generate_suggestions($colors) {
+        // Contrast improvements
+        if ($this->has_warning_type('contrast')) {
+            $this->suggestions[] = 'Consider increasing contrast by adjusting lightness values';
         }
 
-        / Distinction improvements
-        if (!$validation_results['distinction']['is_valid']) {
-            $suggestions['distinction'] = $this->suggest_distinction_improvements(
-                $validation_results['distinction']['issues'],
-                $palette
-            );
+        // Distinction improvements
+        if ($this->has_warning_type('similar')) {
+            $this->suggestions[] = 'Try varying hue or saturation to create more distinct colors';
         }
 
-        / Harmony improvements
-        if (!$validation_results['harmony']['is_valid']) {
-            $suggestions['harmony'] = $this->suggest_harmony_improvements(
-                $validation_results['harmony']['issues'],
-                $palette
-            );
+        // Harmony improvements
+        if ($this->has_warning_type('hue')) {
+            $this->suggestions[] = 'Consider using complementary or analogous color relationships';
         }
-
-        / Colorblind safety improvements
-        if (!$validation_results['colorblind_safe']['is_valid']) {
-            $suggestions['colorblind'] = $this->suggest_colorblind_improvements(
-                $validation_results['colorblind_safe']['issues'],
-                $palette
-            );
-        }
-
-        return $suggestions;
     }
 
     /**
-     * Suggest contrast improvements
+     * Convert hex color to HSV
+     *
+     * @param string $hex Hex color code
+     * @return array HSV values
      */
-    private function suggest_contrast_improvements($issues, $palette, $context) {
-        $suggestions = [];
+    private function hex_to_hsv($hex) {
+        // Convert hex to RGB
+        $hex = ltrim($hex, '#');
+        $r = hexdec(substr($hex, 0, 2)) / 255;
+        $g = hexdec(substr($hex, 2, 2)) / 255;
+        $b = hexdec(substr($hex, 4, 2)) / 255;
 
-        foreach ($issues as $issue) {
-            $color = $palette[$issue['color']];
-            $background = $context['background'] ?? '#FFFFFF';
+        // Convert RGB to HSV
+        $max = max($r, $g, $b);
+        $min = min($r, $g, $b);
+        $delta = $max - $min;
 
-            $suggestions[] = [
-                'color' => $issue['color'],
-                'current_ratio' => $issue['ratio'],
-                'target_ratio' => $issue['required'],
-                'suggested_adjustments' => [
-                    'lighter' => $this->adjust_for_better_contrast($color, $background, 'lighter'),
-                    'darker' => $this->adjust_for_better_contrast($color, $background, 'darker'),
-                    'saturated' => $this->adjust_for_better_contrast($color, $background, 'saturated')
-                ]
-            ];
+        // Calculate hue
+        if ($delta == 0) {
+            $h = 0;
+        } elseif ($max == $r) {
+            $h = 60 * fmod((($g - $b) / $delta), 6);
+        } elseif ($max == $g) {
+            $h = 60 * ((($b - $r) / $delta) + 2);
+        } else {
+            $h = 60 * ((($r - $g) / $delta) + 4);
         }
 
-        return $suggestions;
+        if ($h < 0) {
+            $h += 360;
+        }
+
+        // Calculate saturation and value
+        $s = ($max == 0) ? 0 : ($delta / $max) * 100;
+        $v = $max * 100;
+
+        return [
+            'h' => $h,
+            's' => $s,
+            'v' => $v
+        ];
     }
 
     /**
-     * Utility method to adjust color for better contrast
+     * Calculate variance of an array of numbers
+     *
+     * @param array $numbers Numbers to analyze
+     * @return float Variance
      */
-    private function adjust_for_better_contrast($color, $background, $direction) {
-        $lab = $this->color_analyzer->hex_to_lab($color);
+    private function calculate_variance($numbers) {
+        $count = count($numbers);
+        if ($count < 2) return 0;
 
-        switch ($direction) {
-            case 'lighter':
-                $lab[0] = min(100, $lab[0] + 10);
-                break;
-            case 'darker':
-                $lab[0] = max(0, $lab[0] - 10);
-                break;
-            case 'saturated':
-                $lab[1] *= 1.2;
-                $lab[2] *= 1.2;
-                break;
+        $mean = array_sum($numbers) / $count;
+        $variance = 0;
+
+        foreach ($numbers as $number) {
+            $variance += pow($number - $mean, 2);
         }
 
-        return $this->color_analyzer->lab_to_hex($lab);
+        return sqrt($variance / ($count - 1));
+    }
+
+    /**
+     * Calculate distinction between two colors
+     *
+     * @param array $color1 First color in HSV
+     * @param array $color2 Second color in HSV
+     * @return float Color distinction value
+     */
+    private function calculate_color_distinction($color1, $color2) {
+        $hue_diff = min(
+            abs($color1['h'] - $color2['h']),
+            360 - abs($color1['h'] - $color2['h'])
+        );
+        $sat_diff = abs($color1['s'] - $color2['s']);
+        $val_diff = abs($color1['v'] - $color2['v']);
+
+        return sqrt(
+            pow($hue_diff / 360, 2) +
+            pow($sat_diff / 100, 2) +
+            pow($val_diff / 100, 2)
+        ) * 100;
+    }
+
+    /**
+     * Calculate contrast ratio between two colors
+     *
+     * @param string $color1 First color hex code
+     * @param string $color2 Second color hex code
+     * @return float Contrast ratio
+     */
+    private function calculate_contrast_ratio($color1, $color2) {
+        $l1 = $this->get_relative_luminance($color1);
+        $l2 = $this->get_relative_luminance($color2);
+
+        $lighter = max($l1, $l2);
+        $darker = min($l1, $l2);
+
+        return ($lighter + 0.05) / ($darker + 0.05);
+    }
+
+    /**
+     * Get relative luminance of a color
+     *
+     * @param string $hex Color hex code
+     * @return float Relative luminance
+     */
+    private function get_relative_luminance($hex) {
+        $hex = ltrim($hex, '#');
+        $r = hexdec(substr($hex, 0, 2)) / 255;
+        $g = hexdec(substr($hex, 2, 2)) / 255;
+        $b = hexdec(substr($hex, 4, 2)) / 255;
+
+        $r = ($r <= 0.03928) ? $r / 12.92 : pow(($r + 0.055) / 1.055, 2.4);
+        $g = ($g <= 0.03928) ? $g / 12.92 : pow(($g + 0.055) / 1.055, 2.4);
+        $b = ($b <= 0.03928) ? $b / 12.92 : pow(($b + 0.055) / 1.055, 2.4);
+
+        return 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
+    }
+
+    /**
+     * Check if warnings contain a specific type
+     *
+     * @param string $type Warning type to check for
+     * @return bool True if warning type exists
+     */
+    private function has_warning_type($type) {
+        foreach ($this->warnings as $warning) {
+            if (stripos($warning, $type) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get validation errors
+     *
+     * @return array Validation errors
+     */
+    public function get_errors() {
+        return $this->errors;
+    }
+
+    /**
+     * Get validation warnings
+     *
+     * @return array Validation warnings
+     */
+    public function get_warnings() {
+        return $this->warnings;
+    }
+
+    /**
+     * Get improvement suggestions
+     *
+     * @return array Improvement suggestions
+     */
+    public function get_suggestions() {
+        return $this->suggestions;
     }
 }

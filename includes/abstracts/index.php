@@ -1,1 +1,8 @@
-<?php / Silence is golden
+<?php
+/**
+ * Abstract class definitions
+ *
+ * @package GLColorPalette
+ */
+
+// Silence is golden

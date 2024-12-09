@@ -1,65 +1,97 @@
 <?php
 namespace GLColorPalette;
 
+/**
+ * Accessibility Checker
+ *
+ * Checks color combinations for WCAG 2.1 compliance and accessibility requirements.
+ */
 class AccessibilityChecker {
-    private $settings;
-    private $error_handler;
-    private $cache;
-
-    / WCAG 2.1 contrast ratios
-    const WCAG_AAA_NORMAL = 7.0;
-    const WCAG_AAA_LARGE = 4.5;
-    const WCAG_AA_NORMAL = 4.5;
-    const WCAG_AA_LARGE = 3.0;
-
-    / Color blindness types
-    private $color_vision_types = [
-        'protanopia' => 'red-blind',
-        'deuteranopia' => 'green-blind',
-        'tritanopia' => 'blue-blind',
-        'achromatopsia' => 'total color blindness'
+    /** @var array WCAG 2.1 contrast ratios */
+    private $contrast_ratios = [
+        'AA' => ['normal' => 4.5, 'large' => 3.0],
+        'AAA' => ['normal' => 7.0, 'large' => 4.5]
     ];
 
-    public function __construct() {
-        $this->settings = new SettingsManager();
-        $this->error_handler = new ErrorHandler();
-        $this->cache = new ColorCache();
-    }
+    /** @var array Color blindness types */
+    private $colorblind_types = [
+        'protanopia',
+        'deuteranopia',
+        'tritanopia',
+        'achromatopsia'
+    ];
 
     /**
-     * Check color combination accessibility
+     * Check accessibility compliance
+     *
+     * @param string $foreground Foreground color hex code
+     * @param string $background Background color hex code
+     * @param array $options Check options
+     * @return array Results and recommendations
      */
-    public function check_accessibility($foreground, $background, $context = []) {
-        try {
-            $results = [
-                'contrast_ratio' => $this->calculate_contrast_ratio($foreground, $background),
-                'wcag_compliance' => $this->check_wcag_compliance($foreground, $background, $context),
-                'color_blindness' => $this->check_color_blindness($foreground, $background),
-                'readability' => $this->check_readability($foreground, $background),
-                'distinguishability' => $this->check_distinguishability($foreground, $background)
-            ];
+    public function check_accessibility($foreground, $background, $options = []) {
+        $results = [
+            'passes_aa' => false,
+            'passes_aaa' => false,
+            'contrast_ratio' => 0,
+            'colorblind_safe' => false,
+            'readable' => false,
+            'recommendations' => []
+        ];
 
-            / Add recommendations if needed
-            if (!$results['wcag_compliance']['passes_aa'] || !$results['color_blindness']['is_safe']) {
-                $results['recommendations'] = $this->generate_recommendations($foreground, $background, $results);
+        try {
+            // Calculate contrast ratio
+            $ratio = $this->calculate_contrast_ratio($foreground, $background);
+            $results['contrast_ratio'] = round($ratio, 2);
+
+            // Check WCAG levels
+            $text_size = $options['large_text'] ?? false;
+            $required_aa = $text_size ? 
+                $this->contrast_ratios['AA']['large'] : 
+                $this->contrast_ratios['AA']['normal'];
+            $required_aaa = $text_size ? 
+                $this->contrast_ratios['AAA']['large'] : 
+                $this->contrast_ratios['AAA']['normal'];
+
+            $results['passes_aa'] = $ratio >= $required_aa;
+            $results['passes_aaa'] = $ratio >= $required_aaa;
+
+            // Add recommendations if needed
+            if (!$results['passes_aa']) {
+                $results['recommendations'][] = $this->suggest_contrast_improvement(
+                    $foreground,
+                    $background,
+                    $required_aa
+                );
             }
 
-            return $results;
-
-        } catch (Exception $e) {
-            $this->error_handler->handle_error(
-                ErrorCodes::ACCESS_CHECK_FAILED,
-                $e->getMessage(),
-                ['foreground' => $foreground, 'background' => $background]
+            // Check colorblind accessibility
+            $results['colorblind_safe'] = $this->check_colorblind_safety(
+                $foreground,
+                $background
             );
-            return null;
+
+            // Check readability
+            $results['readable'] = $this->check_readability(
+                $foreground,
+                $background
+            );
+
+        } catch (\Exception $e) {
+            $results['error'] = $e->getMessage();
         }
+
+        return $results;
     }
 
     /**
      * Calculate contrast ratio between two colors
+     *
+     * @param string $color1 First color hex code
+     * @param string $color2 Second color hex code
+     * @return float Contrast ratio
      */
-    private function calculate_contrast_ratio($color1, $color2) {
+    public function calculate_contrast_ratio($color1, $color2) {
         $l1 = $this->get_relative_luminance($color1);
         $l2 = $this->get_relative_luminance($color2);
 
@@ -71,150 +103,135 @@ class AccessibilityChecker {
 
     /**
      * Get relative luminance of a color
+     *
+     * @param string $hex Color hex code
+     * @return float Relative luminance
      */
     private function get_relative_luminance($hex) {
-        $rgb = $this->hex_to_rgb($hex);
+        // Convert to RGB
+        $hex = ltrim($hex, '#');
+        $r = hexdec(substr($hex, 0, 2)) / 255;
+        $g = hexdec(substr($hex, 2, 2)) / 255;
+        $b = hexdec(substr($hex, 4, 2)) / 255;
 
-        / Convert to sRGB
-        $r = $this->to_srgb($rgb['r'] / 255);
-        $g = $this->to_srgb($rgb['g'] / 255);
-        $b = $this->to_srgb($rgb['b'] / 255);
+        // Calculate luminance
+        $r = ($r <= 0.03928) ? $r / 12.92 : pow(($r + 0.055) / 1.055, 2.4);
+        $g = ($g <= 0.03928) ? $g / 12.92 : pow(($g + 0.055) / 1.055, 2.4);
+        $b = ($b <= 0.03928) ? $b / 12.92 : pow(($b + 0.055) / 1.055, 2.4);
 
-        / Calculate luminance
         return 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
     }
 
     /**
-     * Check WCAG compliance
+     * Check if colors are safe for colorblind users
+     *
+     * @param string $color1 First color hex code
+     * @param string $color2 Second color hex code
+     * @return bool True if colorblind safe
      */
-    private function check_wcag_compliance($foreground, $background, $context) {
-        $contrast_ratio = $this->calculate_contrast_ratio($foreground, $background);
-        $is_large_text = isset($context['font_size']) && $context['font_size'] >= 18;
+    public function check_colorblind_safety($color1, $color2) {
+        foreach ($this->colorblind_types as $type) {
+            $simulated1 = $this->simulate_colorblind_vision($color1, $type);
+            $simulated2 = $this->simulate_colorblind_vision($color2, $type);
 
-        return [
-            'contrast_ratio' => $contrast_ratio,
-            'passes_aa' => $is_large_text
-                ? $contrast_ratio >= self::WCAG_AA_LARGE
-                : $contrast_ratio >= self::WCAG_AA_NORMAL,
-            'passes_aaa' => $is_large_text
-                ? $contrast_ratio >= self::WCAG_AAA_LARGE
-                : $contrast_ratio >= self::WCAG_AAA_NORMAL,
-            'level' => $this->determine_wcag_level($contrast_ratio, $is_large_text)
-        ];
-    }
-
-    /**
-     * Check color blindness safety
-     */
-    private function check_color_blindness($foreground, $background) {
-        $results = ['is_safe' => true, 'issues' => []];
-
-        foreach ($this->color_vision_types as $type => $description) {
-            $simulated_foreground = $this->simulate_color_blindness($foreground, $type);
-            $simulated_background = $this->simulate_color_blindness($background, $type);
-
-            $contrast = $this->calculate_contrast_ratio(
-                $simulated_foreground,
-                $simulated_background
-            );
-
-            if ($contrast < self::WCAG_AA_NORMAL) {
-                $results['is_safe'] = false;
-                $results['issues'][$type] = [
-                    'contrast' => $contrast,
-                    'description' => $description
-                ];
+            $contrast = $this->calculate_contrast_ratio($simulated1, $simulated2);
+            if ($contrast < $this->contrast_ratios['AA']['normal']) {
+                return false;
             }
         }
 
-        return $results;
+        return true;
     }
 
     /**
-     * Check readability metrics
+     * Check if text is readable on background
+     *
+     * @param string $text_color Text color hex code
+     * @param string $bg_color Background color hex code
+     * @return bool True if readable
      */
-    private function check_readability($foreground, $background) {
-        return [
-            'contrast_ratio' => $this->calculate_contrast_ratio($foreground, $background),
-            'brightness_difference' => $this->calculate_brightness_difference($foreground, $background),
-            'color_difference' => $this->calculate_color_difference($foreground, $background),
-            'vibration_effects' => $this->check_vibration_effects($foreground, $background)
-        ];
-    }
-
-    /**
-     * Check distinguishability
-     */
-    private function check_distinguishability($foreground, $background) {
-        $rgb1 = $this->hex_to_rgb($foreground);
-        $rgb2 = $this->hex_to_rgb($background);
-
-        return [
-            'hue_difference' => $this->calculate_hue_difference($rgb1, $rgb2),
-            'saturation_difference' => $this->calculate_saturation_difference($rgb1, $rgb2),
-            'brightness_difference' => $this->calculate_brightness_difference($foreground, $background),
-            'is_distinguishable' => $this->is_sufficiently_different($rgb1, $rgb2)
-        ];
-    }
-
-    /**
-     * Generate recommendations for improvement
-     */
-    private function generate_recommendations($foreground, $background, $results) {
-        $recommendations = [];
-
-        / Check contrast ratio
-        if ($results['contrast_ratio'] < self::WCAG_AA_NORMAL) {
-            $recommendations[] = $this->suggest_contrast_improvement($foreground, $background);
+    public function check_readability($text_color, $bg_color) {
+        // Check contrast ratio
+        $contrast = $this->calculate_contrast_ratio($text_color, $bg_color);
+        if ($contrast < $this->contrast_ratios['AA']['normal']) {
+            return false;
         }
 
-        / Check color blindness issues
-        if (!$results['color_blindness']['is_safe']) {
-            $recommendations[] = $this->suggest_color_blind_safe_alternatives($foreground, $background);
+        // Check color blindness issues
+        if (!$this->check_colorblind_safety($text_color, $bg_color)) {
+            return false;
         }
 
-        / Check readability
-        if ($results['readability']['brightness_difference'] < 125) {
-            $recommendations[] = $this->suggest_brightness_adjustment($foreground, $background);
-        }
+        // Check readability
+        $bg_luminance = $this->get_relative_luminance($bg_color);
+        $text_luminance = $this->get_relative_luminance($text_color);
 
-        return $recommendations;
+        return abs($bg_luminance - $text_luminance) >= 0.3;
     }
 
     /**
-     * Utility methods
+     * Suggest improvements for better contrast
+     *
+     * @param string $foreground Foreground color hex code
+     * @param string $background Background color hex code
+     * @param float $target_ratio Target contrast ratio
+     * @return array Improvement suggestions
      */
-    private function hex_to_rgb($hex) {
-        $hex = ltrim($hex, '#');
-        return [
-            'r' => hexdec(substr($hex, 0, 2)),
-            'g' => hexdec(substr($hex, 2, 2)),
-            'b' => hexdec(substr($hex, 4, 2))
-        ];
-    }
+    private function suggest_contrast_improvement($foreground, $background, $target_ratio) {
+        $current_ratio = $this->calculate_contrast_ratio($foreground, $background);
+        $fg_luminance = $this->get_relative_luminance($foreground);
+        $bg_luminance = $this->get_relative_luminance($background);
 
-    private function to_srgb($value) {
-        return $value <= 0.03928
-            ? $value / 12.92
-            : pow(($value + 0.055) / 1.055, 2.4);
-    }
-
-    private function determine_wcag_level($contrast_ratio, $is_large_text) {
-        if ($is_large_text) {
-            if ($contrast_ratio >= self::WCAG_AAA_LARGE) return 'AAA';
-            if ($contrast_ratio >= self::WCAG_AA_LARGE) return 'AA';
+        if ($fg_luminance > $bg_luminance) {
+            return [
+                'message' => 'Try increasing the lightness of the foreground color',
+                'target_ratio' => $target_ratio,
+                'current_ratio' => $current_ratio
+            ];
         } else {
-            if ($contrast_ratio >= self::WCAG_AAA_NORMAL) return 'AAA';
-            if ($contrast_ratio >= self::WCAG_AA_NORMAL) return 'AA';
+            return [
+                'message' => 'Try decreasing the lightness of the foreground color',
+                'target_ratio' => $target_ratio,
+                'current_ratio' => $current_ratio
+            ];
         }
-        return 'Fail';
     }
 
-    private function simulate_color_blindness($hex, $type) {
-        / Implement color blindness simulation algorithms
-        / This would use color vision deficiency simulation matrices
-        / Return simulated color in hex
-        return $hex; / Placeholder
+    /**
+     * Simulate color blindness vision
+     *
+     * @param string $color Color hex code
+     * @param string $type Type of color blindness
+     * @return string Simulated color hex code
+     */
+    private function simulate_colorblind_vision($color, $type) {
+        // Basic simulation - in reality, would use proper matrices
+        $hex = ltrim($color, '#');
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        switch ($type) {
+            case 'protanopia':
+                $r = ($r * 0.567) + ($g * 0.433);
+                break;
+            case 'deuteranopia':
+                $g = ($r * 0.558) + ($g * 0.442);
+                break;
+            case 'tritanopia':
+                $b = ($g * 0.375) + ($b * 0.625);
+                break;
+            case 'achromatopsia':
+                $gray = ($r * 0.299) + ($g * 0.587) + ($b * 0.114);
+                $r = $g = $b = $gray;
+                break;
+        }
+
+        return sprintf('#%02x%02x%02x', 
+            min(255, max(0, round($r))),
+            min(255, max(0, round($g))),
+            min(255, max(0, round($b)))
+        );
     }
 
     /**
