@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * OpenAI Provider Class
  *
@@ -9,6 +11,9 @@
 
 namespace GL_Color_Palette_Generator\Providers;
 
+use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
+use GL_Color_Palette_Generator\Types\Color_Types;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -16,7 +21,14 @@ if (!defined('ABSPATH')) {
 /**
  * OpenAI Provider class
  */
-class OpenAI_Provider implements AI_Provider {
+class OpenAI_Provider extends Abstract_AI_Provider {
+    /**
+     * Default model to use
+     *
+     * @var string
+     */
+    private const DEFAULT_MODEL = 'gpt-4';
+
     /**
      * API base URL
      *
@@ -27,29 +39,85 @@ class OpenAI_Provider implements AI_Provider {
     /**
      * API credentials
      *
-     * @var array
+     * @var array{api_key: string, organization?: string}
      */
     private array $credentials;
 
     /**
      * Constructor
      *
-     * @param array $credentials API credentials
+     * @param array{
+     *     api_key: string,
+     *     organization?: string,
+     *     base_url?: string,
+     *     timeout?: int,
+     *     max_retries?: int
+     * } $config Provider configuration
      */
-    public function __construct(array $credentials) {
-        $this->credentials = $credentials;
+    public function __construct(array $config) {
+        $config['base_url'] = $config['base_url'] ?? 'https://api.openai.com/v1';
+        $this->credentials = $config;
+        $this->api_url = $config['base_url'];
+        parent::__construct($config);
     }
 
     /**
-     * Generate a color palette based on a prompt
+     * Get provider name
+     *
+     * @return string
+     */
+    public function get_name(): string {
+        return 'openai';
+    }
+
+    /**
+     * Get provider display name
+     *
+     * @return string
+     */
+    public function get_display_name(): string {
+        return 'OpenAI';
+    }
+
+    /**
+     * Get provider capabilities
+     *
+     * @return array{
+     *     max_colors: int,
+     *     supports_streaming: bool,
+     *     supports_batch: bool,
+     *     supports_style_transfer: bool,
+     *     max_prompt_length: int,
+     *     rate_limit: array{
+     *         requests_per_minute: int,
+     *         tokens_per_minute: int
+     *     }
+     * }
+     */
+    public function get_capabilities(): array {
+        return [
+            'max_colors' => 10,
+            'supports_streaming' => true,
+            'supports_batch' => false,
+            'supports_style_transfer' => false,
+            'max_prompt_length' => 4000,
+            'rate_limit' => [
+                'requests_per_minute' => 60,
+                'tokens_per_minute' => 90000
+            ]
+        ];
+    }
+
+    /**
+     * Internal color generation method
      *
      * @param string $prompt     Text prompt describing desired palette
-     * @param int    $num_colors Number of colors to generate (2-10)
-     * @param array  $options    Additional provider-specific options
-     * @return array{colors: array<string>, metadata: array} Generated palette data
+     * @param int    $num_colors Number of colors to generate
+     * @param array  $options    Provider-specific options
+     * @return array Raw provider response
      * @throws \Exception If generation fails
      */
-    public function generate_palette(string $prompt, int $num_colors = 5, array $options = []): array {
+    protected function generate_colors_internal(string $prompt, int $num_colors, array $options): array {
         if ($num_colors < 2 || $num_colors > 10) {
             throw new \InvalidArgumentException(
                 sprintf(__('Number of colors must be between 2 and 10, got %d', 'gl-color-palette-generator'), $num_colors)
@@ -57,24 +125,18 @@ class OpenAI_Provider implements AI_Provider {
         }
 
         if (empty($prompt)) {
-            throw new \InvalidArgumentException(
-                __('Prompt cannot be empty', 'gl-color-palette-generator')
-            );
+            throw new \InvalidArgumentException(__('Prompt cannot be empty', 'gl-color-palette-generator'));
         }
 
-        $system_prompt = 'You are a color palette generator. Generate aesthetically pleasing and harmonious color combinations. ' .
-                        'Respond with a JSON object containing two properties: ' .
-                        '"colors" (array of hex color codes) and ' .
-                        '"metadata" (object with properties: theme, mood, description).';
+        if (!empty($options) && !Color_Types::is_valid_provider_options($options)) {
+            throw new \InvalidArgumentException(__('Invalid provider options', 'gl-color-palette-generator'));
+        }
 
-        $user_prompt = sprintf(
-            'Generate a color palette with %d colors based on this description: %s',
-            $num_colors,
-            $prompt
-        );
+        $system_prompt = $this->get_system_prompt($num_colors);
+        $user_prompt = $this->format_user_prompt($prompt, $num_colors);
 
         $response = $this->make_request('chat/completions', [
-            'model' => $options['model'] ?? 'gpt-4',
+            'model' => $options['model'] ?? self::DEFAULT_MODEL,
             'messages' => [
                 [
                     'role' => 'system',
@@ -86,107 +148,63 @@ class OpenAI_Provider implements AI_Provider {
                 ]
             ],
             'temperature' => $options['temperature'] ?? 0.7,
+            'max_tokens' => $options['max_tokens'] ?? 150,
+            'top_p' => $options['top_p'] ?? 1.0,
+            'frequency_penalty' => $options['frequency_penalty'] ?? 0.0,
+            'presence_penalty' => $options['presence_penalty'] ?? 0.0
         ]);
 
         if (empty($response['choices'][0]['message']['content'])) {
-            throw new \Exception(__('Invalid API response format', 'gl-color-palette-generator'));
+            throw new PaletteGenerationException(__('Invalid API response format', 'gl-color-palette-generator'));
         }
 
         $result = json_decode($response['choices'][0]['message']['content'], true);
         if (!is_array($result) || !isset($result['colors'], $result['metadata'])) {
-            throw new \Exception(__('Invalid color data received', 'gl-color-palette-generator'));
+            throw new PaletteGenerationException(__('Invalid color data received', 'gl-color-palette-generator'));
+        }
+
+        // Validate returned colors
+        foreach ($result['colors'] as $color) {
+            if (!Color_Types::is_valid_hex_color($color)) {
+                throw new PaletteGenerationException(
+                    sprintf(__('Invalid color code received from API: %s', 'gl-color-palette-generator'), $color)
+                );
+            }
         }
 
         return $result;
     }
 
     /**
-     * Get provider name
+     * Get system prompt
      *
-     * @return string Provider identifier
+     * @param int $num_colors Number of colors to generate
+     * @return string
      */
-    public function get_name(): string {
-        return 'openai';
+    private function get_system_prompt(int $num_colors): string {
+        return sprintf(
+            'You are a color palette generation assistant. Generate harmonious color palettes based on user prompts. ' .
+            'Return a JSON object with two properties: ' .
+            '"colors" (array of exactly %d hex color codes) and ' .
+            '"metadata" (object with properties: theme, mood, description). ' .
+            'Each color must be a valid hex code starting with #.',
+            $num_colors
+        );
     }
 
     /**
-     * Get provider display name
+     * Format user prompt
      *
-     * @return string Provider display name
+     * @param string $prompt     Raw user prompt
+     * @param int    $num_colors Number of colors to generate
+     * @return string
      */
-    public function get_display_name(): string {
-        return 'OpenAI';
-    }
-
-    /**
-     * Check if provider is configured and ready
-     *
-     * @return bool True if ready, false otherwise
-     */
-    public function is_ready(): bool {
-        return !empty($this->credentials['api_key']);
-    }
-
-    /**
-     * Get provider configuration requirements
-     *
-     * @return array Configuration field definitions
-     */
-    public function get_config_fields(): array {
-        return [
-            'api_key' => [
-                'type' => 'password',
-                'label' => __('API Key', 'gl-color-palette-generator'),
-                'description' => __('Your OpenAI API key', 'gl-color-palette-generator'),
-                'required' => true,
-            ],
-            'model' => [
-                'type' => 'select',
-                'label' => __('Model', 'gl-color-palette-generator'),
-                'description' => __('OpenAI model to use', 'gl-color-palette-generator'),
-                'required' => false,
-                'default' => 'gpt-4',
-                'options' => [
-                    'gpt-4' => 'GPT-4',
-                    'gpt-3.5-turbo' => 'GPT-3.5 Turbo',
-                ],
-            ],
-            'temperature' => [
-                'type' => 'number',
-                'label' => __('Temperature', 'gl-color-palette-generator'),
-                'description' => __('Controls randomness (0.0 to 1.0)', 'gl-color-palette-generator'),
-                'required' => false,
-                'default' => 0.7,
-                'min' => 0,
-                'max' => 1,
-                'step' => 0.1,
-            ],
-        ];
-    }
-
-    /**
-     * Validate provider configuration
-     *
-     * @param array $config Configuration to validate
-     * @return bool True if valid, false otherwise
-     */
-    public function validate_config(array $config): bool {
-        if (empty($config['api_key'])) {
-            return false;
-        }
-
-        if (isset($config['model']) && !in_array($config['model'], ['gpt-4', 'gpt-3.5-turbo'])) {
-            return false;
-        }
-
-        if (isset($config['temperature'])) {
-            $temp = (float) $config['temperature'];
-            if ($temp < 0 || $temp > 1) {
-                return false;
-            }
-        }
-
-        return true;
+    private function format_user_prompt(string $prompt, int $num_colors): string {
+        return sprintf(
+            'Generate a color palette with %d colors based on this description: %s',
+            $num_colors,
+            $prompt
+        );
     }
 
     /**

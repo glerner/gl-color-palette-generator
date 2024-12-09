@@ -1,6 +1,9 @@
 <?php
+declare(strict_types=1);
+
 namespace GL_Color_Palette_Generator\Color_Management;
 
+use GL_Color_Palette_Generator\Types\Color_Types;
 use GL_Color_Palette_Generator\Utils\Validator;
 
 if (!defined('ABSPATH')) {
@@ -18,9 +21,9 @@ if (!defined('ABSPATH')) {
 class Color_Palette {
     /**
      * Array of hex color codes
-     * @var string[]
+     * @var array<string>
      */
-    private $colors = [];
+    private array $colors = [];
 
     /**
      * Metadata about the palette
@@ -31,10 +34,10 @@ class Color_Palette {
      *     created: string,
      *     modified: string,
      *     provider: string,
-     *     tags: string[]
+     *     tags: array<string>
      * }
      */
-    private $metadata = [
+    private array $metadata = [
         'name' => '',
         'description' => '',
         'theme' => '',
@@ -47,9 +50,17 @@ class Color_Palette {
     /**
      * Constructor
      *
-     * @param string[] $colors Array of hex color codes
-     * @param array    $metadata Optional metadata
-     * @throws \InvalidArgumentException If colors are invalid
+     * @param array<string> $colors Array of hex color codes
+     * @param array{
+     *     name?: string,
+     *     description?: string,
+     *     theme?: string,
+     *     created?: string,
+     *     modified?: string,
+     *     provider?: string,
+     *     tags?: array<string>
+     * } $metadata Optional metadata
+     * @throws \InvalidArgumentException If colors or metadata are invalid
      */
     public function __construct(array $colors = [], array $metadata = []) {
         $this->set_colors($colors);
@@ -59,16 +70,15 @@ class Color_Palette {
     /**
      * Set the colors for this palette
      *
-     * @param string[] $colors Array of hex color codes
+     * @param array<string> $colors Array of hex color codes
      * @return void
      * @throws \InvalidArgumentException If any color is invalid
      */
     public function set_colors(array $colors): void {
-        $validator = new Validator();
         $this->colors = [];
         
         foreach ($colors as $color) {
-            if (!$validator->is_valid_hex_color($color)) {
+            if (!Color_Types::is_valid_hex_color($color)) {
                 throw new \InvalidArgumentException(
                     sprintf(__('Invalid color code: %s', 'gl-color-palette-generator'), $color)
                 );
@@ -80,7 +90,7 @@ class Color_Palette {
     /**
      * Get the colors in this palette
      *
-     * @return string[] Array of hex color codes
+     * @return array<string> Array of hex color codes
      */
     public function get_colors(): array {
         return $this->colors;
@@ -89,35 +99,21 @@ class Color_Palette {
     /**
      * Set metadata for this palette
      *
-     * @param array $metadata Metadata to set
+     * @param array{
+     *     name?: string,
+     *     description?: string,
+     *     theme?: string,
+     *     created?: string,
+     *     modified?: string,
+     *     provider?: string,
+     *     tags?: array<string>
+     * } $metadata Metadata to set
      * @return void
      * @throws \InvalidArgumentException If metadata values are invalid
      */
     public function set_metadata(array $metadata): void {
-        // Validate string fields
-        $string_fields = ['name', 'description', 'theme', 'provider'];
-        foreach ($string_fields as $field) {
-            if (isset($metadata[$field]) && !is_string($metadata[$field])) {
-                throw new \InvalidArgumentException(
-                    sprintf(__('%s must be a string', 'gl-color-palette-generator'), $field)
-                );
-            }
-        }
-
-        // Validate tags array
-        if (isset($metadata['tags'])) {
-            if (!is_array($metadata['tags'])) {
-                throw new \InvalidArgumentException(
-                    __('Tags must be an array', 'gl-color-palette-generator')
-                );
-            }
-            foreach ($metadata['tags'] as $tag) {
-                if (!is_string($tag)) {
-                    throw new \InvalidArgumentException(
-                        __('All tags must be strings', 'gl-color-palette-generator')
-                    );
-                }
-            }
+        if (!empty($metadata) && !Color_Types::is_valid_metadata($metadata)) {
+            throw new \InvalidArgumentException(__('Invalid metadata format', 'gl-color-palette-generator'));
         }
 
         $this->metadata = array_merge($this->metadata, $metadata);
@@ -156,8 +152,7 @@ class Color_Palette {
      * @throws \InvalidArgumentException If color is invalid
      */
     public function add_color(string $color): bool {
-        $validator = new Validator();
-        if (!$validator->is_valid_hex_color($color)) {
+        if (!Color_Types::is_valid_hex_color($color)) {
             throw new \InvalidArgumentException(
                 sprintf(__('Invalid color code: %s', 'gl-color-palette-generator'), $color)
             );
@@ -189,7 +184,7 @@ class Color_Palette {
     /**
      * Convert the palette to an array
      *
-     * @return array{colors: string[], metadata: array}
+     * @return array{colors: array<string>, metadata: array}
      */
     public function to_array(): array {
         return [
@@ -201,7 +196,7 @@ class Color_Palette {
     /**
      * Create a palette from an array
      *
-     * @param array{colors?: string[], metadata?: array} $data Array containing colors and metadata
+     * @param array{colors?: array<string>, metadata?: array} $data Array containing colors and metadata
      * @return self
      * @throws \InvalidArgumentException If data is invalid
      */

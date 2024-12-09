@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Color Palette Generator Class
  *
@@ -11,6 +13,9 @@ namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Settings\Settings_Manager;
 use GL_Color_Palette_Generator\AI\AI_Provider_Factory;
+use GL_Color_Palette_Generator\AI\AI_Provider_Interface;
+use GL_Color_Palette_Generator\Types\Color_Types;
+use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
 
 /**
  * Class Color_Palette_Generator
@@ -21,17 +26,19 @@ class Color_Palette_Generator {
      *
      * @var Settings_Manager
      */
-    private $settings;
+    private Settings_Manager $settings;
 
     /**
      * AI provider instance
      *
      * @var AI_Provider_Interface
      */
-    private $ai_provider;
+    private AI_Provider_Interface $ai_provider;
 
     /**
      * Constructor
+     *
+     * @throws PaletteGenerationException If AI provider initialization fails
      */
     public function __construct() {
         $this->settings = new Settings_Manager();
@@ -40,39 +47,74 @@ class Color_Palette_Generator {
 
     /**
      * Initialize AI provider
+     *
+     * @throws PaletteGenerationException If provider initialization fails
+     * @return void
      */
-    private function init_ai_provider() {
-        $provider_name = $this->settings->get_setting('ai_provider', 'openai');
-        $api_key = $this->settings->get_setting('api_key');
+    private function init_ai_provider(): void {
+        try {
+            $provider_name = $this->settings->get_setting('ai_provider', 'openai');
+            $api_key = $this->settings->get_setting('api_key');
 
-        $factory = new AI_Provider_Factory();
-        $this->ai_provider = $factory->create_provider($provider_name, $api_key);
+            if (!is_string($provider_name) || !is_string($api_key)) {
+                throw new \InvalidArgumentException('Invalid provider settings');
+            }
+
+            $factory = new AI_Provider_Factory();
+            $this->ai_provider = $factory->create_provider($provider_name, $api_key);
+        } catch (\Exception $e) {
+            throw new PaletteGenerationException(
+                sprintf(
+                    __('Failed to initialize AI provider: %s', 'gl-color-palette-generator'),
+                    $e->getMessage()
+                ),
+                0,
+                $e
+            );
+        }
     }
 
     /**
      * Generate color palette from prompt
      *
      * @param string $prompt User prompt for palette generation.
-     * @return array Array of hex color codes.
-     * @throws \Exception If palette generation fails.
+     * @return array{colors: array<string>, metadata: array} Generated palette data
+     * @throws PaletteGenerationException If palette generation fails
      */
-    public function generate_from_prompt($prompt) {
+    public function generate_from_prompt(string $prompt): array {
+        if (empty(trim($prompt))) {
+            throw new \InvalidArgumentException(
+                __('Prompt cannot be empty', 'gl-color-palette-generator')
+            );
+        }
+
         // Check cache first
         $cached_palette = $this->get_cached_palette($prompt);
-        if ($cached_palette !== false) {
+        if ($cached_palette !== null) {
             return $cached_palette;
         }
 
-        // Generate palette using AI
-        $colors = $this->generate_colors($prompt);
+        try {
+            // Generate palette using AI
+            $colors = $this->generate_colors($prompt);
 
-        // Validate and process colors
-        $palette = $this->process_colors($colors);
+            // Validate and process colors
+            $palette = $this->process_colors($colors);
 
-        // Cache the result
-        $this->cache_palette($prompt, $palette);
+            // Cache the result
+            $this->cache_palette($prompt, $palette);
 
-        return $palette;
+            return $palette;
+        } catch (\Exception $e) {
+            throw new PaletteGenerationException(
+                sprintf(
+                    __('Failed to generate palette: %s', 'gl-color-palette-generator'),
+                    $e->getMessage()
+                ),
+                0,
+                $e
+            );
+        }
     }
 
     /**
@@ -82,7 +124,7 @@ class Color_Palette_Generator {
      * @return array Raw color data from AI.
      * @throws \Exception If AI generation fails.
      */
-    private function generate_colors($prompt) {
+    private function generate_colors(string $prompt): array {
         $system_prompt = $this->get_system_prompt();
         $formatted_prompt = $this->format_user_prompt($prompt);
 
@@ -90,11 +132,13 @@ class Color_Palette_Generator {
             $response = $this->ai_provider->generate_response($system_prompt, $formatted_prompt);
             return $this->parse_ai_response($response);
         } catch (\Exception $e) {
-            throw new \Exception(
+            throw new PaletteGenerationException(
                 sprintf(
-                    __('Failed to generate palette: %s', 'gl-color-palette-generator'),
+                    __('Failed to generate colors: %s', 'gl-color-palette-generator'),
                     $e->getMessage()
-                )
+                ),
+                0,
+                $e
             );
         }
     }
@@ -104,7 +148,7 @@ class Color_Palette_Generator {
      *
      * @return string
      */
-    private function get_system_prompt() {
+    private function get_system_prompt(): string {
         return <<<EOT
 You are a color palette generation assistant. Generate harmonious color palettes based on user prompts.
 Return exactly 5 colors in hex format (#RRGGBB), one per line.
@@ -119,7 +163,7 @@ EOT;
      * @param string $prompt Raw user prompt.
      * @return string
      */
-    private function format_user_prompt($prompt) {
+    private function format_user_prompt(string $prompt): string {
         return sprintf(
             "Generate a color palette for: %s\nProvide exactly 5 colors in hex format (#RRGGBB), one per line.",
             $prompt
@@ -133,7 +177,7 @@ EOT;
      * @return array
      * @throws \Exception If response format is invalid.
      */
-    private function parse_ai_response($response) {
+    private function parse_ai_response(string $response): array {
         $colors = array_filter(
             array_map('trim', explode("\n", $response)),
             function($line) {
@@ -155,7 +199,7 @@ EOT;
      * @return array Processed color array.
      * @throws \Exception If color validation fails.
      */
-    private function process_colors($colors) {
+    private function process_colors(array $colors): array {
         $processed = array_map(
             function($color) {
                 // Ensure lowercase hex format
@@ -191,9 +235,9 @@ EOT;
      * Get cached palette
      *
      * @param string $prompt User prompt.
-     * @return array|false Cached palette or false if not found.
+     * @return array|null Cached palette or null if not found.
      */
-    private function get_cached_palette($prompt) {
+    private function get_cached_palette(string $prompt): ?array {
         $cache_key = 'gl_cpg_' . md5($prompt);
         $cached = wp_cache_get($cache_key, 'gl-color-palette-generator');
 
@@ -201,7 +245,7 @@ EOT;
             return json_decode($cached, true);
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -210,7 +254,7 @@ EOT;
      * @param string $prompt User prompt.
      * @param array  $palette Generated palette.
      */
-    private function cache_palette($prompt, $palette) {
+    private function cache_palette(string $prompt, array $palette): void {
         $cache_key = 'gl_cpg_' . md5($prompt);
         $cache_duration = $this->settings->get_setting('cache_duration', 3600);
 
