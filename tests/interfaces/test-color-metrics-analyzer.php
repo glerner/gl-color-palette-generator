@@ -1,4 +1,17 @@
-<?php
+/**
+ * Color Metrics Analyzer Interface Tests
+ *
+ * Tests for color metrics analysis, including relationship strength,
+ * contrast ratios, harmony scores, and psychological associations.
+ * Validates color space calculations and statistical measures.
+ *
+ * @package GLColorPalette
+ * @subpackage Tests\Interfaces
+ * @since 1.0.0
+ * @version 1.1.0
+ * @author GL Color Palette Generator
+ * @copyright 2024 GL Color Palette Generator
+ */
 
 namespace GLColorPalette\Tests\Interfaces;
 
@@ -12,13 +25,19 @@ class ColorMetricsAnalyzerTest extends TestCase {
         $this->analyzer = $this->createMock(ColorMetricsAnalyzer::class);
     }
 
+    /**
+     * Test comprehensive color relationship analysis
+     *
+     * @return void
+     */
     public function test_analyze_relationships_returns_comprehensive_analysis(): void {
-        / Arrange
+        // Arrange
         $colors = ['#FF0000', '#00FF00', '#0000FF'];
         $options = [
             'include_contrast' => true,
             'include_harmony' => true,
-            'color_space' => 'LAB'
+            'color_space' => 'LAB',
+            'generated_at' => '2024-12-08T19:52:31-07:00'
         ];
 
         $expected = [
@@ -28,7 +47,8 @@ class ColorMetricsAnalyzerTest extends TestCase {
             ],
             'contrast_matrix' => [
                 ['#FF0000', '#00FF00', 4.5],
-                ['#FF0000', '#0000FF', 3.8]
+                ['#FF0000', '#0000FF', 3.8],
+                ['#00FF00', '#0000FF', 2.9]
             ],
             'harmony_scores' => [
                 'overall' => 0.92,
@@ -42,7 +62,13 @@ class ColorMetricsAnalyzerTest extends TestCase {
             ],
             'statistics' => [
                 'average_distance' => 120.5,
-                'variance' => 15.3
+                'variance' => 15.3,
+                'distribution' => 'even'
+            ],
+            'metadata' => [
+                'generated_at' => '2024-12-08T19:52:31-07:00',
+                'color_space' => 'LAB',
+                'version' => '1.1.0'
             ]
         ];
 
@@ -52,15 +78,121 @@ class ColorMetricsAnalyzerTest extends TestCase {
             ->with($colors, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->analyzer->analyze_relationships($colors, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('relationships', $result);
         $this->assertArrayHasKey('contrast_matrix', $result);
         $this->assertArrayHasKey('harmony_scores', $result);
         $this->assertArrayHasKey('psychology', $result);
+        $this->assertArrayHasKey('statistics', $result);
+        $this->assertArrayHasKey('metadata', $result);
+        $this->assertEquals('2024-12-08T19:52:31-07:00', $result['metadata']['generated_at']);
+    }
+
+    /**
+     * Test color space distance calculations
+     *
+     * @return void
+     */
+    public function test_calculate_color_distances(): void {
+        $test_cases = [
+            [
+                'input' => [
+                    'color1' => '#FFFFFF',
+                    'color2' => '#000000',
+                    'space' => 'LAB'
+                ],
+                'expected' => [
+                    'distance' => 100.0,
+                    'delta_e' => 100.0,
+                    'perceptual_distance' => 'maximum'
+                ]
+            ],
+            [
+                'input' => [
+                    'color1' => '#FF0000',
+                    'color2' => '#FF0001',
+                    'space' => 'LAB'
+                ],
+                'expected' => [
+                    'distance' => 0.1,
+                    'delta_e' => 0.2,
+                    'perceptual_distance' => 'minimal'
+                ]
+            ]
+        ];
+
+        foreach ($test_cases as $case) {
+            $this->analyzer
+                ->expects($this->once())
+                ->method('calculate_color_distances')
+                ->with(
+                    $case['input']['color1'],
+                    $case['input']['color2'],
+                    $case['input']['space']
+                )
+                ->willReturn($case['expected']);
+
+            $result = $this->analyzer->calculate_color_distances(
+                $case['input']['color1'],
+                $case['input']['color2'],
+                $case['input']['space']
+            );
+
+            $this->assertEquals($case['expected'], $result);
+        }
+    }
+
+    /**
+     * Test advanced color metrics calculations
+     *
+     * @return void
+     */
+    public function test_calculate_advanced_metrics(): void {
+        $test_cases = [
+            [
+                'input' => [
+                    'colors' => ['#FF0000', '#00FF00', '#0000FF'],
+                    'metrics' => ['entropy', 'uniformity', 'complexity']
+                ],
+                'expected' => [
+                    'entropy' => 1.58,
+                    'uniformity' => 0.92,
+                    'complexity' => 0.45,
+                    'confidence' => 0.95
+                ]
+            ],
+            [
+                'input' => [
+                    'colors' => ['#FFFFFF', '#CCCCCC', '#999999', '#666666', '#333333', '#000000'],
+                    'metrics' => ['gradient_smoothness', 'tonal_range']
+                ],
+                'expected' => [
+                    'gradient_smoothness' => 0.98,
+                    'tonal_range' => 1.0,
+                    'distribution_type' => 'linear',
+                    'confidence' => 0.99
+                ]
+            ]
+        ];
+
+        foreach ($test_cases as $case) {
+            $this->analyzer
+                ->expects($this->once())
+                ->method('calculate_advanced_metrics')
+                ->with($case['input']['colors'], $case['input']['metrics'])
+                ->willReturn($case['expected']);
+
+            $result = $this->analyzer->calculate_advanced_metrics(
+                $case['input']['colors'],
+                $case['input']['metrics']
+            );
+
+            $this->assertEquals($case['expected'], $result);
+        }
     }
 
     public function test_calculate_distribution_returns_distribution_metrics(): void {

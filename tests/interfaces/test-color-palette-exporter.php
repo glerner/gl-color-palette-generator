@@ -1,4 +1,11 @@
 <?php
+/**
+ * Color Palette Exporter Interface Tests
+ *
+ * @package GLColorPalette
+ * @subpackage Tests\Interfaces
+ * @since 1.0.0
+ */
 
 namespace GLColorPalette\Tests\Interfaces;
 
@@ -12,8 +19,11 @@ class ColorPaletteExporterTest extends TestCase {
         $this->exporter = $this->createMock(ColorPaletteExporter::class);
     }
 
+    /**
+     * Test that export_to_file creates a file with palette data
+     */
     public function test_export_to_file_creates_file(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -29,14 +39,14 @@ class ColorPaletteExporterTest extends TestCase {
             'file' => '/exports/test-palette.json',
             'stats' => [
                 'size' => 256,
-                'created_at' => '2024-01-20T12:00:00Z'
+                'created_at' => '2024-12-08T19:04:25-07:00'
             ],
             'validation' => [
                 'valid' => true,
                 'format' => 'valid'
             ],
             'metadata' => [
-                'exported_at' => '2024-01-20T12:00:00Z',
+                'exported_at' => '2024-12-08T19:04:25-07:00',
                 'format' => 'json'
             ]
         ];
@@ -47,19 +57,24 @@ class ColorPaletteExporterTest extends TestCase {
             ->with($palette, $format, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->exporter->export_to_file($palette, $format, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('file', $result);
         $this->assertArrayHasKey('stats', $result);
         $this->assertArrayHasKey('validation', $result);
         $this->assertArrayHasKey('metadata', $result);
+        $this->assertStringEndsWith('.json', $result['file']);
+        $this->assertTrue($result['validation']['valid']);
     }
 
+    /**
+     * Test that export_to_code generates code in specified language
+     */
     public function test_export_to_code_generates_code(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -82,7 +97,7 @@ class ColorPaletteExporterTest extends TestCase {
                 'usage' => '@import "palette.scss";'
             ],
             'metadata' => [
-                'generated_at' => '2024-01-20T12:00:00Z',
+                'generated_at' => '2024-12-08T19:04:25-07:00',
                 'language' => 'scss'
             ]
         ];
@@ -93,19 +108,24 @@ class ColorPaletteExporterTest extends TestCase {
             ->with($palette, $language, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->exporter->export_to_code($palette, $language, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('code', $result);
         $this->assertArrayHasKey('variables', $result);
         $this->assertArrayHasKey('documentation', $result);
         $this->assertArrayHasKey('metadata', $result);
+        $this->assertStringContainsString('$primary', $result['code']);
+        $this->assertStringContainsString('$secondary', $result['code']);
     }
 
+    /**
+     * Test that export_to_tool creates a tool-specific file
+     */
     public function test_export_to_tool_creates_tool_file(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -130,7 +150,7 @@ class ColorPaletteExporterTest extends TestCase {
                 'features' => ['global_colors' => true]
             ],
             'metadata' => [
-                'exported_at' => '2024-01-20T12:00:00Z',
+                'exported_at' => '2024-12-08T19:04:25-07:00',
                 'tool' => 'sketch'
             ]
         ];
@@ -141,19 +161,23 @@ class ColorPaletteExporterTest extends TestCase {
             ->with($palette, $tool, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->exporter->export_to_tool($palette, $tool, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('file', $result);
         $this->assertArrayHasKey('swatches', $result);
         $this->assertArrayHasKey('compatibility', $result);
         $this->assertArrayHasKey('metadata', $result);
+        $this->assertStringEndsWith('.sketch', $result['file']);
     }
 
+    /**
+     * Test that validate_export checks format and structure
+     */
     public function test_validate_export_checks_format(): void {
-        / Arrange
+        // Arrange
         $export = [
             'format' => 'json',
             'data' => ['colors' => ['#FF0000']]
@@ -169,7 +193,7 @@ class ColorPaletteExporterTest extends TestCase {
             'errors' => [],
             'warnings' => [],
             'metadata' => [
-                'validated_at' => '2024-01-20T12:00:00Z',
+                'validated_at' => '2024-12-08T19:04:25-07:00',
                 'rules_applied' => ['format', 'structure']
             ]
         ];
@@ -180,65 +204,94 @@ class ColorPaletteExporterTest extends TestCase {
             ->with($export, $rules)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->exporter->validate_export($export, $rules);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('valid', $result);
         $this->assertArrayHasKey('errors', $result);
         $this->assertArrayHasKey('warnings', $result);
         $this->assertArrayHasKey('metadata', $result);
         $this->assertTrue($result['valid']);
+        $this->assertEmpty($result['errors']);
     }
 
     /**
-     * @dataProvider invalidPaletteDataProvider
+     * @dataProvider invalidPaletteProvider
      */
-    public function test_export_to_file_validates_palette(array $palette): void {
+    public function test_export_to_file_throws_exception_for_invalid_palette($palette): void {
         $format = 'json';
-
+        
         $this->exporter
             ->expects($this->once())
             ->method('export_to_file')
-            ->with($palette, $format)
+            ->with($palette, $format, [])
             ->willThrowException(new \InvalidArgumentException());
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->exporter->export_to_file($palette, $format);
+        $this->exporter->export_to_file($palette, $format, []);
     }
 
-    public function invalidPaletteDataProvider(): array {
+    /**
+     * @dataProvider invalidFormatProvider
+     */
+    public function test_export_to_code_throws_exception_for_invalid_format($format): void {
+        $palette = ['name' => 'Test', 'colors' => ['#FF0000']];
+        
+        $this->exporter
+            ->expects($this->once())
+            ->method('export_to_code')
+            ->with($palette, $format, [])
+            ->willThrowException(new \InvalidArgumentException());
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->exporter->export_to_code($palette, $format, []);
+    }
+
+    /**
+     * @dataProvider invalidToolProvider
+     */
+    public function test_export_to_tool_throws_exception_for_invalid_tool($tool): void {
+        $palette = ['name' => 'Test', 'colors' => ['#FF0000']];
+        
+        $this->exporter
+            ->expects($this->once())
+            ->method('export_to_tool')
+            ->with($palette, $tool, [])
+            ->willThrowException(new \InvalidArgumentException());
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->exporter->export_to_tool($palette, $tool, []);
+    }
+
+    public function invalidPaletteProvider(): array {
         return [
-            'empty_palette' => [[]],
-            'missing_name' => [['colors' => ['#FF0000']]],
-            'missing_colors' => [['name' => 'Test']],
-            'invalid_colors' => [['name' => 'Test', 'colors' => 'not-array']]
+            'empty array' => [[]],
+            'missing colors' => [['name' => 'Test']],
+            'invalid colors' => [['name' => 'Test', 'colors' => ['invalid']]],
+            'non-array input' => ['invalid'],
+            'null input' => [null]
         ];
     }
 
-    /**
-     * @dataProvider invalidExportFormatProvider
-     */
-    public function test_export_to_file_validates_format(string $format): void {
-        $palette = ['name' => 'Test', 'colors' => ['#FF0000']];
-
-        $this->exporter
-            ->expects($this->once())
-            ->method('export_to_file')
-            ->with($palette, $format)
-            ->willThrowException(new \InvalidArgumentException());
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->exporter->export_to_file($palette, $format);
+    public function invalidFormatProvider(): array {
+        return [
+            'empty format' => [''],
+            'invalid format' => ['invalid'],
+            'numeric format' => ['123'],
+            'null format' => [null],
+            'special chars' => ['format@!']
+        ];
     }
 
-    public function invalidExportFormatProvider(): array {
+    public function invalidToolProvider(): array {
         return [
-            'empty_format' => [''],
-            'invalid_format' => ['invalid'],
-            'unknown_format' => ['doc'],
-            'numeric_format' => ['123']
+            'empty tool' => [''],
+            'invalid tool' => ['invalid'],
+            'numeric tool' => ['123'],
+            'null tool' => [null],
+            'special chars' => ['tool@!']
         ];
     }
 }

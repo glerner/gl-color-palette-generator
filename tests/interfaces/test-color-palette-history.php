@@ -1,4 +1,11 @@
 <?php
+/**
+ * Color Palette History Interface Tests
+ *
+ * @package GLColorPalette
+ * @subpackage Tests\Interfaces
+ * @since 1.0.0
+ */
 
 namespace GLColorPalette\Tests\Interfaces;
 
@@ -12,8 +19,11 @@ class ColorPaletteHistoryTest extends TestCase {
         $this->history = $this->createMock(ColorPaletteHistory::class);
     }
 
+    /**
+     * Test that record_version creates a new version
+     */
     public function test_record_version_creates_version(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -30,7 +40,7 @@ class ColorPaletteHistoryTest extends TestCase {
             'version_info' => [
                 'number' => '1.1',
                 'type' => 'minor',
-                'created_at' => '2024-01-20T12:00:00Z'
+                'created_at' => '2024-12-08T19:04:25-07:00'
             ],
             'diff' => [
                 'added' => ['#00FF00'],
@@ -49,10 +59,10 @@ class ColorPaletteHistoryTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->history->record_version($palette, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('version_id', $result);
         $this->assertArrayHasKey('version_info', $result);
@@ -60,8 +70,11 @@ class ColorPaletteHistoryTest extends TestCase {
         $this->assertArrayHasKey('metadata', $result);
     }
 
+    /**
+     * Test that get_history retrieves version history
+     */
     public function test_get_history_retrieves_versions(): void {
-        / Arrange
+        // Arrange
         $palette_id = 123;
         $options = [
             'limit' => 10,
@@ -73,24 +86,24 @@ class ColorPaletteHistoryTest extends TestCase {
                 [
                     'id' => 2,
                     'number' => '1.1',
-                    'created_at' => '2024-01-20T12:00:00Z'
+                    'created_at' => '2024-12-08T19:04:25-07:00'
                 ],
                 [
                     'id' => 1,
                     'number' => '1.0',
-                    'created_at' => '2024-01-19T12:00:00Z'
+                    'created_at' => '2024-12-08T18:04:25-07:00'
                 ]
             ],
             'timeline' => [
-                '2024-01-20' => ['version' => '1.1', 'changes' => 1],
-                '2024-01-19' => ['version' => '1.0', 'changes' => 3]
+                '2024-12-08 19:04:25' => ['version' => '1.1', 'changes' => 1],
+                '2024-12-08 18:04:25' => ['version' => '1.0', 'changes' => 3]
             ],
             'statistics' => [
                 'total_versions' => 2,
                 'total_changes' => 4
             ],
             'metadata' => [
-                'retrieved_at' => '2024-01-20T12:00:00Z',
+                'retrieved_at' => '2024-12-08T19:04:25-07:00',
                 'filter_applied' => false
             ]
         ];
@@ -101,10 +114,10 @@ class ColorPaletteHistoryTest extends TestCase {
             ->with($palette_id, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->history->get_history($palette_id, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('versions', $result);
         $this->assertArrayHasKey('timeline', $result);
@@ -112,8 +125,11 @@ class ColorPaletteHistoryTest extends TestCase {
         $this->assertArrayHasKey('metadata', $result);
     }
 
+    /**
+     * Test that restore_version reverts to a previous version
+     */
     public function test_restore_version_reverts_to_previous(): void {
-        / Arrange
+        // Arrange
         $palette_id = 123;
         $version_id = 1;
         $options = [
@@ -132,7 +148,7 @@ class ColorPaletteHistoryTest extends TestCase {
                 'version_id' => 3
             ],
             'metadata' => [
-                'restored_at' => '2024-01-20T12:00:00Z',
+                'restored_at' => '2024-12-08T19:04:25-07:00',
                 'restored_by' => 'system'
             ]
         ];
@@ -143,10 +159,10 @@ class ColorPaletteHistoryTest extends TestCase {
             ->with($palette_id, $version_id, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->history->restore_version($palette_id, $version_id, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('success', $result);
         $this->assertArrayHasKey('restored', $result);
@@ -155,8 +171,11 @@ class ColorPaletteHistoryTest extends TestCase {
         $this->assertTrue($result['success']);
     }
 
+    /**
+     * Test that compare_versions shows differences between versions
+     */
     public function test_compare_versions_shows_differences(): void {
-        / Arrange
+        // Arrange
         $palette_id = 123;
         $version_1 = 1;
         $version_2 = 2;
@@ -182,7 +201,7 @@ class ColorPaletteHistoryTest extends TestCase {
                 'after' => ['#FF0000', '#00FF00']
             ],
             'metadata' => [
-                'compared_at' => '2024-01-20T12:00:00Z',
+                'compared_at' => '2024-12-08T19:04:25-07:00',
                 'comparison_type' => 'detailed'
             ]
         ];
@@ -193,10 +212,10 @@ class ColorPaletteHistoryTest extends TestCase {
             ->with($palette_id, $version_1, $version_2, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->history->compare_versions($palette_id, $version_1, $version_2, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('differences', $result);
         $this->assertArrayHasKey('summary', $result);
@@ -205,48 +224,52 @@ class ColorPaletteHistoryTest extends TestCase {
     }
 
     /**
-     * @dataProvider invalidPaletteDataProvider
+     * @dataProvider invalidPaletteProvider
      */
-    public function test_record_version_validates_palette(array $palette): void {
+    public function test_record_version_throws_exception_for_invalid_palette($palette): void {
         $this->history
             ->expects($this->once())
             ->method('record_version')
-            ->with($palette)
+            ->with($palette, [])
             ->willThrowException(new \InvalidArgumentException());
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->history->record_version($palette);
-    }
-
-    public function invalidPaletteDataProvider(): array {
-        return [
-            'empty_palette' => [[]],
-            'missing_name' => [['colors' => ['#FF0000']]],
-            'missing_colors' => [['name' => 'Test']],
-            'invalid_colors' => [['name' => 'Test', 'colors' => 'not-array']]
-        ];
+        $this->history->record_version($palette, []);
     }
 
     /**
-     * @dataProvider invalidVersionIdProvider
+     * @dataProvider invalidVersionProvider
      */
-    public function test_restore_version_validates_version_id(int $version_id): void {
+    public function test_restore_version_throws_exception_for_invalid_version($version_id): void {
         $palette_id = 123;
-
+        
         $this->history
             ->expects($this->once())
             ->method('restore_version')
-            ->with($palette_id, $version_id)
+            ->with($palette_id, $version_id, [])
             ->willThrowException(new \InvalidArgumentException());
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->history->restore_version($palette_id, $version_id);
+        $this->history->restore_version($palette_id, $version_id, []);
     }
 
-    public function invalidVersionIdProvider(): array {
+    public function invalidPaletteProvider(): array {
         return [
-            'negative_id' => [-1],
-            'zero_id' => [0]
+            'empty array' => [[]],
+            'missing colors' => [['name' => 'Test']],
+            'invalid colors' => [['name' => 'Test', 'colors' => ['invalid']]],
+            'non-array input' => ['invalid'],
+            'null input' => [null]
         ];
     }
-} 
+
+    public function invalidVersionProvider(): array {
+        return [
+            'negative version' => [-1],
+            'zero version' => [0],
+            'non-numeric version' => ['invalid'],
+            'null version' => [null],
+            'float version' => [1.5]
+        ];
+    }
+}

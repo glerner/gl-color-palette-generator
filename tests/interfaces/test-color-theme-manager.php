@@ -1,4 +1,11 @@
 <?php
+/**
+ * Color Theme Manager Interface Tests
+ *
+ * @package GLColorPalette
+ * @subpackage Tests\Interfaces
+ * @since 1.0.0
+ */
 
 namespace GLColorPalette\Tests\Interfaces;
 
@@ -12,8 +19,11 @@ class ColorThemeManagerTest extends TestCase {
         $this->manager = $this->createMock(ColorThemeManager::class);
     }
 
+    /**
+     * Test that create_theme returns a valid theme structure
+     */
     public function test_create_theme_returns_valid_structure(): void {
-        / Arrange
+        // Arrange
         $scheme = [
             'primary' => '#FF0000',
             'secondary' => '#00FF00',
@@ -43,7 +53,7 @@ class ColorThemeManagerTest extends TestCase {
                 'tablet' => '1024px'
             ],
             'metadata' => [
-                'created' => '2024-01-20',
+                'created' => '2024-12-08T19:10:46-07:00',
                 'version' => '1.0'
             ]
         ];
@@ -54,19 +64,25 @@ class ColorThemeManagerTest extends TestCase {
             ->with($scheme, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->manager->create_theme($scheme, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('id', $result);
         $this->assertArrayHasKey('light', $result);
         $this->assertArrayHasKey('dark', $result);
         $this->assertArrayHasKey('metadata', $result);
+        $this->assertStringStartsWith('theme_', $result['id']);
+        $this->assertArrayHasKey('primary', $result['light']);
+        $this->assertArrayHasKey('secondary', $result['light']);
     }
 
+    /**
+     * Test that apply_theme returns formatted output for the specified platform
+     */
     public function test_apply_theme_returns_formatted_output(): void {
-        / Arrange
+        // Arrange
         $theme = [
             'light' => [
                 'primary' => '#FF0000',
@@ -89,7 +105,7 @@ class ColorThemeManagerTest extends TestCase {
             ],
             'metadata' => [
                 'format' => 'css',
-                'timestamp' => '2024-01-20'
+                'timestamp' => '2024-12-08T19:10:46-07:00'
             ]
         ];
 
@@ -99,18 +115,24 @@ class ColorThemeManagerTest extends TestCase {
             ->with($theme, $platform, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->manager->apply_theme($theme, $platform, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('content', $result);
         $this->assertArrayHasKey('filename', $result);
         $this->assertArrayHasKey('variables', $result);
+        $this->assertStringContainsString('--primary', $result['content']);
+        $this->assertStringContainsString('--secondary', $result['content']);
+        $this->assertStringEndsWith('.css', $result['filename']);
     }
 
+    /**
+     * Test that validate_theme performs comprehensive validation of theme structure
+     */
     public function test_validate_theme_performs_comprehensive_validation(): void {
-        / Arrange
+        // Arrange
         $theme = [
             'light' => ['primary' => '#FF0000'],
             'dark' => ['primary' => '#CC0000']
@@ -136,19 +158,24 @@ class ColorThemeManagerTest extends TestCase {
             ->with($theme, $platforms)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->manager->validate_theme($theme, $platforms);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('is_valid', $result);
         $this->assertArrayHasKey('compatibility', $result);
         $this->assertArrayHasKey('issues', $result);
         $this->assertIsBool($result['is_valid']);
+        $this->assertTrue($result['is_valid']);
+        $this->assertEmpty($result['issues']);
     }
 
+    /**
+     * Test that generate_variations returns valid theme variants
+     */
     public function test_generate_variations_returns_valid_variants(): void {
-        / Arrange
+        // Arrange
         $theme = [
             'light' => ['primary' => '#FF0000']
         ];
@@ -174,7 +201,7 @@ class ColorThemeManagerTest extends TestCase {
             ],
             'metadata' => [
                 'generation_method' => 'contrast_based',
-                'timestamp' => '2024-01-20'
+                'timestamp' => '2024-12-08T19:10:46-07:00'
             ]
         ];
 
@@ -184,20 +211,25 @@ class ColorThemeManagerTest extends TestCase {
             ->with($theme, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->manager->generate_variations($theme, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('variants', $result);
         $this->assertArrayHasKey('relationships', $result);
         $this->assertArrayHasKey('metadata', $result);
+        $this->assertArrayHasKey('high_contrast', $result['variants']);
+        $this->assertArrayHasKey('seasonal_summer', $result['variants']);
     }
 
     /**
+     * Test that validate_theme identifies invalid theme structures
+     * 
      * @dataProvider invalidThemeProvider
      */
-    public function test_validate_theme_identifies_invalid_themes(array $theme): void {
+    public function test_validate_theme_identifies_invalid_themes($theme): void {
+        // Arrange
         $expected = [
             'is_valid' => false,
             'compatibility' => [],
@@ -211,42 +243,56 @@ class ColorThemeManagerTest extends TestCase {
             ->with($theme)
             ->willReturn($expected);
 
+        // Act
         $result = $this->manager->validate_theme($theme);
+
+        // Assert
         $this->assertFalse($result['is_valid']);
         $this->assertNotEmpty($result['issues']);
-    }
-
-    public function invalidThemeProvider(): array {
-        return [
-            'empty_theme' => [[]],
-            'missing_light' => [['dark' => ['primary' => '#000000']]],
-            'invalid_color' => [['light' => ['primary' => 'invalid']]],
-            'incomplete_theme' => [['light' => []]]
-        ];
+        $this->assertContains('Invalid theme structure', $result['issues']);
     }
 
     /**
+     * Test that apply_theme handles invalid platform specifications
+     * 
      * @dataProvider invalidPlatformProvider
      */
-    public function test_apply_theme_handles_invalid_platforms(
-        array $theme,
-        string $platform
-    ): void {
+    public function test_apply_theme_handles_invalid_platforms($theme, $platform): void {
         $this->manager
             ->expects($this->once())
             ->method('apply_theme')
             ->with($theme, $platform)
-            ->willThrowException(new \InvalidArgumentException());
+            ->willThrowException(new \InvalidArgumentException('Invalid platform specified'));
 
         $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid platform specified');
         $this->manager->apply_theme($theme, $platform);
     }
 
-    public function invalidPlatformProvider(): array {
+    /**
+     * Data provider for invalid theme tests
+     */
+    public function invalidThemeProvider(): array {
         return [
-            'empty_platform' => [['light' => []], ''],
-            'invalid_platform' => [['light' => []], 'invalid'],
-            'unsupported_platform' => [['light' => []], 'legacy']
+            'empty theme' => [[]],
+            'missing light mode' => [['dark' => ['primary' => '#000000']]],
+            'invalid color code' => [['light' => ['primary' => 'invalid']]],
+            'incomplete theme' => [['light' => []]],
+            'null theme' => [null],
+            'non-array theme' => ['invalid']
         ];
     }
-} 
+
+    /**
+     * Data provider for invalid platform tests
+     */
+    public function invalidPlatformProvider(): array {
+        return [
+            'empty platform' => [['light' => ['primary' => '#FF0000']], ''],
+            'invalid platform' => [['light' => ['primary' => '#FF0000']], 'invalid'],
+            'unsupported platform' => [['light' => ['primary' => '#FF0000']], 'legacy'],
+            'numeric platform' => [['light' => ['primary' => '#FF0000']], '123'],
+            'null platform' => [['light' => ['primary' => '#FF0000']], null]
+        ];
+    }
+}
