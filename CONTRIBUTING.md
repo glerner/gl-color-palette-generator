@@ -2,14 +2,20 @@
 
 Thank you for your interest in contributing to the Color Palette Generator! This document provides guidelines and steps for contributing.
 
+## Documentation
+
+The following documentation is available to help you:
+
+1. [API Documentation](docs/API.md) - REST API endpoints and usage
+2. [Database Setup](docs/database-setup.md) - MySQL setup for running tests
+
 ## Development Setup
 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/gl-color-palette-generator.git
+git clone https://github.com/glerner/gl-color-palette-generator.git
 ```
-
 
 2. Set up a local WordPress development environment (we recommend [Local](https://localwp.com/) or [VVV](https://varyingvagrantvagrants.org/))
 
@@ -19,30 +25,33 @@ git clone https://github.com/yourusername/gl-color-palette-generator.git
 ln -s /path/to/gl-color-palette-generator /path/to/wordpress/wp-content/plugins/
 ```
 
+## Testing
 
-4. Install dependencies:
+1. Set up the test environment:
 
 ```bash
-composer install
+./bin/setup-plugin-tests.sh
 ```
 
+This script will:
+- Install composer dependencies
+- Rebuild the Lando environment
+- Install the WordPress test suite
+- Configure the test database
 
-5. Activate the plugin in WordPress admin
+For detailed information about the test database setup, see [docs/database-setup.md](docs/database-setup.md).
 
-6. For development testing, you can set test configuration in wp-config.php:
+2. Run the tests:
 
-```php
-define('GL_COLOR_PALETTE_TEST_API_KEY', 'your_test_key_here');
-define('GL_COLOR_PALETTE_AI_PROVIDER', 'openai'); / Available: 'openai', 'anthropic'
-
-/ Optional: Provider-specific settings
-define('GL_COLOR_PALETTE_OPENAI_MODEL', 'gpt-4'); / Default: gpt-4
-define('GL_COLOR_PALETTE_ANTHROPIC_MODEL', 'claude-3-sonnet'); / Default: claude-3-sonnet
+```bash
+lando test
 ```
 
-## Development Environment Details
+## Contributing Guidelines
 
-### WordPress Development Settings
+### Development Environment Details
+
+#### WordPress Development Settings
 
 1. Enable debug mode in wp-config.php:
 

@@ -58,14 +58,14 @@ class ColorPaletteExporterTest extends TestCase {
         $output = $this->exporter->exportPalette($this->test_palette, 'scss');
 
         $this->assertStringContainsString('$color-0: #FF0000', $output);
-        $this->assertStringContainsString('/ Test Palette', $output);
+        $this->assertStringContainsString('// Test Palette', $output);
     }
 
     public function test_export_less(): void {
         $output = $this->exporter->exportPalette($this->test_palette, 'less');
 
         $this->assertStringContainsString('@color-0: #FF0000', $output);
-        $this->assertStringContainsString('/ Test Palette', $output);
+        $this->assertStringContainsString('// Test Palette', $output);
     }
 
     public function test_export_ase(): void {
