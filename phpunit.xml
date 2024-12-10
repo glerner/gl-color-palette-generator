@@ -1,28 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <phpunit
     bootstrap="tests/bootstrap.php"
     backupGlobals="false"
     colors="true"
     convertErrorsToExceptions="true"
     convertNoticesToExceptions="true"
-    convertWarningsToExceptions="true">
+    convertWarningsToExceptions="true"
+    >
     <testsuites>
-        <testsuite name="unit">
-            <directory suffix=".php">./tests/providers</directory>
-            <directory suffix=".php">./tests/color-management</directory>
-            <directory suffix=".php">./tests/core</directory>
-            <directory suffix=".php">./tests/utils</directory>
-            <directory suffix=".php">./tests/admin</directory>
-        </testsuite>
-        <testsuite name="integration">
-            <directory suffix=".php">./tests/integration</directory>
-            <directory suffix=".php">./tests/api</directory>
-            <directory suffix=".php">./tests/interfaces</directory>
+        <testsuite name="sample">
+            <directory prefix="test-" suffix=".php">./tests/</directory>
         </testsuite>
     </testsuites>
-    <php>
-        <env name="WP_TESTS_DIR" value="/app/wordpress-phpunit"/>
-        <env name="WP_TESTS_INTEGRATION" value="1"/>
-        <env name="WP_CONTENT_DIR" value="/app/wordpress/wp-content"/>
-    </php>
 </phpunit>

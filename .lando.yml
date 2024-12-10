@@ -1,0 +1,29 @@
+name: gl-color-palette-generator
+recipe: wordpress
+config:
+  webroot: .
+  php: '8.1'
+  xdebug: true
+
+services:
+  appserver:
+    type: php:8.1
+    xdebug: true
+    build_as_root:
+      - mkdir -p /var/lib/apt/lists/partial
+      - chmod 755 /var/lib/apt/lists/partial
+      - touch /tmp/xdebug.log
+      - chmod 666 /tmp/xdebug.log
+    config:
+      php: .lando/php.ini
+    environment:
+      WP_TESTS_DIR: /app/wordpress-phpunit
+      XDEBUG_MODE: debug
+      XDEBUG_CONFIG: "client_host=host.docker.internal client_port=9003 log=/tmp/xdebug.log"
+
+tooling:
+  test:
+    service: appserver
+    cmd: /app/wp-content/plugins/gl-color-palette-generator/vendor/bin/phpunit -c /app/wp-content/plugins/gl-color-palette-generator/phpunit.xml
+    env:
+      WP_TESTS_DIR: /app/wordpress-phpunit
