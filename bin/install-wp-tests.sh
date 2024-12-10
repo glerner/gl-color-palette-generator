@@ -17,6 +17,15 @@ TMPDIR=$(echo $TMPDIR | sed -e "s/\/$//")
 WP_TESTS_DIR=${WP_TESTS_DIR-/app/wordpress-phpunit}
 WP_CORE_DIR=${WP_CORE_DIR-/app/wordpress/}
 
+# Debug output
+echo "=== Debug Information ==="
+echo "WP_VERSION = ${WP_VERSION}"
+echo "WP_TESTS_DIR = ${WP_TESTS_DIR}"
+echo "DB_HOST = ${DB_HOST}"
+echo "=== End Debug Information ==="
+
+set -ex
+
 download() {
     if [ `which curl` ]; then
         curl -s "$1" > "$2";
@@ -39,6 +48,7 @@ elif [[ $WP_VERSION =~ [0-9]+\.[0-9]+\.[0-9]+ ]]; then
 elif [[ $WP_VERSION == 'nightly' || $WP_VERSION == 'trunk' ]]; then
     WP_TESTS_TAG="trunk"
 else
+    # http serves a single offer, whereas https serves multiple. we only want one
     download http://api.wordpress.org/core/version-check/1.7/ /tmp/wp-latest.json
     LATEST_VERSION=$(grep -o '"version":"[^"]*' /tmp/wp-latest.json | sed 's/"version":"//')
     if [[ -z "$LATEST_VERSION" ]]; then
@@ -48,12 +58,17 @@ else
     WP_TESTS_TAG="tags/$LATEST_VERSION"
 fi
 
+echo "=== Debug Information ==="
+echo "WP_VERSION = ${WP_VERSION}"
+echo "WP_TESTS_TAG = ${WP_TESTS_TAG}"
+echo "WP_TESTS_DIR = ${WP_TESTS_DIR}"
+echo "DB_HOST = ${DB_HOST}"
+echo "=== End Debug Information ==="
+
 if [ -d $WP_TESTS_DIR ]; then
     echo "Removing existing test directory..."
     rm -rf $WP_TESTS_DIR
 fi
-
-set -ex
 
 install_test_suite() {
     # portable in-place argument for both GNU sed and Mac OSX sed
@@ -67,16 +82,27 @@ install_test_suite() {
     if [ ! -d $WP_TESTS_DIR ]; then
         # set up testing suite
         mkdir -p $WP_TESTS_DIR
-        
-        # Clone WordPress test suite from GitHub
-        git clone --depth=1 https://github.com/WordPress/wordpress-develop.git /tmp/wordpress-develop
-        cp -r /tmp/wordpress-develop/tests/phpunit/includes/ $WP_TESTS_DIR/includes
-        cp -r /tmp/wordpress-develop/tests/phpunit/data/ $WP_TESTS_DIR/data
-        rm -rf /tmp/wordpress-develop
+        echo "Cloning WordPress test suite from https://github.com/WordPress/wordpress-develop.git..."
+        git clone --depth=1 https://github.com/WordPress/wordpress-develop.git /tmp/wordpress-tests-lib
+        echo "Moving test files to $WP_TESTS_DIR..."
+        mv /tmp/wordpress-tests-lib/tests/phpunit/includes $WP_TESTS_DIR/
+        mv /tmp/wordpress-tests-lib/tests/phpunit/data $WP_TESTS_DIR/
+        # Ensure correct permissions for www-data user
+        echo "Setting permissions..."
+        chown -R www-data:www-data $WP_TESTS_DIR
+        chmod -R 755 $WP_TESTS_DIR
+        # Cleaning up...
+        rm -rf /tmp/wordpress-tests-lib
+        echo "Verifying test suite installation..."
+        if [ ! -d "$WP_TESTS_DIR/includes" ] || [ ! -f "$WP_TESTS_DIR/includes/functions.php" ]; then
+            echo "Test suite files not found in $WP_TESTS_DIR/includes"
+            ls -la $WP_TESTS_DIR/includes
+            exit 1
+        fi
     fi
 
     if [ ! -f wp-tests-config.php ]; then
-        download https://raw.githubusercontent.com/WordPress/wordpress-develop/${WP_TESTS_TAG}/wp-tests-config-sample.php "$WP_TESTS_DIR"/wp-tests-config.php
+        download https://develop.svn.wordpress.org/tags/$WP_VERSION/wp-tests-config-sample.php "$WP_TESTS_DIR"/wp-tests-config.php
         # remove all forward slashes in the end
         WP_CORE_DIR=$(echo $WP_CORE_DIR | sed "s:/\+$::")
         sed $ioption "s:dirname( __FILE__ ) . '/src/':'$WP_CORE_DIR/':" "$WP_TESTS_DIR"/wp-tests-config.php
@@ -86,11 +112,9 @@ install_test_suite() {
         sed $ioption "s/yourpasswordhere/$DB_PASS/" "$WP_TESTS_DIR"/wp-tests-config.php
         sed $ioption "s|localhost|${DB_HOST}|" "$WP_TESTS_DIR"/wp-tests-config.php
         
-        # Add required WordPress test constants
-        echo "define( 'WP_TESTS_DOMAIN', 'example.org' );" >> "$WP_TESTS_DIR"/wp-tests-config.php
-        echo "define( 'WP_TESTS_EMAIL', 'admin@example.org' );" >> "$WP_TESTS_DIR"/wp-tests-config.php
-        echo "define( 'WP_TESTS_TITLE', 'Test Blog' );" >> "$WP_TESTS_DIR"/wp-tests-config.php
-        echo "define( 'WP_PHP_BINARY', 'php' );" >> "$WP_TESTS_DIR"/wp-tests-config.php
+        # Ensure config file has correct permissions
+        chown www-data:www-data "$WP_TESTS_DIR"/wp-tests-config.php
+        chmod 644 "$WP_TESTS_DIR"/wp-tests-config.php
     fi
 }
 
