@@ -5,7 +5,7 @@ use GLColorPalette\Providers\Cohere_Provider;
 use WP_Mock;
 
 class Cohere_Provider_Test extends \WP_Mock\Tools\TestCase {
-    private $provider;
+    protected $provider;
 
     public function setUp(): void {
         parent::setUp();

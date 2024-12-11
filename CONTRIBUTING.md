@@ -17,13 +17,32 @@ The following documentation is available to help you:
 git clone https://github.com/glerner/gl-color-palette-generator.git
 ```
 
-2. Set up a local WordPress development environment (we recommend [Local](https://localwp.com/) or [VVV](https://varyingvagrantvagrants.org/))
-
-3. Symlink or copy the plugin to your WordPress plugins directory:
+2. Set up Lando development environment:
 
 ```bash
-ln -s /path/to/gl-color-palette-generator /path/to/wordpress/wp-content/plugins/
+# Copy the example Lando configuration
+cp .lando.example.yml ~/sites/wordpress/.lando.yml
+
+# Start Lando
+cd ~/sites/wordpress && lando start
+
+# Install WordPress and the plugin
+cd ~/sites/wordpress && lando install:wordpress
 ```
+
+3. Set up the test environment:
+
+```bash
+./bin/setup-plugin-tests.sh
+```
+
+This script will:
+- Install composer dependencies
+- Rebuild the Lando environment
+- Install the WordPress test suite
+- Configure the test database
+
+For detailed information about the test database setup, see [docs/database-setup.md](docs/database-setup.md).
 
 ## Testing
 
@@ -43,8 +62,96 @@ For detailed information about the test database setup, see [docs/database-setup
 
 2. Run the tests:
 
+The project uses both WP_Mock and WP_UnitTestCase for different types of tests:
+
 ```bash
-lando test
+# Run all tests
+cd ~/sites/wordpress && lando test
+
+# Run specific test suites
+cd ~/sites/wordpress && LANDO_TEST_ARGS="--group wp-mock" lando test     # Provider and API tests
+cd ~/sites/wordpress && LANDO_TEST_ARGS="--group wp-unit" lando test     # WordPress core functionality tests
+cd ~/sites/wordpress && LANDO_TEST_ARGS="--group integration" lando test  # Integration tests
+```
+
+### Test Organization
+
+Tests are organized into three main suites:
+
+1. **WP_Mock Tests** (`--group wp-mock`):
+   - Located in `tests/providers` and `tests/api`
+   - Used for testing external API interactions and isolated functionality
+   - Doesn't require WordPress database or functions
+   - Faster execution and more precise control
+
+2. **WP_UnitTestCase Tests** (`--group wp-unit`):
+   - Located in `tests/core`, `tests/admin`, and `tests/settings`
+   - Used for testing WordPress-specific functionality
+   - Requires WordPress test environment
+   - Tests actual WordPress hooks, filters, and database operations
+
+3. **Integration Tests** (`--group integration`):
+   - Located in `tests/integration`
+   - Tests full system integration
+   - Requires complete WordPress environment
+
+### Creating New Tests
+
+Choose the appropriate test type based on what you're testing:
+
+- Use **WP_Mock** when testing:
+  - External API interactions
+  - Complex business logic
+  - Code that doesn't heavily interact with WordPress core
+  - Functions that need precise control over return values
+
+- Use **WP_UnitTestCase** when testing:
+  - WordPress hooks and filters
+  - Database operations
+  - WordPress core function integration
+  - Plugin activation/deactivation
+  - WordPress admin interfaces
+  - Theme integration
+
+Example WP_Mock test:
+```php
+class My_Provider_Test extends \WP_Mock\Tools\TestCase {
+    protected $provider;
+
+    public function setUp(): void {
+        parent::setUp();
+        WP_Mock::setUp();
+        $this->provider = new My_Provider(['api_key' => 'test_key']);
+    }
+
+    public function tearDown(): void {
+        WP_Mock::tearDown();
+        parent::tearDown();
+    }
+
+    public function test_api_call() {
+        WP_Mock::userFunction('wp_remote_post')->once()->andReturn([
+            'response' => ['code' => 200],
+            'body' => json_encode(['success' => true])
+        ]);
+
+        $result = $this->provider->make_api_call();
+        $this->assertTrue($result);
+    }
+}
+```
+
+Example WP_UnitTestCase test:
+```php
+class My_WordPress_Test extends WP_UnitTestCase {
+    public function test_wordpress_integration() {
+        $post_id = $this->factory->post->create();
+        $this->assertGreaterThan(0, $post_id);
+        
+        $post = get_post($post_id);
+        $this->assertInstanceOf('WP_Post', $post);
+    }
+}
 ```
 
 ## Contributing Guidelines
@@ -60,7 +167,6 @@ define('WP_DEBUG', true);
 define('WP_DEBUG_LOG', true);
 define('WP_DEBUG_DISPLAY', true);
 ```
-
 
 2. Install recommended development plugins:
 - Query Monitor

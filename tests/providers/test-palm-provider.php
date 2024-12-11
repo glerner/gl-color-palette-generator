@@ -5,7 +5,7 @@ use GLColorPalette\Providers\Palm_Provider;
 use WP_Mock\Tools\TestCase;
 
 class Palm_Provider_Test extends TestCase {
-    private $provider;
+    protected $provider;
 
     public function setUp(): void {
         parent::setUp();

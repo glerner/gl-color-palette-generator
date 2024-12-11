@@ -3,8 +3,8 @@ namespace GLColorPalette\Tests\Integration;
 
 use GLColorPalette\Providers\Cohere_Provider;
 
-class Cohere_Integration_Test extends Provider_Integration_Test_Case {
-    protected function get_test_credentials() {
+class Test_Cohere_Integration extends Test_Provider_Integration {
+    protected function get_test_credentials(): array {
         return [
             'api_key' => getenv('COHERE_API_KEY')
         ];

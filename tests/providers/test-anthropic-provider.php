@@ -5,7 +5,7 @@ use GLColorPalette\Providers\Anthropic_Provider;
 use WP_Mock;
 
 class Anthropic_Provider_Test extends \WP_Mock\Tools\TestCase {
-    private $provider;
+    protected $provider;
 
     public function setUp(): void {
         parent::setUp();

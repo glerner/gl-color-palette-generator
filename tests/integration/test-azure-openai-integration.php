@@ -3,8 +3,8 @@ namespace GLColorPalette\Tests\Integration;
 
 use GLColorPalette\Providers\Azure_OpenAI_Provider;
 
-class Azure_OpenAI_Integration_Test extends Provider_Integration_Test_Case {
-    protected function get_test_credentials() {
+class Test_Azure_OpenAI_Integration extends Test_Provider_Integration {
+    protected function get_test_credentials(): array {
         return [
             'api_key' => getenv('AZURE_OPENAI_API_KEY'),
             'resource_name' => getenv('AZURE_OPENAI_RESOURCE'),

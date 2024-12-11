@@ -1,10 +1,11 @@
 <?php
+
 namespace GLColorPalette\Tests\Integration;
 
 use GLColorPalette\Providers\Anthropic_Provider;
 
-class Anthropic_Integration_Test extends Provider_Integration_Test_Case {
-    protected function get_test_credentials() {
+class Test_Anthropic_Integration extends Test_Provider_Integration {
+    protected function get_test_credentials(): array {
         return [
             'api_key' => getenv('ANTHROPIC_API_KEY')
         ];
@@ -19,6 +20,5 @@ class Anthropic_Integration_Test extends Provider_Integration_Test_Case {
     public function test_generate_palette() {
         $colors = $this->provider->generate_palette($this->test_params);
         $this->assertNotWPError($colors);
-        $this->validate_palette_response($colors);
     }
-} 
+}

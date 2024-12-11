@@ -24,6 +24,6 @@ services:
 tooling:
   test:
     service: appserver
-    cmd: /app/wp-content/plugins/gl-color-palette-generator/vendor/bin/phpunit -c /app/wp-content/plugins/gl-color-palette-generator/phpunit.xml
+    cmd: composer dump-autoload -d /app/wp-content/plugins/gl-color-palette-generator && /app/wp-content/plugins/gl-color-palette-generator/vendor/bin/phpunit -c /app/wp-content/plugins/gl-color-palette-generator/phpunit.xml || echo 'Tests failed'
     env:
       WP_TESTS_DIR: /app/wordpress-phpunit

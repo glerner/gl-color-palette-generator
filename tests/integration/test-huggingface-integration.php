@@ -1,10 +1,11 @@
 <?php
+
 namespace GLColorPalette\Tests\Integration;
 
 use GLColorPalette\Providers\HuggingFace_Provider;
 
-class HuggingFace_Integration_Test extends Provider_Integration_Test_Case {
-    protected function get_test_credentials() {
+class Test_HuggingFace_Integration extends Test_Provider_Integration {
+    protected function get_test_credentials(): array {
         return [
             'api_key' => getenv('HUGGINGFACE_API_KEY'),
             'model_id' => getenv('HUGGINGFACE_MODEL_ID')

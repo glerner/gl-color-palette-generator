@@ -8,8 +8,31 @@
     convertWarningsToExceptions="true"
     >
     <testsuites>
-        <testsuite name="sample">
-            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests/</directory>
+        <testsuite name="all">
+            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests</directory>
         </testsuite>
     </testsuites>
+    <groups>
+        <group>
+            <include>
+                <group>wp-mock</group>
+            </include>
+            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests/providers</directory>
+            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests/api</directory>
+        </group>
+        <group>
+            <include>
+                <group>wp-unit</group>
+            </include>
+            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests/core</directory>
+            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests/admin</directory>
+            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests/settings</directory>
+        </group>
+        <group>
+            <include>
+                <group>integration</group>
+            </include>
+            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests/integration</directory>
+        </group>
+    </groups>
 </phpunit>

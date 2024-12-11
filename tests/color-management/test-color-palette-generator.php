@@ -1,155 +1,214 @@
 <?php
-declare(strict_types=1);
-
 /**
- * Tests for Color_Palette_Generator class
+ * Test Color Palette Generator Class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Color_Management
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
  */
 
 namespace GL_Color_Palette_Generator\Tests\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator;
-use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
 use GL_Color_Palette_Generator\Settings\Settings_Manager;
 use GL_Color_Palette_Generator\AI\AI_Provider_Interface;
 use PHPUnit\Framework\TestCase;
+use Brain\Monkey\Functions;
+use Mockery;
 
 /**
- * Color Palette Generator test case
+ * Class Test_Color_Palette_Generator
  */
 class Test_Color_Palette_Generator extends TestCase {
+    use \Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+
     /**
-     * Mock settings manager
+     * Settings manager mock
      *
-     * @var Settings_Manager|\PHPUnit\Framework\MockObject\MockObject
+     * @var Mockery\MockInterface
      */
     private $settings;
 
     /**
-     * Mock AI provider
+     * AI provider mock
      *
-     * @var AI_Provider_Interface|\PHPUnit\Framework\MockObject\MockObject
+     * @var Mockery\MockInterface
      */
     private $ai_provider;
 
     /**
-     * Set up test environment
+     * Setup test environment
      */
     protected function setUp(): void {
         parent::setUp();
+        \Brain\Monkey\setUp();
 
         // Mock settings
-        $this->settings = $this->createMock(Settings_Manager::class);
-        $this->settings->method('get_setting')
-            ->willReturnMap([
-                ['ai_provider', 'openai', 'openai'],
-                ['api_key', null, 'test_key'],
-                ['cache_duration', 3600, 3600]
-            ]);
+        $this->settings = Mockery::mock(Settings_Manager::class);
+        $this->settings->shouldReceive('get_setting')
+            ->with('ai_provider', 'openai')
+            ->andReturn('openai');
+        $this->settings->shouldReceive('get_setting')
+            ->with('api_key')
+            ->andReturn('test_key');
 
-        // Mock AI provider
-        $this->ai_provider = $this->createMock(AI_Provider_Interface::class);
+        // Mock cache functions
+        Functions\when('wp_cache_get')->justReturn(false);
+        Functions\when('wp_cache_set')->justReturn(true);
+    }
+
+    /**
+     * Teardown test environment
+     */
+    protected function tearDown(): void {
+        Mockery::close();
+        \Brain\Monkey\tearDown();
+        parent::tearDown();
     }
 
     /**
      * Test successful palette generation
      */
-    public function test_generate_from_prompt_success(): void {
-        $prompt = 'Test prompt';
+    public function test_generate_from_prompt_success() {
         $expected_colors = [
-            '#FF0000',
-            '#00FF00',
-            '#0000FF',
-            '#FFFF00',
-            '#FF00FF'
+            '#ff0000',
+            '#00ff00',
+            '#0000ff',
+            '#ffff00',
+            '#ff00ff'
         ];
 
-        $this->ai_provider->method('generate_response')
-            ->willReturn(implode("\n", $expected_colors));
+        // Mock AI response
+        $ai_response = implode("\n", $expected_colors);
+        $this->ai_provider = Mockery::mock(AI_Provider_Interface::class);
+        $this->ai_provider->shouldReceive('generate_response')
+            ->once()
+            ->andReturn($ai_response);
 
-        $generator = new Color_Palette_Generator();
-        $result = $generator->generate_from_prompt($prompt);
+        // Create generator with mocked dependencies
+        $generator = $this->createGeneratorWithMocks();
 
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('colors', $result);
-        $this->assertEquals($expected_colors, $result['colors']);
+        $palette = $generator->generate_from_prompt('Create a vibrant color scheme');
+
+        $this->assertCount(5, $palette);
+        $this->assertEquals($expected_colors, $palette);
     }
 
     /**
-     * Test empty prompt validation
+     * Test palette generation with invalid AI response
      */
-    public function test_generate_from_prompt_empty_prompt(): void {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Prompt cannot be empty');
+    public function test_generate_from_prompt_invalid_response() {
+        $this->ai_provider = Mockery::mock(AI_Provider_Interface::class);
+        $this->ai_provider->shouldReceive('generate_response')
+            ->once()
+            ->andReturn('Invalid response without proper hex codes');
 
-        $generator = new Color_Palette_Generator();
-        $generator->generate_from_prompt('');
+        $generator = $this->createGeneratorWithMocks();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Invalid AI response format');
+
+        $generator->generate_from_prompt('Create a color scheme');
     }
 
     /**
-     * Test invalid color response
+     * Test palette generation with similar colors
      */
-    public function test_generate_from_prompt_invalid_colors(): void {
-        $prompt = 'Test prompt';
-        $invalid_colors = [
-            'not a color',
-            '#GG0000',
-            '#12345',
-            'RGB(255,0,0)',
-            'red'
+    public function test_generate_from_prompt_similar_colors() {
+        $similar_colors = [
+            '#ff0000',
+            '#ff0505',
+            '#ff0a0a',
+            '#ff0f0f',
+            '#ff1414'
         ];
 
-        $this->ai_provider->method('generate_response')
-            ->willReturn(implode("\n", $invalid_colors));
+        $this->ai_provider = Mockery::mock(AI_Provider_Interface::class);
+        $this->ai_provider->shouldReceive('generate_response')
+            ->once()
+            ->andReturn(implode("\n", $similar_colors));
 
-        $this->expectException(PaletteGenerationException::class);
-        $this->expectExceptionMessage('Invalid color format');
+        $generator = $this->createGeneratorWithMocks();
 
-        $generator = new Color_Palette_Generator();
-        $generator->generate_from_prompt($prompt);
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Generated colors are not visually distinct enough');
+
+        $generator->generate_from_prompt('Create a red color scheme');
     }
 
     /**
-     * Test AI provider error handling
+     * Test palette generation with cached result
      */
-    public function test_generate_from_prompt_ai_error(): void {
-        $prompt = 'Test prompt';
-        $error_message = 'API error';
-
-        $this->ai_provider->method('generate_response')
-            ->willThrowException(new \Exception($error_message));
-
-        $this->expectException(PaletteGenerationException::class);
-        $this->expectExceptionMessage('Failed to generate colors: ' . $error_message);
-
-        $generator = new Color_Palette_Generator();
-        $generator->generate_from_prompt($prompt);
-    }
-
-    /**
-     * Test cache functionality
-     */
-    public function test_generate_from_prompt_cache(): void {
-        $prompt = 'Test prompt';
+    public function test_generate_from_prompt_cached() {
         $cached_palette = [
-            'colors' => ['#FF0000', '#00FF00', '#0000FF'],
-            'metadata' => ['theme' => 'test']
+            '#ff0000',
+            '#00ff00',
+            '#0000ff',
+            '#ffff00',
+            '#ff00ff'
         ];
 
-        // Mock cache functions
-        global $wp_object_cache;
-        $wp_object_cache = $this->createMock(\WP_Object_Cache::class);
-        $wp_object_cache->method('get')
-            ->willReturn(json_encode($cached_palette));
+        Functions\when('wp_cache_get')->justReturn(json_encode($cached_palette));
 
-        $generator = new Color_Palette_Generator();
-        $result = $generator->generate_from_prompt($prompt);
+        $generator = $this->createGeneratorWithMocks();
 
-        $this->assertEquals($cached_palette, $result);
-        // Verify AI provider was not called
-        $this->ai_provider->expects($this->never())
-            ->method('generate_response');
+        $palette = $generator->generate_from_prompt('Create a vibrant color scheme');
+
+        $this->assertEquals($cached_palette, $palette);
+    }
+
+    /**
+     * Test system prompt formatting
+     */
+    public function test_system_prompt_format() {
+        $this->ai_provider = Mockery::mock(AI_Provider_Interface::class);
+        $this->ai_provider->shouldReceive('generate_response')
+            ->once()
+            ->with(
+                Mockery::type('string'),
+                Mockery::pattern('/Generate a color palette for:.*\nProvide exactly 5 colors/')
+            )
+            ->andReturn("#ff0000\n#00ff00\n#0000ff\n#ffff00\n#ff00ff");
+
+        $generator = $this->createGeneratorWithMocks();
+        $generator->generate_from_prompt('Test prompt');
+    }
+
+    /**
+     * Test error handling for AI provider failure
+     */
+    public function test_ai_provider_failure() {
+        $this->ai_provider = Mockery::mock(AI_Provider_Interface::class);
+        $this->ai_provider->shouldReceive('generate_response')
+            ->once()
+            ->andThrow(new \Exception('AI service unavailable'));
+
+        $generator = $this->createGeneratorWithMocks();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Failed to generate palette: AI service unavailable');
+
+        $generator->generate_from_prompt('Test prompt');
+    }
+
+    /**
+     * Create generator instance with mocked dependencies
+     *
+     * @return Color_Palette_Generator
+     */
+    private function createGeneratorWithMocks() {
+        $reflection = new \ReflectionClass(Color_Palette_Generator::class);
+
+        $generator = $reflection->newInstanceWithoutConstructor();
+
+        $settings_prop = $reflection->getProperty('settings');
+        $settings_prop->setAccessible(true);
+        $settings_prop->setValue($generator, $this->settings);
+
+        $ai_provider_prop = $reflection->getProperty('ai_provider');
+        $ai_provider_prop->setAccessible(true);
+        $ai_provider_prop->setValue($generator, $this->ai_provider);
+
+        return $generator;
     }
 }

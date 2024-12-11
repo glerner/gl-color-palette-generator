@@ -27,6 +27,7 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "GLColorPalette\\Tests\\Integration\\": "tests/integration/",
             "GLColorPalette\\Tests\\": "tests/"
         }
     },

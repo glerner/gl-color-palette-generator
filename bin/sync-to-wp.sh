@@ -6,11 +6,22 @@ WP_ROOT="/home/george/sites/wordpress"
 PLUGIN_DEST="${WP_ROOT}/wp-content/plugins/gl-color-palette-generator"
 WP_TESTS_DIR="${WP_ROOT}/wordpress-phpunit"
 
+# Check if .lando.example.yml is newer than WordPress .lando.yml
+if [ -f "${WP_ROOT}/.lando.yml" ] && [ -f "${PLUGIN_SOURCE}/.lando.example.yml" ]; then
+    if [ "${PLUGIN_SOURCE}/.lando.example.yml" -nt "${WP_ROOT}/.lando.yml" ]; then
+        echo "⚠️  Warning: .lando.example.yml has been updated."
+        echo "   Please review changes and update your .lando.yml:"
+        echo "   cp ${PLUGIN_SOURCE}/.lando.example.yml ${WP_ROOT}/.lando.yml"
+        echo ""
+    fi
+fi
+
 # Sync plugin files to WordPress plugins directory
 rsync -av --delete \
     --exclude=.git/ \
     --exclude=.github/ \
     --exclude=vendor/ \
+    --exclude=.lando.yml \
     "${PLUGIN_SOURCE}/" \
     "${PLUGIN_DEST}/"
 
