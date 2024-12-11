@@ -13,7 +13,7 @@ class ColorExporterTest extends TestCase {
     }
 
     public function test_export_palette_returns_valid_structure(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'colors' => ['#FF0000', '#00FF00', '#0000FF'],
             'names' => ['Primary Red', 'Accent Green', 'Background Blue']
@@ -40,10 +40,10 @@ class ColorExporterTest extends TestCase {
             ->with($palette, $format, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->exporter->export_palette($palette, $format, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('content', $result);
         $this->assertArrayHasKey('filename', $result);
@@ -52,7 +52,7 @@ class ColorExporterTest extends TestCase {
     }
 
     public function test_get_supported_formats_returns_format_list(): void {
-        / Arrange
+        // Arrange
         $expected = [
             'css' => [
                 'name' => 'CSS Variables',
@@ -79,10 +79,10 @@ class ColorExporterTest extends TestCase {
             ->method('get_supported_formats')
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->exporter->get_supported_formats();
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('css', $result);
         $this->assertArrayHasKey('scss', $result);
@@ -91,7 +91,7 @@ class ColorExporterTest extends TestCase {
     }
 
     public function test_validate_for_export_returns_validation_results(): void {
-        / Arrange
+        // Arrange
         $palette = ['#FF0000', '#00FF00', '#0000FF'];
         $format = 'css';
         $expected = [
@@ -106,10 +106,10 @@ class ColorExporterTest extends TestCase {
             ->with($palette, $format)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->exporter->validate_for_export($palette, $format);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('is_valid', $result);
         $this->assertArrayHasKey('errors', $result);
@@ -118,7 +118,7 @@ class ColorExporterTest extends TestCase {
     }
 
     public function test_generate_preview_returns_preview_content(): void {
-        / Arrange
+        // Arrange
         $palette = ['#FF0000', '#00FF00', '#0000FF'];
         $format = 'css';
         $options = ['variable_prefix' => 'gl'];
@@ -130,10 +130,10 @@ class ColorExporterTest extends TestCase {
             ->with($palette, $format, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->exporter->generate_preview($palette, $format, $options);
 
-        / Assert
+        // Assert
         $this->assertIsString($result);
         $this->assertNotEmpty($result);
     }

@@ -25,6 +25,9 @@ Thumbs.db
 /build/
 /dist/
 
+# Build output
+/dist/
+
 # Temporary files
 *.log
 *.cache

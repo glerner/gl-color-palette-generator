@@ -40,22 +40,32 @@ services:
 tooling:
   composer:
     service: appserver
-  phpunit:
+  setup-wp-tests:
     service: appserver
-    description: Run PHPUnit tests including browser and javascript tests
-    cmd: "/app/vendor/bin/phpunit -c /app/core/phpunit.xml.dist"
+    description: Set up WordPress test environment
+    cmd: bash /app/wp-content/plugins/gl-color-palette-generator/bin/install-wp-tests.sh wordpress_test wordpress wordpress database latest true
   test:
     service: appserver
-    description: Run PHPUnit tests
-    cmd: composer --working-dir=/app/wp-content/plugins/gl-color-palette-generator test -- $LANDO_TEST_ARGS
-  install-wp-tests:
-    service: appserver
-    description: Install WordPress test suite
+    description: Run plugin tests
     cmd: |
-      bash /app/wp-content/plugins/gl-color-palette-generator/bin/install-wp-tests.sh wordpress_test wordpress wordpress database latest true
-  install:wordpress:
+      cd /app/wp-content/plugins/gl-color-palette-generator && \
+      composer dump-autoload && \
+      if [ "$LANDO_TEST_GROUP" = "wp-mock" ]; then
+        vendor/bin/phpunit --group wp-mock
+      else
+        vendor/bin/phpunit --exclude-group wp-mock
+      fi
+  test:wp-mock:
     service: appserver
-    cmd:
-      - wp core download && wp config create --dbname=wordpress --dbuser=wordpress --dbpass=wordpress --dbhost=database
-      - wp core install --url="https://gl-color-palette.lndo.site" --title="GL Color Palette Generator" --admin_user="admin" --admin_password="admin" --admin_email="admin@gl-color-palette.lndo.site"
-      - wp plugin install gl-color-palette-generator --activate
+    description: Run wp-mock tests only
+    cmd: |
+      cd /app/wp-content/plugins/gl-color-palette-generator && \
+      composer dump-autoload && \
+      vendor/bin/phpunit --group wp-mock
+  test:wp:
+    service: appserver
+    description: Run WordPress integration tests
+    cmd: |
+      cd /app/wp-content/plugins/gl-color-palette-generator && \
+      composer dump-autoload && \
+      vendor/bin/phpunit --exclude-group wp-mock

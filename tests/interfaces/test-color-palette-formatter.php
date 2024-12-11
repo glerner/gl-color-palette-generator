@@ -13,7 +13,7 @@ class ColorPaletteFormatterTest extends TestCase {
     }
 
     public function test_format_colors_converts_values(): void {
-        / Arrange
+        // Arrange
         $colors = ['#FF0000', '#00FF00'];
         $format = 'rgb';
         $options = [
@@ -43,10 +43,10 @@ class ColorPaletteFormatterTest extends TestCase {
             ->with($colors, $format, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->formatter->format_colors($colors, $format, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('formatted', $result);
         $this->assertArrayHasKey('original', $result);
@@ -55,7 +55,7 @@ class ColorPaletteFormatterTest extends TestCase {
     }
 
     public function test_format_structure_organizes_data(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00'],
@@ -97,10 +97,10 @@ class ColorPaletteFormatterTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->formatter->format_structure($palette, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('formatted', $result);
         $this->assertArrayHasKey('structure', $result);
@@ -109,7 +109,7 @@ class ColorPaletteFormatterTest extends TestCase {
     }
 
     public function test_format_metadata_processes_fields(): void {
-        / Arrange
+        // Arrange
         $metadata = [
             'created' => '2024-01-20',
             'modified' => '2024-01-21',
@@ -146,10 +146,10 @@ class ColorPaletteFormatterTest extends TestCase {
             ->with($metadata, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->formatter->format_metadata($metadata, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('formatted', $result);
         $this->assertArrayHasKey('validation', $result);
@@ -158,7 +158,7 @@ class ColorPaletteFormatterTest extends TestCase {
     }
 
     public function test_format_output_generates_formatted_data(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -192,10 +192,10 @@ class ColorPaletteFormatterTest extends TestCase {
             ->with($palette, $format, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->formatter->format_output($palette, $format, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('output', $result);
         $this->assertArrayHasKey('format', $result);

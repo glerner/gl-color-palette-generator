@@ -13,7 +13,7 @@ class AIColorServiceTest extends TestCase {
     }
 
     public function test_generate_palette_returns_valid_structure(): void {
-        / Arrange
+        // Arrange
         $criteria = [
             'mood' => 'energetic',
             'style' => 'modern',
@@ -36,10 +36,10 @@ class AIColorServiceTest extends TestCase {
             ->with($criteria)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->service->generate_palette($criteria);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('colors', $result);
         $this->assertArrayHasKey('metadata', $result);
@@ -49,7 +49,7 @@ class AIColorServiceTest extends TestCase {
     }
 
     public function test_analyze_palette_returns_valid_analysis(): void {
-        / Arrange
+        // Arrange
         $palette = ['#FF0000', '#00FF00', '#0000FF'];
         $expected = [
             'harmony_score' => 0.85,
@@ -72,10 +72,10 @@ class AIColorServiceTest extends TestCase {
             ->with($palette)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->service->analyze_palette($palette);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('harmony_score', $result);
         $this->assertArrayHasKey('mood_analysis', $result);
@@ -85,7 +85,7 @@ class AIColorServiceTest extends TestCase {
     }
 
     public function test_get_color_recommendations_returns_valid_suggestions(): void {
-        / Arrange
+        // Arrange
         $context = [
             'industry' => 'technology',
             'audience' => 'professional',
@@ -106,10 +106,10 @@ class AIColorServiceTest extends TestCase {
             ->with($context)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->service->get_color_recommendations($context);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('primary', $result);
         $this->assertArrayHasKey('secondary', $result);
@@ -122,16 +122,16 @@ class AIColorServiceTest extends TestCase {
     }
 
     public function test_validate_service_connection_returns_true(): void {
-        / Arrange
+        // Arrange
         $this->service
             ->expects($this->once())
             ->method('validate_service_connection')
             ->willReturn(true);
 
-        / Act
+        // Act
         $result = $this->service->validate_service_connection();
 
-        / Assert
+        // Assert
         $this->assertTrue($result);
     }
 } 

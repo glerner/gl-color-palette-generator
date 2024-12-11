@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <phpunit
-    bootstrap="/app/wp-content/plugins/gl-color-palette-generator/tests/bootstrap.php"
+    bootstrap="tests/bootstrap.php"
     backupGlobals="false"
     colors="true"
     convertErrorsToExceptions="true"
@@ -8,31 +8,26 @@
     convertWarningsToExceptions="true"
     >
     <testsuites>
+        <testsuite name="wp-mock">
+            <directory prefix="test-" suffix=".php">tests/providers</directory>
+            <directory prefix="test-" suffix=".php">tests/api</directory>
+            <directory prefix="test-" suffix=".php">tests/admin</directory>
+        </testsuite>
+        <testsuite name="integration">
+            <directory prefix="test-" suffix=".php">tests/integration</directory>
+        </testsuite>
         <testsuite name="all">
-            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests</directory>
+            <directory prefix="test-" suffix=".php">tests</directory>
         </testsuite>
     </testsuites>
     <groups>
-        <group>
-            <include>
-                <group>wp-mock</group>
-            </include>
-            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests/providers</directory>
-            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests/api</directory>
-        </group>
-        <group>
-            <include>
-                <group>wp-unit</group>
-            </include>
-            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests/core</directory>
-            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests/admin</directory>
-            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests/settings</directory>
-        </group>
-        <group>
-            <include>
-                <group>integration</group>
-            </include>
-            <directory prefix="test-" suffix=".php">/app/wp-content/plugins/gl-color-palette-generator/tests/integration</directory>
-        </group>
+        <include>
+            <group>wp-mock</group>
+        </include>
     </groups>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">includes</directory>
+        </whitelist>
+    </filter>
 </phpunit>

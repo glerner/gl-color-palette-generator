@@ -196,7 +196,7 @@ class ColorMetricsAnalyzerTest extends TestCase {
     }
 
     public function test_calculate_distribution_returns_distribution_metrics(): void {
-        / Arrange
+        // Arrange
         $colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00'];
 
         $expected = [
@@ -229,10 +229,10 @@ class ColorMetricsAnalyzerTest extends TestCase {
             ->with($colors)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->analyzer->calculate_distribution($colors);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('hue_distribution', $result);
         $this->assertArrayHasKey('saturation_spread', $result);
@@ -241,7 +241,7 @@ class ColorMetricsAnalyzerTest extends TestCase {
     }
 
     public function test_measure_difference_returns_detailed_measurements(): void {
-        / Arrange
+        // Arrange
         $color1 = '#FF0000';
         $color2 = '#FF3333';
         $options = [
@@ -270,10 +270,10 @@ class ColorMetricsAnalyzerTest extends TestCase {
             ->with($color1, $color2, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->analyzer->measure_difference($color1, $color2, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('delta_e', $result);
         $this->assertArrayHasKey('components', $result);
@@ -282,7 +282,7 @@ class ColorMetricsAnalyzerTest extends TestCase {
     }
 
     public function test_generate_metrics_report_returns_comprehensive_report(): void {
-        / Arrange
+        // Arrange
         $colors = ['#FF0000', '#00FF00', '#0000FF'];
         $criteria = [
             'metrics' => ['harmony', 'contrast', 'distribution'],
@@ -321,10 +321,10 @@ class ColorMetricsAnalyzerTest extends TestCase {
             ->with($colors, $criteria)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->analyzer->generate_metrics_report($colors, $criteria);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('summary', $result);
         $this->assertArrayHasKey('detailed_data', $result);

@@ -13,7 +13,7 @@ class ColorPaletteStorageTest extends TestCase {
     }
 
     public function test_store_in_db_saves_palette(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -44,10 +44,10 @@ class ColorPaletteStorageTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->storage->store_in_db($palette, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('id', $result);
         $this->assertArrayHasKey('success', $result);
@@ -57,7 +57,7 @@ class ColorPaletteStorageTest extends TestCase {
     }
 
     public function test_retrieve_from_db_loads_palette(): void {
-        / Arrange
+        // Arrange
         $id = 123;
         $options = [
             'fields' => ['name', 'colors'],
@@ -88,10 +88,10 @@ class ColorPaletteStorageTest extends TestCase {
             ->with($id, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->storage->retrieve_from_db($id, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('palette', $result);
         $this->assertArrayHasKey('version', $result);
@@ -100,7 +100,7 @@ class ColorPaletteStorageTest extends TestCase {
     }
 
     public function test_store_in_cache_caches_palette(): void {
-        / Arrange
+        // Arrange
         $key = 'palette:123';
         $palette = [
             'name' => 'Test Palette',
@@ -132,10 +132,10 @@ class ColorPaletteStorageTest extends TestCase {
             ->with($key, $palette, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->storage->store_in_cache($key, $palette, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('cached', $result);
         $this->assertArrayHasKey('key', $result);
@@ -145,7 +145,7 @@ class ColorPaletteStorageTest extends TestCase {
     }
 
     public function test_retrieve_from_cache_loads_cached_palette(): void {
-        / Arrange
+        // Arrange
         $key = 'palette:123';
         $options = [
             'refresh' => false,
@@ -174,10 +174,10 @@ class ColorPaletteStorageTest extends TestCase {
             ->with($key, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->storage->retrieve_from_cache($key, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('palette', $result);
         $this->assertArrayHasKey('hit', $result);

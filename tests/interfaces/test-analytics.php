@@ -13,7 +13,7 @@ class AnalyticsTest extends TestCase {
     }
 
     public function test_track_usage_handles_valid_feature(): void {
-        / Arrange
+        // Arrange
         $feature = 'palette_generation';
         $context = ['colors' => 5, 'style' => 'modern'];
 
@@ -22,12 +22,12 @@ class AnalyticsTest extends TestCase {
             ->method('track_usage')
             ->with($feature, $context);
 
-        / Act & Assert
+        // Act & Assert
         $this->analytics->track_usage($feature, $context);
     }
 
     public function test_generate_report_returns_valid_structure(): void {
-        / Arrange
+        // Arrange
         $criteria = [
             'start_date' => '2024-01-01',
             'end_date' => '2024-01-31',
@@ -59,10 +59,10 @@ class AnalyticsTest extends TestCase {
             ->with($criteria)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->analytics->generate_report($criteria);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('usage_stats', $result);
         $this->assertArrayHasKey('trends', $result);
@@ -71,7 +71,7 @@ class AnalyticsTest extends TestCase {
     }
 
     public function test_get_metrics_returns_current_data(): void {
-        / Arrange
+        // Arrange
         $expected = [
             'total_palettes' => 1000,
             'active_users' => 150,
@@ -90,10 +90,10 @@ class AnalyticsTest extends TestCase {
             ->method('get_metrics')
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->analytics->get_metrics();
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('total_palettes', $result);
         $this->assertArrayHasKey('active_users', $result);
@@ -104,7 +104,7 @@ class AnalyticsTest extends TestCase {
     }
 
     public function test_export_analytics_returns_valid_format(): void {
-        / Arrange
+        // Arrange
         $format = 'json';
         $options = ['include_trends' => true];
         $expected = '{"data": "sample"}';
@@ -115,10 +115,10 @@ class AnalyticsTest extends TestCase {
             ->with($format, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->analytics->export_analytics($format, $options);
 
-        / Assert
+        // Assert
         $this->assertIsString($result);
         $this->assertJson($result);
     }

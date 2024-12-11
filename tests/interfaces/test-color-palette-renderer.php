@@ -13,7 +13,7 @@ class ColorPaletteRendererTest extends TestCase {
     }
 
     public function test_render_as_html_generates_markup(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -47,10 +47,10 @@ class ColorPaletteRendererTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->renderer->render_as_html($palette, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('html', $result);
         $this->assertArrayHasKey('assets', $result);
@@ -59,7 +59,7 @@ class ColorPaletteRendererTest extends TestCase {
     }
 
     public function test_render_as_image_creates_image(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -94,10 +94,10 @@ class ColorPaletteRendererTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->renderer->render_as_image($palette, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('image', $result);
         $this->assertArrayHasKey('dimensions', $result);
@@ -106,7 +106,7 @@ class ColorPaletteRendererTest extends TestCase {
     }
 
     public function test_render_preview_generates_preview(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -139,10 +139,10 @@ class ColorPaletteRendererTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->renderer->render_preview($palette, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('preview', $result);
         $this->assertArrayHasKey('context', $result);
@@ -151,7 +151,7 @@ class ColorPaletteRendererTest extends TestCase {
     }
 
     public function test_render_documentation_generates_docs(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -184,10 +184,10 @@ class ColorPaletteRendererTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->renderer->render_documentation($palette, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('documentation', $result);
         $this->assertArrayHasKey('sections', $result);

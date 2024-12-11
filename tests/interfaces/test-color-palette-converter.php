@@ -13,7 +13,7 @@ class ColorPaletteConverterTest extends TestCase {
     }
 
     public function test_convert_color_space_transforms_colors(): void {
-        / Arrange
+        // Arrange
         $colors = ['#FF0000', '#00FF00'];
         $from = 'rgb';
         $to = 'hsl';
@@ -46,10 +46,10 @@ class ColorPaletteConverterTest extends TestCase {
             ->with($colors, $from, $to, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->converter->convert_color_space($colors, $from, $to, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('converted', $result);
         $this->assertArrayHasKey('original', $result);
@@ -58,7 +58,7 @@ class ColorPaletteConverterTest extends TestCase {
     }
 
     public function test_convert_format_transforms_palette(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -92,10 +92,10 @@ class ColorPaletteConverterTest extends TestCase {
             ->with($palette, $format, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->converter->convert_format($palette, $format, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('converted', $result);
         $this->assertArrayHasKey('original', $result);
@@ -104,7 +104,7 @@ class ColorPaletteConverterTest extends TestCase {
     }
 
     public function test_convert_standard_transforms_compliance(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#FFFFFF']
@@ -141,10 +141,10 @@ class ColorPaletteConverterTest extends TestCase {
             ->with($palette, $standard, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->converter->convert_standard($palette, $standard, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('converted', $result);
         $this->assertArrayHasKey('compliance', $result);
@@ -153,7 +153,7 @@ class ColorPaletteConverterTest extends TestCase {
     }
 
     public function test_convert_system_transforms_palette(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -188,10 +188,10 @@ class ColorPaletteConverterTest extends TestCase {
             ->with($palette, $system, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->converter->convert_system($palette, $system, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('converted', $result);
         $this->assertArrayHasKey('compatibility', $result);
@@ -200,7 +200,7 @@ class ColorPaletteConverterTest extends TestCase {
     }
 
     public function test_convert_color_transforms_single_color(): void {
-        / Arrange
+        // Arrange
         $color = '#FF0000';
         $target_type = 'space';
         $target = 'HSL';
@@ -231,10 +231,10 @@ class ColorPaletteConverterTest extends TestCase {
             ->with($color, $target_type, $target, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->converter->convert_color($color, $target_type, $target, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('color', $result);
         $this->assertArrayHasKey('original', $result);
@@ -243,7 +243,7 @@ class ColorPaletteConverterTest extends TestCase {
     }
 
     public function test_validate_conversion_checks_conversion_data(): void {
-        / Arrange
+        // Arrange
         $conversion = [
             'color' => 'hsl(0, 100%, 50%)',
             'source' => '#FF0000',
@@ -274,10 +274,10 @@ class ColorPaletteConverterTest extends TestCase {
             ->with($conversion, $rules)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->converter->validate_conversion($conversion, $rules);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('valid', $result);
         $this->assertArrayHasKey('errors', $result);

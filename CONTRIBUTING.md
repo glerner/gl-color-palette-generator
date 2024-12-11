@@ -46,33 +46,53 @@ For detailed information about the test database setup, see [docs/database-setup
 
 ## Testing
 
-1. Set up the test environment:
+### Setting up the Test Environment
+
+You can set up the test environment using the provided script. The script requires the following parameters:
 
 ```bash
-./bin/setup-plugin-tests.sh
+./bin/install-wp-tests.sh <db-name> <db-user> <db-pass> [db-host] [wp-version] [skip-database-creation]
 ```
 
-This script will:
-- Install composer dependencies
-- Rebuild the Lando environment
-- Install the WordPress test suite
-- Configure the test database
+Parameters:
+- `db-name`: Name of the test database to create
+- `db-user`: MySQL/MariaDB username with database creation privileges
+- `db-pass`: Database user password
+- `db-host`: (optional) Database hostname, defaults to 'localhost'
+- `wp-version`: (optional) WordPress version to test against, defaults to 'latest'
+- `skip-database-creation`: (optional) Set to 'true' to skip database creation
+
+Examples:
+
+1. For local development:
+   ```bash
+   # From the plugin directory
+   bin/install-wp-tests.sh wordpress_test <your-db-user> '<your-db-password>' localhost latest
+   ```
+
+2. For Lando environment:
+   ```bash
+   # From the WordPress root directory
+   cd ~/sites/wordpress && \
+   lando ssh -c "/app/wp-content/plugins/gl-color-palette-generator/bin/install-wp-tests.sh wordpress wordpress wordpress database"
+   ```
+
+### Running Tests
+
+Once the test environment is set up:
+
+1. From the plugin directory:
+   ```bash
+   composer test    # Run PHP unit tests
+   npm test        # Run JavaScript tests
+   ```
+
+2. For development with auto-rebuild:
+   ```bash
+   npm run dev     # Start development mode with auto-rebuild
+   ```
 
 For detailed information about the test database setup, see [docs/database-setup.md](docs/database-setup.md).
-
-2. Run the tests:
-
-The project uses both WP_Mock and WP_UnitTestCase for different types of tests:
-
-```bash
-# Run all tests
-cd ~/sites/wordpress && lando test
-
-# Run specific test suites
-cd ~/sites/wordpress && LANDO_TEST_ARGS="--group wp-mock" lando test     # Provider and API tests
-cd ~/sites/wordpress && LANDO_TEST_ARGS="--group wp-unit" lando test     # WordPress core functionality tests
-cd ~/sites/wordpress && LANDO_TEST_ARGS="--group integration" lando test  # Integration tests
-```
 
 ### Test Organization
 
@@ -154,6 +174,22 @@ class My_WordPress_Test extends WP_UnitTestCase {
 }
 ```
 
+## Sync Scripts
+
+The plugin includes two sync scripts for different purposes:
+
+1. `bin/sync-to-wp.sh` - Syncs the plugin files to your local WordPress test environment:
+   ```bash
+   ./bin/sync-to-wp.sh
+   ```
+   This copies all files needed for development and testing.
+
+2. `bin/sync-to-production.sh` - Creates a clean production copy without development files:
+   ```bash
+   ./bin/sync-to-production.sh ~/plugin-releases/gl-color-palette-generator
+   ```
+   This excludes development files (tests, configs, docs) and installs only production dependencies.
+
 ## Contributing Guidelines
 
 ### Development Environment Details
@@ -187,12 +223,6 @@ define('WP_DEBUG_DISPLAY', true);
 composer test
 ```
 
-
-2. Creating new tests:
-- Place test files in the `tests` directory
-- Name test files as `test-*.php` or `class-test-*.php`
-- Extend `WP_UnitTestCase`
-
 ### Development Workflow
 
 1. Create a new branch for each feature/fix
@@ -209,13 +239,11 @@ This project follows the WordPress Coding Standards. To check your code:
 composer phpcs
 ```
 
-
 To automatically fix some coding standard issues:
 
 ```bash
 composer phpcbf
 ```
-
 
 ## Pull Request Process
 
@@ -225,7 +253,6 @@ composer phpcbf
 git checkout -b feature/your-feature-name
 ```
 
-
 2. Make your changes and commit them using conventional commits:
 
 ```bash
@@ -233,7 +260,6 @@ git commit -m "feat: Add new color analysis feature"
 git commit -m "fix: Resolve contrast calculation issue"
 git commit -m "docs: Update API documentation"
 ```
-
 
 3. Push to your fork and create a Pull Request with:
    - Clear description of the changes

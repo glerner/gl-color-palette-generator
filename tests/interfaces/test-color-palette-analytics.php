@@ -13,7 +13,7 @@ class ColorPaletteAnalyticsTest extends TestCase {
     }
 
     public function test_analyze_usage_returns_comprehensive_analysis(): void {
-        / Arrange
+        // Arrange
         $palette_id = 'pal_123';
         $options = [
             'start_date' => '2024-01-01',
@@ -56,10 +56,10 @@ class ColorPaletteAnalyticsTest extends TestCase {
             ->with($palette_id, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->analytics->analyze_usage($palette_id, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('usage_stats', $result);
         $this->assertArrayHasKey('color_usage', $result);
@@ -68,7 +68,7 @@ class ColorPaletteAnalyticsTest extends TestCase {
     }
 
     public function test_generate_metrics_returns_performance_data(): void {
-        / Arrange
+        // Arrange
         $palette_id = 'pal_123';
         $metrics = [
             'accessibility' => true,
@@ -103,10 +103,10 @@ class ColorPaletteAnalyticsTest extends TestCase {
             ->with($palette_id, $metrics)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->analytics->generate_metrics($palette_id, $metrics);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('scores', $result);
         $this->assertArrayHasKey('benchmarks', $result);
@@ -115,7 +115,7 @@ class ColorPaletteAnalyticsTest extends TestCase {
     }
 
     public function test_track_usage_event_records_event_data(): void {
-        / Arrange
+        // Arrange
         $event = [
             'palette_id' => 'pal_123',
             'color' => '#FF0000',
@@ -148,10 +148,10 @@ class ColorPaletteAnalyticsTest extends TestCase {
             ->with($event)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->analytics->track_usage_event($event);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('event_id', $result);
         $this->assertArrayHasKey('tracked', $result);
@@ -161,7 +161,7 @@ class ColorPaletteAnalyticsTest extends TestCase {
     }
 
     public function test_generate_report_returns_complete_report(): void {
-        / Arrange
+        // Arrange
         $palette_id = 'pal_123';
         $options = [
             'format' => 'detailed',
@@ -202,10 +202,10 @@ class ColorPaletteAnalyticsTest extends TestCase {
             ->with($palette_id, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->analytics->generate_report($palette_id, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('summary', $result);
         $this->assertArrayHasKey('metrics', $result);

@@ -4,7 +4,9 @@ Generate beautiful and accessible color palettes for your WordPress website usin
 
 ## Description
 
-GL Color Palette Generator is a WordPress plugin that helps you create and manage color palettes for your website design. It uses AI to generate harmonious color combinations while ensuring accessibility standards are met.
+GL Color Palette Generator (named with "GL" to distinguish it from other color palette plugins) is a WordPress plugin that helps you create and manage color palettes for your website design. It uses AI to generate harmonious color combinations while ensuring accessibility standards are met.
+
+This plugin is designed to work with the TwentyTwentyFour theme (and future WordPress default themes) and is part of the course materials for ["WordPress Websites: From Overwhelm to Mastery"](https://website-overwhelm-to-mastery.glerner.com/).
 
 **Author:** [George Lerner](https://website-tech.glerner.com/)
 **Plugin URI:** [https://github.com/glerner/gl-color-palette-generator](https://github.com/glerner/gl-color-palette-generator)
@@ -36,18 +38,32 @@ For development setup and contribution guidelines, please see:
 
 ## Installation
 
-### Production
+### Installation from GitHub
 
-1. Download the plugin from [GitHub](https://github.com/glerner/gl-color-palette-generator)
-2. Upload to your WordPress plugins directory
-3. Activate the plugin through the WordPress admin interface
-4. Configure your AI provider settings
+To install the plugin directly from GitHub:
 
-### Development
+1. From your WordPress plugins directory, run:
+   ```bash
+   cd wp-content/plugins && \
+   git clone https://github.com/glerner/gl-color-palette-generator.git && \
+   cd gl-color-palette-generator && \
+   composer install && \
+   npm install && \
+   npm run build
+   ```
 
-1. Clone the repository:
+2. Activate the plugin through the WordPress admin interface
+
+3. Configure your AI provider settings in the plugin settings
+
+### Development Setup
+
+If you want to contribute to the plugin development:
+
+1. Clone the repository to your development environment:
    ```bash
    git clone https://github.com/glerner/gl-color-palette-generator.git
+   cd gl-color-palette-generator
    ```
 
 2. Install dependencies:
@@ -56,36 +72,17 @@ For development setup and contribution guidelines, please see:
    npm install
    ```
 
-3. Set up WordPress test environment:
-   ```bash
-   # For local development with Git (recommended):
-   bin/install-wp-tests-git.sh wordpress_test root '' localhost latest
-
-   # For local development with SVN:
-   bin/install-wp-tests.sh wordpress_test root '' localhost latest
-
-   # For Lando with Git (recommended):
-   lando ssh -c "/app/wp-content/plugins/gl-color-palette-generator/bin/install-wp-tests-git.sh wordpress wordpress wordpress database"
-
-   # For Lando with SVN:
-   lando ssh -c "/app/wp-content/plugins/gl-color-palette-generator/bin/install-wp-tests.sh wordpress wordpress wordpress database"
-   ```
-
-4. Build assets:
+3. Build frontend assets:
    ```bash
    npm run build
    ```
-
-5. Run tests:
+   
+   For development with auto-rebuild:
    ```bash
-   # For local development:
-   composer test
-   npm test
-
-   # For Lando:
-   lando composer test
-   lando npm test
+   npm run dev
    ```
+
+4. For running tests and setting up the test environment, see the [Contributing Guide](CONTRIBUTING.md)
 
 ## Documentation
 

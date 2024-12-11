@@ -13,7 +13,7 @@ class ColorPaletteLoggerTest extends TestCase {
     }
 
     public function test_log_creates_log_entry(): void {
-        / Arrange
+        // Arrange
         $level = 'info';
         $message = 'Palette updated successfully';
         $context = [
@@ -44,10 +44,10 @@ class ColorPaletteLoggerTest extends TestCase {
             ->with($level, $message, $context)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->logger->log($level, $message, $context);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('log_id', $result);
         $this->assertArrayHasKey('logged', $result);
@@ -57,7 +57,7 @@ class ColorPaletteLoggerTest extends TestCase {
     }
 
     public function test_get_logs_retrieves_filtered_entries(): void {
-        / Arrange
+        // Arrange
         $criteria = [
             'levels' => ['info', 'error'],
             'start_date' => '2024-01-01',
@@ -101,10 +101,10 @@ class ColorPaletteLoggerTest extends TestCase {
             ->with($criteria)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->logger->get_logs($criteria);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('entries', $result);
         $this->assertArrayHasKey('total', $result);
@@ -113,7 +113,7 @@ class ColorPaletteLoggerTest extends TestCase {
     }
 
     public function test_analyze_logs_returns_pattern_analysis(): void {
-        / Arrange
+        // Arrange
         $options = [
             'time_frame' => '30d',
             'metrics' => ['error_rate', 'operation_frequency'],
@@ -149,10 +149,10 @@ class ColorPaletteLoggerTest extends TestCase {
             ->with($options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->logger->analyze_logs($options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('patterns', $result);
         $this->assertArrayHasKey('statistics', $result);
@@ -161,7 +161,7 @@ class ColorPaletteLoggerTest extends TestCase {
     }
 
     public function test_maintain_logs_performs_maintenance(): void {
-        / Arrange
+        // Arrange
         $action = 'cleanup';
         $params = [
             'retention' => 30,
@@ -189,10 +189,10 @@ class ColorPaletteLoggerTest extends TestCase {
             ->with($action, $params)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->logger->maintain_logs($action, $params);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('success', $result);
         $this->assertArrayHasKey('actions', $result);

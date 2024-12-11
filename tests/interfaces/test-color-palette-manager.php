@@ -13,7 +13,7 @@ class ColorPaletteManagerTest extends TestCase {
     }
 
     public function test_create_palette_stores_new_palette(): void {
-        / Arrange
+        // Arrange
         $palette = [
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00']
@@ -47,10 +47,10 @@ class ColorPaletteManagerTest extends TestCase {
             ->with($palette, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->manager->create_palette($palette, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('palette', $result);
         $this->assertArrayHasKey('validation', $result);
@@ -58,7 +58,7 @@ class ColorPaletteManagerTest extends TestCase {
     }
 
     public function test_update_palette_modifies_existing_palette(): void {
-        / Arrange
+        // Arrange
         $id = 'pal_123';
         $updates = [
             'name' => 'Updated Palette',
@@ -93,10 +93,10 @@ class ColorPaletteManagerTest extends TestCase {
             ->with($id, $updates, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->manager->update_palette($id, $updates, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('palette', $result);
         $this->assertArrayHasKey('changes', $result);
@@ -104,7 +104,7 @@ class ColorPaletteManagerTest extends TestCase {
     }
 
     public function test_delete_palette_removes_palette(): void {
-        / Arrange
+        // Arrange
         $id = 'pal_123';
         $options = [
             'force' => true,
@@ -129,10 +129,10 @@ class ColorPaletteManagerTest extends TestCase {
             ->with($id, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->manager->delete_palette($id, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('success', $result);
         $this->assertArrayHasKey('backup', $result);
@@ -141,7 +141,7 @@ class ColorPaletteManagerTest extends TestCase {
     }
 
     public function test_list_palettes_returns_collection(): void {
-        / Arrange
+        // Arrange
         $filters = ['tag' => 'featured'];
         $options = [
             'pagination' => ['page' => 1, 'per_page' => 10],
@@ -170,10 +170,10 @@ class ColorPaletteManagerTest extends TestCase {
             ->with($filters, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->manager->list_palettes($filters, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('palettes', $result);
         $this->assertArrayHasKey('pagination', $result);
@@ -181,7 +181,7 @@ class ColorPaletteManagerTest extends TestCase {
     }
 
     public function test_get_palette_retrieves_palette(): void {
-        / Arrange
+        // Arrange
         $id = 'pal_123';
         $options = [
             'fields' => ['name', 'colors'],
@@ -212,10 +212,10 @@ class ColorPaletteManagerTest extends TestCase {
             ->with($id, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->manager->get_palette($id, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('palette', $result);
         $this->assertArrayHasKey('relations', $result);
@@ -223,7 +223,7 @@ class ColorPaletteManagerTest extends TestCase {
     }
 
     public function test_search_palettes_finds_matches(): void {
-        / Arrange
+        // Arrange
         $criteria = [
             'query' => 'blue',
             'tags' => ['modern', 'cool']
@@ -255,10 +255,10 @@ class ColorPaletteManagerTest extends TestCase {
             ->with($criteria, $options)
             ->willReturn($expected);
 
-        / Act
+        // Act
         $result = $this->manager->search_palettes($criteria, $options);
 
-        / Assert
+        // Assert
         $this->assertIsArray($result);
         $this->assertArrayHasKey('palettes', $result);
         $this->assertArrayHasKey('pagination', $result);
