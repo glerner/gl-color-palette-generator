@@ -1,20 +1,23 @@
 <?php
-namespace GLColorPalette\Tests\Providers;
+namespace GL_Color_Palette_Generator\Tests\Providers;
 
-use GLColorPalette\Providers\Azure_OpenAI_Provider;
+use GL_Color_Palette_Generator\Providers\Azure_OpenAI_Provider;
+use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use WP_Mock;
 
-class Azure_OpenAI_Provider_Test extends \WP_Mock\Tools\TestCase {
-    protected $provider;
+class Test_Azure_OpenAI_Provider extends Test_Provider_Mock {
+    protected function get_test_credentials(): array {
+        return [
+            'api_key' => 'test_key',
+            'endpoint' => 'https://test-endpoint.openai.azure.com',
+            'deployment' => 'test-deployment'
+        ];
+    }
 
     public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
-        $this->provider = new Azure_OpenAI_Provider([
-            'api_key' => 'test_key',
-            'endpoint' => 'test_endpoint',
-            'deployment_name' => 'test_deployment'
-        ]);
+        $this->provider = new Azure_OpenAI_Provider($this->get_test_credentials());
     }
 
     public function tearDown(): void {
@@ -26,10 +29,10 @@ class Azure_OpenAI_Provider_Test extends \WP_Mock\Tools\TestCase {
         $provider = new Azure_OpenAI_Provider([]);
         $this->assertInstanceOf(\WP_Error::class, $provider->validate_credentials());
 
-        $provider = new Azure_OpenAI_Provider(['api_key' => 'test_key']);
+        $provider = new Azure_OpenAI_Provider(['api_key' => 'test']);
         $this->assertInstanceOf(\WP_Error::class, $provider->validate_credentials());
 
-        $provider = new Azure_OpenAI_Provider(['api_key' => 'test_key', 'endpoint' => 'test_endpoint']);
+        $provider = new Azure_OpenAI_Provider(['api_key' => 'test', 'endpoint' => 'test']);
         $this->assertInstanceOf(\WP_Error::class, $provider->validate_credentials());
 
         $this->assertTrue($this->provider->validate_credentials());
@@ -59,7 +62,7 @@ class Azure_OpenAI_Provider_Test extends \WP_Mock\Tools\TestCase {
             ])
         ]);
 
-        $colors = $this->provider->generate_palette(['prompt' => 'test', 'count' => 3]);
+        $colors = $this->provider->generate_palette($this->test_params);
         $this->assertIsArray($colors);
         $this->assertCount(3, $colors);
     }

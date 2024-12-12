@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests\Providers;
+namespace GL_Color_Palette_Generator\Tests;
 
 use GL_Color_Palette_Generator\Providers\OpenAI_Provider;
 use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
@@ -17,7 +17,7 @@ use WP_Mock;
 /**
  * OpenAI Provider test case
  */
-class Test_OpenAI_Provider extends \WP_Mock\Tools\TestCase {
+class Test_OpenAI_Provider extends Test_Provider_Mock {
     /**
      * Provider instance
      *
@@ -220,5 +220,45 @@ class Test_OpenAI_Provider extends \WP_Mock\Tools\TestCase {
 
         $this->expectException(PaletteGenerationException::class);
         $this->provider->generate_palette('Test prompt');
+    }
+
+    protected function get_test_credentials(): array {
+        return ['api_key' => 'test_key'];
+    }
+
+    public function test_validate_credentials() {
+        $provider = new OpenAI_Provider([]);
+        $this->assertInstanceOf(\WP_Error::class, $provider->validate_credentials());
+
+        $this->assertTrue($this->provider->validate_credentials());
+    }
+
+    public function test_generate_palette_validates_params() {
+        $result = $this->provider->generate_palette([
+            'base_color' => 'invalid',
+            'mode' => 'invalid',
+            'count' => 0
+        ]);
+        $this->assertInstanceOf(\WP_Error::class, $result);
+    }
+
+    public function test_generate_palette() {
+        // Mock the API response
+        WP_Mock::userFunction('wp_remote_post')->once()->andReturn([
+            'response' => ['code' => 200],
+            'body' => json_encode([
+                'choices' => [
+                    [
+                        'message' => [
+                            'content' => json_encode(['colors' => ['#FF0000', '#00FF00', '#0000FF']])
+                        ]
+                    ]
+                ]
+            ])
+        ]);
+
+        $colors = $this->provider->generate_palette($this->test_params);
+        $this->assertIsArray($colors);
+        $this->assertCount(3, $colors);
     }
 }

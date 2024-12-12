@@ -7,10 +7,40 @@ WP_ROOT=${WP_ROOT:-"/home/george/sites/wordpress"}
 PLUGIN_SOURCE=${PLUGIN_SOURCE:-"$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"}
 PLUGIN_DIR="${WP_ROOT}/wp-content/plugins/gl-color-palette-generator"
 
-echo "Using paths:"
+# Database configuration
+# Customize these for your environment by setting environment variables, e.g.:
+# export DB_NAME="your_test_db"
+# export DB_USER="your_db_user"
+# export DB_PASS="your_db_password"
+# export DB_HOST="localhost"  # Use 'database' for Lando, 'localhost' for Local
+DB_NAME=${DB_NAME:-"wordpress"}
+DB_USER=${DB_USER:-"wordpress"}
+DB_PASS=${DB_PASS:-"wordpress"}
+DB_HOST=${DB_HOST:-"database"}  # Lando uses 'database', Local typically uses 'localhost'
+WP_VERSION=${WP_VERSION:-"latest"}
+SKIP_DB_CREATE=${SKIP_DB_CREATE:-"false"}
+
+# Test environment paths (customize these for your environment)
+# For Lando, these are set in .lando.yml
+WP_TESTS_DIR=${WP_TESTS_DIR:-"${WP_ROOT}/wordpress-phpunit"}
+WP_CORE_DIR=${WP_CORE_DIR:-"${WP_ROOT}/wordpress"}
+
+# Development environment detection
+IS_LANDO=false
+if [ -f "${WP_ROOT}/.lando.yml" ]; then
+    IS_LANDO=true
+fi
+
+echo "=== Environment Configuration ==="
 echo "WordPress root: $WP_ROOT"
 echo "Plugin source: $PLUGIN_SOURCE"
 echo "Plugin directory: $PLUGIN_DIR"
+echo "Database host: $DB_HOST"
+echo "Database name: $DB_NAME"
+echo "Database user: $DB_USER"
+echo "WordPress version: $WP_VERSION"
+echo "Environment: $([ "$IS_LANDO" = true ] && echo "Lando" || echo "Local")"
+echo "=========================="
 
 echo "=== Starting Plugin Test Environment Setup ==="
 
@@ -49,76 +79,112 @@ echo "✅ Plugin synced to WordPress"
 
 # Step 4: Generate wp-tests-config.php
 echo -e "\n4. Generating wp-tests-config.php..."
-cd "$WP_ROOT"
 
-# Get Lando info
-echo "Getting Lando info..."
-LANDO_INFO=$(lando info)
-echo "$LANDO_INFO" | grep -A5 'internal_connection:'
+# Create wp-tests-config.php with environment-specific settings
+cat > "${PLUGIN_DIR}/wp-tests-config.php" << EOL
+<?php
+// Test with WordPress debug mode (default)
+define( 'WP_DEBUG', true );
 
-DOMAIN=$(echo "$LANDO_INFO" | grep -o 'https://.*\.lndo\.site' | head -n1 | sed 's/https:\/\///')
-DB_HOST='database'  # This is always 'database' in Lando
-DB_USER='wordpress'  # Default WordPress Lando credentials
-DB_PASS='wordpress'
-DB_NAME='wordpress'
-
-echo "Using configuration:"
-echo "Domain: $DOMAIN"
-echo "DB Host: $DB_HOST"
-echo "DB User: $DB_USER"
-echo "DB Name: $DB_NAME"
-
-# Create wp-tests-config.php content
-CONFIG_CONTENT="<?php
-// Required constants for WordPress test suite
-define( 'WP_TESTS_DOMAIN', '$DOMAIN' );
-define( 'WP_TESTS_EMAIL', 'admin@example.com' );
-define( 'WP_TESTS_TITLE', 'Test Blog' );
-define( 'WP_PHP_BINARY', 'php' );
-
-// Database configuration
-define( 'DB_NAME', '$DB_NAME' );
-define( 'DB_USER', '$DB_USER' );
-define( 'DB_PASSWORD', '$DB_PASS' );
-define( 'DB_HOST', '$DB_HOST' );
+// ** MySQL settings ** //
+define( 'DB_NAME', '${DB_NAME}' );
+define( 'DB_USER', '${DB_USER}' );
+define( 'DB_PASSWORD', '${DB_PASS}' );
+define( 'DB_HOST', '${DB_HOST}' );
 define( 'DB_CHARSET', 'utf8' );
 define( 'DB_COLLATE', '' );
 
 \$table_prefix = 'wptests_';
 
-// Test suite database configuration
-define( 'WP_TESTS_DB_NAME', '$DB_NAME' );
-define( 'WP_TESTS_DB_USER', '$DB_USER' );
-define( 'WP_TESTS_DB_PASSWORD', '$DB_PASS' );
-define( 'WP_TESTS_DB_HOST', '$DB_HOST' );
+define( 'WP_TESTS_DOMAIN', 'example.org' );
+define( 'WP_TESTS_EMAIL', 'admin@example.org' );
+define( 'WP_TESTS_TITLE', 'Test Blog' );
 
-// WordPress core constants
-define( 'ABSPATH', dirname(__FILE__) . '/' );
-define( 'WP_DEBUG', true );"
+define( 'WP_PHP_BINARY', 'php' );
+define( 'WPLANG', '' );
+EOL
 
+# Create wp-tests-config.php in WordPress root
 echo "Creating config files in:"
 echo "1. $WP_ROOT/wp-tests-config.php"
 echo "2. $PLUGIN_DIR/wp-tests-config.php"
 
 # Create wp-tests-config.php in WordPress root
-echo "$CONFIG_CONTENT" > "$WP_ROOT/wp-tests-config.php"
-if [ ! -f "$WP_ROOT/wp-tests-config.php" ]; then
-    echo "❌ Failed to create wp-tests-config.php in WordPress root"
-    exit 1
-fi
+cat > "${WP_ROOT}/wp-tests-config.php" << EOL
+<?php
+// Test with WordPress debug mode (default)
+define( 'WP_DEBUG', true );
+
+// ** MySQL settings ** //
+define( 'DB_NAME', '${DB_NAME}' );
+define( 'DB_USER', '${DB_USER}' );
+define( 'DB_PASSWORD', '${DB_PASS}' );
+define( 'DB_HOST', '${DB_HOST}' );
+define( 'DB_CHARSET', 'utf8' );
+define( 'DB_COLLATE', '' );
+
+\$table_prefix = 'wptests_';
+
+define( 'WP_TESTS_DOMAIN', 'example.org' );
+define( 'WP_TESTS_EMAIL', 'admin@example.org' );
+define( 'WP_TESTS_TITLE', 'Test Blog' );
+
+define( 'WP_PHP_BINARY', 'php' );
+define( 'WPLANG', '' );
+EOL
 
 # Create wp-tests-config.php in plugin directory
-echo "$CONFIG_CONTENT" > "$PLUGIN_DIR/wp-tests-config.php"
-if [ ! -f "$PLUGIN_DIR/wp-tests-config.php" ]; then
-    echo "❌ Failed to create wp-tests-config.php in plugin directory"
-    exit 1
-fi
+cat > "${PLUGIN_DIR}/wp-tests-config.php" << EOL
+<?php
+// Test with WordPress debug mode (default)
+define( 'WP_DEBUG', true );
+
+// ** MySQL settings ** //
+define( 'DB_NAME', '${DB_NAME}' );
+define( 'DB_USER', '${DB_USER}' );
+define( 'DB_PASSWORD', '${DB_PASS}' );
+define( 'DB_HOST', '${DB_HOST}' );
+define( 'DB_CHARSET', 'utf8' );
+define( 'DB_COLLATE', '' );
+
+\$table_prefix = 'wptests_';
+
+define( 'WP_TESTS_DOMAIN', 'example.org' );
+define( 'WP_TESTS_EMAIL', 'admin@example.org' );
+define( 'WP_TESTS_TITLE', 'Test Blog' );
+
+define( 'WP_PHP_BINARY', 'php' );
+define( 'WPLANG', '' );
+EOL
 
 # Also create in tests directory
 mkdir -p "$PLUGIN_DIR/tests"
-echo "$CONFIG_CONTENT" > "$PLUGIN_DIR/tests/wp-tests-config.php"
-if [ ! -f "$PLUGIN_DIR/tests/wp-tests-config.php" ]; then
-    echo "❌ Failed to create wp-tests-config.php in tests directory"
+cat > "${PLUGIN_DIR}/tests/wp-tests-config.php" << EOL
+<?php
+// Test with WordPress debug mode (default)
+define( 'WP_DEBUG', true );
+
+// ** MySQL settings ** //
+define( 'DB_NAME', '${DB_NAME}' );
+define( 'DB_USER', '${DB_USER}' );
+define( 'DB_PASSWORD', '${DB_PASS}' );
+define( 'DB_HOST', '${DB_HOST}' );
+define( 'DB_CHARSET', 'utf8' );
+define( 'DB_COLLATE', '' );
+
+\$table_prefix = 'wptests_';
+
+define( 'WP_TESTS_DOMAIN', 'example.org' );
+define( 'WP_TESTS_EMAIL', 'admin@example.org' );
+define( 'WP_TESTS_TITLE', 'Test Blog' );
+
+define( 'WP_PHP_BINARY', 'php' );
+define( 'WPLANG', '' );
+EOL
+
+if [ ! -f "$PLUGIN_DIR/wp-tests-config.php" ]; then
+    echo "Error: Failed to generate wp-tests-config.php. Check the error messages above for details."
+    echo "This file is required for WordPress integration tests but not for WP-Mock tests."
     exit 1
 fi
 
@@ -148,8 +214,17 @@ echo -e "\n=== Verifying Environment ==="
 echo "6a. Checking WordPress site..."
 max_retries=5
 retry_count=0
+
+# Set domain based on environment
+if [ "$IS_LANDO" = true ]; then
+    SITE_URL="https://lc.lndo.site/"
+else
+    SITE_URL="http://localhost/"  # Can be overridden with SITE_URL env var
+fi
+SITE_URL=${SITE_URL:-"http://localhost/"}
+
 while [ $retry_count -lt $max_retries ]; do
-    if curl -sI "https://$DOMAIN/" | grep "HTTP/"; then
+    if curl -sI "$SITE_URL" | grep -q "200\|301\|302"; then
         echo "✅ WordPress site is responding"
         break
     fi
@@ -159,8 +234,9 @@ while [ $retry_count -lt $max_retries ]; do
 done
 
 if [ $retry_count -eq $max_retries ]; then
-    echo "❌ WordPress site check failed after $max_retries attempts"
-    exit 1
+    echo "⚠️  WordPress site check failed after $max_retries attempts"
+    echo "This may be OK if you haven't set up WordPress yet."
+    echo "Continuing with setup..."
 fi
 
 # Check if database is accessible

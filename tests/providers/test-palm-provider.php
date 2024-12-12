@@ -1,16 +1,19 @@
 <?php
-namespace GLColorPalette\Tests\Providers;
+namespace GL_Color_Palette_Generator\Tests\Providers;
 
-use GLColorPalette\Providers\Palm_Provider;
+use GL_Color_Palette_Generator\Providers\PaLM_Provider;
+use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use WP_Mock\Tools\TestCase;
 
-class Palm_Provider_Test extends TestCase {
-    protected $provider;
+class Test_PaLM_Provider extends Test_Provider_Mock {
+    protected function get_test_credentials(): array {
+        return ['api_key' => 'test_key'];
+    }
 
     public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
-        $this->provider = new Palm_Provider(['api_key' => 'test_key']);
+        $this->provider = new PaLM_Provider($this->get_test_credentials());
     }
 
     public function tearDown(): void {
@@ -19,7 +22,7 @@ class Palm_Provider_Test extends TestCase {
     }
 
     public function test_validate_credentials() {
-        $provider = new Palm_Provider([]);
+        $provider = new PaLM_Provider([]);
         $this->assertInstanceOf(\WP_Error::class, $provider->validate_credentials());
 
         $this->assertTrue($this->provider->validate_credentials());

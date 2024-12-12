@@ -1,16 +1,19 @@
 <?php
-namespace GLColorPalette\Tests\Providers;
+namespace GL_Color_Palette_Generator\Tests\Providers;
 
-use GLColorPalette\Providers\Cohere_Provider;
+use GL_Color_Palette_Generator\Providers\Cohere_Provider;
+use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use WP_Mock;
 
-class Cohere_Provider_Test extends \WP_Mock\Tools\TestCase {
-    protected $provider;
+class Test_Cohere_Provider extends Test_Provider_Mock {
+    protected function get_test_credentials(): array {
+        return ['api_key' => 'test_key'];
+    }
 
     public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
-        $this->provider = new Cohere_Provider(['api_key' => 'test_key']);
+        $this->provider = new Cohere_Provider($this->get_test_credentials());
     }
 
     public function tearDown(): void {
@@ -25,8 +28,9 @@ class Cohere_Provider_Test extends \WP_Mock\Tools\TestCase {
         $this->assertTrue($this->provider->validate_credentials());
     }
 
-    public function test_generate_palette_with_invalid_params() {
+    public function test_generate_palette_validates_params() {
         $result = $this->provider->generate_palette([
+            'base_color' => 'invalid',
             'mode' => 'invalid',
             'count' => 0
         ]);
@@ -37,14 +41,10 @@ class Cohere_Provider_Test extends \WP_Mock\Tools\TestCase {
         // Mock the API response
         WP_Mock::userFunction('wp_remote_post')->once()->andReturn([
             'response' => ['code' => 200],
-            'body' => json_encode([
-                'generations' => [
-                    ['text' => json_encode(['colors' => ['#FF0000', '#00FF00', '#0000FF']])]
-                ]
-            ])
+            'body' => json_encode(['colors' => ['#FF0000', '#00FF00', '#0000FF']])
         ]);
 
-        $colors = $this->provider->generate_palette(['prompt' => 'test', 'count' => 3]);
+        $colors = $this->provider->generate_palette($this->test_params);
         $this->assertIsArray($colors);
         $this->assertCount(3, $colors);
     }

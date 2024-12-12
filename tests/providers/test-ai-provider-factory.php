@@ -1,27 +1,25 @@
 <?php
 
-namespace GLColorPalette\Tests\Providers;
+namespace GL_Color_Palette_Generator\Tests\Providers;
 
-use GLColorPalette\Providers\AI_Provider_Factory;
-use WP_Mock;
+use GL_Color_Palette_Generator\Providers\AI_Provider_Factory;
+use GL_Color_Palette_Generator\Tests\TestCase;
 
-class AI_Provider_Factory_Test extends \WP_Mock\Tools\TestCase {
+class Test_AI_Provider_Factory extends TestCase {
     protected $factory;
 
     public function setUp(): void {
         parent::setUp();
-        WP_Mock::setUp();
         $this->factory = new AI_Provider_Factory();
     }
 
     public function tearDown(): void {
-        WP_Mock::tearDown();
         parent::tearDown();
     }
 
     public function test_get_provider() {
         $provider = $this->factory->get_provider('openai', ['api_key' => 'test_key']);
-        $this->assertInstanceOf('GLColorPalette\Providers\OpenAI_Provider', $provider);
+        $this->assertInstanceOf('GL_Color_Palette_Generator\Providers\OpenAI_Provider', $provider);
     }
 
     public function test_get_invalid_provider() {

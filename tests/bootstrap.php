@@ -17,8 +17,16 @@ require_once dirname( __FILE__ ) . '/../vendor/autoload.php';
 $is_wp_mock = false;
 foreach ($_SERVER['argv'] as $arg) {
     if (strpos($arg, '--group') === 0) {
-        $group = substr($arg, strpos($arg, '=') !== false ? strpos($arg, '=') + 1 : 7);
-        if ($group === 'wp-mock') {
+        // Handle both --group wp-mock and --group=wp-mock formats
+        if (strpos($arg, '=') !== false) {
+            // Format: --group=wp-mock
+            $group = substr($arg, strpos($arg, '=') + 1);
+        } else if (isset($_SERVER['argv'][array_search($arg, $_SERVER['argv']) + 1])) {
+            // Format: --group wp-mock
+            $group = $_SERVER['argv'][array_search($arg, $_SERVER['argv']) + 1];
+        }
+
+        if (isset($group) && $group === 'wp-mock') {
             $is_wp_mock = true;
             break;
         }
@@ -44,23 +52,36 @@ if ($is_wp_mock) {
         define('WPINC', 'wp-includes');
     }
 
-    // Load mock test files
-    $mock_test_directories = ['interfaces', 'providers', 'api', 'admin'];
+    // Load only WP-Mock test files
+    $mock_test_directories = ['providers', 'api', 'admin'];
     $test_root = dirname(__FILE__);
-    
+
+    // Load the base provider mock test class first
+    require_once $test_root . '/providers/test-provider-mock.php';
+
+    // Then load all other WP-Mock test files
     foreach ($mock_test_directories as $dir) {
         $dir_path = $test_root . '/' . $dir;
         if (is_dir($dir_path)) {
             foreach (glob($dir_path . '/test-*.php') as $test_file) {
-                require_once $test_file;
+                // Skip integration test files and already loaded files
+                if (strpos($test_file, 'integration') === false &&
+                    basename($test_file) !== 'test-provider-mock.php') {
+                    require_once $test_file;
+                }
             }
         }
     }
 } else {
-    // WordPress integration tests
+    // Only load WordPress test suite for non-WP-Mock tests
     $_tests_dir = getenv('WP_TESTS_DIR');
     if (!$_tests_dir) {
         $_tests_dir = '/app/wordpress-phpunit';
+    }
+
+    // Check if we're running integration tests
+    if (!file_exists($_tests_dir . '/includes/functions.php')) {
+        die("WordPress test suite not found at {$_tests_dir}. Please run setup-plugin-tests.sh first.\n");
     }
 
     // Load WordPress test environment
@@ -70,10 +91,11 @@ if ($is_wp_mock) {
     // Load integration test files
     $wp_test_directories = [
         'integration',
+        'interfaces',
         'system',
         '.'  // Root directory for files like test-color-analysis.php
     ];
-    
+
     foreach ($wp_test_directories as $dir) {
         $dir_path = dirname(__FILE__) . '/' . $dir;
         if (is_dir($dir_path)) {

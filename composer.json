@@ -22,19 +22,24 @@
     },
     "autoload": {
         "psr-4": {
-            "GLColorPalette\\": "includes/"
+            "GL_Color_Palette_Generator\\": "includes/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "GLColorPalette\\Tests\\Integration\\": "tests/integration/",
-            "GLColorPalette\\Tests\\": "tests/"
+            "GL_Color_Palette_Generator\\Tests\\": "tests/"
         }
     },
     "scripts": {
-        "test": "phpunit",
-        "test:integration": "phpunit --testsuite integration",
-        "test:unit": "phpunit --testsuite unit",
+        "test": [
+            "@test:unit",
+            "@test:integration"
+        ],
+        "test:unit": "phpunit --bootstrap=tests/bootstrap-wp-mock.php --testsuite unit",
+        "test:integration": "phpunit --bootstrap=tests/bootstrap-wp.php --testsuite integration",
+        "coverage": "phpunit --coverage-html=coverage",
+        "coverage:text": "phpunit --coverage-text",
+        "prepare-test": "bash bin/install-wp-tests.sh wordpress_test root root localhost latest",
         "phpcs": "phpcs --standard=WordPress",
         "phpcbf": "phpcbf --standard=WordPress"
     },
@@ -43,4 +48,4 @@
             "dealerdirect/phpcodesniffer-composer-installer": true
         }
     }
-} 
+}

@@ -1,16 +1,19 @@
 <?php
-namespace GLColorPalette\Tests\Providers;
+namespace GL_Color_Palette_Generator\Tests\Providers;
 
-use GLColorPalette\Providers\Anthropic_Provider;
+use GL_Color_Palette_Generator\Providers\Anthropic_Provider;
+use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use WP_Mock;
 
-class Anthropic_Provider_Test extends \WP_Mock\Tools\TestCase {
-    protected $provider;
+class Test_Anthropic_Provider extends Test_Provider_Mock {
+    protected function get_test_credentials(): array {
+        return ['api_key' => 'test_key'];
+    }
 
     public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
-        $this->provider = new Anthropic_Provider(['api_key' => 'test_key']);
+        $this->provider = new Anthropic_Provider($this->get_test_credentials());
     }
 
     public function tearDown(): void {
@@ -41,7 +44,7 @@ class Anthropic_Provider_Test extends \WP_Mock\Tools\TestCase {
             'body' => json_encode(['colors' => ['#FF0000', '#00FF00', '#0000FF']])
         ]);
 
-        $colors = $this->provider->generate_palette(['prompt' => 'test', 'count' => 3]);
+        $colors = $this->provider->generate_palette($this->test_params);
         $this->assertIsArray($colors);
         $this->assertCount(3, $colors);
     }

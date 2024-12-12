@@ -1,23 +1,23 @@
 <?php
 
-namespace GLColorPalette\Tests\Providers;
+namespace GL_Color_Palette_Generator\Tests\Providers;
 
-use GLColorPalette\Providers\HuggingFace_Provider;
+use GL_Color_Palette_Generator\Providers\HuggingFace_Provider;
+use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use WP_Mock;
 
 /**
  * @group wp-mock
  */
-class HuggingFace_Provider_Test extends \WP_Mock\Tools\TestCase {
-    protected $provider;
+class Test_HuggingFace_Provider extends Test_Provider_Mock {
+    protected function get_test_credentials(): array {
+        return ['api_key' => 'test_key', 'model_id' => 'test_model'];
+    }
 
     public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
-        $this->provider = new HuggingFace_Provider([
-            'api_key' => 'test_key',
-            'model_id' => 'test_model'
-        ]);
+        $this->provider = new HuggingFace_Provider($this->get_test_credentials());
     }
 
     public function tearDown(): void {
@@ -63,10 +63,12 @@ class HuggingFace_Provider_Test extends \WP_Mock\Tools\TestCase {
         // Mock the API response
         WP_Mock::userFunction('wp_remote_post')->once()->andReturn([
             'response' => ['code' => 200],
-            'body' => json_encode(['colors' => ['#FF0000', '#00FF00', '#0000FF']])
+            'body' => json_encode([
+                'generated_text' => json_encode(['colors' => ['#FF0000', '#00FF00', '#0000FF']])
+            ])
         ]);
 
-        $colors = $this->provider->generate_palette(['prompt' => 'test', 'count' => 3]);
+        $colors = $this->provider->generate_palette($this->test_params);
         $this->assertIsArray($colors);
         $this->assertCount(3, $colors);
     }
