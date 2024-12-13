@@ -1,11 +1,11 @@
 <?php
 
-namespace GLColorPalette\Tests\Performance;
+namespace GL_Color_Palette_Generator\Tests\Performance;
 
-use GLColorPalette\Performance\Performance_Monitor;
-use WP_UnitTestCase;
+use GL_Color_Palette_Generator\Performance\Performance_Monitor;
+use PHPUnit\Framework\TestCase;
 
-class Test_Performance_Monitor extends WP_UnitTestCase {
+class Test_Performance_Monitor extends TestCase {
     protected $performance_monitor;
 
     public function setUp(): void {

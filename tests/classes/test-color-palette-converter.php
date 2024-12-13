@@ -12,7 +12,7 @@ class ColorPaletteConverterTest extends TestCase {
     private $formatter;
     private $palette;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->formatter = new ColorPaletteFormatter();
         $this->converter = new ColorPaletteConverter($this->formatter);
         $this->palette = new ColorPalette([

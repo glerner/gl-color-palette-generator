@@ -14,13 +14,13 @@ use WP_Mock;
 class Test_Validator extends \WP_Mock\Tools\TestCase {
     private $validator;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
         $this->validator = new Validator();
     }
 
-    protected function tearDown(): void {
+    public function tearDown(): void {
         WP_Mock::tearDown();
         parent::tearDown();
     }

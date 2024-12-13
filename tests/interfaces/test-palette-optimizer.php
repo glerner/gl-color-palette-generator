@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\PaletteOptimizer;
 class PaletteOptimizerTest extends TestCase {
     private $optimizer;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->optimizer = $this->createMock(PaletteOptimizer::class);
     }
 

@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\ColorAnalyzer;
 class ColorAnalyzerTest extends TestCase {
     private $analyzer;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->analyzer = $this->createMock(ColorAnalyzer::class);
     }
 

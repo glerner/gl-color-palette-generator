@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\CulturalAnalyzer;
 class CulturalAnalyzerTest extends TestCase {
     private $analyzer;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->analyzer = $this->createMock(CulturalAnalyzer::class);
     }
 

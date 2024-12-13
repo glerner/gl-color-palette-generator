@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\VisualizationEngine;
 class VisualizationEngineTest extends TestCase {
     private $engine;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->engine = $this->createMock(VisualizationEngine::class);
     }
 

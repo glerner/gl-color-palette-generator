@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\AIService;
 class AIServiceTest extends TestCase {
     private $service;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->service = $this->createMock(AIService::class);
     }
 

@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\ColorThemeManager;
 class ColorThemeManagerTest extends TestCase {
     private $manager;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->manager = $this->createMock(ColorThemeManager::class);
     }
 

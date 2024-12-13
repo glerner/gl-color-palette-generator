@@ -8,7 +8,7 @@ use GLColorPalette\Interfaces\AccessibilityChecker;
 class AccessibilityCheckerTest extends TestCase {
     private $checker;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->checker = $this->createMock(AccessibilityChecker::class);
     }
 

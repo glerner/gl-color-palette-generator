@@ -22,7 +22,7 @@ use GLColorPalette\Interfaces\ColorAccessibility;
 class ColorAccessibilityTest extends TestCase {
     private $accessibility;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->accessibility = $this->createMock(ColorAccessibility::class);
     }
 

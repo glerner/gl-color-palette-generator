@@ -8,7 +8,7 @@ use GLColorPalette\Interfaces\ColorPaletteCache;
 class ColorPaletteCacheTest extends TestCase {
     private $cache;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->cache = $this->createMock(ColorPaletteCache::class);
     }
 

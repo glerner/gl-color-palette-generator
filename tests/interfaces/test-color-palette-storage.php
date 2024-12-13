@@ -1,15 +1,15 @@
 <?php
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Storage;
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\ColorPaletteStorage;
 
-class ColorPaletteStorageTest extends TestCase {
+class Color_Palette_Storage_Test extends TestCase {
     private $storage;
 
-    protected function setUp(): void {
-        $this->storage = $this->createMock(ColorPaletteStorage::class);
+    public function setUp(): void {
+        $this->storage = $this->createMock(Color_Palette_Storage::class);
     }
 
     public function test_store_in_db_saves_palette(): void {

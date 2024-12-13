@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\Validator;
 class ValidatorTest extends TestCase {
     private $validator;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->validator = $this->createMock(Validator::class);
     }
 

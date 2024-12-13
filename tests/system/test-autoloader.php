@@ -29,7 +29,7 @@ class Test_Autoloader extends TestCase {
     /**
      * Setup test environment
      */
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         $this->autoloader = new Autoloader();
     }
@@ -37,7 +37,7 @@ class Test_Autoloader extends TestCase {
     /**
      * Teardown test environment
      */
-    protected function tearDown(): void {
+    public function tearDown(): void {
         Mockery::close();
         parent::tearDown();
     }

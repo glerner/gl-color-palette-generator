@@ -8,7 +8,7 @@ use GLColorPalette\Interfaces\ColorSchemeGenerator;
 class ColorSchemeGeneratorTest extends TestCase {
     private $generator;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->generator = $this->createMock(ColorSchemeGenerator::class);
     }
 

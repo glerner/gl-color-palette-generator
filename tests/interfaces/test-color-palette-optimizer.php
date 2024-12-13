@@ -8,7 +8,7 @@ use GLColorPalette\Interfaces\ColorPaletteOptimizer;
 class ColorPaletteOptimizerTest extends TestCase {
     private $optimizer;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->optimizer = $this->createMock(ColorPaletteOptimizer::class);
     }
 

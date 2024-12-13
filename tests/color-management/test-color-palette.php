@@ -22,7 +22,7 @@ class Test_Color_Palette extends \WP_Mock\Tools\TestCase {
         'tags' => ['test', 'demo']
     ];
 
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
 
@@ -32,7 +32,7 @@ class Test_Color_Palette extends \WP_Mock\Tools\TestCase {
         ]);
     }
 
-    protected function tearDown(): void {
+    public function tearDown(): void {
         WP_Mock::tearDown();
         Mockery::close();
         parent::tearDown();

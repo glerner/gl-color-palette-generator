@@ -30,7 +30,7 @@ class Test_Color_Palette_Admin extends TestCase {
     /**
      * Setup test environment
      */
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         \Brain\Monkey\setUp();
         $this->admin = new Color_Palette_Admin();
@@ -39,7 +39,7 @@ class Test_Color_Palette_Admin extends TestCase {
     /**
      * Teardown test environment
      */
-    protected function tearDown(): void {
+    public function tearDown(): void {
         \Brain\Monkey\tearDown();
         Mockery::close();
         parent::tearDown();

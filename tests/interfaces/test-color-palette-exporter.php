@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\ColorPaletteExporter;
 class ColorPaletteExporterTest extends TestCase {
     private $exporter;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->exporter = $this->createMock(ColorPaletteExporter::class);
     }
 

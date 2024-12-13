@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\AdminInterface;
 class AdminInterfaceTest extends TestCase {
     private $admin;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->admin = $this->createMock(AdminInterface::class);
     }
 

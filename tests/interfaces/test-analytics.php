@@ -8,7 +8,7 @@ use GLColorPalette\Interfaces\Analytics;
 class AnalyticsTest extends TestCase {
     private $analytics;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->analytics = $this->createMock(Analytics::class);
     }
 

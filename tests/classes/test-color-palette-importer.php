@@ -18,7 +18,7 @@ class ColorPaletteImporterTest extends TestCase {
     private ColorPaletteImporter $importer;
     private ColorPaletteFormatter $formatter;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->formatter = new ColorPaletteFormatter();
         $this->importer = new ColorPaletteImporter($this->formatter);
     }

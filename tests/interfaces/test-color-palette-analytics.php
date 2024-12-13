@@ -8,7 +8,7 @@ use GLColorPalette\Interfaces\ColorPaletteAnalytics;
 class ColorPaletteAnalyticsTest extends TestCase {
     private $analytics;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->analytics = $this->createMock(ColorPaletteAnalytics::class);
     }
 

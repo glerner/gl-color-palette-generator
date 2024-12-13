@@ -26,7 +26,7 @@ class Test_Color_Utility extends TestCase {
     /**
      * Set up test environment
      */
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         $this->color_util = new Color_Utility();
     }

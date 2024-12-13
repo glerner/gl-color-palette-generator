@@ -9,12 +9,12 @@ use WP_Mock;
 use WP_Mock\Tools\TestCase;
 
 class Test_Settings_Validator extends TestCase {
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
     }
 
-    protected function tearDown(): void {
+    public function tearDown(): void {
         WP_Mock::tearDown();
         parent::tearDown();
     }

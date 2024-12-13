@@ -9,7 +9,6 @@
 
 namespace GL_Color_Palette_Generator\Tests;
 
-use GL_Color_Palette_Generator\Providers\Provider;
 use GL_Color_Palette_Generator\Providers\Cohere_Provider;
 use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
 use WP_Mock;
@@ -18,17 +17,12 @@ use WP_Mock;
  * Cohere Provider test case
  */
 class Test_Cohere_Provider extends Test_Provider_Mock {
-    protected Provider $provider;
-
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
-        WP_Mock::setUp();
-        
         $this->provider = new Cohere_Provider($this->get_test_credentials());
     }
 
-    protected function tearDown(): void {
-        WP_Mock::tearDown();
+    public function tearDown(): void {
         parent::tearDown();
     }
 

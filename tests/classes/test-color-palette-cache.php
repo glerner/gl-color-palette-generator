@@ -19,7 +19,7 @@ class ColorPaletteCacheTest extends TestCase {
     protected ColorPaletteCache $cache;
     protected ColorPalette $test_palette;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         \Brain\Monkey\setUp();
 
@@ -31,7 +31,7 @@ class ColorPaletteCacheTest extends TestCase {
         ]);
     }
 
-    protected function tearDown(): void {
+    public function tearDown(): void {
         \Brain\Monkey\tearDown();
         parent::tearDown();
     }

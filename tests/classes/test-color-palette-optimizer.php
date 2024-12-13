@@ -22,7 +22,7 @@ class ColorPaletteOptimizerTest extends TestCase {
     private ColorPaletteFormatter $formatter;
     private ColorPalette $test_palette;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->formatter = new ColorPaletteFormatter();
         $this->analyzer = new ColorPaletteAnalyzer($this->formatter);
         $this->optimizer = new ColorPaletteOptimizer($this->analyzer, $this->formatter);

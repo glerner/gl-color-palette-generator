@@ -21,7 +21,7 @@ use GLColorPalette\Interfaces\ColorMetricsAnalyzer;
 class ColorMetricsAnalyzerTest extends TestCase {
     private $analyzer;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->analyzer = $this->createMock(ColorMetricsAnalyzer::class);
     }
 

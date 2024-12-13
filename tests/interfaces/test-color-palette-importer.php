@@ -8,7 +8,7 @@ use GLColorPalette\Interfaces\ColorPaletteImporter;
 class ColorPaletteImporterTest extends TestCase {
     private $importer;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->importer = $this->createMock(ColorPaletteImporter::class);
     }
 

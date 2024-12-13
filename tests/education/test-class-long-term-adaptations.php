@@ -8,7 +8,7 @@ use WP_UnitTestCase;
 class Test_Long_Term_Adaptations extends WP_UnitTestCase {
     private $adaptations;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
         $this->adaptations = new LongTermAdaptations();
@@ -152,7 +152,7 @@ class Test_Long_Term_Adaptations extends WP_UnitTestCase {
         $this->assertArrayHasKey('adaptation_strategies', $recommendations);
     }
 
-    protected function tearDown(): void {
+    public function tearDown(): void {
         WP_Mock::tearDown();
         parent::tearDown();
     }

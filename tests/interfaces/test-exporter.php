@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\Exporter;
 class ExporterTest extends TestCase {
     private $exporter;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->exporter = $this->createMock(Exporter::class);
     }
 

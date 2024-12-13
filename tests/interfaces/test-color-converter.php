@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\ColorConverter;
 class ColorConverterTest extends TestCase {
     private $converter;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         // Create a mock implementation of the interface
         $this->converter = $this->createMock(ColorConverter::class);
     }

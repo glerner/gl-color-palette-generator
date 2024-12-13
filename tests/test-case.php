@@ -7,24 +7,24 @@ use Yoast\PHPUnitPolyfills\TestCases\TestCase as Polyfill_TestCase;
 /**
  * Base test case class for all plugin tests
  */
-abstract class TestCase extends WP_Mock_TestCase {
+abstract class Test_Case extends WP_Mock_TestCase {
     use \Yoast\PHPUnitPolyfills\Polyfills\AssertIsType;
     use \Yoast\PHPUnitPolyfills\Polyfills\AssertStringContains;
 
     /**
      * Set up test environment
      */
-    protected function set_up() {
-        parent::set_up();
+    public function setUp(): void {
+        parent::setUp();
         \WP_Mock::setUp();
     }
 
     /**
      * Tear down test environment
      */
-    protected function tear_down() {
+    public function tearDown(): void {
         \WP_Mock::tearDown();
-        parent::tear_down();
+        parent::tearDown();
     }
 
     /**

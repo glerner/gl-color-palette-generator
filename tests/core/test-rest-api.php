@@ -16,12 +16,12 @@ use WP_REST_Response;
 use WP_Error;
 
 class Test_REST_API extends \WP_Mock\Tools\TestCase {
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
     }
 
-    protected function tearDown(): void {
+    public function tearDown(): void {
         WP_Mock::tearDown();
         Mockery::close();
         parent::tearDown();

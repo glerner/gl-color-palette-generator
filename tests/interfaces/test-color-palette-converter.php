@@ -8,7 +8,7 @@ use GLColorPalette\Interfaces\ColorPaletteConverter;
 class ColorPaletteConverterTest extends TestCase {
     private $converter;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->converter = $this->createMock(ColorPaletteConverter::class);
     }
 

@@ -8,7 +8,7 @@ use GLColorPalette\Interfaces\ColorPaletteVersionControl;
 class ColorPaletteVersionControlTest extends TestCase {
     private $versionControl;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->versionControl = $this->createMock(ColorPaletteVersionControl::class);
     }
 

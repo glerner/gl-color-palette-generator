@@ -18,7 +18,7 @@ class ColorPaletteGeneratorTest extends TestCase {
     private ColorPaletteGenerator $generator;
     private ColorPaletteFormatter $formatter;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->formatter = new ColorPaletteFormatter();
         $this->generator = new ColorPaletteGenerator($this->formatter);
     }

@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\ColorPaletteNotifier;
 class ColorPaletteNotifierTest extends TestCase {
     private $notifier;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->notifier = $this->createMock(ColorPaletteNotifier::class);
     }
 

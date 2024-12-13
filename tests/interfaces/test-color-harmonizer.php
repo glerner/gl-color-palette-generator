@@ -21,7 +21,7 @@ use GLColorPalette\Interfaces\ColorHarmonizer;
 class ColorHarmonizerTest extends TestCase {
     private $harmonizer;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->harmonizer = $this->createMock(ColorHarmonizer::class);
     }
 

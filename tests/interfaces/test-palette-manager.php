@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\PaletteManager;
 class PaletteManagerTest extends TestCase {
     private $manager;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->manager = $this->createMock(PaletteManager::class);
     }
 

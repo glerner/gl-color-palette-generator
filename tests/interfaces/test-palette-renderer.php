@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\PaletteRenderer;
 class PaletteRendererTest extends TestCase {
     private $renderer;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->renderer = $this->createMock(PaletteRenderer::class);
     }
 

@@ -8,7 +8,7 @@ use GLColorPalette\Interfaces\ColorPaletteRenderer;
 class ColorPaletteRendererTest extends TestCase {
     private $renderer;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->renderer = $this->createMock(ColorPaletteRenderer::class);
     }
 

@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\ErrorHandler;
 class ErrorHandlerTest extends TestCase {
     private $handler;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->handler = $this->createMock(ErrorHandler::class);
     }
 

@@ -8,7 +8,7 @@ use WP_UnitTestCase;
 class Test_Color_Metrics_Analyzer extends WP_UnitTestCase {
     protected $analyzer;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
         $this->analyzer = new Color_Metrics_Analyzer();

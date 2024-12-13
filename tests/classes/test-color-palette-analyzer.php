@@ -20,7 +20,7 @@ class ColorPaletteAnalyzerTest extends TestCase {
     protected ColorPaletteFormatter $formatter;
     protected ColorPalette $test_palette;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->formatter = new ColorPaletteFormatter();
         $this->analyzer = new ColorPaletteAnalyzer($this->formatter);
         $this->test_palette = new ColorPalette([

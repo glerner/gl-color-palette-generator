@@ -8,7 +8,7 @@ use GLColorPalette\Interfaces\ColorPaletteManager;
 class ColorPaletteManagerTest extends TestCase {
     protected $manager;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->manager = $this->createMock(ColorPaletteManager::class);
     }
 

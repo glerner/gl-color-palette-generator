@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\AIProvider;
 class AIProviderTest extends TestCase {
     private $provider;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->provider = $this->createMock(AIProvider::class);
     }
 

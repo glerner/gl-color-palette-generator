@@ -8,7 +8,7 @@ use GLColorPalette\Interfaces\ColorPaletteValidator;
 class ColorPaletteValidatorTest extends TestCase {
     private $validator;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->validator = $this->createMock(ColorPaletteValidator::class);
     }
 

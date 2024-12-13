@@ -1,11 +1,11 @@
 <?php
 
-namespace GLColorPalette\Tests\Localization;
+namespace GL_Color_Palette_Generator\Tests\Localization;
 
-use GLColorPalette\Localization\Localization_Manager;
-use WP_UnitTestCase;
+use GL_Color_Palette_Generator\Localization\Localization_Manager;
+use PHPUnit\Framework\TestCase;
 
-class Test_Localization_Manager extends WP_UnitTestCase {
+class Test_Localization_Manager extends TestCase {
     private $localization_manager;
 
     public function setUp(): void {

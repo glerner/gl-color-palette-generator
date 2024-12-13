@@ -22,7 +22,7 @@ use GLColorPalette\Interfaces\ColorPalettePreview;
 class ColorPalettePreviewTest extends TestCase {
     private $preview;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->preview = $this->createMock(ColorPalettePreview::class);
     }
 

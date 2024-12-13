@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\PerformanceMonitor;
 class PerformanceMonitorTest extends TestCase {
     private $monitor;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->monitor = $this->createMock(PerformanceMonitor::class);
     }
 

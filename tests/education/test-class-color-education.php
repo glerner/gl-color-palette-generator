@@ -1,17 +1,17 @@
 <?php
 
-namespace GLColorPalette\Tests\Education;
+namespace GL_Color_Palette_Generator\Tests\Education;
 
-use GLColorPalette\ColorEducation;
-use WP_UnitTestCase;
+use GL_Color_Palette_Generator\Education\Color_Education;
+use PHPUnit\Framework\TestCase;
 
-class Test_Color_Education extends WP_UnitTestCase {
+class Test_Color_Education extends TestCase {
     private $education;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
-        $this->education = new ColorEducation();
+        $this->education = new Color_Education();
     }
 
     public function test_get_color_relationships(): void {

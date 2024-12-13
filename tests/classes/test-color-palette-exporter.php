@@ -21,7 +21,7 @@ class ColorPaletteExporterTest extends TestCase {
     protected ColorPalette $test_palette;
     protected string $temp_dir;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->formatter = new ColorPaletteFormatter();
         $this->exporter = new ColorPaletteExporter($this->formatter);
         $this->test_palette = new ColorPalette([
@@ -194,7 +194,7 @@ class ColorPaletteExporterTest extends TestCase {
         $this->assertStringNotContainsString('/* Test Palette */', $output);
     }
 
-    protected function tearDown(): void {
+    public function tearDown(): void {
         // Clean up any temporary files if they exist
         $temp_files = glob($this->temp_dir . '/test_palette.*');
         foreach ($temp_files as $file) {

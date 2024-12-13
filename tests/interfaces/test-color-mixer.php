@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\ColorMixer;
 class ColorMixerTest extends TestCase {
     private $mixer;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->mixer = $this->createMock(ColorMixer::class);
     }
 

@@ -18,17 +18,15 @@ use WP_Mock;
  * Anthropic Provider test case
  */
 class Test_Anthropic_Provider extends Test_Provider_Mock {
-    protected Provider $provider;
 
-    protected function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
-        WP_Mock::setUp();
-        
         $this->provider = new Anthropic_Provider($this->get_test_credentials());
     }
 
-    protected function tearDown(): void {
-        WP_Mock::tearDown();
+    public function tearDown(): void
+    {
         parent::tearDown();
     }
 

@@ -20,7 +20,7 @@ class ColorPaletteRendererTest extends TestCase {
     private ColorPaletteFormatter $formatter;
     private ColorPalette $test_palette;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->formatter = new ColorPaletteFormatter();
         $this->renderer = new ColorPaletteRenderer($this->formatter);
         $this->test_palette = new ColorPalette([

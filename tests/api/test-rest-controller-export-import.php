@@ -33,7 +33,7 @@ class Test_Rest_Controller_Export_Import extends TestCase {
     /**
      * Setup test environment
      */
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         \Brain\Monkey\setUp();
         global $wpdb;
@@ -46,7 +46,7 @@ class Test_Rest_Controller_Export_Import extends TestCase {
     /**
      * Teardown test environment
      */
-    protected function tearDown(): void {
+    public function tearDown(): void {
         Mockery::close();
         \Brain\Monkey\tearDown();
         parent::tearDown();

@@ -39,7 +39,7 @@ class Test_Color_Palette_Generator extends TestCase {
     /**
      * Setup test environment
      */
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         \Brain\Monkey\setUp();
 
@@ -60,7 +60,7 @@ class Test_Color_Palette_Generator extends TestCase {
     /**
      * Teardown test environment
      */
-    protected function tearDown(): void {
+    public function tearDown(): void {
         Mockery::close();
         \Brain\Monkey\tearDown();
         parent::tearDown();

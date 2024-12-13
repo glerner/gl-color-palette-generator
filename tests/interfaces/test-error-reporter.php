@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\ErrorReporter;
 class ErrorReporterTest extends TestCase {
     private $reporter;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->reporter = $this->createMock(ErrorReporter::class);
     }
 

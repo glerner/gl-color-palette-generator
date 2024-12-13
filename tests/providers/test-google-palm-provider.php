@@ -18,15 +18,12 @@ use WP_Mock;
  * Google PaLM Provider test case
  */
 class Test_Google_PaLM_Provider extends Test_Provider_Mock {
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
-        WP_Mock::setUp();
-        
         $this->provider = new Google_PaLM_Provider($this->get_test_credentials());
     }
 
-    protected function tearDown(): void {
-        WP_Mock::tearDown();
+    public function tearDown(): void {
         parent::tearDown();
     }
 

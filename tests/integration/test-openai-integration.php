@@ -11,7 +11,7 @@ class Test_OpenAI_Integration extends Test_Provider_Integration {
         ];
     }
 
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
         $this->maybe_skip_test();

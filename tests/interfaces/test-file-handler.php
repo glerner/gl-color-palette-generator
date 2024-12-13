@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\FileHandler;
 class FileHandlerTest extends TestCase {
     private $handler;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->handler = $this->createMock(FileHandler::class);
     }
 

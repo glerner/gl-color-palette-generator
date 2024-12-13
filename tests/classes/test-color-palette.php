@@ -8,7 +8,7 @@ use GLColorPalette\ColorPalette;
 class ColorPaletteTest extends TestCase {
     private ColorPalette $palette;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->palette = new ColorPalette([
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00', '#0000FF'],

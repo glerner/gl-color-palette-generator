@@ -2,22 +2,20 @@
 /**
  * Color Palette Formatter Tests
  *
- * @package GLColorPalette
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
- * @since   1.0.0
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests
  */
 
-namespace GLColorPalette\Tests;
+namespace GL_Color_Palette_Generator\Tests;
 
+use GL_Color_Palette_Generator\Color_Palette_Formatter;
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\ColorPaletteFormatter;
 
 class ColorPaletteFormatterTest extends TestCase {
-    private ColorPaletteFormatter $formatter;
+    private Color_Palette_Formatter $formatter;
 
-    protected function setUp(): void {
-        $this->formatter = new ColorPaletteFormatter();
+    public function setUp(): void {
+        $this->formatter = new Color_Palette_Formatter();
     }
 
     /**

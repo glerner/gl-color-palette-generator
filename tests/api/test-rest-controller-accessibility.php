@@ -32,7 +32,7 @@ class Test_Rest_Controller_Accessibility extends TestCase {
     /**
      * Setup test environment
      */
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         \Brain\Monkey\setUp();
         $this->controller = new Rest_Controller();
@@ -41,7 +41,7 @@ class Test_Rest_Controller_Accessibility extends TestCase {
     /**
      * Teardown test environment
      */
-    protected function tearDown(): void {
+    public function tearDown(): void {
         Mockery::close();
         \Brain\Monkey\tearDown();
         parent::tearDown();

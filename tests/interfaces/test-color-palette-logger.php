@@ -8,7 +8,7 @@ use GLColorPalette\Interfaces\ColorPaletteLogger;
 class ColorPaletteLoggerTest extends TestCase {
     private $logger;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->logger = $this->createMock(ColorPaletteLogger::class);
     }
 

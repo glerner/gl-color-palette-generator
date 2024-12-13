@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\ColorPaletteHistory;
 class ColorPaletteHistoryTest extends TestCase {
     private $history;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->history = $this->createMock(ColorPaletteHistory::class);
     }
 

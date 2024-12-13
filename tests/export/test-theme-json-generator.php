@@ -1,24 +1,23 @@
 <?php
 
-namespace GLColorPalette\Tests\Export;
+namespace GL_Color_Palette_Generator\Tests\Export;
 
-use GLColorPalette\ThemeJsonGenerator;
-use GLColorPalette\ContrastChecker;
-use WP_UnitTestCase;
+use GL_Color_Palette_Generator\Export\Theme_JSON_Generator;
+use PHPUnit\Framework\TestCase;
 
-class Test_Theme_Json_Generator extends WP_UnitTestCase {
+class Test_Theme_JSON_Generator extends TestCase {
     private $generator;
     private $temp_dir;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         $contrast_checker = new ContrastChecker();
-        $this->generator = new ThemeJsonGenerator($contrast_checker);
+        $this->generator = new Theme_JSON_Generator($contrast_checker);
         $this->temp_dir = get_temp_dir() . 'theme-json-test-' . uniqid();
         mkdir($this->temp_dir);
     }
 
-    protected function tearDown(): void {
+    public function tearDown(): void {
         // Clean up temporary files
         $this->removeDirectory($this->temp_dir);
         parent::tearDown();

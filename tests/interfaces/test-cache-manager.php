@@ -15,7 +15,7 @@ use GLColorPalette\Interfaces\CacheManager;
 class CacheManagerTest extends TestCase {
     private $manager;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->manager = $this->createMock(CacheManager::class);
     }
 

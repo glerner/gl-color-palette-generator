@@ -23,7 +23,7 @@ class Test_Setup extends TestCase {
     /**
      * Setup test environment
      */
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
         \Brain\Monkey\setUp();
     }
@@ -31,7 +31,7 @@ class Test_Setup extends TestCase {
     /**
      * Teardown test environment
      */
-    protected function tearDown(): void {
+    public function tearDown(): void {
         \Brain\Monkey\tearDown();
         Mockery::close();
         parent::tearDown();

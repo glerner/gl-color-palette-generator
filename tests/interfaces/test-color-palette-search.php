@@ -8,7 +8,7 @@ use GLColorPalette\Interfaces\ColorPaletteSearch;
 class ColorPaletteSearchTest extends TestCase {
     private $search;
 
-    protected function setUp(): void {
+    public function setUp(): void {
         $this->search = $this->createMock(ColorPaletteSearch::class);
     }
 
