@@ -19,6 +19,8 @@ use WP_Mock;
  * Color Pizza Provider test case
  */
 class Test_Color_Pizza_Provider extends Test_Provider_Mock {
+    protected Provider $provider;
+
     protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();

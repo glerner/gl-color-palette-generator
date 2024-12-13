@@ -6,9 +6,9 @@ use GL_Color_Palette_Generator\Providers\Provider;
 use GL_Color_Palette_Generator\Color_Management\Color_Validator;
 
 class Test_Palette_Generator extends TestCase {
-    private Palette_Generator $generator;
-    private $mock_provider;
-    private $mock_validator;
+    protected Palette_Generator $generator;
+    protected $mock_provider;
+    protected $mock_validator;
 
     protected function set_up() {
         parent::set_up();

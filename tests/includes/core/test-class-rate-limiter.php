@@ -24,28 +24,28 @@ class Test_Rate_Limiter extends WP_UnitTestCase {
      *
      * @var Rate_Limiter
      */
-    private $rate_limiter;
+    protected $rate_limiter;
 
     /**
      * Mock logger
      *
      * @var Logger|\PHPUnit\Framework\MockObject\MockObject
      */
-    private $logger;
+    protected $logger;
 
     /**
      * Mock error handler
      *
      * @var Error_Handler|\PHPUnit\Framework\MockObject\MockObject
      */
-    private $error_handler;
+    protected $error_handler;
 
     /**
      * Test identifier
      *
      * @var string
      */
-    private $test_identifier = 'test_user_123';
+    protected $test_identifier = 'test_user_123';
 
     /**
      * Set up test environment

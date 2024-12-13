@@ -8,7 +8,7 @@ use WP_Mock;
 use WP_Mock\Tools\TestCase;
 
 class Test_Name_Generator extends TestCase {
-    private Name_Generator $name_generator;
+    protected Name_Generator $name_generator;
 
     public function setUp(): void {
         parent::setUp();

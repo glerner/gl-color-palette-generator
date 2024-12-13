@@ -6,6 +6,8 @@ use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use WP_Mock\Tools\TestCase;
 
 class Test_PaLM_Provider extends Test_Provider_Mock {
+    protected Provider $provider;
+
     protected function get_test_credentials(): array {
         return ['api_key' => 'test_key'];
     }

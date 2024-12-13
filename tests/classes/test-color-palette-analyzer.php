@@ -16,9 +16,9 @@ use GLColorPalette\ColorPaletteAnalyzer;
 use GLColorPalette\ColorPaletteFormatter;
 
 class ColorPaletteAnalyzerTest extends TestCase {
-    private ColorPaletteAnalyzer $analyzer;
-    private ColorPaletteFormatter $formatter;
-    private ColorPalette $test_palette;
+    protected ColorPaletteAnalyzer $analyzer;
+    protected ColorPaletteFormatter $formatter;
+    protected ColorPalette $test_palette;
 
     protected function setUp(): void {
         $this->formatter = new ColorPaletteFormatter();

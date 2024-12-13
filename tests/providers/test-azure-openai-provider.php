@@ -18,6 +18,8 @@ use WP_Mock;
  * Azure OpenAI Provider test case
  */
 class Test_Azure_OpenAI_Provider extends Test_Provider_Mock {
+    protected Provider $provider;
+
     protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();

@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use GLColorPalette\Interfaces\ColorPaletteManager;
 
 class ColorPaletteManagerTest extends TestCase {
-    private $manager;
+    protected $manager;
 
     protected function setUp(): void {
         $this->manager = $this->createMock(ColorPaletteManager::class);

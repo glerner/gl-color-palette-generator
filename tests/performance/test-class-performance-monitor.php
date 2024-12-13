@@ -6,7 +6,7 @@ use GLColorPalette\Performance\Performance_Monitor;
 use WP_UnitTestCase;
 
 class Test_Performance_Monitor extends WP_UnitTestCase {
-    private $performance_monitor;
+    protected $performance_monitor;
 
     public function setUp(): void {
         parent::setUp();

@@ -8,7 +8,7 @@ use WP_Mock;
 use WP_Mock\Tools\TestCase;
 
 class Test_ML_Color_Engine extends TestCase {
-    private ML_Color_Engine $ml_color_engine;
+    protected ML_Color_Engine $ml_color_engine;
 
     protected function setUp(): void {
         parent::setUp();

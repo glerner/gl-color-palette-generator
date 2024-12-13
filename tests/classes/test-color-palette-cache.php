@@ -16,8 +16,8 @@ use GLColorPalette\ColorPaletteCache;
 use Brain\Monkey\Functions;
 
 class ColorPaletteCacheTest extends TestCase {
-    private ColorPaletteCache $cache;
-    private ColorPalette $test_palette;
+    protected ColorPaletteCache $cache;
+    protected ColorPalette $test_palette;
 
     protected function setUp(): void {
         parent::setUp();

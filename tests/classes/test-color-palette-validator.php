@@ -15,7 +15,7 @@ use GLColorPalette\ColorPalette;
 use GLColorPalette\ColorPaletteValidator;
 
 class ColorPaletteValidatorTest extends TestCase {
-    private ColorPaletteValidator $validator;
+    protected ColorPaletteValidator $validator;
 
     protected function setUp(): void {
         $this->validator = new ColorPaletteValidator();

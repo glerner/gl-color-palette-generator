@@ -6,7 +6,7 @@ use GL_Color_Palette_Generator\Color_Management\Color_Metrics_Analyzer;
 use WP_UnitTestCase;
 
 class Test_Color_Metrics_Analyzer extends WP_UnitTestCase {
-    private $analyzer;
+    protected $analyzer;
 
     protected function setUp(): void {
         parent::setUp();

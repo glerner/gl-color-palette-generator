@@ -13,8 +13,8 @@ use WP_Mock;
 use Mockery;
 
 class Test_Color_Palette extends \WP_Mock\Tools\TestCase {
-    private $valid_colors = ['#FF0000', '#00FF00', '#0000FF'];
-    private $valid_metadata = [
+    protected $valid_colors = ['#FF0000', '#00FF00', '#0000FF'];
+    protected $valid_metadata = [
         'name' => 'Test Palette',
         'description' => 'A test palette',
         'theme' => 'test',

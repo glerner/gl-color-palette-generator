@@ -8,7 +8,7 @@ use WP_Mock;
 use WP_Mock\Tools\TestCase;
 
 class Test_Prompt_Engineer extends TestCase {
-    private Prompt_Engineer $prompt_engineer;
+    protected Prompt_Engineer $prompt_engineer;
 
     protected function setUp(): void {
         parent::setUp();

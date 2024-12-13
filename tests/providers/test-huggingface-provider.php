@@ -18,6 +18,8 @@ use WP_Mock;
  * HuggingFace Provider test case
  */
 class Test_HuggingFace_Provider extends Test_Provider_Mock {
+    protected Provider $provider;
+
     protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();

@@ -16,10 +16,10 @@ use GLColorPalette\ColorPaletteExporter;
 use GLColorPalette\ColorPaletteFormatter;
 
 class ColorPaletteExporterTest extends TestCase {
-    private ColorPaletteExporter $exporter;
-    private ColorPaletteFormatter $formatter;
-    private ColorPalette $test_palette;
-    private string $temp_dir;
+    protected ColorPaletteExporter $exporter;
+    protected ColorPaletteFormatter $formatter;
+    protected ColorPalette $test_palette;
+    protected string $temp_dir;
 
     protected function setUp(): void {
         $this->formatter = new ColorPaletteFormatter();
