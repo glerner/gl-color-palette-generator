@@ -7,53 +7,48 @@
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Color_Management
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
- * @since   1.0.0
+ * @since 1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
+use GL_Color_Palette_Generator\Interfaces\Color_Harmonizer_Interface;
+use GL_Color_Palette_Generator\Types\Color_Types;
+use GL_Color_Palette_Generator\Types\Harmony_Types;
 use GL_Color_Palette_Generator\Color_Management\Color_Analyzer;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Settings\Settings_Manager;
 
 /**
- * Class Color_Harmonization
+ * Color Harmonization Class
  *
- * Manages color harmony rules and relationships to create visually balanced
- * and aesthetically pleasing color combinations. Supports:
- * - Classical color harmonies (complementary, analogous, triadic)
- * - Dynamic mood-based harmonies
- * - Cultural color harmonies
- * - Custom harmony rules
+ * Implements color harmony algorithms and relationships for generating
+ * aesthetically pleasing color combinations. Supports various harmony
+ * types and dynamic mood-based harmonies.
  *
  * @since 1.0.0
  */
-class Color_Harmonization {
+class Color_Harmonization implements Color_Harmonizer_Interface {
     /**
      * Color analyzer instance
      *
      * @var Color_Analyzer
-     * @since 1.0.0
      */
-    private $color_analyzer;
+    private Color_Analyzer $analyzer;
 
     /**
      * Color utility instance
      *
      * @var Color_Utility
-     * @since 1.0.0
      */
-    private $color_utility;
+    private Color_Utility $utility;
 
     /**
      * Settings manager instance
      *
      * @var Settings_Manager
-     * @since 1.0.0
      */
-    private $settings;
+    private Settings_Manager $settings;
 
     /**
      * Harmony rules and specifications
@@ -115,6 +110,65 @@ class Color_Harmonization {
     ];
 
     /**
+     * Constructor
+     *
+     * @param Color_Analyzer   $analyzer Color analyzer instance
+     * @param Color_Utility    $utility  Color utility instance
+     * @param Settings_Manager $settings Settings manager instance
+     */
+    public function __construct(
+        Color_Analyzer $analyzer,
+        Color_Utility $utility,
+        Settings_Manager $settings
+    ) {
+        $this->analyzer = $analyzer;
+        $this->utility = $utility;
+        $this->settings = $settings;
+    }
+
+    /**
+     * Generate harmonious color scheme
+     *
+     * @param string $base_color Base color in hex format
+     * @param string $harmony_type Type of harmony to generate
+     * @param array  $options Additional options for harmony generation
+     * @return array Array of harmonious colors
+     */
+    public function generate_harmony(
+        string $base_color,
+        string $harmony_type,
+        array $options = []
+    ): array {
+        $this->validate_color($base_color);
+        $harmony_type = strtolower($harmony_type);
+
+        return match($harmony_type) {
+            Harmony_Types::COMPLEMENTARY => $this->generate_complementary($base_color, $options),
+            Harmony_Types::ANALOGOUS => $this->generate_analogous($base_color, $options),
+            Harmony_Types::TRIADIC => $this->generate_triadic($base_color, $options),
+            Harmony_Types::SPLIT_COMPLEMENTARY => $this->generate_split_complementary($base_color, $options),
+            Harmony_Types::TETRADIC => $this->generate_tetradic($base_color, $options),
+            Harmony_Types::SQUARE => $this->generate_square($base_color, $options),
+            Harmony_Types::MONOCHROMATIC => $this->generate_monochromatic($base_color, $options),
+            default => throw new \InvalidArgumentException("Invalid harmony type: {$harmony_type}")
+        };
+    }
+
+    /**
+     * Validate color value
+     *
+     * @param string $color Color to validate
+     * @throws \InvalidArgumentException If color is invalid
+     */
+    private function validate_color(string $color): void {
+        if (!preg_match('/^#[a-f0-9]{6}$/i', $color)) {
+            throw new \InvalidArgumentException(
+                'Invalid color format. Must be a 6-digit hex color (e.g., #FF0000)'
+            );
+        }
+    }
+
+    /**
      * Generate harmonious color combination
      *
      * @param string $base_color
@@ -123,7 +177,7 @@ class Color_Harmonization {
      *
      * @return array
      */
-    public function generate_harmony(string $base_color, string $harmony_type, array $context = []): array {
+    public function generate_harmony_combination(string $base_color, string $harmony_type, array $context = []): array {
         $harmony_rules = $this->get_harmony_rules($harmony_type);
         if (!$harmony_rules) return null;
 

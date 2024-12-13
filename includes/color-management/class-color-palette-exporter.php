@@ -10,13 +10,13 @@
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Shade_Generator;
-use GL_Color_Palette_Generator\Interfaces\AccessibilityChecker;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Exporter_Interface;
 use GL_Color_Palette_Generator\Traits\Color_Shade_Generator_Trait;
 
 /**
  * Class Color_Palette_Exporter
  */
-class Color_Palette_Exporter implements \GL_Color_Palette_Generator\Interfaces\Color_Palette_Exporter {
+class Color_Palette_Exporter implements Color_Palette_Exporter_Interface {
     use Color_Shade_Generator_Trait;
 
     private $color_exporter;
@@ -30,6 +30,23 @@ class Color_Palette_Exporter implements \GL_Color_Palette_Generator\Interfaces\C
     public function __construct(AccessibilityChecker $accessibility_checker) {
         $this->color_exporter = new ColorExporter($accessibility_checker);
         $this->shade_generator = new Color_Shade_Generator($accessibility_checker);
+    }
+
+    /**
+     * Export color palette to specified format
+     *
+     * @param array  $palette Color palette data
+     * @param string $format  Export format (css, scss, json, etc.)
+     * @return string|array Exported palette in specified format
+     */
+    public function export_palette(array $palette, string $format): string|array {
+        return match($format) {
+            'css'  => $this->export_to_css($palette),
+            'scss' => $this->export_to_scss($palette),
+            'json' => $this->export_to_json($palette),
+            'xml'  => $this->export_to_xml($palette),
+            default => throw new \InvalidArgumentException("Unsupported export format: {$format}")
+        };
     }
 
     /**

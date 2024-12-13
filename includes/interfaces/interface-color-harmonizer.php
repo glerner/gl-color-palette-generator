@@ -1,18 +1,23 @@
-<?php
-
-namespace GLColorPalette\Interfaces;
+<?php declare(strict_types=1);
 
 /**
  * Color Harmonizer Interface
  *
  * Defines the contract for creating and analyzing color harmonies.
  *
- * @package GLColorPalette
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
- * @since   1.0.0
+ * @package GL_Color_Palette_Generator
+ * @subpackage Interfaces
+ * @since 1.0.0
  */
-interface ColorHarmonizer {
+
+namespace GL_Color_Palette_Generator\Interfaces;
+
+/**
+ * Color Harmonizer Interface
+ *
+ * @since 1.0.0
+ */
+interface Color_Harmonizer_Interface {
     /**
      * Generates harmonious colors based on a base color.
      *

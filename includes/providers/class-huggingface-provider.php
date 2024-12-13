@@ -1,6 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * HuggingFace Provider Class
+ *
+ * Implements AI provider interface for HuggingFace's models.
+ * Handles color palette generation using HuggingFace's Inference API.
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Providers
@@ -9,17 +12,63 @@
 
 namespace GL_Color_Palette_Generator\Providers;
 
-use GL_Color_Palette_Generator\Providers\Abstract_AI_Provider;
-use GL_Color_Palette_Generator\Providers\Provider_Config;
+use GL_Color_Palette_Generator\Interfaces\AI_Provider_Interface;
+use GL_Color_Palette_Generator\Abstracts\AI_Provider_Base;
+use GL_Color_Palette_Generator\Types\Provider_Config;
+use GL_Color_Palette_Generator\Types\Color_Types;
 use WP_Error;
 
 /**
- * Class HuggingFace_Provider
+ * HuggingFace Provider Class
+ *
+ * @since 1.0.0
  */
-class HuggingFace_Provider extends Abstract_AI_Provider {
+class HuggingFace_Provider extends AI_Provider_Base implements AI_Provider_Interface {
+    /**
+     * Constructor
+     *
+     * @param array $credentials API credentials
+     */
     public function __construct(array $credentials) {
         $this->api_url = 'https://api-inference.huggingface.co/models/';
-        $this->credentials = $credentials;
+        parent::__construct($credentials);
+    }
+
+    /**
+     * Get provider name
+     *
+     * @return string
+     */
+    public function get_name(): string {
+        return 'huggingface';
+    }
+
+    /**
+     * Get provider display name
+     *
+     * @return string
+     */
+    public function get_display_name(): string {
+        return 'HuggingFace';
+    }
+
+    /**
+     * Get provider capabilities
+     *
+     * @return array
+     */
+    public function get_capabilities(): array {
+        return [
+            'max_colors' => 12,
+            'supports_streaming' => false,
+            'supports_batch' => true,
+            'supports_style_transfer' => true,
+            'max_prompt_length' => 2048,
+            'rate_limit' => [
+                'requests_per_minute' => 120,
+                'tokens_per_minute' => 200000
+            ]
+        ];
     }
 
     public function generate_palette(array $params) {

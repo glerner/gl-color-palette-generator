@@ -7,37 +7,31 @@
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Color_Management
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
- * @since   1.0.0
+ * @since 1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
+use GL_Color_Palette_Generator\Interfaces\Color_Wheel_Interface;
+use GL_Color_Palette_Generator\Types\Color_Types;
+use GL_Color_Palette_Generator\Types\Scheme_Types;
 use GL_Color_Palette_Generator\Color_Management\Color_Calculator;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Settings\Settings_Manager;
 
 /**
- * Class Color_Wheel
- *
- * Manages color wheel operations and relationships including:
- * - Color harmony calculations
- * - Complementary color generation
- * - Analogous color schemes
- * - Split-complementary patterns
- * - Triadic and tetradic harmonies
+ * Color Wheel Class
  *
  * @since 1.0.0
  */
-class Color_Wheel {
+class Color_Wheel implements Color_Wheel_Interface {
     /**
      * Color calculator instance
      *
      * @var Color_Calculator
      * @since 1.0.0
      */
-    private $color_calculator;
+    private Color_Calculator $color_calculator;
 
     /**
      * Color utility instance
@@ -45,7 +39,7 @@ class Color_Wheel {
      * @var Color_Utility
      * @since 1.0.0
      */
-    private $color_utility;
+    private Color_Utility $color_utility;
 
     /**
      * Settings manager instance
@@ -53,7 +47,7 @@ class Color_Wheel {
      * @var Settings_Manager
      * @since 1.0.0
      */
-    private $settings;
+    private Settings_Manager $settings;
 
     /**
      * Color wheel configuration
@@ -88,10 +82,14 @@ class Color_Wheel {
      *
      * @since 1.0.0
      */
-    public function __construct() {
-        $this->color_calculator = new Color_Calculator();
-        $this->color_utility = new Color_Utility();
-        $this->settings = new Settings_Manager();
+    public function __construct(
+        Color_Calculator $color_calculator,
+        Color_Utility $color_utility,
+        Settings_Manager $settings
+    ) {
+        $this->color_calculator = $color_calculator;
+        $this->color_utility = $color_utility;
+        $this->settings = $settings;
     }
 
     /**
@@ -347,5 +345,47 @@ class Color_Wheel {
             'harmony_indicators' => $this->generate_harmony_indicators($selected_color),
             'interaction_handlers' => $this->get_interaction_handlers()
         ];
+    }
+
+    /**
+     * Generate color scheme
+     *
+     * @param string $base_color
+     * @param string $scheme_type
+     * @param array  $options
+     *
+     * @return array
+     */
+    public function generate_scheme(
+        string $base_color,
+        string $scheme_type,
+        array $options = []
+    ): array {
+        $this->validate_color($base_color);
+        $scheme_type = strtolower($scheme_type);
+
+        return match($scheme_type) {
+            Scheme_Types::COMPLEMENTARY => $this->generate_complementary_scheme($base_color, $options),
+            Scheme_Types::ANALOGOUS => $this->generate_analogous_scheme($base_color, $options),
+            Scheme_Types::TRIADIC => $this->generate_triadic_scheme($base_color, $options),
+            Scheme_Types::SPLIT_COMPLEMENTARY => $this->generate_split_complementary_scheme($base_color, $options),
+            Scheme_Types::TETRADIC => $this->generate_tetradic_scheme($base_color, $options),
+            Scheme_Types::SQUARE => $this->generate_square_scheme($base_color, $options),
+            default => throw new \InvalidArgumentException("Invalid scheme type: {$scheme_type}")
+        };
+    }
+
+    /**
+     * Validate color value
+     *
+     * @param string $color Color to validate
+     * @throws \InvalidArgumentException If color is invalid
+     */
+    private function validate_color(string $color): void {
+        if (!preg_match('/^#[a-f0-9]{6}$/i', $color)) {
+            throw new \InvalidArgumentException(
+                'Invalid color format. Must be a 6-digit hex color (e.g., #FF0000)'
+            );
+        }
     }
 }

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Color Calculator Class
  *
@@ -8,15 +8,16 @@
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Color_Management
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
- * @since   1.0.0
+ * @since 1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
-use GL_Color_Palette_Generator\Color_Management\Color_Utility;
-use GL_Color_Palette_Generator\Settings\Settings_Manager;
+use GL_Color_Palette_Generator\Interfaces\Color_Calculator_Interface;
+use GL_Color_Palette_Generator\Types\Color_Types;
+use GL_Color_Palette_Generator\Types\Calculator_Types;
+use GL_Color_Palette_Generator\Traits\Error_Handler;
+use GL_Color_Palette_Generator\Traits\Logger;
 
 /**
  * Class Color_Calculator
@@ -29,7 +30,9 @@ use GL_Color_Palette_Generator\Settings\Settings_Manager;
  *
  * @since 1.0.0
  */
-class Color_Calculator {
+class Color_Calculator implements Color_Calculator_Interface {
+    use Error_Handler, Logger;
+
     /**
      * Color utility instance
      *

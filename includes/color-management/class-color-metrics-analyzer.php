@@ -1,27 +1,15 @@
 <?php declare(strict_types=1);
-/**
- * Color Metrics Analyzer Class
- *
- * Provides comprehensive analysis of color metrics including perceptual,
- * psychological, and accessibility measurements. Handles color space
- * conversions and relationships between colors.
- *
- * @package GL_Color_Palette_Generator
- * @subpackage Color_Management
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
- * @since   1.0.0
- */
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
+use GL_Color_Palette_Generator\Interfaces\Color_Metrics_Analyzer_Interface;
+use GL_Color_Palette_Generator\Types\Color_Types;
+use GL_Color_Palette_Generator\Types\Metric_Types;
 use GL_Color_Palette_Generator\Traits\Error_Handler;
 use GL_Color_Palette_Generator\Traits\Logger;
-use GL_Color_Palette_Generator\Interfaces\Color_Metrics_Analyzer as Color_Metrics_Analyzer_Interface;
-use GL_Color_Palette_Generator\Accessibility\AccessibilityChecker;
 
 /**
- * Class Color_Metrics_Analyzer
+ * Color Metrics Analyzer Class
  *
  * Analyzes detailed color metrics and relationships including:
  * - Basic color properties (brightness, saturation, etc.)
@@ -30,6 +18,8 @@ use GL_Color_Palette_Generator\Accessibility\AccessibilityChecker;
  * - Accessibility measurements (contrast ratios, WCAG compliance)
  * - Color space conversions and relationships
  *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Color_Management
  * @since 1.0.0
  */
 class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
@@ -39,102 +29,51 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      * Color utility instance
      *
      * @var Color_Utility
-     * @since 1.0.0
      */
-    private Color_Utility $color_utility;
+    private Color_Utility $utility;
 
     /**
-     * Accessibility checker instance
+     * Color calculator instance
      *
-     * @var AccessibilityChecker
-     * @since 1.0.0
+     * @var Color_Calculator
      */
-    private AccessibilityChecker $accessibility_checker;
-
-    /**
-     * Error logging properties
-     *
-     * @var array<string, mixed>
-     * @since 1.0.0
-     */
-    private array $error_log = [];
-
-    /**
-     * Debug mode flag
-     *
-     * @var bool
-     * @since 1.0.0
-     */
-    private bool $debug_mode = false;
-
-    /**
-     * Last error message
-     *
-     * @var string|null
-     * @since 1.0.0
-     */
-    private ?string $last_error = null;
-
-    /**
-     * Cache for color calculations
-     *
-     * @var array<string, array<string, mixed>>
-     * @since 1.0.0
-     */
-    private array $calculation_cache = [];
-
-    /**
-     * Cache time-to-live in seconds
-     *
-     * @var int
-     * @since 1.0.0
-     */
-    private int $cache_ttl = 3600;
+    private Color_Calculator $calculator;
 
     /**
      * Constructor
      *
-     * Initializes the color utility and sets up error handling.
-     *
-     * @since 1.0.0
+     * @param Color_Utility    $utility    Color utility instance
+     * @param Color_Calculator $calculator Color calculator instance
      */
-    public function __construct() {
-        $this->color_utility = new Color_Utility();
-        $this->accessibility_checker = new AccessibilityChecker();
+    public function __construct(
+        Color_Utility $utility,
+        Color_Calculator $calculator
+    ) {
+        $this->utility = $utility;
+        $this->calculator = $calculator;
     }
 
     /**
      * Analyze comprehensive color metrics
      *
      * @param string $color Hex color code
-     * @return array{
-     *     basic_metrics: array,
-     *     perceptual_metrics: array,
-     *     color_space_values: array,
-     *     psychological_metrics: array,
-     *     accessibility_metrics: array,
-     *     complementary_colors: array,
-     *     semantic_analysis: array
-     * }
-     * @throws \RuntimeException If color analysis fails
-     * @since 1.0.0
+     * @return array Color metrics analysis
      */
     public function analyze_color(string $color): array {
-        try {
-            $this->validate_color($color);
+        $this->validate_color($color);
 
+        try {
             return [
                 'basic_metrics' => $this->get_basic_metrics($color),
                 'perceptual_metrics' => $this->get_perceptual_metrics($color),
                 'color_space_values' => $this->get_color_space_values($color),
                 'psychological_metrics' => $this->get_psychological_metrics($color),
                 'accessibility_metrics' => $this->get_accessibility_metrics($color),
-                'complementary_colors' => $this->get_complementary_colors($color),
                 'semantic_analysis' => $this->get_semantic_analysis($color)
             ];
         } catch (\Exception $e) {
-            $this->handle_error($e, "Color analysis failed");
-            throw new \RuntimeException("Failed to analyze color: " . $e->getMessage());
+            $this->log_error('Color analysis failed', ['color' => $color, 'error' => $e->getMessage()]);
+            throw new \RuntimeException("Failed to analyze color: {$e->getMessage()}");
         }
     }
 
@@ -142,34 +81,20 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      * Get basic color metrics
      *
      * @param string $color Hex color code
-     * @return array{
-     *     brightness: float,
-     *     relative_luminance: float,
-     *     saturation: float,
-     *     lightness: float,
-     *     intensity: float,
-     *     purity: float
-     * }
-     * @throws \RuntimeException If metric calculation fails
-     * @since 1.0.0
+     * @return array Basic metrics data
      */
-    private function get_basic_metrics(string $color): array {
-        try {
-            $rgb = $this->handle_color_conversion($color, 'rgb');
-            $hsl = $this->handle_color_conversion($color, 'hsl');
+    public function get_basic_metrics(string $color): array {
+        $rgb = $this->utility->hex_to_rgb($color);
+        $hsl = $this->utility->rgb_to_hsl($rgb);
 
-            return [
-                'brightness' => $this->calculate_brightness($rgb),
-                'relative_luminance' => $this->color_utility->calculate_relative_luminance($color),
-                'saturation' => $hsl['s'],
-                'lightness' => $hsl['l'],
-                'intensity' => ($rgb['r'] + $rgb['g'] + $rgb['b']) / (3 * 255),
-                'purity' => $this->calculate_color_purity($rgb)
-            ];
-        } catch (\Exception $e) {
-            $this->handle_error($e, "Basic metrics calculation failed");
-            throw new \RuntimeException("Failed to calculate basic metrics: " . $e->getMessage());
-        }
+        return [
+            'brightness' => $this->calculate_brightness($rgb),
+            'relative_luminance' => $this->calculator->calculate_relative_luminance($rgb),
+            'saturation' => $hsl['s'],
+            'lightness' => $hsl['l'],
+            'intensity' => ($rgb['r'] + $rgb['g'] + $rgb['b']) / (3 * 255),
+            'purity' => $this->calculate_color_purity($rgb)
+        ];
     }
 
     /**
@@ -188,12 +113,13 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      */
     private function get_perceptual_metrics(string $color): array {
         try {
-            $lab = $this->handle_color_conversion($color, 'lab');
+            $rgb = $this->utility->hex_to_rgb($color);
+            $lab = $this->utility->rgb_to_lab($rgb);
 
             return [
-                'perceived_brightness' => $lab['l'],
+                'perceived_brightness' => $lab['L'],
                 'perceived_colorfulness' => sqrt(pow($lab['a'], 2) + pow($lab['b'], 2)),
-                'perceived_hue' => atan2($lab['b'], $lab['a']) * (180 / M_PI),
+                'perceived_hue' => atan2($lab['b'], $lab['a']),
                 'perceived_warmth' => $this->calculate_perceived_warmth($color),
                 'visual_weight' => $this->calculate_visual_weight($color)
             ];
@@ -219,12 +145,13 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      */
     private function get_color_space_values(string $color): array {
         try {
+            $rgb = $this->utility->hex_to_rgb($color);
             return [
-                'rgb' => $this->handle_color_conversion($color, 'rgb'),
-                'hsl' => $this->handle_color_conversion($color, 'hsl'),
-                'lab' => $this->handle_color_conversion($color, 'lab'),
-                'cmyk' => $this->handle_color_conversion($color, 'cmyk'),
-                'xyz' => $this->handle_color_conversion($color, 'xyz')
+                'rgb' => $rgb,
+                'hsl' => $this->utility->rgb_to_hsl($rgb),
+                'lab' => $this->utility->rgb_to_lab($rgb),
+                'cmyk' => $this->utility->rgb_to_cmyk($rgb),
+                'xyz' => $this->utility->rgb_to_xyz($rgb)
             ];
         } catch (\Exception $e) {
             $this->handle_error($e, "Color space conversion failed");
@@ -248,12 +175,13 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      */
     private function get_psychological_metrics(string $color): array {
         try {
-            $hsl = $this->handle_color_conversion($color, 'hsl');
+            $rgb = $this->utility->hex_to_rgb($color);
+            $hsl = $this->utility->rgb_to_hsl($rgb);
 
             return [
                 'temperature' => $this->calculate_psychological_temperature($hsl),
                 'weight' => $this->calculate_psychological_weight($hsl),
-                'activity' => $this->calculate_psychological_activity($hsl),
+                'activity' => $this->calculate_psychological_activity($rgb, $hsl),
                 'emotional_response' => $this->get_emotional_response($hsl),
                 'cultural_associations' => $this->get_cultural_associations($hsl)
             ];
@@ -279,10 +207,14 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      */
     private function get_accessibility_metrics(string $color): array {
         try {
+            $rgb = $this->utility->hex_to_rgb($color);
+
             return [
-                'wcag_compliance' => $this->check_wcag_compliance($color),
-                'colorblind_safe' => $this->accessibility_checker->check_colorblind_safety($color, '#FFFFFF'), // Test against white background
-                'readability_score' => $this->calculate_legibility_score($color)
+                'wcag_contrast_white' => $this->calculator->calculate_contrast_ratio($rgb, ['r' => 255, 'g' => 255, 'b' => 255]),
+                'wcag_contrast_black' => $this->calculator->calculate_contrast_ratio($rgb, ['r' => 0, 'g' => 0, 'b' => 0]),
+                'meets_aa_normal' => $this->check_wcag_aa_compliance($rgb, 'normal'),
+                'meets_aa_large' => $this->check_wcag_aa_compliance($rgb, 'large'),
+                'meets_aaa' => $this->check_wcag_aaa_compliance($rgb)
             ];
         } catch (\Exception $e) {
             $this->handle_error($e, "Accessibility metrics calculation failed");
@@ -291,75 +223,19 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
     }
 
     /**
-     * Get complementary colors
-     *
-     * @param string $color Hex color code.
-     * @return array Complementary colors.
-     */
-    private function get_complementary_colors($color) {
-        try {
-            $this->validate_color($color);
-            $hsl = $this->color_utility->hex_to_hsl($color);
-
-            // Calculate complementary hue (opposite on color wheel)
-            $complementary_hue = ($hsl['h'] + 180) % 360;
-
-            return [
-                'primary' => $color,
-                'complementary' => $this->color_utility->hsl_to_hex([
-                    'h' => $complementary_hue,
-                    's' => $hsl['s'],
-                    'l' => $hsl['l']
-                ]),
-                'variations' => $this->generate_complementary_variations($hsl)
-            ];
-        } catch (\Exception $e) {
-            $this->log_error("Failed to generate complementary colors", $e);
-            throw new \RuntimeException("Complementary color generation failed: " . $e->getMessage());
-        }
-    }
-
-    /**
-     * Generate variations of complementary colors
-     *
-     * @param array $hsl HSL values.
-     * @return array Color variations.
-     */
-    private function generate_complementary_variations($hsl) {
-        return $this->get_cached_calculation(
-            "complementary_variations_{$hsl['h']}_{$hsl['s']}_{$hsl['l']}",
-            function() use ($hsl) {
-                $variations = [];
-                $lightness_steps = [-20, -10, 10, 20];
-
-                foreach ($lightness_steps as $step) {
-                    $new_lightness = max(0, min(100, $hsl['l'] + $step));
-                    $variations[] = $this->color_utility->hsl_to_hex([
-                        'h' => $hsl['h'],
-                        's' => $hsl['s'],
-                        'l' => $new_lightness
-                    ]);
-                }
-
-                return $variations;
-            }
-        );
-    }
-
-    /**
      * Get semantic color analysis
      *
      * @param string $color Hex color code.
      * @return array Semantic analysis.
      */
-    private function get_semantic_analysis($color) {
-        $hsl = $this->handle_color_conversion($color, 'hsl');
+    private function get_semantic_analysis(string $color) {
+        $rgb = $this->utility->hex_to_rgb($color);
+        $hsl = $this->utility->rgb_to_hsl($rgb);
 
         return [
-            'color_name' => $this->get_closest_color_name($color),
-            'color_category' => $this->get_color_category($hsl),
-            'semantic_associations' => $this->get_semantic_associations($hsl),
-            'industry_usage' => $this->get_industry_usage($hsl)
+            'color_category' => $this->determine_color_category($hsl),
+            'color_properties' => $this->analyze_color_properties($rgb, $hsl),
+            'color_harmony' => $this->analyze_color_harmony($hsl)
         ];
     }
 
@@ -387,7 +263,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      * @return float Warmth value.
      */
     private function calculate_perceived_warmth($color) {
-        $rgb = $this->handle_color_conversion($color, 'rgb');
+        $rgb = $this->utility->hex_to_rgb($color);
         return ($rgb['r'] * 2 + $rgb['g'] + $rgb['b'] * 0.5) / (3.5 * 255);
     }
 
@@ -398,8 +274,8 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      * @return float Visual weight value.
      */
     private function calculate_visual_weight($color) {
-        $lab = $this->handle_color_conversion($color, 'lab');
-        return (100 - $lab['l']) / 100;
+        $lab = $this->utility->hex_to_lab($color);
+        return (100 - $lab['L']) / 100;
     }
 
     /**
@@ -527,7 +403,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      * @return string Color name.
      */
     private function get_closest_color_name($color) {
-        $rgb = $this->handle_color_conversion($color, 'rgb');
+        $rgb = $this->utility->hex_to_rgb($color);
         $min_distance = PHP_FLOAT_MAX;
         $closest_name = '';
 
@@ -922,10 +798,10 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      *
      * @param string $audience Target audience description
      * @return array{
-     *     age_group: string,
      *     demographics: array<string>,
-     *     interests: array<string>,
-     *     preferences: array<string>
+     *     psychographics: array<string>,
+     *     behavior_patterns: array<string>,
+     *     communication_style: string
      * }
      */
     private function analyze_audience(string $audience): array {
@@ -1108,7 +984,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
         $hsl = $this->color_utility->hex_to_hsl($primary_color);
 
         // Create vibrant accent by increasing saturation and shifting hue
-        $hsl['h'] = fmod($hsl['h'] + 180, 360); // Opposite hue
+        $hsl['h'] = fmod($hsl['h'] + 120, 360); // Opposite hue
         $hsl['s'] = min(100, $hsl['s'] * 1.2); // More saturated
         $hsl['l'] = min(100, $hsl['l'] * 0.9); // Slightly darker
 
@@ -1256,7 +1132,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
 
         // Calculate CIEDE2000 Delta E
         return sqrt(
-            pow($color1_lab['l'] - $color2_lab['l'], 2) +
+            pow($color1_lab['L'] - $color2_lab['L'], 2) +
             pow($color1_lab['a'] - $color2_lab['a'], 2) +
             pow($color1_lab['b'] - $color2_lab['b'], 2)
         );
@@ -1370,10 +1246,10 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
             $black_contrast = $this->accessibility_checker->calculate_contrast_ratio($color, '#000000');
 
             $analysis['wcag_compliance'][$color] = [
-                'AA_large_text' => ($white_contrast >= 3.0 || $black_contrast >= 3.0),
-                'AA_small_text' => ($white_contrast >= 4.5 || $black_contrast >= 4.5),
-                'AAA_large_text' => ($white_contrast >= 4.5 || $black_contrast >= 4.5),
-                'AAA_small_text' => ($white_contrast >= 7.0 || $black_contrast >= 7.0),
+                'AA_large_text' => $white_contrast >= 3.0 || $black_contrast >= 3.0,
+                'AA_small_text' => $white_contrast >= 4.5 || $black_contrast >= 4.5,
+                'AAA_large_text' => $white_contrast >= 4.5 || $black_contrast >= 4.5,
+                'AAA_small_text' => $white_contrast >= 7.0 || $black_contrast >= 7.0,
                 'recommended_text_color' => ($white_contrast > $black_contrast) ? '#FFFFFF' : '#000000'
             ];
 
@@ -1384,5 +1260,159 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
         }
 
         return $analysis;
+    }
+
+    /**
+     * Get perceptual metrics for a color
+     *
+     * @param string $color Hex color code
+     * @return array Perceptual metrics data
+     */
+    private function get_perceptual_metrics(string $color): array {
+        $rgb = $this->utility->hex_to_rgb($color);
+        $lab = $this->utility->rgb_to_lab($rgb);
+
+        return [
+            'perceived_brightness' => $lab['L'],
+            'perceived_colorfulness' => sqrt(pow($lab['a'], 2) + pow($lab['b'], 2)),
+            'perceived_hue' => atan2($lab['b'], $lab['a'])
+        ];
+    }
+
+    /**
+     * Get color space values
+     *
+     * @param string $color Hex color code
+     * @return array Color space values
+     */
+    private function get_color_space_values(string $color): array {
+        $rgb = $this->utility->hex_to_rgb($color);
+        return [
+            'rgb' => $rgb,
+            'hsl' => $this->utility->rgb_to_hsl($rgb),
+            'lab' => $this->utility->rgb_to_lab($rgb),
+            'xyz' => $this->utility->rgb_to_xyz($rgb)
+        ];
+    }
+
+    /**
+     * Get psychological metrics
+     *
+     * @param string $color Hex color code
+     * @return array Psychological metrics data
+     */
+    private function get_psychological_metrics(string $color): array {
+        $rgb = $this->utility->hex_to_rgb($color);
+        $hsl = $this->utility->rgb_to_hsl($rgb);
+
+        return [
+            'temperature' => $this->calculate_temperature($rgb),
+            'weight' => $this->calculate_weight($hsl),
+            'activity' => $this->calculate_activity($rgb, $hsl)
+        ];
+    }
+
+    /**
+     * Get accessibility metrics
+     *
+     * @param string $color Hex color code
+     * @return array Accessibility metrics data
+     */
+    private function get_accessibility_metrics(string $color): array {
+        $rgb = $this->utility->hex_to_rgb($color);
+        
+        return [
+            'wcag_contrast_white' => $this->calculator->calculate_contrast_ratio($rgb, ['r' => 255, 'g' => 255, 'b' => 255]),
+            'wcag_contrast_black' => $this->calculator->calculate_contrast_ratio($rgb, ['r' => 0, 'g' => 0, 'b' => 0]),
+            'meets_aa_normal' => $this->check_wcag_aa_compliance($rgb, 'normal'),
+            'meets_aa_large' => $this->check_wcag_aa_compliance($rgb, 'large'),
+            'meets_aaa' => $this->check_wcag_aaa_compliance($rgb)
+        ];
+    }
+
+    /**
+     * Get semantic analysis of the color
+     *
+     * @param string $color Hex color code.
+     * @return array Semantic analysis data
+     */
+    private function get_semantic_analysis(string $color): array {
+        $rgb = $this->utility->hex_to_rgb($color);
+        $hsl = $this->utility->rgb_to_hsl($rgb);
+
+        return [
+            'color_category' => $this->determine_color_category($hsl),
+            'color_properties' => $this->analyze_color_properties($rgb, $hsl),
+            'color_harmony' => $this->analyze_color_harmony($hsl)
+        ];
+    }
+
+    /**
+     * Validate color value
+     *
+     * @param string $color Color to validate
+     * @throws \InvalidArgumentException If color is invalid
+     */
+    private function validate_color(string $color): void {
+        if (!preg_match('/^#[a-f0-9]{6}$/i', $color)) {
+            throw new \InvalidArgumentException(
+                'Invalid color format. Must be a 6-digit hex color (e.g., #FF0000)'
+            );
+        }
+    }
+
+    /**
+     * Calculate color temperature
+     *
+     * @param array $rgb RGB color values
+     * @return float Color temperature value
+     */
+    private function calculate_temperature(array $rgb): float {
+        return (($rgb['r'] * 2) + $rgb['b']) / (($rgb['b'] * 2) + $rgb['r']);
+    }
+
+    /**
+     * Calculate perceived weight of a color
+     *
+     * @param array $hsl HSL color values
+     * @return float Weight value
+     */
+    private function calculate_weight(array $hsl): float {
+        return 1 - ($hsl['l'] / 100);
+    }
+
+    /**
+     * Calculate color activity level
+     *
+     * @param array $rgb RGB color values
+     * @param array $hsl HSL color values
+     * @return float Activity level
+     */
+    private function calculate_activity(array $rgb, array $hsl): float {
+        $saturation_impact = $hsl['s'] / 100;
+        $contrast = max($rgb['r'], $rgb['g'], $rgb['b']) - min($rgb['r'], $rgb['g'], $rgb['b']);
+        return ($saturation_impact + ($contrast / 255)) / 2;
+    }
+
+    /**
+     * Calculate color purity
+     *
+     * @param array $rgb RGB color values
+     * @return float Purity value
+     */
+    private function calculate_color_purity(array $rgb): float {
+        $max = max($rgb['r'], $rgb['g'], $rgb['b']);
+        $min = min($rgb['r'], $rgb['g'], $rgb['b']);
+        return ($max - $min) / 255;
+    }
+
+    /**
+     * Calculate brightness
+     *
+     * @param array $rgb RGB color values
+     * @return float Brightness value
+     */
+    private function calculate_brightness(array $rgb): float {
+        return (($rgb['r'] * 299) + ($rgb['g'] * 587) + ($rgb['b'] * 114)) / 1000;
     }
 }

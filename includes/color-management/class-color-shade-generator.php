@@ -3,21 +3,22 @@
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Interfaces\Color_Shade_Generator_Interface;
-use GL_Color_Palette_Generator\Interfaces\AccessibilityChecker;
+use GL_Color_Palette_Generator\Traits\Color_Shade_Generator_Trait;
 
 /**
- * Color Shade Generator Class
+ * Color Variation Generator Class
  *
- * Generates accessible tints and shades from a base color.
- * This is distinct from WordPress theme style variations - it focuses on
- * creating lighter and darker versions of a single color that meet WCAG standards.
+ * Generates tints and shades from base colors while ensuring WCAG compliance.
+ * This is distinct from WordPress theme style variations - it focuses on creating
+ * lighter and darker versions of a single color that meet accessibility standards.
  *
  * @package GL_Color_Palette_Generator
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
- * @since   1.0.0
+ * @subpackage Color_Management
+ * @since 1.0.0
  */
-class Color_Shade_Generator implements Color_Shade_Generator_Interface {
+class Color_Variation_Generator implements Color_Shade_Generator_Interface {
+    use Color_Shade_Generator_Trait;
+
     /**
      * @var AccessibilityChecker
      */
@@ -33,11 +34,11 @@ class Color_Shade_Generator implements Color_Shade_Generator_Interface {
     }
 
     /**
-     * Generate accessible tints and shades
+     * Generate tints and shades that meet accessibility requirements
      *
      * @param string $color Base color in hex format
-     * @param array  $options Generation options
-     * @return array Array of accessible tints and shades
+     * @param array  $options Optional settings for generation
+     * @return array Array of generated tints and shades
      */
     public function generate_tints_and_shades(string $color, array $options = []): array {
         // Set default options

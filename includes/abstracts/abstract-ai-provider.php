@@ -12,17 +12,17 @@
 
 namespace GL_Color_Palette_Generator\Abstracts;
 
-use GL_Color_Palette_Generator\Interfaces\AI_Provider;
+use GL_Color_Palette_Generator\Interfaces\AI_Provider_Interface;
 
 /**
- * Abstract class AI_Provider_Base
+ * Abstract AI Provider Base Class
  *
- * Provides common functionality for AI providers including API communication,
- * error handling, and response processing.
+ * Provides base functionality for AI service providers that generate
+ * color palettes. Handles common API operations and error handling.
  *
  * @since 1.0.0
  */
-abstract class AI_Provider_Base implements AI_Provider {
+abstract class AI_Provider_Base implements AI_Provider_Interface {
     /**
      * API endpoint URL.
      *

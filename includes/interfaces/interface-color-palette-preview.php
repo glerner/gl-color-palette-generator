@@ -1,18 +1,23 @@
-<?php
-
-namespace GLColorPalette\Interfaces;
+<?php declare(strict_types=1);
 
 /**
  * Color Palette Preview Interface
  *
  * Defines the contract for generating previews of color palettes.
  *
- * @package GLColorPalette
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
- * @since   1.0.0
+ * @package GL_Color_Palette_Generator
+ * @subpackage Interfaces
+ * @since 1.0.0
  */
-interface ColorPalettePreview {
+
+namespace GL_Color_Palette_Generator\Interfaces;
+
+/**
+ * Color Palette Preview Interface
+ *
+ * @since 1.0.0
+ */
+interface Color_Palette_Preview_Interface {
     /**
      * Generates UI preview.
      *

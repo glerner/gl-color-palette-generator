@@ -1,6 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * AI Provider Factory Class
+ *
+ * Factory class for creating AI provider instances.
+ * Handles provider instantiation and configuration management.
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Providers
@@ -9,72 +12,88 @@
 
 namespace GL_Color_Palette_Generator\Providers;
 
-use GL_Color_Palette_Generator\Providers\OpenAI_Provider;
-use GL_Color_Palette_Generator\Providers\Azure_OpenAI_Provider;
-use GL_Color_Palette_Generator\Providers\Anthropic_Provider;
-use GL_Color_Palette_Generator\Providers\Cohere_Provider;
-use GL_Color_Palette_Generator\Providers\HuggingFace_Provider;
-use GL_Color_Palette_Generator\Providers\PaLM_Provider;
+use GL_Color_Palette_Generator\Interfaces\AI_Provider_Interface;
+use GL_Color_Palette_Generator\Interfaces\Factory_Interface;
+use GL_Color_Palette_Generator\Types\Provider_Config;
+use GL_Color_Palette_Generator\Types\Factory_Types;
 use WP_Error;
 
 /**
- * Class AI_Provider_Factory
+ * AI Provider Factory Class
  *
- * Creates instances of AI providers based on configuration.
+ * Creates and configures AI provider instances based on type and credentials.
+ *
+ * @since 1.0.0
  */
-class AI_Provider_Factory {
+class AI_Provider_Factory implements Factory_Interface {
     /**
-     * Available provider types.
-     */
-    private const PROVIDERS = [
-        'openai' => OpenAI_Provider::class,
-        'anthropic' => Anthropic_Provider::class,
-        'azure' => Azure_OpenAI_Provider::class,
-        'cohere' => Cohere_Provider::class,
-        'huggingface' => HuggingFace_Provider::class,
-        'palm' => PaLM_Provider::class,
-    ];
-
-    /**
-     * Create a provider instance.
+     * Create a provider instance
      *
-     * @param string $type Provider type.
-     * @param array  $credentials Provider credentials.
-     * @return AI_Provider|WP_Error Provider instance or error.
+     * @param string $type        Provider type
+     * @param array  $credentials Provider credentials
+     * @return AI_Provider_Interface|WP_Error Provider instance or error
      */
-    public function create(string $type, array $credentials) {
-        if (!isset(self::PROVIDERS[$type])) {
-            return new \WP_Error(
+    public static function create(string $type, array $credentials): AI_Provider_Interface|WP_Error {
+        $provider_class = match(strtolower($type)) {
+            'openai'         => OpenAI_Provider::class,
+            'azure-openai'   => Azure_OpenAI_Provider::class,
+            'anthropic'      => Anthropic_Provider::class,
+            'cohere'        => Cohere_Provider::class,
+            'huggingface'   => HuggingFace_Provider::class,
+            'palm'          => Palm_Provider::class,
+            default         => null
+        };
+
+        if (!$provider_class) {
+            return new WP_Error(
                 'invalid_provider',
-                sprintf('Unknown provider type: %s', $type)
+                sprintf('Invalid provider type: %s', $type)
             );
         }
 
-        $provider_class = self::PROVIDERS[$type];
-        $provider = new $provider_class($credentials);
-
-        $validation = $provider->validate_credentials();
-        if (is_wp_error($validation)) {
-            return $validation;
+        try {
+            return new $provider_class($credentials);
+        } catch (\Exception $e) {
+            return new WP_Error(
+                'provider_creation_failed',
+                sprintf('Failed to create provider: %s', $e->getMessage())
+            );
         }
-
-        return $provider;
     }
 
     /**
-     * Get available provider types.
+     * Get available provider types
      *
-     * @return array Provider types and their requirements.
+     * @return array Provider types and their requirements
      */
-    public function get_available_providers(): array {
-        $providers = [];
-        foreach (self::PROVIDERS as $type => $class) {
-            $provider = new $class([]);
-            $providers[$type] = [
-                'name' => ucfirst($type),
-                'requirements' => $provider->get_requirements(),
-            ];
-        }
-        return $providers;
+    public static function get_available_providers(): array {
+        return [
+            'openai' => [
+                'name' => 'OpenAI',
+                'requires' => ['api_key'],
+                'optional' => ['organization_id']
+            ],
+            'azure-openai' => [
+                'name' => 'Azure OpenAI',
+                'requires' => ['api_key', 'resource_name', 'deployment_id']
+            ],
+            'anthropic' => [
+                'name' => 'Anthropic',
+                'requires' => ['api_key']
+            ],
+            'cohere' => [
+                'name' => 'Cohere',
+                'requires' => ['api_key']
+            ],
+            'huggingface' => [
+                'name' => 'HuggingFace',
+                'requires' => ['api_key'],
+                'optional' => ['model_id']
+            ],
+            'palm' => [
+                'name' => 'Google PaLM',
+                'requires' => ['api_key']
+            ]
+        ];
     }
-} 
+}

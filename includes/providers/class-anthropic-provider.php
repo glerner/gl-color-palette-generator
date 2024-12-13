@@ -1,6 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Anthropic Provider Class
+ *
+ * Implements AI provider interface for Anthropic's Claude models.
+ * Handles color palette generation using Anthropic's API.
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Providers
@@ -9,16 +12,18 @@
 
 namespace GL_Color_Palette_Generator\Providers;
 
-use GL_Color_Palette_Generator\Providers\Abstract_AI_Provider;
-use GL_Color_Palette_Generator\Providers\Provider_Config;
+use GL_Color_Palette_Generator\Interfaces\AI_Provider_Interface;
+use GL_Color_Palette_Generator\Abstracts\AI_Provider_Base;
+use GL_Color_Palette_Generator\Types\Provider_Config;
+use GL_Color_Palette_Generator\Types\Color_Types;
 use WP_Error;
 
 /**
- * Class Anthropic_Provider
+ * Anthropic Provider Class
  *
- * Anthropic Claude-specific implementation of the AI provider interface.
+ * @since 1.0.0
  */
-class Anthropic_Provider extends Abstract_AI_Provider {
+class Anthropic_Provider extends AI_Provider_Base implements AI_Provider_Interface {
     /**
      * Constructor.
      *

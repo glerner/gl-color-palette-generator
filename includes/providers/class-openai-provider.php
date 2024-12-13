@@ -1,8 +1,9 @@
-<?php
-declare(strict_types=1);
-
+<?php declare(strict_types=1);
 /**
  * OpenAI Provider Class
+ *
+ * Implements AI provider interface for OpenAI's GPT models.
+ * Handles color palette generation using OpenAI's API.
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Providers
@@ -11,6 +12,8 @@ declare(strict_types=1);
 
 namespace GL_Color_Palette_Generator\Providers;
 
+use GL_Color_Palette_Generator\Interfaces\AI_Provider_Interface;
+use GL_Color_Palette_Generator\Abstracts\AI_Provider_Base;
 use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
 use GL_Color_Palette_Generator\Types\Color_Types;
 
@@ -19,9 +22,11 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * OpenAI Provider class
+ * OpenAI Provider Class
+ *
+ * @since 1.0.0
  */
-class OpenAI_Provider extends Abstract_AI_Provider {
+class OpenAI_Provider extends AI_Provider_Base implements AI_Provider_Interface {
     /**
      * Default model to use
      *
