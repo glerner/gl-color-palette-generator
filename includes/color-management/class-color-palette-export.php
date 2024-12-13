@@ -4,11 +4,11 @@
  *
  * Handles exporting color palettes in various formats (CSS, SCSS, JSON, etc.)
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @since 1.0.0
  */
 
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator\Color_Management;
 
 /**
  * Class Color_Palette_Export

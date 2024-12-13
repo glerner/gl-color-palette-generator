@@ -1,4 +1,16 @@
-<?php defined('ABSPATH') || exit; ?>
+<?php
+/**
+ * Template for the plugin settings page
+ *
+ * This template provides the interface for configuring plugin settings,
+ * including storage methods, API configurations, and general preferences.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Admin\Views
+ * @since 1.0.0
+ */
+
+defined('ABSPATH') || exit; ?>
 
 <div class="wrap gl-color-palette-settings">
     <h1><?php esc_html_e('Color Palette Settings', 'gl-color-palette-generator'); ?></h1>

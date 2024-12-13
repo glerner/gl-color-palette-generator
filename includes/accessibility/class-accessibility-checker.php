@@ -1,19 +1,42 @@
 <?php
-namespace GLColorPalette;
-
 /**
- * Accessibility Checker
+ * Accessibility Checker Class
  *
  * Checks color combinations for WCAG 2.1 compliance and accessibility requirements.
+ * Provides comprehensive accessibility testing including contrast ratios,
+ * color blindness simulation, and readability analysis.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Accessibility
+ * @since 1.0.0
+ */
+
+namespace GL_Color_Palette_Generator\Accessibility;
+
+/**
+ * Class AccessibilityChecker
+ *
+ * Handles accessibility testing and validation for color combinations.
+ * Implements WCAG 2.1 guidelines and provides color blindness simulation.
+ *
+ * @since 1.0.0
  */
 class AccessibilityChecker {
-    /** @var array WCAG 2.1 contrast ratios */
+    /**
+     * WCAG 2.1 contrast ratios
+     *
+     * @var array Minimum contrast ratios for AA and AAA compliance
+     */
     private $contrast_ratios = [
         'AA' => ['normal' => 4.5, 'large' => 3.0],
         'AAA' => ['normal' => 7.0, 'large' => 4.5]
     ];
 
-    /** @var array Color blindness types */
+    /**
+     * Color blindness types
+     *
+     * @var array Supported color blindness simulation types
+     */
     private $colorblind_types = [
         'protanopia',
         'deuteranopia',

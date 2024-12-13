@@ -1,12 +1,23 @@
 <?php
 namespace GLColorPalette;
 
+use GLColorPalette\Color_Management\Color_Shade_Generator;
+use GLColorPalette\Interfaces\AccessibilityChecker;
+use GLColorPalette\Traits\Color_Shade_Generator_Trait;
+
 class ColorExportSystem {
+    use Color_Shade_Generator_Trait;
+
     private $format_converter;
     private $asset_generator;
     private $batch_processor;
+    private $color_exporter;
+    private $palette_exporter;
+    private $shade_generator;
 
-    / Export system configurations
+    /**
+     * Export system configurations
+     */
     private const EXPORT_CONFIGURATIONS = [
         'format_handlers' => [
             'vector_formats' => [
@@ -180,6 +191,17 @@ class ColorExportSystem {
     ];
 
     /**
+     * Constructor
+     *
+     * @param AccessibilityChecker $accessibility_checker Accessibility checker instance
+     */
+    public function __construct(AccessibilityChecker $accessibility_checker) {
+        $this->color_exporter = new ColorExporter($accessibility_checker);
+        $this->palette_exporter = new Color_Palette_Exporter($accessibility_checker);
+        $this->shade_generator = new Color_Shade_Generator($accessibility_checker);
+    }
+
+    /**
      * Export color palette
      *
      * @param array $palette The color palette to export
@@ -189,7 +211,7 @@ class ColorExportSystem {
      */
     public function export_palette($palette, $format, $options = []) {
         if (is_string($format)) {
-            / Original single-format export logic
+            // Original single-format export logic
             return [
                 'exported_files' => $this->generate_exports($palette, $format),
                 'metadata' => $this->generate_metadata($palette),
@@ -198,7 +220,7 @@ class ColorExportSystem {
             ];
         }
 
-        / Multi-format export logic
+        // Multi-format export logic
         $results = [];
         $exporter = new ColorExporter();
 
@@ -265,4 +287,13 @@ class ColorExportSystem {
             'tailwind' => $this->generate_tailwind_examples($palette)
         ];
     }
+
+    /**
+     * Generate accessible tints and shades
+     *
+     * @param string $color Base color in hex format
+     * @param array  $options Optional. Generation options.
+     * @return array Array of accessible tints and shades (lighter, light, dark, darker)
+     */
+    // Removed duplicate method generate_accessible_shades
 }

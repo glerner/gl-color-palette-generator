@@ -1,10 +1,30 @@
 <?php
 /**
  * Cultural Color Analyzer Class
+ *
+ * Analyzes cultural significance and meanings of colors across different regions
+ * and traditions. Provides insights into symbolism, traditions, taboos, and
+ * celebratory uses of colors in various cultures.
+ *
+ * @package GL_Color_Palette_Generator
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ */
+
+namespace GL_Color_Palette_Generator\Color_Management;
+
+/**
+ * Class Cultural_Analyzer
+ * 
+ * Provides analysis of cultural color meanings and significance
  */
 class Cultural_Analyzer {
     /**
      * Get cultural meanings across regions
+     *
+     * @param string $color   The color to analyze
+     * @param array  $regions Array of region codes to analyze
+     * @return array Array of cultural meanings by region
      */
     public function get_cultural_meanings($color, $regions = []) {
         $meanings = [];
@@ -21,6 +41,9 @@ class Cultural_Analyzer {
 
     /**
      * Analyze regional preferences
+     *
+     * @param string $color The color to analyze
+     * @return array Array of regional preferences
      */
     public function analyze_regional_preferences($color) {
         return [
@@ -33,6 +56,9 @@ class Cultural_Analyzer {
 
     /**
      * Get religious significance
+     *
+     * @param string $color The color to analyze
+     * @return array Array of religious significance
      */
     public function get_religious_significance($color) {
         return [
@@ -47,6 +73,10 @@ class Cultural_Analyzer {
 
     /**
      * Get regional symbolism
+     *
+     * @param string $color  The color to analyze
+     * @param string $region The region to analyze
+     * @return array Array of regional symbolism
      */
     private function get_regional_symbolism($color, $region) {
         $symbolism_map = [
@@ -69,6 +99,10 @@ class Cultural_Analyzer {
 
     /**
      * Get traditional uses
+     *
+     * @param string $color  The color to analyze
+     * @param string $region The region to analyze
+     * @return array Array of traditional uses
      */
     private function get_traditional_uses($color, $region) {
         $traditional_uses_map = [

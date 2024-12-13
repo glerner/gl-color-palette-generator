@@ -1,16 +1,30 @@
 <?php
 /**
- * Color AI Generator
+ * Color AI Generator Class
  *
  * Handles AI-driven color palette generation based on business context and user preferences.
+ * Integrates with various AI providers to generate contextually appropriate color schemes.
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
+ * @subpackage AI_ML
  * @since 1.0.0
  */
 
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator\AI_ML;
 
-class Color_AI_Generator {
+use GL_Color_Palette_Generator\Abstracts\AI_Provider_Base;
+use GL_Color_Palette_Generator\Interfaces\Color_Generator_Interface;
+use GL_Color_Palette_Generator\Settings\Settings_Manager;
+
+/**
+ * Class Color_AI_Generator
+ *
+ * Main class for handling AI-based color palette generation.
+ * Implements various strategies for generating color palettes using AI models.
+ *
+ * @since 1.0.0
+ */
+class Color_AI_Generator implements Color_Generator_Interface {
     /**
      * OpenAI API client
      * @var \OpenAI\Client
@@ -28,6 +42,22 @@ class Color_AI_Generator {
      * @var string 'descriptive'|'functional'|'both'
      */
     private $naming_preference;
+
+    /**
+     * AI provider instance
+     *
+     * @var AI_Provider_Base The AI service provider instance
+     * @since 1.0.0
+     */
+    private $ai_provider;
+
+    /**
+     * Settings manager instance
+     *
+     * @var Settings_Manager The settings manager instance
+     * @since 1.0.0
+     */
+    private $settings;
 
     /**
      * Constructor

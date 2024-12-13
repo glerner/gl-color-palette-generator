@@ -2,16 +2,21 @@
 /**
  * Cohere Provider Class
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Providers
  * @since 1.0.0
  */
 
-namespace GLColorPalette\Providers;
+namespace GL_Color_Palette_Generator\Providers;
 
-use GLColorPalette\Abstracts\AI_Provider_Base;
+use GL_Color_Palette_Generator\Providers\Abstract_AI_Provider;
+use GL_Color_Palette_Generator\Providers\Provider_Config;
+use WP_Error;
 
-class Cohere_Provider extends AI_Provider_Base {
+/**
+ * Class Cohere_Provider
+ */
+class Cohere_Provider extends Abstract_AI_Provider {
     public function __construct(array $credentials) {
         $this->api_url = 'https://api.cohere.ai/v1/';
         $this->credentials = $credentials;

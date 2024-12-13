@@ -5,7 +5,7 @@
  * Provides persistent storage for color palettes with support for both WordPress
  * options and custom database tables. Includes caching and migration capabilities.
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @since   1.0.0
  *
  * @example
@@ -18,7 +18,7 @@
  * $palette = $storage->get($id);
  */
 
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator\Color_Management;
 
 use WP_Error;
 
@@ -498,7 +498,7 @@ class Color_Palette_Storage {
         $palettes = [];
         $count = 0;
 
-        $all_palettes = $this->list(['limit' => 999]);
+        $all_palettes = $this->list(['limit' => PHP_INT_MAX]);
 
         foreach ($all_palettes as $palette) {
             if ($count >= $args['limit']) {

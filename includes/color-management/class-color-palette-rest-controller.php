@@ -6,11 +6,11 @@
  * and export functionality. Provides a RESTful interface for the plugin's
  * core features.
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @since   1.0.0
  */
 
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator\Color_Management;
 
 use WP_REST_Controller;
 use WP_REST_Server;

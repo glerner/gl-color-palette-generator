@@ -1,12 +1,44 @@
-<?php
-namespace GLColorPalette;
+/**
+ * Color Combination Engine Class
+ *
+ * @package GL_Color_Palette_Generator
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ */
 
-class ColorCombinationEngine {
+namespace GL_Color_Palette_Generator\Color_Management;
+
+/**
+ * Class Color_Combination_Engine
+ * Handles advanced color combination algorithms and rules
+ */
+class Color_Combination_Engine {
+    /**
+     * Color analyzer instance
+     *
+     * @var Color_Analyzer
+     */
     private $color_analyzer;
+
+    /**
+     * Harmony calculator instance
+     *
+     * @var Harmony_Calculator
+     */
     private $harmony_calculator;
+
+    /**
+     * Context evaluator instance
+     *
+     * @var Context_Evaluator
+     */
     private $context_evaluator;
 
-    / Advanced combination configurations
+    /**
+     * Advanced combination configurations
+     *
+     * @var array
+     */
     private const COMBINATION_RULES = [
         'harmony_algorithms' => [
             'advanced_complementary' => [
@@ -130,6 +162,12 @@ class ColorCombinationEngine {
 
     /**
      * Generate optimized color combination
+     *
+     * @param string $base_color
+     * @param array  $parameters
+     * @param array  $context
+     *
+     * @return array
      */
     public function generate_combination($base_color, $parameters = [], $context = []) {
         $combination = [
@@ -145,6 +183,11 @@ class ColorCombinationEngine {
 
     /**
      * Validate and optimize color combination
+     *
+     * @param array $colors
+     * @param array $context
+     *
+     * @return array
      */
     public function validate_combination($colors, $context = []) {
         return [

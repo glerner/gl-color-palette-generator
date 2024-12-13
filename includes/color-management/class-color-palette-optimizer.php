@@ -2,11 +2,13 @@
 /**
  * Color Palette Optimizer
  *
- * @package GLColorPalette
- * @since 1.0.0
+ * @package GL_Color_Palette_Generator
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ * @since   1.0.0
  */
 
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator\Color_Management;
 
 /**
  * Class Color_Palette_Optimizer
@@ -55,27 +57,37 @@ class Color_Palette_Optimizer {
 
         $options = wp_parse_args($options, $default_options);
 
-        / Get initial analysis
+        /**
+         * Get initial analysis
+         */
         $analysis = $this->analyzer->analyze($palette);
 
-        / Create a new palette for optimization
+        /**
+         * Create a new palette for optimization
+         */
         $optimized_colors = $palette->get_colors();
 
-        / Optimize contrast ratios
+        /**
+         * Optimize contrast ratios
+         */
         $optimized_colors = $this->optimize_contrast(
             $optimized_colors,
             $options['target_wcag'],
             $options['max_adjustment']
         );
 
-        / Optimize color harmony
+        /**
+         * Optimize color harmony
+         */
         $optimized_colors = $this->optimize_harmony(
             $optimized_colors,
             $options['preserve_hues'],
             $options['max_adjustment']
         );
 
-        / Create new palette with optimized colors
+        /**
+         * Create new palette with optimized colors
+         */
         return new Color_Palette(
             $optimized_colors,
             array_merge($palette->get_metadata(), [
@@ -106,7 +118,9 @@ class Color_Palette_Optimizer {
                 $contrast = $this->analyzer->get_contrast_ratio($optimized[$i], $optimized[$j]);
 
                 if ($contrast < $min_contrast) {
-                    / Adjust colors to improve contrast
+                    /**
+                     * Adjust colors to improve contrast
+                     */
                     list($color1, $color2) = $this->adjust_contrast_pair(
                         $optimized[$i],
                         $optimized[$j],
@@ -134,20 +148,28 @@ class Color_Palette_Optimizer {
     private function optimize_harmony(array $colors, bool $preserve_hues, float $max_adjustment): array {
         $optimized = $colors;
 
-        / Get current harmony analysis
+        /**
+         * Get current harmony analysis
+         */
         $harmony = $this->analyzer->analyze_harmony($optimized);
 
-        / Adjust saturation variance if needed
+        /**
+         * Adjust saturation variance if needed
+         */
         if ($harmony['saturation_variance'] > 0.1) {
             $optimized = $this->normalize_saturation($optimized, $max_adjustment);
         }
 
-        / Adjust value distribution if needed
+        /**
+         * Adjust value distribution if needed
+         */
         if (!$harmony['is_balanced']) {
             $optimized = $this->balance_values($optimized, $max_adjustment);
         }
 
-        / Adjust hue distribution if allowed and needed
+        /**
+         * Adjust hue distribution if allowed and needed
+         */
         if (!$preserve_hues && $harmony['hue_variance'] > 2000) {
             $optimized = $this->distribute_hues($optimized, $max_adjustment);
         }
@@ -176,7 +198,9 @@ class Color_Palette_Optimizer {
         $l1 = $this->get_relative_luminance($color1);
         $l2 = $this->get_relative_luminance($color2);
 
-        / Determine which color to lighten and which to darken
+        /**
+         * Determine which color to lighten and which to darken
+         */
         if ($l1 > $l2) {
             $lighter =& $rgb1;
             $darker =& $rgb2;
@@ -185,15 +209,21 @@ class Color_Palette_Optimizer {
             $darker =& $rgb1;
         }
 
-        / Adjust colors within max_adjustment limit
+        /**
+         * Adjust colors within max_adjustment limit
+         */
         $adjustment = min($max_adjustment * 255, 255 * 0.9);
 
-        / Lighten the lighter color
+        /**
+         * Lighten the lighter color
+         */
         foreach ($lighter as &$component) {
             $component = min(255, $component + $adjustment);
         }
 
-        / Darken the darker color
+        /**
+         * Darken the darker color
+         */
         foreach ($darker as &$component) {
             $component = max(0, $component - $adjustment);
         }
@@ -272,7 +302,9 @@ class Color_Palette_Optimizer {
         $min = min($r, $g, $b);
         $delta = $max - $min;
 
-        / Calculate hue
+        /**
+         * Calculate hue
+         */
         if ($delta == 0) {
             $h = 0;
         } elseif ($max == $r) {
@@ -283,10 +315,16 @@ class Color_Palette_Optimizer {
             $h = 60 * ((($r - $g) / $delta) + 4);
         }
 
-        / Calculate saturation
+        /**
+         * Calculate saturation
+         */
         $s = ($max == 0) ? 0 : ($delta / $max);
 
-        / Calculate value
+        /**
+         * Calculate value
+         *
+         * The value (brightness) is the maximum of the RGB values.
+         */
         $v = $max;
 
         return [
@@ -368,7 +406,9 @@ class Color_Palette_Optimizer {
         $count = count($colors);
         $target_step = 360 / $count;
 
-        / Sort colors by hue
+        /**
+         * Sort colors by hue
+         */
         usort($colors, function($a, $b) {
             return $this->hex_to_hsv($a)['h'] <=> $this->hex_to_hsv($b)['h'];
         });

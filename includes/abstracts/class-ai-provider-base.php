@@ -2,7 +2,10 @@
 /**
  * Base AI Provider Class
  *
- * @package    GLColorPalette
+ * Base class for AI service providers that generate color palettes.
+ * Handles authentication, API communication, and response processing.
+ *
+ * @package    GL_Color_Palette_Generator
  * @subpackage Abstracts
  * @author     George Lerner
  * @link       https://website-tech.glerner.com/
@@ -11,6 +14,14 @@
 
 namespace GL_Color_Palette_Generator\Abstracts;
 
+/**
+ * Abstract class AI_Provider_Base
+ *
+ * Provides base functionality for AI service providers including
+ * authentication, request handling, and response processing.
+ *
+ * @since 1.0.0
+ */
 abstract class AI_Provider_Base {
     /**
      * Provider credentials

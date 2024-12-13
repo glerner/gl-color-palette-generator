@@ -1,4 +1,16 @@
-<?php defined('ABSPATH') || exit; ?>
+<?php
+/**
+ * Template for the main palette listing page
+ *
+ * This template displays the grid of saved color palettes and provides
+ * options for managing them, including adding new palettes.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Admin\Views
+ * @since 1.0.0
+ */
+
+defined('ABSPATH') || exit; ?>
 
 <div class="wrap gl-color-palette-main">
     <h1 class="wp-heading-inline">

@@ -6,6 +6,9 @@
  */
 namespace GLColorPalette;
 
+use GLColorPalette\Color_Management\Color_Variation_Generator;
+use GLColorPalette\Interfaces\AccessibilityChecker;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -14,16 +17,18 @@ class ThemeJsonGenerator {
     private $contrast_checker;
     private $color_processor;
     private $base_theme_json;
+    private $variation_generator;
 
     /**
      * Constructor
      *
-     * @param ContrastChecker $contrast_checker Contrast checker instance
+     * @param AccessibilityChecker $accessibility_checker Accessibility checker instance
      */
-    public function __construct(ContrastChecker $contrast_checker) {
-        $this->contrast_checker = $contrast_checker;
+    public function __construct(AccessibilityChecker $accessibility_checker) {
+        $this->contrast_checker = $accessibility_checker;
         $this->color_processor = new ColorProcessor();
         $this->base_theme_json = $this->get_base_theme_json();
+        $this->variation_generator = new Color_Variation_Generator($accessibility_checker);
     }
 
     /**
@@ -135,52 +140,13 @@ class ThemeJsonGenerator {
      * @return array Array of color variations that meet contrast requirements
      */
     private function generate_color_variations($base_color) {
-        // Convert hex to RGB
-        $hex = ltrim($base_color, '#');
-        list($r, $g, $b) = sscanf($hex, "%02x%02x%02x");
+        $result = $this->variation_generator->generate_variations($base_color, [
+            'contrast_level' => 'AA',
+            'small_text' => true,
+            'include_base' => true
+        ]);
 
-        // Generate variations with increasing contrast until requirements are met
-        $variations = [];
-
-        // Try different brightness adjustments until we find ones that meet contrast requirements
-        for ($lighter = 40; $lighter <= 80; $lighter += 5) {
-            $lighter_color = $this->adjust_brightness([$r, $g, $b], $lighter);
-            if ($this->meets_contrast_requirements($lighter_color)) {
-                $variations['lighter'] = $lighter_color;
-                break;
-            }
-        }
-
-        for ($light = 20; $light <= 60; $light += 5) {
-            $light_color = $this->adjust_brightness([$r, $g, $b], $light);
-            if ($this->meets_contrast_requirements($light_color)) {
-                $variations['light'] = $light_color;
-                break;
-            }
-        }
-
-        for ($dark = -20; $dark >= -60; $dark -= 5) {
-            $dark_color = $this->adjust_brightness([$r, $g, $b], $dark);
-            if ($this->meets_contrast_requirements($dark_color)) {
-                $variations['dark'] = $dark_color;
-                break;
-            }
-        }
-
-        for ($darker = -40; $darker >= -80; $darker -= 5) {
-            $darker_color = $this->adjust_brightness([$r, $g, $b], $darker);
-            if ($this->meets_contrast_requirements($darker_color)) {
-                $variations['darker'] = $darker_color;
-                break;
-            }
-        }
-
-        // Only include base color if it meets contrast requirements
-        if ($this->meets_contrast_requirements($base_color)) {
-            $variations['base'] = $base_color;
-        }
-
-        return $variations;
+        return $result['variations'];
     }
 
     /**
@@ -412,17 +378,17 @@ class ThemeJsonGenerator {
     }
 
     /**
-     * Generate style variations from base colors
+     * Generate WordPress theme style variations from base colors
      * 
      * @param array $base_colors Array of 4 hex color codes
-     * @return array Array of style variations
+     * @return array Array of WordPress theme style variations
      * 
      * @todo Add support for different WordPress theme naming conventions:
      *       - TwentyTwentyFour: primary/secondary/tertiary/accent with variations
      *       - TwentyTwentyFive: accent-1 through accent-6, base/contrast system
      * @todo Integrate with Codeium API to generate artistic color names
      */
-    public function generate_style_variations($base_colors) {
+    public function generate_theme_style_variations($base_colors) {
         if (count($base_colors) !== 4) {
             throw new \InvalidArgumentException('Exactly 4 base colors must be provided');
         }

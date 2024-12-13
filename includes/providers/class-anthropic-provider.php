@@ -2,21 +2,23 @@
 /**
  * Anthropic Provider Class
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Providers
  * @since 1.0.0
  */
 
-namespace GLColorPalette\Providers;
+namespace GL_Color_Palette_Generator\Providers;
 
-use GLColorPalette\Abstracts\AI_Provider_Base;
+use GL_Color_Palette_Generator\Providers\Abstract_AI_Provider;
+use GL_Color_Palette_Generator\Providers\Provider_Config;
+use WP_Error;
 
 /**
  * Class Anthropic_Provider
  *
  * Anthropic Claude-specific implementation of the AI provider interface.
  */
-class Anthropic_Provider extends AI_Provider_Base {
+class Anthropic_Provider extends Abstract_AI_Provider {
     /**
      * Constructor.
      *
@@ -101,7 +103,7 @@ class Anthropic_Provider extends AI_Provider_Base {
             return new \WP_Error('invalid_response', 'Invalid API response format');
         }
 
-        / Extract JSON array from response
+        // Extract JSON array from response
         preg_match('/\[.*\]/', $response['content'], $matches);
         if (empty($matches[0])) {
             return new \WP_Error('invalid_colors', 'No color array found in response');
@@ -112,7 +114,7 @@ class Anthropic_Provider extends AI_Provider_Base {
             return new \WP_Error('invalid_colors', 'Invalid color data received');
         }
 
-        / Validate each color is a proper hex code
+        // Validate each color is a proper hex code
         foreach ($colors as $color) {
             if (!preg_match('/^#[a-fA-F0-9]{6}$/', $color)) {
                 return new \WP_Error('invalid_color_format', 'Invalid color format in response');

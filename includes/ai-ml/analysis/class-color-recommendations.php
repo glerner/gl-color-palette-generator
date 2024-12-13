@@ -1,31 +1,104 @@
 <?php
-namespace GLColorPalette;
+/**
+ * Color Recommendations Analysis Class
+ *
+ * Analyzes color combinations and provides intelligent recommendations
+ * for improving contrast, accessibility, and visual harmony.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage AI_ML\Analysis
+ * @since 1.0.0
+ */
 
-class ColorRecommendations {
+namespace GL_Color_Palette_Generator\AI_ML\Analysis;
+
+use GL_Color_Palette_Generator\Analysis\Color_Analyzer;
+use GL_Color_Palette_Generator\Accessibility\Accessibility_Checker;
+use GL_Color_Palette_Generator\Color_Management\Color_Harmonizer;
+use GL_Color_Palette_Generator\Settings\Settings_Manager;
+
+/**
+ * Class Color_Recommendations
+ *
+ * Provides intelligent color recommendations based on analysis of
+ * contrast ratios, accessibility requirements, and color harmony.
+ *
+ * @since 1.0.0
+ */
+class Color_Recommendations {
+    /**
+     * Color analyzer instance
+     *
+     * @var Color_Analyzer
+     * @since 1.0.0
+     */
     private $color_analyzer;
+
+    /**
+     * Accessibility checker instance
+     *
+     * @var Accessibility_Checker
+     * @since 1.0.0
+     */
     private $accessibility_checker;
+
+    /**
+     * Color harmonizer instance
+     *
+     * @var Color_Harmonizer
+     * @since 1.0.0
+     */
     private $color_harmonizer;
+
+    /**
+     * Settings manager instance
+     *
+     * @var Settings_Manager
+     * @since 1.0.0
+     */
     private $settings;
 
-    / Adjustment thresholds
-    private const MINOR_ADJUSTMENT = 0.1;  / 10% change
-    private const MODERATE_ADJUSTMENT = 0.2;  / 20% change
-    private const MAJOR_ADJUSTMENT = 0.3;  / 30% change
+    /**
+     * Adjustment threshold constants
+     */
+    private const MINOR_ADJUSTMENT = 0.1;    // 10% change
+    private const MODERATE_ADJUSTMENT = 0.2;  // 20% change
+    private const MAJOR_ADJUSTMENT = 0.3;    // 30% change
 
-    / Minimum improvements required
+    /**
+     * Minimum improvement thresholds
+     */
     private const MIN_CONTRAST_IMPROVEMENT = 1.0;
     private const MIN_BRIGHTNESS_IMPROVEMENT = 20;
     private const MIN_DISTINGUISHABILITY_IMPROVEMENT = 0.15;
 
+    /**
+     * Constructor
+     *
+     * Initializes the color analyzer, accessibility checker, color harmonizer, and settings manager.
+     *
+     * @since 1.0.0
+     */
     public function __construct() {
-        $this->color_analyzer = new ColorAnalyzer();
-        $this->accessibility_checker = new AccessibilityChecker();
-        $this->color_harmonizer = new ColorHarmonizer();
-        $this->settings = new SettingsManager();
+        $this->color_analyzer = new Color_Analyzer();
+        $this->accessibility_checker = new Accessibility_Checker();
+        $this->color_harmonizer = new Color_Harmonizer();
+        $this->settings = new Settings_Manager();
     }
 
     /**
      * Generate comprehensive recommendations
+     *
+     * Analyzes the provided color combination and generates recommendations for improving contrast, accessibility, and visual harmony.
+     *
+     * @param string $foreground Foreground color in hexadecimal format.
+     * @param string $background Background color in hexadecimal format.
+     * @param array $results Analysis results from the color analyzer.
+     * @param array $context Optional context data for generating context-specific recommendations.
+     *
+     * @return array Comprehensive recommendations for improving the color combination.
+     *
+     * @since 1.0.0
      */
     public function generate_recommendations($foreground, $background, $results, $context = []) {
         $recommendations = [
@@ -38,7 +111,7 @@ class ColorRecommendations {
             'priority' => $this->determine_priority($results)
         ];
 
-        / Add specific context-based recommendations
+        // Add specific context-based recommendations
         if (!empty($context)) {
             $recommendations['context_specific'] = $this->get_context_specific_recommendations(
                 $foreground,
@@ -53,16 +126,26 @@ class ColorRecommendations {
 
     /**
      * Generate contrast improvement suggestions
+     *
+     * Analyzes the provided color combination and generates suggestions for improving contrast.
+     *
+     * @param string $foreground Foreground color in hexadecimal format.
+     * @param string $background Background color in hexadecimal format.
+     * @param array $results Analysis results from the color analyzer.
+     *
+     * @return array Contrast improvement suggestions.
+     *
+     * @since 1.0.0
      */
     private function get_contrast_improvements($foreground, $background, $results) {
         $current_contrast = $results['contrast_ratio'];
         $improvements = [];
 
-        / Calculate adjustments needed
+        // Calculate adjustments needed
         $target_contrast = $this->determine_target_contrast($results);
 
         if ($current_contrast < $target_contrast) {
-            / Try different adjustment strategies
+            // Try different adjustment strategies
             $improvements['foreground'] = [
                 'lighter' => $this->adjust_for_better_contrast($foreground, $background, 'lighter'),
                 'darker' => $this->adjust_for_better_contrast($foreground, $background, 'darker'),
@@ -75,7 +158,7 @@ class ColorRecommendations {
                 'desaturated' => $this->adjust_for_better_contrast($background, $foreground, 'desaturated', true)
             ];
 
-            / Sort improvements by effectiveness
+            // Sort improvements by effectiveness
             $improvements = $this->sort_improvements_by_effectiveness($improvements, $target_contrast);
         }
 
@@ -89,6 +172,16 @@ class ColorRecommendations {
 
     /**
      * Generate colorblind-friendly alternatives
+     *
+     * Analyzes the provided color combination and generates colorblind-friendly alternatives.
+     *
+     * @param string $foreground Foreground color in hexadecimal format.
+     * @param string $background Background color in hexadecimal format.
+     * @param array $results Analysis results from the color analyzer.
+     *
+     * @return array Colorblind-friendly alternatives.
+     *
+     * @since 1.0.0
      */
     private function get_colorblind_alternatives($foreground, $background, $results) {
         $alternatives = [];
@@ -113,11 +206,21 @@ class ColorRecommendations {
 
     /**
      * Generate readability adjustments
+     *
+     * Analyzes the provided color combination and generates readability adjustments.
+     *
+     * @param string $foreground Foreground color in hexadecimal format.
+     * @param string $background Background color in hexadecimal format.
+     * @param array $results Analysis results from the color analyzer.
+     *
+     * @return array Readability adjustments.
+     *
+     * @since 1.0.0
      */
     private function get_readability_adjustments($foreground, $background, $results) {
         $adjustments = [];
 
-        / Check brightness
+        // Check brightness
         if ($results['readability']['brightness_difference'] < 125) {
             $adjustments['brightness'] = $this->suggest_brightness_adjustments(
                 $foreground,
@@ -126,7 +229,7 @@ class ColorRecommendations {
             );
         }
 
-        / Check color difference
+        // Check color difference
         if ($results['readability']['color_difference'] < 500) {
             $adjustments['color'] = $this->suggest_color_adjustments(
                 $foreground,
@@ -135,7 +238,7 @@ class ColorRecommendations {
             );
         }
 
-        / Check vibration effects
+        // Check vibration effects
         if ($results['readability']['vibration_effects']['has_vibration']) {
             $adjustments['vibration'] = $this->suggest_vibration_reduction(
                 $foreground,
@@ -153,6 +256,16 @@ class ColorRecommendations {
 
     /**
      * Generate harmony suggestions
+     *
+     * Analyzes the provided color combination and generates harmony suggestions.
+     *
+     * @param string $foreground Foreground color in hexadecimal format.
+     * @param string $background Background color in hexadecimal format.
+     * @param array $context Optional context data for generating context-specific harmony suggestions.
+     *
+     * @return array Harmony suggestions.
+     *
+     * @since 1.0.0
      */
     private function get_harmony_suggestions($foreground, $background, $context) {
         $harmony_analysis = $this->color_harmonizer->analyze_harmony($foreground, $background);
@@ -171,16 +284,26 @@ class ColorRecommendations {
 
     /**
      * Generate alternative color combinations
+     *
+     * Analyzes the provided color combination and generates alternative color combinations.
+     *
+     * @param string $foreground Foreground color in hexadecimal format.
+     * @param string $background Background color in hexadecimal format.
+     * @param array $results Analysis results from the color analyzer.
+     *
+     * @return array Alternative color combinations.
+     *
+     * @since 1.0.0
      */
     private function get_alternative_combinations($foreground, $background, $results) {
         $alternatives = [];
 
-        / Generate alternatives based on current colors
+        // Generate alternatives based on current colors
         $alternatives['similar'] = $this->generate_similar_combinations($foreground, $background);
         $alternatives['contrasting'] = $this->generate_contrasting_combinations($foreground, $background);
         $alternatives['safe'] = $this->generate_safe_combinations($foreground, $background);
 
-        / Sort alternatives by accessibility score
+        // Sort alternatives by accessibility score
         foreach ($alternatives as &$category) {
             $category = $this->sort_combinations_by_accessibility($category);
         }
@@ -194,11 +317,22 @@ class ColorRecommendations {
 
     /**
      * Generate context-specific recommendations
+     *
+     * Analyzes the provided color combination and generates context-specific recommendations.
+     *
+     * @param string $foreground Foreground color in hexadecimal format.
+     * @param string $background Background color in hexadecimal format.
+     * @param array $results Analysis results from the color analyzer.
+     * @param array $context Optional context data for generating context-specific recommendations.
+     *
+     * @return array Context-specific recommendations.
+     *
+     * @since 1.0.0
      */
     private function get_context_specific_recommendations($foreground, $background, $results, $context) {
         $recommendations = [];
 
-        / Brand guidelines compliance
+        // Brand guidelines compliance
         if (isset($context['brand_colors'])) {
             $recommendations['brand'] = $this->check_brand_compliance(
                 $foreground,
@@ -207,7 +341,7 @@ class ColorRecommendations {
             );
         }
 
-        / Usage-specific recommendations
+        // Usage-specific recommendations
         if (isset($context['usage'])) {
             $recommendations['usage'] = $this->get_usage_specific_recommendations(
                 $foreground,
@@ -216,7 +350,7 @@ class ColorRecommendations {
             );
         }
 
-        / Device/platform specific recommendations
+        // Device/platform specific recommendations
         if (isset($context['platforms'])) {
             $recommendations['platform'] = $this->get_platform_specific_recommendations(
                 $foreground,

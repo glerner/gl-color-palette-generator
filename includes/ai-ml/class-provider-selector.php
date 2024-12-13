@@ -1,14 +1,77 @@
 <?php
-namespace GLColorPalette;
+/**
+ * AI Provider Selector Class
+ *
+ * Handles the selection and management of AI service providers based on
+ * performance, cost, availability, and quality metrics.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage AI_ML
+ * @since 1.0.0
+ */
 
-class ProviderSelector {
+namespace GL_Color_Palette_Generator\AI_ML;
+
+use GL_Color_Palette_Generator\Settings\Settings_Manager;
+use GL_Color_Palette_Generator\Performance\Performance_Monitor;
+use GL_Color_Palette_Generator\Business\Cost_Calculator;
+use GL_Color_Palette_Generator\System\Availability_Checker;
+use GL_Color_Palette_Generator\Analysis\Quality_Tracker;
+
+/**
+ * Class Provider_Selector
+ *
+ * Implements intelligent selection of AI providers based on multiple criteria
+ * including performance metrics, cost constraints, and quality requirements.
+ *
+ * @since 1.0.0
+ */
+class Provider_Selector {
+    /**
+     * Settings manager instance
+     *
+     * @var Settings_Manager
+     * @since 1.0.0
+     */
     private $settings;
+
+    /**
+     * Performance monitoring instance
+     *
+     * @var Performance_Monitor
+     * @since 1.0.0
+     */
     private $performance_monitor;
+
+    /**
+     * Cost calculation instance
+     *
+     * @var Cost_Calculator
+     * @since 1.0.0
+     */
     private $cost_calculator;
+
+    /**
+     * Availability checking instance
+     *
+     * @var Availability_Checker
+     * @since 1.0.0
+     */
     private $availability_checker;
+
+    /**
+     * Quality tracking instance
+     *
+     * @var Quality_Tracker
+     * @since 1.0.0
+     */
     private $quality_tracker;
 
-    / Provider capabilities and characteristics
+    /**
+     * Provider capabilities and characteristics
+     *
+     * @var array
+     */
     private $provider_specs = [
         'openai' => [
             'models' => [
@@ -51,40 +114,51 @@ class ProviderSelector {
                 'tpm' => 100000
             ]
         ],
-        / ... additional providers
+        // ... additional providers
     ];
 
+    /**
+     * Constructor
+     *
+     * Initializes the provider selector with required instances.
+     *
+     * @since 1.0.0
+     */
     public function __construct() {
-        $this->settings = new SettingsManager();
-        $this->performance_monitor = new PerformanceMonitor();
-        $this->cost_calculator = new CostCalculator();
-        $this->availability_checker = new AvailabilityChecker();
-        $this->quality_tracker = new QualityTracker();
+        $this->settings = new Settings_Manager();
+        $this->performance_monitor = new Performance_Monitor();
+        $this->cost_calculator = new Cost_Calculator();
+        $this->availability_checker = new Availability_Checker();
+        $this->quality_tracker = new Quality_Tracker();
     }
 
     /**
      * Select optimal provider based on requirements
+     *
+     * @param array $requirements
+     * @return array
+     * @since 1.0.0
      */
     public function select_provider($requirements = []) {
-        / Get available providers
+        // Get available providers
         $available_providers = $this->get_available_providers();
 
-        / Filter by requirements
+        // Filter by requirements
         $eligible_providers = $this->filter_eligible_providers(
             $available_providers,
             $requirements
         );
 
-        / Score providers
+        // Score providers
         $scored_providers = $this->score_providers(
             $eligible_providers,
             $requirements
         );
 
-        / Select best provider
+        // Select best provider
         $selected_provider = $this->select_best_provider($scored_providers);
 
-        / Log selection
+        // Log selection
         $this->log_provider_selection($selected_provider, $requirements);
 
         return $selected_provider;
@@ -92,6 +166,9 @@ class ProviderSelector {
 
     /**
      * Get currently available providers
+     *
+     * @return array
+     * @since 1.0.0
      */
     private function get_available_providers() {
         $factory = new Providers\AiProviderFactory();
@@ -109,24 +186,29 @@ class ProviderSelector {
 
     /**
      * Filter providers by requirements
+     *
+     * @param array $providers
+     * @param array $requirements
+     * @return array
+     * @since 1.0.0
      */
     private function filter_eligible_providers($providers, $requirements) {
         return array_filter($providers, function($provider_data) use ($requirements) {
-            / Check budget constraints
+            // Check budget constraints
             if (isset($requirements['max_cost'])) {
                 if ($provider_data['current_costs']['cost_per_request'] > $requirements['max_cost']) {
                     return false;
                 }
             }
 
-            / Check quality requirements
+            // Check quality requirements
             if (isset($requirements['min_quality'])) {
                 if ($provider_data['quality_metrics']['average_score'] < $requirements['min_quality']) {
                     return false;
                 }
             }
 
-            / Check feature requirements
+            // Check feature requirements
             if (isset($requirements['required_features'])) {
                 foreach ($requirements['required_features'] as $feature) {
                     if (!in_array($feature, $provider_data['features'])) {
@@ -135,7 +217,7 @@ class ProviderSelector {
                 }
             }
 
-            / Check response time requirements
+            // Check response time requirements
             if (isset($requirements['max_response_time'])) {
                 if ($provider_data['current_performance']['avg_response_time'] >
                     $requirements['max_response_time']) {
@@ -143,7 +225,7 @@ class ProviderSelector {
                 }
             }
 
-            / Check token requirements
+            // Check token requirements
             if (isset($requirements['required_tokens'])) {
                 $has_suitable_model = false;
                 foreach ($provider_data['models'] as $model) {
@@ -163,6 +245,11 @@ class ProviderSelector {
 
     /**
      * Score providers based on requirements
+     *
+     * @param array $providers
+     * @param array $requirements
+     * @return array
+     * @since 1.0.0
      */
     private function score_providers($providers, $requirements) {
         $scored = [];
@@ -170,22 +257,22 @@ class ProviderSelector {
         foreach ($providers as $provider => $data) {
             $score = 0;
 
-            / Quality score (0-40 points)
+            // Quality score (0-40 points)
             $score += $data['quality_metrics']['average_score'] * 40;
 
-            / Performance score (0-20 points)
+            // Performance score (0-20 points)
             $performance_score = $this->calculate_performance_score($data['current_performance']);
             $score += $performance_score * 20;
 
-            / Cost efficiency score (0-20 points)
+            // Cost efficiency score (0-20 points)
             $cost_score = $this->calculate_cost_efficiency_score($data['current_costs']);
             $score += $cost_score * 20;
 
-            / Reliability score (0-20 points)
+            // Reliability score (0-20 points)
             $reliability_score = $this->calculate_reliability_score($data);
             $score += $reliability_score * 20;
 
-            / Apply requirement-specific weights
+            // Apply requirement-specific weights
             $score = $this->apply_requirement_weights($score, $data, $requirements);
 
             $scored[$provider] = [
@@ -205,6 +292,10 @@ class ProviderSelector {
 
     /**
      * Calculate performance score
+     *
+     * @param array $performance_data
+     * @return float
+     * @since 1.0.0
      */
     private function calculate_performance_score($performance_data) {
         $response_time_score = 1 - min(1, $performance_data['avg_response_time'] / 5);
@@ -216,6 +307,10 @@ class ProviderSelector {
 
     /**
      * Calculate cost efficiency score
+     *
+     * @param array $cost_data
+     * @return float
+     * @since 1.0.0
      */
     private function calculate_cost_efficiency_score($cost_data) {
         $base_cost_score = 1 - min(1, $cost_data['cost_per_request'] / 0.05);
@@ -226,6 +321,10 @@ class ProviderSelector {
 
     /**
      * Calculate reliability score
+     *
+     * @param array $provider_data
+     * @return float
+     * @since 1.0.0
      */
     private function calculate_reliability_score($provider_data) {
         $uptime_score = $provider_data['reliability'];
@@ -237,6 +336,12 @@ class ProviderSelector {
 
     /**
      * Apply requirement-specific weights
+     *
+     * @param float $score
+     * @param array $provider_data
+     * @param array $requirements
+     * @return float
+     * @since 1.0.0
      */
     private function apply_requirement_weights($score, $provider_data, $requirements) {
         if (isset($requirements['priority'])) {
@@ -261,6 +366,10 @@ class ProviderSelector {
 
     /**
      * Select best provider based on scores
+     *
+     * @param array $scored_providers
+     * @return array
+     * @since 1.0.0
      */
     private function select_best_provider($scored_providers) {
         uasort($scored_providers, function($a, $b) {
@@ -272,6 +381,10 @@ class ProviderSelector {
 
     /**
      * Log provider selection
+     *
+     * @param array $selected_provider
+     * @param array $requirements
+     * @since 1.0.0
      */
     private function log_provider_selection($selected_provider, $requirements) {
         $log_data = [
@@ -287,12 +400,16 @@ class ProviderSelector {
             ]
         ];
 
-        / Log to database or monitoring system
+        // Log to database or monitoring system
         do_action('color_palette_provider_selection', $log_data);
     }
 
     /**
      * Select optimal provider
+     *
+     * @param array $requirements
+     * @return array
+     * @since 1.0.0
      */
     public function select_optimal_provider($requirements = []) {
         $providers = $this->get_available_providers();
@@ -312,6 +429,11 @@ class ProviderSelector {
 
     /**
      * Validate provider configuration
+     *
+     * @param string $provider
+     * @param array $config
+     * @return array
+     * @since 1.0.0
      */
     public function validate_provider_configuration($provider, $config) {
         try {

@@ -1,4 +1,16 @@
-<?php defined('ABSPATH') || exit; ?>
+<?php
+/**
+ * Template for the palette generation page
+ *
+ * This template provides the interface for creating and editing color palettes,
+ * including manual selection, image extraction, and harmony-based generation.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Admin\Views
+ * @since 1.0.0
+ */
+
+defined('ABSPATH') || exit; ?>
 
 <div class="wrap gl-color-palette-generate">
     <h1>

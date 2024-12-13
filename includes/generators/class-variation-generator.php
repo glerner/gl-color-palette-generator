@@ -1,15 +1,33 @@
 <?php
 namespace GL_Color_Palette_Generator\Generators;
 
-class Variation_Generator {
+/**
+ * Theme Style Generator Class
+ *
+ * Generates WordPress theme style variations using different color relationships.
+ * This is distinct from tints/shades - it focuses on creating complete theme styles
+ * using different color relationships (complementary, analogous, etc).
+ *
+ * @package GL_Color_Palette_Generator
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ * @since   1.0.0
+ */
+class Theme_Style_Generator {
     private $settings;
-    private $cache_duration = 3600; // 1 hour in seconds
 
     public function __construct() {
         $this->settings = get_option('gl_color_palette_generator_settings', []);
     }
 
-    public function generate_variations($colors, $options = []) {
+    /**
+     * Generate theme style variations
+     *
+     * @param array  $colors Base colors to generate variations from
+     * @param array  $options Generation options
+     * @return array Generated theme style variations
+     */
+    public function generate_theme_styles($colors, $options = []) {
         if (empty($colors)) {
             return [];
         }
@@ -17,65 +35,77 @@ class Variation_Generator {
         $type = $options['type'] ?? 'all';
         $count = $options['count'] ?? 3;
 
-        $variations = [];
+        $styles = [];
         foreach ($colors as $color) {
             switch ($type) {
                 case 'monochromatic':
-                    $variations[] = $this->generate_monochromatic_variations($color);
+                    $styles[] = $this->generate_monochromatic_style($color);
                     break;
                 case 'analogous':
-                    $variations[] = $this->generate_analogous_variations($color);
+                    $styles[] = $this->generate_analogous_style($color);
                     break;
                 case 'complementary':
-                    $variations[] = $this->generate_complementary_variations($color);
+                    $styles[] = $this->generate_complementary_style($color);
                     break;
                 case 'split_complementary':
-                    $variations[] = $this->generate_split_complementary_variations($color);
+                    $styles[] = $this->generate_split_complementary_style($color);
                     break;
                 case 'triadic':
-                    $variations[] = $this->generate_triadic_variations($color);
+                    $styles[] = $this->generate_triadic_style($color);
                     break;
                 case 'tetradic':
-                    $variations[] = $this->generate_tetradic_variations($color);
+                    $styles[] = $this->generate_tetradic_style($color);
                     break;
                 case 'all':
                 default:
-                    $variations[] = array_merge(
-                        $this->generate_monochromatic_variations($color),
-                        $this->generate_analogous_variations($color),
-                        $this->generate_complementary_variations($color)
+                    $styles[] = array_merge(
+                        $this->generate_monochromatic_style($color),
+                        $this->generate_analogous_style($color),
+                        $this->generate_complementary_style($color)
                     );
             }
         }
 
-        return array_slice(array_merge(...$variations), 0, $count);
+        return array_slice(array_merge(...$styles), 0, $count);
     }
 
-    public function generate_monochromatic_variations($color) {
+    /**
+     * Generate monochromatic theme style
+     *
+     * @param string $color Base color
+     * @return array Theme style colors
+     */
+    public function generate_monochromatic_style($color) {
         $rgb = $this->hex_to_rgb($color);
         $hsv = $this->rgb_to_hsv($rgb);
-        $variations = [];
+        $style_colors = [];
 
         // Generate lighter and darker variations
         for ($i = -2; $i <= 2; $i++) {
             if ($i === 0) continue;
-            
+
             $new_hsv = [
                 'h' => $hsv['h'],
                 's' => $hsv['s'],
                 'v' => max(0, min(1, $hsv['v'] + ($i * 0.2)))
             ];
-            
-            $variations[] = $this->hsv_to_hex($new_hsv);
+
+            $style_colors[] = $this->hsv_to_hex($new_hsv);
         }
 
-        return $variations;
+        return $style_colors;
     }
 
-    public function generate_analogous_variations($color) {
+    /**
+     * Generate analogous theme style
+     *
+     * @param string $color Base color
+     * @return array Theme style colors
+     */
+    public function generate_analogous_style($color) {
         $rgb = $this->hex_to_rgb($color);
         $hsv = $this->rgb_to_hsv($rgb);
-        $variations = [];
+        $style_colors = [];
 
         // Generate variations with hue shifts
         $angles = [-30, -15, 15, 30];
@@ -85,38 +115,50 @@ class Variation_Generator {
                 's' => $hsv['s'],
                 'v' => $hsv['v']
             ];
-            
-            $variations[] = $this->hsv_to_hex($new_hsv);
+
+            $style_colors[] = $this->hsv_to_hex($new_hsv);
         }
 
-        return $variations;
+        return $style_colors;
     }
 
-    public function generate_complementary_variations($color) {
+    /**
+     * Generate complementary theme style
+     *
+     * @param string $color Base color
+     * @return array Theme style colors
+     */
+    public function generate_complementary_style($color) {
         $rgb = $this->hex_to_rgb($color);
         $hsv = $this->rgb_to_hsv($rgb);
-        $variations = [];
+        $style_colors = [];
 
         // Generate complementary color and variations
         $complementary_h = fmod(($hsv['h'] + 180), 360);
-        
+
         for ($i = -1; $i <= 1; $i++) {
             $new_hsv = [
                 'h' => $complementary_h,
                 's' => max(0, min(1, $hsv['s'] + ($i * 0.1))),
                 'v' => max(0, min(1, $hsv['v'] + ($i * 0.1)))
             ];
-            
-            $variations[] = $this->hsv_to_hex($new_hsv);
+
+            $style_colors[] = $this->hsv_to_hex($new_hsv);
         }
 
-        return $variations;
+        return $style_colors;
     }
 
-    public function generate_split_complementary_variations($color) {
+    /**
+     * Generate split complementary theme style
+     *
+     * @param string $color Base color
+     * @return array Theme style colors
+     */
+    public function generate_split_complementary_style($color) {
         $rgb = $this->hex_to_rgb($color);
         $hsv = $this->rgb_to_hsv($rgb);
-        $variations = [];
+        $style_colors = [];
 
         // Generate split complementary colors
         $angles = [150, 210];
@@ -126,17 +168,23 @@ class Variation_Generator {
                 's' => $hsv['s'],
                 'v' => $hsv['v']
             ];
-            
-            $variations[] = $this->hsv_to_hex($new_hsv);
+
+            $style_colors[] = $this->hsv_to_hex($new_hsv);
         }
 
-        return $variations;
+        return $style_colors;
     }
 
-    public function generate_triadic_variations($color) {
+    /**
+     * Generate triadic theme style
+     *
+     * @param string $color Base color
+     * @return array Theme style colors
+     */
+    public function generate_triadic_style($color) {
         $rgb = $this->hex_to_rgb($color);
         $hsv = $this->rgb_to_hsv($rgb);
-        $variations = [];
+        $style_colors = [];
 
         // Generate triadic colors
         $angles = [120, 240];
@@ -146,17 +194,23 @@ class Variation_Generator {
                 's' => $hsv['s'],
                 'v' => $hsv['v']
             ];
-            
-            $variations[] = $this->hsv_to_hex($new_hsv);
+
+            $style_colors[] = $this->hsv_to_hex($new_hsv);
         }
 
-        return $variations;
+        return $style_colors;
     }
 
-    public function generate_tetradic_variations($color) {
+    /**
+     * Generate tetradic theme style
+     *
+     * @param string $color Base color
+     * @return array Theme style colors
+     */
+    public function generate_tetradic_style($color) {
         $rgb = $this->hex_to_rgb($color);
         $hsv = $this->rgb_to_hsv($rgb);
-        $variations = [];
+        $style_colors = [];
 
         // Generate tetradic (double complementary) colors
         $angles = [90, 180, 270];
@@ -166,49 +220,49 @@ class Variation_Generator {
                 's' => $hsv['s'],
                 'v' => $hsv['v']
             ];
-            
-            $variations[] = $this->hsv_to_hex($new_hsv);
+
+            $style_colors[] = $this->hsv_to_hex($new_hsv);
         }
 
-        return $variations;
+        return $style_colors;
     }
 
     public function adjust_saturation($color, $amount) {
         $rgb = $this->hex_to_rgb($color);
         $hsv = $this->rgb_to_hsv($rgb);
-        
+
         $new_hsv = [
             'h' => $hsv['h'],
             's' => max(0, min(1, $hsv['s'] + $amount)),
             'v' => $hsv['v']
         ];
-        
+
         return $this->hsv_to_hex($new_hsv);
     }
 
     public function adjust_lightness($color, $amount) {
         $rgb = $this->hex_to_rgb($color);
         $hsv = $this->rgb_to_hsv($rgb);
-        
+
         $new_hsv = [
             'h' => $hsv['h'],
             's' => $hsv['s'],
             'v' => max(0, min(1, $hsv['v'] + $amount))
         ];
-        
+
         return $this->hsv_to_hex($new_hsv);
     }
 
     public function rotate_hue($color, $degrees) {
         $rgb = $this->hex_to_rgb($color);
         $hsv = $this->rgb_to_hsv($rgb);
-        
+
         $new_hsv = [
             'h' => fmod(($hsv['h'] + $degrees + 360), 360),
             's' => $hsv['s'],
             'v' => $hsv['v']
         ];
-        
+
         return $this->hsv_to_hex($new_hsv);
     }
 

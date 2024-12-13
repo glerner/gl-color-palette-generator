@@ -1,12 +1,59 @@
 <?php
-namespace GLColorPalette;
+/**
+ * Emotional Color Mapping Strategy Class
+ *
+ * Implements color selection strategies based on emotional psychology
+ * and color-emotion associations across different contexts.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage AI_ML\Strategies
+ * @since 1.0.0
+ */
 
-class EmotionalMapping {
+namespace GL_Color_Palette_Generator\AI_ML\Strategies;
+
+use GL_Color_Palette_Generator\Analysis\Color_Analyzer;
+use GL_Color_Palette_Generator\Analysis\Cultural_Context;
+use GL_Color_Palette_Generator\Analysis\Psychological_Data;
+
+/**
+ * Class Emotional_Mapping
+ *
+ * Maps colors to emotional responses and psychological effects,
+ * considering cultural context and psychological research.
+ *
+ * @since 1.0.0
+ */
+class Emotional_Mapping {
+    /**
+     * Color analysis instance
+     *
+     * @var Color_Analyzer
+     * @since 1.0.0
+     */
     private $color_analyzer;
+
+    /**
+     * Cultural context instance
+     *
+     * @var Cultural_Context
+     * @since 1.0.0
+     */
     private $cultural_context;
+
+    /**
+     * Psychological data instance
+     *
+     * @var Psychological_Data
+     * @since 1.0.0
+     */
     private $psychological_data;
 
-    / Comprehensive emotional color mappings
+    /**
+     * Comprehensive emotional color mappings
+     *
+     * @var array
+     */
     private const EMOTIONAL_MAPPINGS = [
         'primary_emotions' => [
             'joy' => [
@@ -316,6 +363,10 @@ class EmotionalMapping {
 
     /**
      * Get emotional associations for color
+     *
+     * @param string $color
+     * @param array $context
+     * @return array|null
      */
     public function get_emotional_mapping($color, $context = []) {
         foreach (self::EMOTIONAL_MAPPINGS['primary_emotions'] as $emotion => $data) {
@@ -330,6 +381,10 @@ class EmotionalMapping {
 
     /**
      * Generate emotional color strategy
+     *
+     * @param string $target_emotion
+     * @param array $context
+     * @return array|null
      */
     public function generate_emotional_strategy($target_emotion, $context = []) {
         if (isset(self::EMOTIONAL_MAPPINGS['primary_emotions'][$target_emotion])) {
@@ -347,6 +402,10 @@ class EmotionalMapping {
 
     /**
      * Generate emotional transitions
+     *
+     * @param string $start_emotion
+     * @param string $end_emotion
+     * @return array
      */
     public function generate_emotional_transition($start_emotion, $end_emotion) {
         return [

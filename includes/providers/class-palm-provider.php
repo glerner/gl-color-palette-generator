@@ -2,16 +2,21 @@
 /**
  * Google PaLM Provider Class
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Providers
  * @since 1.0.0
  */
 
-namespace GLColorPalette\Providers;
+namespace GL_Color_Palette_Generator\Providers;
 
-use GLColorPalette\Abstracts\AI_Provider_Base;
+use GL_Color_Palette_Generator\Providers\Abstract_AI_Provider;
+use GL_Color_Palette_Generator\Providers\Provider_Config;
+use WP_Error;
 
-class Palm_Provider extends AI_Provider_Base {
+/**
+ * Class Palm_Provider
+ */
+class Palm_Provider extends Abstract_AI_Provider {
     public function __construct(array $credentials) {
         $this->api_url = 'https://generativelanguage.googleapis.com/v1beta/models/';
         $this->credentials = $credentials;
@@ -48,7 +53,7 @@ class Palm_Provider extends AI_Provider_Base {
 
     public function validate_credentials() {
         if (empty($this->credentials['api_key'])) {
-            return new \WP_Error('missing_api_key', 'Google PaLM API key is required');
+            return new WP_Error('missing_api_key', 'Google PaLM API key is required');
         }
         return true;
     }

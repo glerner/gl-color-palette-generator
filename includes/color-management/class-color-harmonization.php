@@ -1,123 +1,114 @@
-<?php
-namespace GLColorPalette;
+/**
+ * Color Harmonization Class
+ *
+ * Implements color harmony rules and relationships for generating aesthetically
+ * pleasing color combinations. Supports various harmony types including
+ * complementary, analogous, triadic, and dynamic mood-based harmonies.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Color_Management
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ * @since   1.0.0
+ */
 
-class ColorHarmonization {
+namespace GL_Color_Palette_Generator\Color_Management;
+
+use GL_Color_Palette_Generator\Color_Management\Color_Analyzer;
+use GL_Color_Palette_Generator\Color_Management\Color_Utility;
+use GL_Color_Palette_Generator\Settings\Settings_Manager;
+
+/**
+ * Class Color_Harmonization
+ *
+ * Manages color harmony rules and relationships to create visually balanced
+ * and aesthetically pleasing color combinations. Supports:
+ * - Classical color harmonies (complementary, analogous, triadic)
+ * - Dynamic mood-based harmonies
+ * - Cultural color harmonies
+ * - Custom harmony rules
+ *
+ * @since 1.0.0
+ */
+class Color_Harmonization {
+    /**
+     * Color analyzer instance
+     *
+     * @var Color_Analyzer
+     * @since 1.0.0
+     */
     private $color_analyzer;
-    private $harmony_calculator;
-    private $context_evaluator;
 
-    / Advanced harmony configurations
+    /**
+     * Color utility instance
+     *
+     * @var Color_Utility
+     * @since 1.0.0
+     */
+    private $color_utility;
+
+    /**
+     * Settings manager instance
+     *
+     * @var Settings_Manager
+     * @since 1.0.0
+     */
+    private $settings;
+
+    /**
+     * Harmony rules and specifications
+     *
+     * @var array
+     * @since 1.0.0
+     */
     private const HARMONY_RULES = [
         'classical_harmonies' => [
             'complementary' => [
                 'primary_rules' => [
                     'hue_difference' => 180,
-                    'variations' => [
-                        'split' => [
-                            'angles' => [150, 210],
-                            'balance_ratio' => ['primary' => 0.6, 'splits' => 0.2],
-                            'saturation_rules' => [
-                                'primary' => ['range' => '60-100%', 'optimal' => '80%'],
-                                'secondary' => ['range' => '40-80%', 'optimal' => '60%']
-                            ]
-                        ],
-                        'double' => [
-                            'angle_pairs' => [[0, 180], [90, 270]],
-                            'balance_ratio' => ['primary_pair' => 0.5, 'secondary_pair' => 0.5],
-                            'intensity_distribution' => ['dominant' => 0.4, 'supporting' => 0.3]
-                        ]
-                    ],
-                    'contrast_requirements' => [
-                        'minimum' => 4.5,
-                        'optimal' => 7.0,
-                        'maximum' => 12.0
-                    ]
+                    'saturation_balance' => true,
+                    'lightness_contrast' => 'moderate'
                 ],
-                'contextual_adjustments' => [
-                    'digital' => [
-                        'screen_type' => [
-                            'OLED' => ['saturation' => '-10%', 'brightness' => '+5%'],
-                            'LCD' => ['saturation' => 'standard', 'brightness' => '-5%']
-                        ],
-                        'viewing_distance' => [
-                            'mobile' => ['contrast' => '+10%', 'size_ratio' => 1.2],
-                            'desktop' => ['contrast' => 'standard', 'size_ratio' => 1.0]
-                        ]
+                'variations' => [
+                    'split' => [
+                        'angle_offset' => 30,
+                        'count' => 3
                     ],
-                    'print' => [
-                        'paper_type' => [
-                            'coated' => ['saturation' => '+5%', 'brightness' => 'standard'],
-                            'uncoated' => ['saturation' => '+15%', 'brightness' => '+10%']
-                        ]
+                    'double' => [
+                        'pair_spacing' => 60,
+                        'count' => 4
                     ]
                 ]
             ],
-
             'analogous' => [
                 'primary_rules' => [
-                    'hue_range' => [30, 45],
-                    'variations' => [
-                        'tight' => [
-                            'angle_range' => [15, 25],
-                            'saturation_steps' => ['primary' => 100, 'secondary' => 85, 'tertiary' => 70],
-                            'brightness_progression' => ['start' => 100, 'step' => -10]
-                        ],
-                        'wide' => [
-                            'angle_range' => [40, 60],
-                            'saturation_pattern' => ['high' => 90, 'medium' => 75, 'low' => 60],
-                            'brightness_variation' => ['range' => 30, 'steps' => 3]
-                        ]
+                    'hue_range' => 30,
+                    'saturation_step' => 10,
+                    'lightness_step' => 5
+                ],
+                'variations' => [
+                    'close' => [
+                        'hue_range' => 15
+                    ],
+                    'wide' => [
+                        'hue_range' => 45
                     ]
                 ]
             ]
         ],
-
-        'advanced_harmonies' => [
-            'golden_ratio' => [
-                'hue_progression' => [
-                    'angle' => 137.5,
-                    'iterations' => 5,
-                    'saturation_decay' => 0.618,
-                    'brightness_progression' => ['start' => 95, 'ratio' => 0.618]
-                ]
-            ],
-            'tetratic' => [
-                'rectangle' => [
-                    'angle_pairs' => [[0, 180], [60, 240]],
-                    'weight_distribution' => ['primary' => 0.4, 'secondary' => 0.3, 'accents' => 0.15]
-                ],
-                'square' => [
-                    'angles' => [0, 90, 180, 270],
-                    'balance_rules' => ['equal_weight' => true, 'rotation_allowed' => true]
-                ]
-            ]
-        ],
-
         'dynamic_harmonies' => [
             'mood_based' => [
                 'energetic' => [
                     'primary_hue_range' => [0, 60],
                     'contrast_level' => 'high',
-                    'saturation_rules' => ['minimum' => 70, 'optimal' => 85],
-                    'rhythm_pattern' => ['dynamic', 'progressive']
+                    'saturation_range' => [70, 100],
+                    'lightness_range' => [45, 65]
                 ],
-                'calming' => [
-                    'primary_hue_range' => [180, 270],
+                'calm' => [
+                    'primary_hue_range' => [180, 240],
                     'contrast_level' => 'low',
-                    'saturation_rules' => ['maximum' => 60, 'optimal' => 45],
-                    'rhythm_pattern' => ['steady', 'gradual']
-                ]
-            ],
-            'seasonal' => [
-                'spring' => [
-                    'hue_range' => [60, 150],
-                    'saturation_profile' => ['fresh', 'bright'],
-                    'contrast_pattern' => ['medium', 'balanced']
-                ],
-                'autumn' => [
-                    'hue_range' => [20, 60],
-                    'saturation_profile' => ['rich', 'warm'],
-                    'contrast_pattern' => ['deep', 'muted']
+                    'saturation_range' => [20, 50],
+                    'lightness_range' => [60, 80]
                 ]
             ]
         ]
@@ -125,8 +116,14 @@ class ColorHarmonization {
 
     /**
      * Generate harmonious color combination
+     *
+     * @param string $base_color
+     * @param string $harmony_type
+     * @param array  $context
+     *
+     * @return array
      */
-    public function generate_harmony($base_color, $harmony_type, $context = []) {
+    public function generate_harmony(string $base_color, string $harmony_type, array $context = []): array {
         $harmony_rules = $this->get_harmony_rules($harmony_type);
         if (!$harmony_rules) return null;
 
@@ -143,8 +140,14 @@ class ColorHarmonization {
 
     /**
      * Validate color harmony
+     *
+     * @param array  $colors
+     * @param string $harmony_type
+     * @param array  $context
+     *
+     * @return array
      */
-    public function validate_harmony($colors, $harmony_type, $context = []) {
+    public function validate_harmony(array $colors, string $harmony_type, array $context = []): array {
         $validation = [
             'is_valid' => true,
             'contrast_scores' => $this->calculate_contrast_scores($colors),
@@ -154,7 +157,7 @@ class ColorHarmonization {
             'recommendations' => []
         ];
 
-        / Add specific recommendations if needed
+        // Add specific recommendations if needed
         if ($validation['contrast_scores']['minimum'] < 4.5) {
             $validation['is_valid'] = false;
             $validation['recommendations'][] = [
@@ -168,8 +171,12 @@ class ColorHarmonization {
 
     /**
      * Generate harmonic combinations
+     *
+     * @param string $base_color
+     *
+     * @return array
      */
-    public function generate_harmonic_combinations($base_color) {
+    public function generate_harmonic_combinations(string $base_color): array {
         return [
             'complementary' => $this->get_complementary_colors($base_color),
             'analogous' => $this->get_analogous_colors($base_color),
@@ -182,8 +189,12 @@ class ColorHarmonization {
 
     /**
      * Optimize color harmony
+     *
+     * @param array $palette
+     *
+     * @return array
      */
-    public function optimize_harmony($palette) {
+    public function optimize_harmony(array $palette): array {
         $current_harmony = $this->analyze_harmony($palette);
         $optimization_needed = $this->check_optimization_needed($current_harmony);
 
@@ -205,8 +216,12 @@ class ColorHarmonization {
 
     /**
      * Generate harmony variations
+     *
+     * @param array $palette
+     *
+     * @return array
      */
-    public function generate_harmony_variations($palette) {
+    public function generate_harmony_variations(array $palette): array {
         return [
             'monochromatic' => $this->generate_monochromatic_variation($palette),
             'warm_harmony' => $this->generate_warm_variation($palette),

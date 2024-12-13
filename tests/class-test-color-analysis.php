@@ -1,8 +1,8 @@
 <?php
 
-namespace GLColorPalette\Tests;
+namespace GL_Color_Palette_Generator\Tests;
 
-use GLColorPalette\Color_Analysis;
+use GL_Color_Palette_Generator\Color_Analysis;
 use WP_UnitTestCase;
 
 class Test_Color_Analysis extends WP_UnitTestCase {

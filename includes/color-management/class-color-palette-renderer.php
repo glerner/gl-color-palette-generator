@@ -2,11 +2,13 @@
 /**
  * Color Palette Renderer
  *
- * @package GLColorPalette
- * @since 1.0.0
+ * @package GL_Color_Palette_Generator
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ * @since   1.0.0
  */
 
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator\Color_Management;
 
 /**
  * Class Color_Palette_Renderer
@@ -29,11 +31,11 @@ class Color_Palette_Renderer {
      */
     public function render(Color_Palette $palette, array $options = []): string {
         $default_options = [
-            'layout' => 'swatches', / swatches, grid, cards
+            'layout' => 'swatches', // swatches, grid, cards
             'show_info' => true,
             'show_names' => true,
             'show_values' => true,
-            'size' => 'medium', / small, medium, large
+            'size' => 'medium', // small, medium, large
             'class' => '',
         ];
 

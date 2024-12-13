@@ -2,13 +2,13 @@
 /**
  * Test Helper Functions
  *
- * @package    GLColorPalette
+ * @package    GL_Color_Palette_Generator
  * @author     George Lerner
  * @link       https://website-tech.glerner.com/
  * @since      1.0.0
  */
 
-namespace GLColorPalette\Tests;
+namespace GL_Color_Palette_Generator\Tests;
 
 class TestHelpers {
     /**

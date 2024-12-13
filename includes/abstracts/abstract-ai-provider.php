@@ -2,7 +2,10 @@
 /**
  * Abstract AI Provider Class
  *
- * @package GLColorPalette
+ * Provides base functionality for AI service providers that generate
+ * color palettes. Handles common API operations and error handling.
+ *
+ * @package GL_Color_Palette_Generator
  * @subpackage Abstracts
  * @since 1.0.0
  */
@@ -14,7 +17,10 @@ use GL_Color_Palette_Generator\Interfaces\AI_Provider;
 /**
  * Abstract class AI_Provider_Base
  *
- * Provides common functionality for AI providers.
+ * Provides common functionality for AI providers including API communication,
+ * error handling, and response processing.
+ *
+ * @since 1.0.0
  */
 abstract class AI_Provider_Base implements AI_Provider {
     /**

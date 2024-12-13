@@ -2,8 +2,12 @@
 /**
  * Class SampleTest
  *
- * @package Gl_Color_Palette_Generator
+ * @package GL_Color_Palette_Generator
  */
+
+namespace GL_Color_Palette_Generator\Tests;
+
+use WP_UnitTestCase;
 
 class SampleTest extends WP_UnitTestCase {
 

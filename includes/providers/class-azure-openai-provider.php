@@ -2,18 +2,23 @@
 /**
  * Azure OpenAI Provider Class
  *
- * @package    GLColorPalette
+ * @package    GL_Color_Palette_Generator
  * @subpackage Providers
  * @author     George Lerner
  * @link       https://website-tech.glerner.com/
  * @since      1.0.0
  */
 
-namespace GLColorPalette\Providers;
+namespace GL_Color_Palette_Generator\Providers;
 
-use GLColorPalette\Abstracts\AI_Provider_Base;
+use GL_Color_Palette_Generator\Providers\Abstract_AI_Provider;
+use GL_Color_Palette_Generator\Providers\Provider_Config;
+use WP_Error;
 
-class Azure_OpenAI_Provider extends AI_Provider_Base {
+/**
+ * Class Azure_OpenAI_Provider
+ */
+class Azure_OpenAI_Provider extends Abstract_AI_Provider {
     public function __construct(array $credentials) {
         $this->credentials = $credentials;
         $this->api_url = sprintf(

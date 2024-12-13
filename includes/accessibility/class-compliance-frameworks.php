@@ -1,12 +1,52 @@
 <?php
-namespace GLColorPalette;
+/**
+ * Compliance Frameworks Class
+ *
+ * Manages compliance with various accessibility and data protection frameworks.
+ * Handles GDPR, WCAG, Section 508, and other regulatory requirements.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Accessibility
+ * @since 1.0.0
+ */
 
-class ComplianceFrameworks {
+namespace GL_Color_Palette_Generator\Accessibility;
+
+/**
+ * Class Compliance_Frameworks
+ *
+ * Implements compliance checks and validations for various regulatory frameworks.
+ * Manages data protection, accessibility standards, and audit requirements.
+ *
+ * @since 1.0.0
+ */
+class Compliance_Frameworks {
+    /**
+     * Compliance manager instance
+     *
+     * @var object
+     */
     private $compliance_manager;
+
+    /**
+     * Audit controller instance
+     *
+     * @var object
+     */
     private $audit_controller;
+
+    /**
+     * Reporting engine instance
+     *
+     * @var object
+     */
     private $reporting_engine;
 
-    / Comprehensive compliance configurations
+    /**
+     * Comprehensive compliance configurations
+     *
+     * @var array
+     */
     private const COMPLIANCE_FRAMEWORKS = [
         'gdpr' => [
             'data_protection' => [
@@ -172,6 +212,10 @@ class ComplianceFrameworks {
 
     /**
      * Validate compliance status
+     *
+     * @param string $framework Compliance framework to validate
+     * @param array $scope Optional scope for validation
+     * @return array Compliance status and gap analysis
      */
     public function validate_compliance($framework, $scope = []) {
         return [
@@ -184,6 +228,9 @@ class ComplianceFrameworks {
 
     /**
      * Generate compliance report
+     *
+     * @param mixed $palette Compliance palette to generate report for
+     * @return array Compliance report
      */
     public function generate_compliance_report($palette) {
         $compliance_status = $this->check_compliance_status($palette);
@@ -197,7 +244,10 @@ class ComplianceFrameworks {
     }
 
     /**
-     * Check compliance status
+     * Check compliance
+     *
+     * @param mixed $palette Compliance palette to check
+     * @return array Compliance status
      */
     public function check_compliance($palette) {
         $wcag = new WCAGCompliance();
@@ -219,6 +269,9 @@ class ComplianceFrameworks {
 
     /**
      * Monitor compliance changes
+     *
+     * @param mixed $palette Compliance palette to monitor
+     * @return array Compliance monitoring data
      */
     public function monitor_compliance_changes($palette) {
         return [
@@ -231,6 +284,9 @@ class ComplianceFrameworks {
 
     /**
      * Check compliance status
+     *
+     * @param mixed $palette Compliance palette to check
+     * @return array Compliance status
      */
     public function check_compliance_status($palette) {
         return [
@@ -241,44 +297,47 @@ class ComplianceFrameworks {
         ];
     }
 
-    / Private helper methods
+    /**
+     * Private helper methods
+     */
+
     private function check_wcag_compliance($palette) {
-        / Implementation
+        // Implementation
     }
 
     private function check_section508_compliance($palette) {
-        / Implementation
+        // Implementation
     }
 
     private function check_aoda_compliance($palette) {
-        / Implementation
+        // Implementation
     }
 
     private function check_en301549_compliance($palette) {
-        / Implementation
+        // Implementation
     }
 
     private function analyze_compliance_details($status) {
-        / Implementation
+        // Implementation
     }
 
     private function generate_compliance_recommendations($status) {
-        / Implementation
+        // Implementation
     }
 
     private function create_implementation_guide($status) {
-        / Implementation
+        // Implementation
     }
 
     private function get_historical_compliance_data($palette) {
-        / Implementation
+        // Implementation
     }
 
     private function analyze_compliance_trends($palette) {
-        / Implementation
+        // Implementation
     }
 
     private function generate_compliance_alerts($palette) {
-        / Implementation
+        // Implementation
     }
 }

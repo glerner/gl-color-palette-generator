@@ -9,10 +9,29 @@
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
+use GL_Color_Palette_Generator\Color_Management\Color_Shade_Generator;
+use GL_Color_Palette_Generator\Interfaces\AccessibilityChecker;
+use GL_Color_Palette_Generator\Traits\Color_Shade_Generator_Trait;
+
 /**
  * Class Color_Palette_Exporter
  */
 class Color_Palette_Exporter implements \GL_Color_Palette_Generator\Interfaces\Color_Palette_Exporter {
+    use Color_Shade_Generator_Trait;
+
+    private $color_exporter;
+    private $shade_generator;
+
+    /**
+     * Constructor
+     *
+     * @param AccessibilityChecker $accessibility_checker Accessibility checker instance
+     */
+    public function __construct(AccessibilityChecker $accessibility_checker) {
+        $this->color_exporter = new ColorExporter($accessibility_checker);
+        $this->shade_generator = new Color_Shade_Generator($accessibility_checker);
+    }
+
     /**
      * Export palettes to JSON
      *

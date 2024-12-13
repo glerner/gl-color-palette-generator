@@ -1,4 +1,16 @@
-<?php defined('ABSPATH') || exit; ?>
+<?php
+/**
+ * Template for displaying color palette analysis results
+ *
+ * This template shows the contrast analysis and accessibility results
+ * for a generated color palette.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Admin\Views
+ * @since 1.0.0
+ */
+
+defined('ABSPATH') || exit; ?>
 
 <div class="gl-analysis-results">
     <?php if (isset($analysis['contrast'])): ?>

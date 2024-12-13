@@ -1,7 +1,7 @@
 <?php
-namespace GLColorPalette\Tests;
+namespace GL_Color_Palette_Generator\Tests;
 
-use GLColorPalette\Ajax_Handler;
+use GL_Color_Palette_Generator\Ajax_Handler;
 use WP_UnitTestCase;
 
 class Test_Ajax_Handler extends WP_UnitTestCase {

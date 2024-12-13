@@ -2,9 +2,14 @@
 /**
  * Color Palette Admin Class
  *
+ * Handles the WordPress admin interface for the color palette generator.
+ * Manages admin menus, settings pages, and dashboard integration.
+ *
  * @package GL_Color_Palette_Generator
+ * @subpackage Admin
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
+ * @since   1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Admin;
@@ -13,17 +18,27 @@ use GL_Color_Palette_Generator\Settings\Settings_Manager;
 
 /**
  * Class Color_Palette_Admin
+ *
+ * Implements the WordPress admin interface functionality for the plugin.
+ * Handles menu creation, settings registration, and admin page rendering.
+ *
+ * @since 1.0.0
  */
 class Color_Palette_Admin {
     /**
      * Settings manager instance
      *
-     * @var Settings_Manager
+     * @var Settings_Manager The settings manager object
+     * @since 1.0.0
      */
     private $settings;
 
     /**
      * Initialize the admin
+     *
+     * Sets up the admin interface by registering menus, settings, and hooks.
+     *
+     * @since 1.0.0
      */
     public function init() {
         $this->settings = new Settings_Manager();
@@ -35,6 +50,10 @@ class Color_Palette_Admin {
 
     /**
      * Add admin menu items
+     *
+     * Registers the main menu and settings submenu for the plugin.
+     *
+     * @since 1.0.0
      */
     public function add_admin_menu() {
         add_menu_page(
@@ -60,7 +79,10 @@ class Color_Palette_Admin {
     /**
      * Enqueue admin assets
      *
+     * Loads the required CSS and JavaScript files for the admin interface.
+     *
      * @param string $hook Current admin page.
+     * @since 1.0.0
      */
     public function enqueue_admin_assets($hook) {
         if (!strpos($hook, 'gl-color-palette')) {
@@ -95,6 +117,10 @@ class Color_Palette_Admin {
 
     /**
      * Render main admin page
+     *
+     * Displays the main admin page for the plugin.
+     *
+     * @since 1.0.0
      */
     public function render_main_page() {
         $palettes = $this->get_saved_palettes();
@@ -103,6 +129,10 @@ class Color_Palette_Admin {
 
     /**
      * Render settings page
+     *
+     * Displays the settings page for the plugin.
+     *
+     * @since 1.0.0
      */
     public function render_settings_page() {
         include GL_CPG_PLUGIN_DIR . 'templates/admin/settings-page.php';
@@ -110,6 +140,10 @@ class Color_Palette_Admin {
 
     /**
      * Handle palette generation AJAX request
+     *
+     * Processes the AJAX request for generating a color palette.
+     *
+     * @since 1.0.0
      */
     public function handle_generate_palette() {
         check_ajax_referer('gl_cpg_admin', 'nonce');
@@ -138,7 +172,10 @@ class Color_Palette_Admin {
     /**
      * Get saved color palettes
      *
+     * Retrieves the saved color palettes from the database.
+     *
      * @return array
+     * @since 1.0.0
      */
     private function get_saved_palettes() {
         global $wpdb;
@@ -158,9 +195,12 @@ class Color_Palette_Admin {
     /**
      * Save color palette
      *
+     * Saves a color palette to the database.
+     *
      * @param string $name Palette name.
      * @param array  $colors Palette colors.
      * @return int|false The number of rows inserted, or false on error.
+     * @since 1.0.0
      */
     public function save_palette($name, $colors) {
         global $wpdb;
@@ -181,8 +221,11 @@ class Color_Palette_Admin {
     /**
      * Delete color palette
      *
+     * Deletes a color palette from the database.
+     *
      * @param int $id Palette ID.
      * @return int|false The number of rows deleted, or false on error.
+     * @since 1.0.0
      */
     public function delete_palette($id) {
         global $wpdb;

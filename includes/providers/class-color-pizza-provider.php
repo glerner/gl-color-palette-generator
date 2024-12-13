@@ -1,5 +1,15 @@
 <?php
-namespace GLColorPalette\Providers;
+/**
+ * Color.pizza API Provider
+ *
+ * @package    GL_Color_Palette_Generator
+ * @subpackage Providers
+ * @since      1.0.0
+ */
+
+namespace GL_Color_Palette_Generator\Providers;
+
+use WP_Error;
 
 /**
  * Color.pizza API Provider

@@ -1,20 +1,38 @@
 <?php
+/**
+ * Abstract Color Processor Class
+ *
+ * Provides base functionality for processing and validating colors across
+ * different color spaces. Handles color space conversions, validation,
+ * and palette management.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Abstracts
+ * @since 1.0.0
+ */
 
 namespace GL_Color_Palette_Generator\Abstracts;
 
 /**
- * Abstract class for processing colors.
+ * Abstract class BaseColorProcessor
  *
- * This class defines the structure for color processing and validation.
+ * Defines the core structure for color processing and validation operations.
+ * Supports multiple color spaces and provides palette management functionality.
+ *
+ * @since 1.0.0
  */
 abstract class BaseColorProcessor {
     /**
-     * @var array List of supported color spaces.
+     * List of supported color spaces
+     *
+     * @var array Supported color spaces including rgb, hsl, hsv, cmyk, and lab
      */
     protected array $color_space = ['rgb', 'hsl', 'hsv', 'cmyk', 'lab'];
 
     /**
-     * @var array Current color palette.
+     * Current color palette
+     *
+     * @var array Array of colors in the current working palette
      */
     protected array $current_palette = [];
 

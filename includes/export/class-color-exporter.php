@@ -1,11 +1,29 @@
 <?php
 namespace GLColorPalette;
+use GLColorPalette\Color_Management\Color_Shade_Generator;
+use GLColorPalette\Interfaces\AccessibilityChecker;
+use GLColorPalette\Traits\Color_Shade_Generator_Trait;
+
 class ColorExporter {
+    use Color_Shade_Generator_Trait;
     private $formatter;
     private $validator;
     private $settings;
+    private $shade_generator;
 
-    / Export formats
+    /**
+     * Constructor
+     *
+     * @param AccessibilityChecker $accessibility_checker Accessibility checker instance
+     */
+    public function __construct(AccessibilityChecker $accessibility_checker) {
+        $this->formatter = new ColorFormatter();
+        $this->validator = new PaletteValidator();
+        $this->settings = new SettingsManager();
+        $this->shade_generator = new Color_Shade_Generator($accessibility_checker);
+    }
+
+    // Export formats
     private const EXPORT_FORMATS = [
         'css' => ['variables', 'tailwind', 'sass', 'less'],
         'design' => ['sketch', 'figma', 'adobe_xd', 'invision'],
@@ -14,18 +32,12 @@ class ColorExporter {
         'web' => ['html', 'svg', 'postcss', 'styled-components']
     ];
 
-    public function __construct() {
-        $this->formatter = new ColorFormatter();
-        $this->validator = new PaletteValidator();
-        $this->settings = new SettingsManager();
-    }
-
     /**
      * Export palette in specified format
      */
     public function export_palette($palette, $format, $options = []) {
         try {
-            / Validate palette before export
+            // Validate palette before export
             if (!$this->validator->validate_palette($palette)) {
                 throw new ExportException('Invalid palette for export');
             }
@@ -259,4 +271,21 @@ class ColorExporter {
         $output .= "}\n";
         return $output;
     }
+
+    /**
+     * Generate accessible tints and shades
+     *
+     * @param string $color Base color in hex format
+     * @param array  $options Optional. Generation options.
+     * @return array Array of accessible tints and shades (lighter, light, dark, darker)
+     */
+    // protected function generate_accessible_shades($color, $options = []) {
+    //     $result = $this->shade_generator->generate_variations($color, array_merge([
+    //         'contrast_level' => 'AA',
+    //         'small_text' => true,
+    //         'include_base' => true
+    //     ], $options));
+
+    //     return $result['variations'];
+    // }
 }

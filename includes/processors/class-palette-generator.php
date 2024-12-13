@@ -1,13 +1,26 @@
-<?php
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator\Processors;
 
-class PaletteGenerator {
+use GL_Color_Palette_Generator\Color_Management\Color_Analyzer;
+use GL_Color_Palette_Generator\Accessibility\Accessibility_Checker;
+use GL_Color_Palette_Generator\Settings\Settings_Manager;
+use GL_Color_Palette_Generator\Cache\Color_Cache;
+
+/**
+ * Class Palette_Generator
+ * 
+ * Generates color palettes based on various harmonies and accessibility requirements.
+ * 
+ * @package GL_Color_Palette_Generator
+ * @subpackage Processors
+ * @since 1.0.0
+ */
+class Palette_Generator {
     private $color_analyzer;
     private $accessibility_checker;
     private $settings;
     private $cache;
 
-    / Color harmony types
+    /** Color harmony types */
     private const HARMONY_TYPES = [
         'monochromatic',
         'analogous',
@@ -19,7 +32,7 @@ class PaletteGenerator {
         'compound'
     ];
 
-    / Palette sizes
+    /** Palette sizes */
     private const PALETTE_SIZES = [
         'minimal' => 3,
         'standard' => 5,
@@ -28,14 +41,14 @@ class PaletteGenerator {
     ];
 
     public function __construct() {
-        $this->color_analyzer = new ColorAnalyzer();
-        $this->accessibility_checker = new AccessibilityChecker();
-        $this->settings = new SettingsManager();
-        $this->cache = new ColorCache();
+        $this->color_analyzer = new Color_Analyzer();
+        $this->accessibility_checker = new Accessibility_Checker();
+        $this->settings = new Settings_Manager();
+        $this->cache = new Color_Cache();
     }
 
     /**
-     * Generate color palette
+     * Generate a complete color palette
      */
     public function generate_palette($base_color, $options = []) {
         $harmony_type = $options['harmony'] ?? 'complementary';
@@ -43,26 +56,26 @@ class PaletteGenerator {
         $context = $options['context'] ?? [];
 
         try {
-            / Get base color properties
+            /** Get base color properties */
             $base_properties = $this->color_analyzer->analyze_color($base_color);
 
-            / Generate harmony colors
+            /** Generate harmony colors */
             $harmony_colors = $this->generate_harmony_colors(
                 $base_color,
                 $harmony_type,
                 self::PALETTE_SIZES[$palette_size]
             );
 
-            / Adjust for accessibility
+            /** Adjust for accessibility */
             $accessible_colors = $this->ensure_accessibility($harmony_colors, $context);
 
-            / Generate shades and tints
-            $extended_colors = $this->generate_variations($accessible_colors);
+            /** Generate tints and shades */
+            $extended_colors = $this->generate_tints_and_shades($accessible_colors);
 
-            / Organize palette
+            /** Organize palette */
             $palette = $this->organize_palette($extended_colors, $options);
 
-            / Add metadata
+            /** Add metadata */
             $palette['metadata'] = $this->generate_palette_metadata(
                 $base_color,
                 $harmony_type,
@@ -185,49 +198,42 @@ class PaletteGenerator {
     }
 
     /**
-     * Generate variations
+     * Generate tints and shades for each color
+     *
+     * @param array $colors Base colors to generate tints and shades for
+     * @return array Array of colors with their tints and shades
      */
-    private function generate_variations($colors) {
-        $variations = [];
+    private function generate_tints_and_shades($colors) {
+        $extended = [];
 
         foreach ($colors as $color) {
-            $variations = array_merge(
-                $variations,
-                $this->generate_color_variations($color)
-            );
+            $hsl = $this->color_analyzer->hex_to_hsl($color);
+            $variations = [];
+
+            /** Generate shades (darker) */
+            for ($i = 1; $i <= 4; $i++) {
+                $lightness = max(0, $hsl[2] - ($i * 0.1));
+                $variations['shade_' . $i] = $this->color_analyzer->hsl_to_hex([
+                    $hsl[0],
+                    $hsl[1],
+                    $lightness
+                ]);
+            }
+
+            /** Generate tints (lighter) */
+            for ($i = 1; $i <= 4; $i++) {
+                $lightness = min(1, $hsl[2] + ($i * 0.1));
+                $variations['tint_' . $i] = $this->color_analyzer->hsl_to_hex([
+                    $hsl[0],
+                    $hsl[1],
+                    $lightness
+                ]);
+            }
+
+            $extended = array_merge($extended, $variations);
         }
 
-        return $variations;
-    }
-
-    /**
-     * Generate color variations
-     */
-    private function generate_color_variations($color) {
-        $hsl = $this->color_analyzer->hex_to_hsl($color);
-        $variations = [];
-
-        / Generate shades (darker)
-        for ($i = 1; $i <= 4; $i++) {
-            $lightness = max(0, $hsl[2] - ($i * 0.1));
-            $variations['shade_' . $i] = $this->color_analyzer->hsl_to_hex([
-                $hsl[0],
-                $hsl[1],
-                $lightness
-            ]);
-        }
-
-        / Generate tints (lighter)
-        for ($i = 1; $i <= 4; $i++) {
-            $lightness = min(1, $hsl[2] + ($i * 0.1));
-            $variations['tint_' . $i] = $this->color_analyzer->hsl_to_hex([
-                $hsl[0],
-                $hsl[1],
-                $lightness
-            ]);
-        }
-
-        return $variations;
+        return $extended;
     }
 
     /**

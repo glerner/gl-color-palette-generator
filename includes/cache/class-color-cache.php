@@ -1,7 +1,15 @@
-<?php
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator\Cache;
 
-class ColorCache {
+/**
+ * Class Color_Cache
+ * 
+ * Handles caching of color data and calculations.
+ * 
+ * @package GL_Color_Palette_Generator
+ * @subpackage Cache
+ * @since 1.0.0
+ */
+class Color_Cache {
     private $cache_group = 'color_names';
     private $expiration = DAY_IN_SECONDS * 7;
 
@@ -25,6 +33,9 @@ class ColorCache {
 
     /**
      * Cache color calculations
+     *
+     * @param array $color_data Color data to cache
+     * @return array Cache status information
      */
     public function cache_calculations($color_data) {
         $cache_key = $this->generate_cache_key($color_data);

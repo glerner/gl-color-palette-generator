@@ -5,11 +5,13 @@
  * Handles migration of color palettes between storage methods and
  * manages database schema updates.
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
 
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator\Color_Management;
 
 use WP_Error;
 
@@ -45,10 +47,10 @@ class Color_Palette_Migration {
         global $wpdb;
         $stats = ['success' => 0, 'failed' => 0];
 
-        / Ensure table exists
+        // Ensure table exists
         $this->create_table();
 
-        / Get all palette options
+        // Get all palette options
         $options = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT option_name, option_value FROM $wpdb->options WHERE option_name LIKE %s",
@@ -67,7 +69,7 @@ class Color_Palette_Migration {
 
             $palette = new Color_Palette($data['colors'], $data['metadata'] ?? []);
 
-            / Temporarily enable database storage
+            // Temporarily enable database storage
             $this->storage->use_database(true);
             $result = $this->storage->store($palette, $id);
             $this->storage->use_database(false);
@@ -119,7 +121,7 @@ class Color_Palette_Migration {
     public function needs_migration(): bool {
         global $wpdb;
 
-        / Check if we have any palettes in options
+        // Check if we have any palettes in options
         $has_options = (bool) $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT COUNT(*) FROM $wpdb->options WHERE option_name LIKE %s",
@@ -127,7 +129,7 @@ class Color_Palette_Migration {
             )
         );
 
-        / Check if table exists and is empty
+        // Check if table exists and is empty
         $table_name = $wpdb->prefix . 'color_palettes';
         $table_exists = (bool) $wpdb->get_var(
             $wpdb->prepare(

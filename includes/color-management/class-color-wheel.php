@@ -1,71 +1,111 @@
-<?php
-namespace GLColorPalette;
+/**
+ * Color Wheel Class
+ *
+ * Implements a comprehensive color wheel system for managing color relationships
+ * and generating harmonious color combinations. Provides tools for calculating
+ * complementary colors, analogous colors, and other color harmony patterns.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Color_Management
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ * @since   1.0.0
+ */
 
-class ColorWheel {
+namespace GL_Color_Palette_Generator\Color_Management;
+
+use GL_Color_Palette_Generator\Color_Management\Color_Calculator;
+use GL_Color_Palette_Generator\Color_Management\Color_Utility;
+use GL_Color_Palette_Generator\Settings\Settings_Manager;
+
+/**
+ * Class Color_Wheel
+ *
+ * Manages color wheel operations and relationships including:
+ * - Color harmony calculations
+ * - Complementary color generation
+ * - Analogous color schemes
+ * - Split-complementary patterns
+ * - Triadic and tetradic harmonies
+ *
+ * @since 1.0.0
+ */
+class Color_Wheel {
+    /**
+     * Color calculator instance
+     *
+     * @var Color_Calculator
+     * @since 1.0.0
+     */
     private $color_calculator;
-    private $harmony_analyzer;
-    private $conversion_utils;
 
-    / Advanced color wheel configurations
-    private const COLOR_WHEEL = [
+    /**
+     * Color utility instance
+     *
+     * @var Color_Utility
+     * @since 1.0.0
+     */
+    private $color_utility;
+
+    /**
+     * Settings manager instance
+     *
+     * @var Settings_Manager
+     * @since 1.0.0
+     */
+    private $settings;
+
+    /**
+     * Color wheel configuration
+     *
+     * @var array
+     * @since 1.0.0
+     */
+    private const WHEEL_CONFIG = [
+        'segments' => 12,
         'primary_colors' => [
-            'red' => ['hue' => 0, 'hex' => '#FF0000'],
-            'blue' => ['hue' => 240, 'hex' => '#0000FF'],
-            'yellow' => ['hue' => 60, 'hex' => '#FFFF00']
+            'red' => 0,
+            'yellow' => 120,
+            'blue' => 240
         ],
         'secondary_colors' => [
-            'green' => ['hue' => 120, 'hex' => '#00FF00'],
-            'orange' => ['hue' => 30, 'hex' => '#FF8000'],
-            'purple' => ['hue' => 300, 'hex' => '#800080']
+            'orange' => 60,
+            'green' => 180,
+            'purple' => 300
         ],
         'tertiary_colors' => [
-            'yellow_green' => ['hue' => 90, 'hex' => '#80FF00'],
-            'blue_green' => ['hue' => 180, 'hex' => '#00FF80'],
-            'blue_purple' => ['hue' => 270, 'hex' => '#8000FF'],
-            'red_purple' => ['hue' => 330, 'hex' => '#FF0080'],
-            'red_orange' => ['hue' => 15, 'hex' => '#FF4000'],
-            'yellow_orange' => ['hue' => 45, 'hex' => '#FFB000']
-        ]
-    ];
-
-    / Color harmony patterns
-    private const HARMONY_PATTERNS = [
-        'complementary' => [
-            'angle' => 180,
-            'variations' => [
-                'split' => ['angles' => [150, 210]],
-                'double' => ['pairs' => [[0, 180], [90, 270]]]
-            ]
-        ],
-        'analogous' => [
-            'angles' => [30, -30],
-            'variations' => [
-                'wide' => ['angles' => [45, -45]],
-                'narrow' => ['angles' => [15, -15]]
-            ]
-        ],
-        'triadic' => [
-            'angles' => [120, 240],
-            'variations' => [
-                'split' => ['angles' => [120, 150, 210, 240]],
-                'compressed' => ['angles' => [90, 180]]
-            ]
-        ],
-        'tetradic' => [
-            'rectangle' => ['angles' => [90, 180, 270]],
-            'square' => ['angles' => [90, 180, 270]]
-        ],
-        'compound' => [
-            'split_complementary' => ['angles' => [150, 210]],
-            'double_split_complementary' => ['angles' => [30, 150, 210, 330]]
+            'red-orange' => 30,
+            'yellow-orange' => 90,
+            'yellow-green' => 150,
+            'blue-green' => 210,
+            'blue-purple' => 270,
+            'red-purple' => 330
         ]
     ];
 
     /**
-     * Calculate color harmonies
+     * Constructor
+     *
+     * @since 1.0.0
      */
-    public function calculate_harmonies($base_color, $harmony_type, $options = []) {
-        $hsl = $this->conversion_utils->hex_to_hsl($base_color);
+    public function __construct() {
+        $this->color_calculator = new Color_Calculator();
+        $this->color_utility = new Color_Utility();
+        $this->settings = new Settings_Manager();
+    }
+
+    /**
+     * Calculate color harmonies
+     *
+     * @param string $base_color
+     * @param string $harmony_type
+     * @param array  $options
+     *
+     * @return array
+     * @since 1.0.0
+     */
+    public function calculate_harmonies(string $base_color, string $harmony_type, array $options = []): array {
+        $hsl = $this->color_utility->hex_to_hsl($base_color);
         $harmonies = [];
 
         switch ($harmony_type) {
@@ -91,8 +131,13 @@ class ColorWheel {
 
     /**
      * Calculate color relationships
+     *
+     * @param string $color
+     *
+     * @return array
+     * @since 1.0.0
      */
-    public function calculate_relationships($color) {
+    public function calculate_relationships(string $color): array {
         return [
             'complementary' => $this->find_complementary($color),
             'analogous' => $this->find_analogous($color),
@@ -105,8 +150,14 @@ class ColorWheel {
 
     /**
      * Generate dynamic color wheel
+     *
+     * @param int   $segments
+     * @param array $options
+     *
+     * @return array
+     * @since 1.0.0
      */
-    public function generate_color_wheel($segments = 12, $options = []) {
+    public function generate_color_wheel(int $segments = 12, array $options = []): array {
         $wheel = [];
         $segment_angle = 360 / $segments;
 
@@ -124,9 +175,15 @@ class ColorWheel {
 
     /**
      * Calculate advanced color variations
+     *
+     * @param string $base_color
+     * @param string $variation_type
+     *
+     * @return array
+     * @since 1.0.0
      */
-    private function calculate_variations($base_color, $variation_type) {
-        $hsl = $this->conversion_utils->hex_to_hsl($base_color);
+    private function calculate_variations(string $base_color, string $variation_type): array {
+        $hsl = $this->color_utility->hex_to_hsl($base_color);
         $variations = [];
 
         switch ($variation_type) {
@@ -149,8 +206,15 @@ class ColorWheel {
 
     /**
      * Generate color schemes
+     *
+     * @param string $base_color
+     * @param string $scheme_type
+     * @param array  $options
+     *
+     * @return array
+     * @since 1.0.0
      */
-    public function generate_scheme($base_color, $scheme_type, $options = []) {
+    public function generate_scheme(string $base_color, string $scheme_type, array $options = []): array {
         $scheme = [
             'base' => $base_color,
             'harmonies' => $this->calculate_harmonies($base_color, $scheme_type),
@@ -172,8 +236,14 @@ class ColorWheel {
 
     /**
      * Calculate color wheel position
+     *
+     * @param float $hue
+     * @param array $options
+     *
+     * @return array
+     * @since 1.0.0
      */
-    private function calculate_wheel_position($hue, $options = []) {
+    private function calculate_wheel_position(float $hue, array $options = []): array {
         $position = [
             'angle' => $hue,
             'radius' => $options['radius'] ?? 1.0,
@@ -190,11 +260,18 @@ class ColorWheel {
 
     /**
      * Generate interpolated colors
+     *
+     * @param string $start_color
+     * @param string $end_color
+     * @param int    $steps
+     *
+     * @return array
+     * @since 1.0.0
      */
-    private function generate_interpolated_colors($start_color, $end_color, $steps) {
+    private function generate_interpolated_colors(string $start_color, string $end_color, int $steps): array {
         $colors = [];
-        $start_hsl = $this->conversion_utils->hex_to_hsl($start_color);
-        $end_hsl = $this->conversion_utils->hex_to_hsl($end_color);
+        $start_hsl = $this->color_utility->hex_to_hsl($start_color);
+        $end_hsl = $this->color_utility->hex_to_hsl($end_color);
 
         for ($i = 0; $i <= $steps; $i++) {
             $ratio = $i / $steps;
@@ -203,7 +280,7 @@ class ColorWheel {
                 's' => $start_hsl['s'] + ($end_hsl['s'] - $start_hsl['s']) * $ratio,
                 'l' => $start_hsl['l'] + ($end_hsl['l'] - $start_hsl['l']) * $ratio
             ];
-            $colors[] = $this->conversion_utils->hsl_to_hex($hsl);
+            $colors[] = $this->color_utility->hsl_to_hex($hsl);
         }
 
         return $colors;
@@ -211,8 +288,13 @@ class ColorWheel {
 
     /**
      * Calculate color harmony strength
+     *
+     * @param array $colors
+     *
+     * @return array
+     * @since 1.0.0
      */
-    private function calculate_harmony_strength($colors) {
+    private function calculate_harmony_strength(array $colors): array {
         $strength = [
             'contrast' => $this->calculate_contrast_ratio($colors),
             'balance' => $this->calculate_color_balance($colors),
@@ -225,8 +307,13 @@ class ColorWheel {
 
     /**
      * Generate color wheel data
+     *
+     * @param int $resolution
+     *
+     * @return array
+     * @since 1.0.0
      */
-    public function generate_wheel_data($resolution = 360) {
+    public function generate_wheel_data(int $resolution = 360): array {
         $wheel_data = [
             'primary_colors' => $this->get_primary_colors(),
             'secondary_colors' => $this->get_secondary_colors(),
@@ -244,8 +331,13 @@ class ColorWheel {
 
     /**
      * Generate interactive wheel data
+     *
+     * @param string $selected_color
+     *
+     * @return array
+     * @since 1.0.0
      */
-    public function generate_interactive_data($selected_color = null) {
+    public function generate_interactive_data(string $selected_color = null): array {
         $wheel_data = $this->generate_wheel_data();
 
         return [

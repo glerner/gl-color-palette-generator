@@ -2,14 +2,20 @@
 /**
  * AI Provider Factory Class
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Providers
  * @since 1.0.0
  */
 
-namespace GLColorPalette\Providers;
+namespace GL_Color_Palette_Generator\Providers;
 
-use GLColorPalette\Interfaces\AI_Provider;
+use GL_Color_Palette_Generator\Providers\OpenAI_Provider;
+use GL_Color_Palette_Generator\Providers\Azure_OpenAI_Provider;
+use GL_Color_Palette_Generator\Providers\Anthropic_Provider;
+use GL_Color_Palette_Generator\Providers\Cohere_Provider;
+use GL_Color_Palette_Generator\Providers\HuggingFace_Provider;
+use GL_Color_Palette_Generator\Providers\PaLM_Provider;
+use WP_Error;
 
 /**
  * Class AI_Provider_Factory
@@ -26,7 +32,7 @@ class AI_Provider_Factory {
         'azure' => Azure_OpenAI_Provider::class,
         'cohere' => Cohere_Provider::class,
         'huggingface' => HuggingFace_Provider::class,
-        'palm' => Palm_Provider::class,
+        'palm' => PaLM_Provider::class,
     ];
 
     /**

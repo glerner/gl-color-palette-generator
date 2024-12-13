@@ -2,26 +2,60 @@
 /**
  * Color Utility Class
  *
+ * Provides essential color manipulation and conversion utilities.
+ * Handles color space transformations, color calculations, and
+ * various color format conversions.
+ *
  * @package GL_Color_Palette_Generator
+ * @subpackage Color_Management
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
+ * @since   1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
 /**
  * Class Color_Utility
+ *
+ * Core utility class for color operations including:
+ * - Color space conversions (RGB, HSL, Lab, CMYK)
+ * - Color difference calculations
+ * - Color manipulation (lighten, darken, saturate)
+ * - Format validation and normalization
+ *
+ * @since 1.0.0
  */
 class Color_Utility {
+    /**
+     * Color space conversion matrices
+     *
+     * @var array
+     * @since 1.0.0
+     */
+    private const COLOR_MATRICES = [
+        'rgb_to_xyz' => [
+            [0.4124564, 0.3575761, 0.1804375],
+            [0.2126729, 0.7151522, 0.0721750],
+            [0.0193339, 0.1191920, 0.9503041]
+        ],
+        'xyz_to_rgb' => [
+            [3.2404542, -1.5371385, -0.4985314],
+            [-0.9692660, 1.8760108, 0.0415560],
+            [0.0556434, -0.2040259, 1.0572252]
+        ]
+    ];
+
     /**
      * Get perceptual color difference between two colors
      * Uses Delta E (CIE76) formula for simplicity and performance
      *
-     * @param string $color1 First hex color.
-     * @param string $color2 Second hex color.
-     * @return float Color difference value (0-100).
+     * @param string $color1 First hex color
+     * @param string $color2 Second hex color
+     * @return float Delta E value (0-100)
+     * @since 1.0.0
      */
-    public function get_color_difference($color1, $color2) {
+    public function get_color_difference(string $color1, string $color2): float {
         // Convert hex to Lab color space
         $lab1 = $this->hex_to_lab($color1);
         $lab2 = $this->hex_to_lab($color2);
@@ -35,12 +69,83 @@ class Color_Utility {
     }
 
     /**
+     * Convert hex color to RGB array
+     *
+     * @param string $hex Hex color code
+     * @return array RGB values [r, g, b]
+     * @since 1.0.0
+     */
+    public function hex_to_rgb(string $hex): array {
+        $hex = ltrim($hex, '#');
+        return [
+            'r' => hexdec(substr($hex, 0, 2)),
+            'g' => hexdec(substr($hex, 2, 2)),
+            'b' => hexdec(substr($hex, 4, 2))
+        ];
+    }
+
+    /**
+     * Convert RGB to hex color
+     *
+     * @param array $rgb RGB values [r, g, b]
+     * @return string Hex color code
+     * @since 1.0.0
+     */
+    public function rgb_to_hex(array $rgb): string {
+        return sprintf('#%02x%02x%02x', $rgb['r'], $rgb['g'], $rgb['b']);
+    }
+
+    /**
+     * Convert RGB to HSL color space
+     *
+     * @param array $rgb RGB values [r, g, b]
+     * @return array HSL values [h, s, l]
+     * @since 1.0.0
+     */
+    public function rgb_to_hsl(array $rgb): array {
+        $r = $rgb['r'] / 255;
+        $g = $rgb['g'] / 255;
+        $b = $rgb['b'] / 255;
+
+        $max = max($r, $g, $b);
+        $min = min($r, $g, $b);
+        $l = ($max + $min) / 2;
+
+        if ($max == $min) {
+            $h = $s = 0;
+        } else {
+            $d = $max - $min;
+            $s = $l > 0.5 ? $d / (2 - $max - $min) : $d / ($max + $min);
+
+            switch ($max) {
+                case $r:
+                    $h = ($g - $b) / $d + ($g < $b ? 6 : 0);
+                    break;
+                case $g:
+                    $h = ($b - $r) / $d + 2;
+                    break;
+                case $b:
+                    $h = ($r - $g) / $d + 4;
+                    break;
+            }
+            $h /= 6;
+        }
+
+        return [
+            'h' => round($h * 360),
+            's' => round($s * 100),
+            'l' => round($l * 100)
+        ];
+    }
+
+    /**
      * Convert hex color to Lab color space
      *
      * @param string $hex_color Hex color code.
      * @return array Lab values.
+     * @since 1.0.0
      */
-    private function hex_to_lab($hex_color) {
+    private function hex_to_lab(string $hex_color): array {
         // First convert hex to RGB
         $rgb = $this->hex_to_rgb($hex_color);
 
@@ -52,28 +157,13 @@ class Color_Utility {
     }
 
     /**
-     * Convert hex color to RGB array
-     *
-     * @param string $hex_color Hex color code.
-     * @return array RGB values (0-1).
-     */
-    private function hex_to_rgb($hex_color) {
-        $hex = ltrim($hex_color, '#');
-
-        return [
-            'r' => hexdec(substr($hex, 0, 2)) / 255,
-            'g' => hexdec(substr($hex, 2, 2)) / 255,
-            'b' => hexdec(substr($hex, 4, 2)) / 255,
-        ];
-    }
-
-    /**
      * Convert RGB to XYZ color space
      *
      * @param array $rgb RGB values (0-1).
      * @return array XYZ values.
+     * @since 1.0.0
      */
-    private function rgb_to_xyz($rgb) {
+    private function rgb_to_xyz(array $rgb): array {
         // Convert RGB to linear RGB
         foreach ($rgb as &$val) {
             $val = ($val > 0.04045)
@@ -94,8 +184,9 @@ class Color_Utility {
      *
      * @param array $xyz XYZ values.
      * @return array Lab values.
+     * @since 1.0.0
      */
-    private function xyz_to_lab($xyz) {
+    private function xyz_to_lab(array $xyz): array {
         // D65 reference white
         $ref_x = 0.95047;
         $ref_y = 1.00000;
@@ -123,8 +214,9 @@ class Color_Utility {
      *
      * @param array $colors Array of hex colors.
      * @return bool True if colors are visually distinct.
+     * @since 1.0.0
      */
-    public function are_colors_distinct($colors) {
+    public function are_colors_distinct(array $colors): bool {
         // Minimum perceptual difference threshold
         $min_difference = 25;
 
@@ -149,8 +241,9 @@ class Color_Utility {
      *
      * @param array $colors Array of hex colors.
      * @return float Distinctiveness score (0-100).
+     * @since 1.0.0
      */
-    public function get_distinctiveness_score($colors) {
+    public function get_distinctiveness_score(array $colors): float {
         $differences = [];
 
         foreach ($colors as $i => $color1) {

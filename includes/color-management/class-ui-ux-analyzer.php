@@ -1,10 +1,31 @@
 <?php
 /**
  * UI/UX Color Analyzer Class
+ *
+ * Analyzes colors in the context of user interface and user experience design.
+ * Provides insights into readability, accessibility, interface design
+ * recommendations, and user interaction considerations.
+ *
+ * @package GL_Color_Palette_Generator
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ */
+
+namespace GL_Color_Palette_Generator\Color_Management;
+
+/**
+ * Class UI_UX_Analyzer
+ *
+ * Analyzes colors for UI/UX design considerations
  */
 class UI_UX_Analyzer {
     /**
      * Analyze readability metrics
+     *
+     * @param string $color The color to analyze
+     * @return array Analysis results including text size compatibility,
+     * background contrast, viewing conditions, and device
+     * considerations
      */
     public function analyze_readability($color) {
         return [
@@ -17,6 +38,10 @@ class UI_UX_Analyzer {
 
     /**
      * Get interface recommendations
+     *
+     * @param string $color The color to analyze
+     * @return array Interface design recommendations including primary actions,
+     * secondary elements, navigation elements, and feedback states
      */
     public function get_interface_recommendations($color) {
         return [
@@ -29,6 +54,10 @@ class UI_UX_Analyzer {
 
     /**
      * Analyze mobile display considerations
+     *
+     * @param string $color The color to analyze
+     * @return array Mobile display analysis results including touch target
+     * visibility, outdoor visibility, battery impact, and responsive behavior
      */
     public function analyze_mobile_display($color) {
         return [
@@ -41,6 +70,10 @@ class UI_UX_Analyzer {
 
     /**
      * Suggest dark mode variants
+     *
+     * @param string $color The color to analyze
+     * @return array Dark mode variant suggestions including dark mode equivalent,
+     * contrast adjustments, brightness mapping, and system integration
      */
     public function suggest_dark_mode_variants($color) {
         return [
@@ -55,6 +88,9 @@ class UI_UX_Analyzer {
 
     /**
      * Analyze text size compatibility
+     *
+     * @param string $color The color to analyze
+     * @return array Text size compatibility analysis results
      */
     private function analyze_text_size_compatibility($color) {
         $background_colors = $this->generate_background_colors();
@@ -77,6 +113,9 @@ class UI_UX_Analyzer {
 
     /**
      * Analyze background combinations
+     *
+     * @param string $color The color to analyze
+     * @return array Background combination analysis results
      */
     private function analyze_background_combinations($color) {
         $backgrounds = $this->generate_background_variations($color);
