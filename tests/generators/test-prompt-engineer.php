@@ -10,13 +10,13 @@ use WP_Mock\Tools\TestCase;
 class Test_Prompt_Engineer extends TestCase {
     private Prompt_Engineer $prompt_engineer;
 
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
         $this->prompt_engineer = new Prompt_Engineer();
     }
 
-    public function tearDown(): void {
+    protected function tearDown(): void {
         WP_Mock::tearDown();
         parent::tearDown();
     }

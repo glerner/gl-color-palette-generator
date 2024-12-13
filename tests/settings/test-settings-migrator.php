@@ -8,12 +8,12 @@ use WP_Mock;
 use WP_Mock\Tools\TestCase;
 
 class Test_Settings_Migrator extends TestCase {
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
     }
 
-    public function tearDown(): void {
+    protected function tearDown(): void {
         WP_Mock::tearDown();
         parent::tearDown();
     }

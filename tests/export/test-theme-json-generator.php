@@ -10,7 +10,7 @@ class Test_Theme_Json_Generator extends WP_UnitTestCase {
     private $generator;
     private $temp_dir;
 
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
         $contrast_checker = new ContrastChecker();
         $this->generator = new ThemeJsonGenerator($contrast_checker);
@@ -18,7 +18,7 @@ class Test_Theme_Json_Generator extends WP_UnitTestCase {
         mkdir($this->temp_dir);
     }
 
-    public function tearDown(): void {
+    protected function tearDown(): void {
         // Clean up temporary files
         $this->removeDirectory($this->temp_dir);
         parent::tearDown();

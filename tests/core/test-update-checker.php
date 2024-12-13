@@ -18,7 +18,7 @@ class Test_Update_Checker extends \WP_Mock\Tools\TestCase {
     private $plugin_file = '/path/to/plugin.php';
     private $plugin_slug = 'test-plugin/test-plugin.php';
 
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
 
@@ -29,7 +29,7 @@ class Test_Update_Checker extends \WP_Mock\Tools\TestCase {
         );
     }
 
-    public function tearDown(): void {
+    protected function tearDown(): void {
         WP_Mock::tearDown();
         Mockery::close();
         parent::tearDown();

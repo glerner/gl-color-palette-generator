@@ -13,13 +13,12 @@ use WP_Mock;
 use Mockery;
 
 class Test_Assets extends \WP_Mock\Tools\TestCase {
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
-        Assets::init();
     }
 
-    public function tearDown(): void {
+    protected function tearDown(): void {
         WP_Mock::tearDown();
         Mockery::close();
         parent::tearDown();

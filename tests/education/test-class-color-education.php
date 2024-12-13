@@ -8,8 +8,9 @@ use WP_UnitTestCase;
 class Test_Color_Education extends WP_UnitTestCase {
     private $education;
 
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
+        WP_Mock::setUp();
         $this->education = new ColorEducation();
     }
 

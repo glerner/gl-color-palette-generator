@@ -12,8 +12,9 @@ class Test_Azure_OpenAI_Integration extends Test_Provider_Integration {
         ];
     }
 
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
+        WP_Mock::setUp();
         $this->maybe_skip_test();
         $this->provider = new Azure_OpenAI_Provider($this->get_test_credentials());
     }

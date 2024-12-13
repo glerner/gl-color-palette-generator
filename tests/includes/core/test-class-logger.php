@@ -34,7 +34,7 @@ class Test_Logger extends WP_UnitTestCase {
     /**
      * Set up test environment
      */
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
         $this->test_log_file = GL_CPG_PLUGIN_DIR . 'logs/test.log';
         $this->logger = new Logger($this->test_log_file);
@@ -43,7 +43,7 @@ class Test_Logger extends WP_UnitTestCase {
     /**
      * Clean up test environment
      */
-    public function tearDown(): void {
+    protected function tearDown(): void {
         if (file_exists($this->test_log_file)) {
             unlink($this->test_log_file);
         }

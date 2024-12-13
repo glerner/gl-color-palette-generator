@@ -1,28 +1,41 @@
-<?php
-namespace GL_Color_Palette_Generator\Tests\Providers;
+<?php declare(strict_types=1);
 
+/**
+ * Azure OpenAI Provider Tests
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests
+ */
+
+namespace GL_Color_Palette_Generator\Tests;
+
+use GL_Color_Palette_Generator\Providers\Provider;
 use GL_Color_Palette_Generator\Providers\Azure_OpenAI_Provider;
-use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
+use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
 use WP_Mock;
 
+/**
+ * Azure OpenAI Provider test case
+ */
 class Test_Azure_OpenAI_Provider extends Test_Provider_Mock {
-    protected function get_test_credentials(): array {
-        return [
-            'api_key' => 'test_key',
-            'endpoint' => 'https://test-endpoint.openai.azure.com',
-            'deployment' => 'test-deployment'
-        ];
-    }
-
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
+        
         $this->provider = new Azure_OpenAI_Provider($this->get_test_credentials());
     }
 
-    public function tearDown(): void {
+    protected function tearDown(): void {
         WP_Mock::tearDown();
         parent::tearDown();
+    }
+
+    protected function get_test_credentials(): array {
+        return [
+            'api_key' => 'test_key_123',
+            'endpoint' => 'https://test.openai.azure.com',
+            'deployment' => 'test-deployment'
+        ];
     }
 
     public function test_validate_credentials() {

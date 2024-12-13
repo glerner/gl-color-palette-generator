@@ -8,8 +8,9 @@ class Test_Ajax_Handler extends WP_UnitTestCase {
     private $ajax_handler;
     private $user_id;
 
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
+        WP_Mock::setUp();
 
         $this->ajax_handler = new Ajax_Handler();
 
@@ -20,7 +21,8 @@ class Test_Ajax_Handler extends WP_UnitTestCase {
         wp_set_current_user($this->user_id);
     }
 
-    public function tearDown(): void {
+    protected function tearDown(): void {
+        WP_Mock::tearDown();
         parent::tearDown();
         wp_delete_user($this->user_id);
     }

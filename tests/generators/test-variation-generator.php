@@ -10,13 +10,13 @@ use WP_Mock\Tools\TestCase;
 class Test_Variation_Generator extends TestCase {
     private Variation_Generator $variation_generator;
 
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
         $this->variation_generator = new Variation_Generator();
     }
 
-    public function tearDown(): void {
+    protected function tearDown(): void {
         WP_Mock::tearDown();
         parent::tearDown();
     }

@@ -1,24 +1,40 @@
-<?php
-namespace GL_Color_Palette_Generator\Tests\Providers;
+<?php declare(strict_types=1);
 
+/**
+ * Anthropic Provider Tests
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests
+ */
+
+namespace GL_Color_Palette_Generator\Tests;
+
+use GL_Color_Palette_Generator\Providers\Provider;
 use GL_Color_Palette_Generator\Providers\Anthropic_Provider;
-use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
+use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
 use WP_Mock;
 
+/**
+ * Anthropic Provider test case
+ */
 class Test_Anthropic_Provider extends Test_Provider_Mock {
-    protected function get_test_credentials(): array {
-        return ['api_key' => 'test_key'];
-    }
-
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
+        
         $this->provider = new Anthropic_Provider($this->get_test_credentials());
     }
 
-    public function tearDown(): void {
+    protected function tearDown(): void {
         WP_Mock::tearDown();
         parent::tearDown();
+    }
+
+    protected function get_test_credentials(): array {
+        return [
+            'api_key' => 'test_key_123',
+            'base_url' => 'https://api.anthropic.com/v1'
+        ];
     }
 
     public function test_validate_credentials() {

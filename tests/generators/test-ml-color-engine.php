@@ -10,13 +10,13 @@ use WP_Mock\Tools\TestCase;
 class Test_ML_Color_Engine extends TestCase {
     private ML_Color_Engine $ml_color_engine;
 
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
         $this->ml_color_engine = new ML_Color_Engine();
     }
 
-    public function tearDown(): void {
+    protected function tearDown(): void {
         WP_Mock::tearDown();
         parent::tearDown();
     }

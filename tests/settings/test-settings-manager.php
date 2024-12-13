@@ -12,13 +12,13 @@ use WP_Mock\Tools\TestCase;
 class Test_Settings_Manager extends TestCase {
     private Settings_Manager $settings_manager;
 
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
         $this->settings_manager = new Settings_Manager();
     }
 
-    public function tearDown(): void {
+    protected function tearDown(): void {
         WP_Mock::tearDown();
         parent::tearDown();
     }

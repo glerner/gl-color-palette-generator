@@ -50,7 +50,7 @@ class Test_Rate_Limiter extends WP_UnitTestCase {
     /**
      * Set up test environment
      */
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
         
         $this->logger = $this->createMock(Logger::class);
@@ -68,7 +68,7 @@ class Test_Rate_Limiter extends WP_UnitTestCase {
     /**
      * Clean up test environment
      */
-    public function tearDown(): void {
+    protected function tearDown(): void {
         $this->rate_limiter->reset($this->test_identifier);
         parent::tearDown();
     }

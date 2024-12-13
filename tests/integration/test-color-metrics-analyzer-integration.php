@@ -10,8 +10,9 @@ class Test_Color_Metrics_Analyzer_Integration extends WP_UnitTestCase {
     private $analyzer;
     private $color_utility;
 
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
+        WP_Mock::setUp();
         $this->analyzer = new Color_Metrics_Analyzer();
         $this->color_utility = new Color_Utility();
     }

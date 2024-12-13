@@ -35,7 +35,7 @@ class Test_Error_Handler extends WP_UnitTestCase {
     /**
      * Set up test environment
      */
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
         $this->logger = $this->createMock(Logger::class);
         $this->error_handler = new Error_Handler($this->logger);

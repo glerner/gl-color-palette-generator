@@ -14,13 +14,13 @@ use WP_Mock;
 class Test_Color_Converter extends \WP_Mock\Tools\TestCase {
     private $converter;
 
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
         $this->converter = new Color_Converter();
     }
 
-    public function tearDown(): void {
+    protected function tearDown(): void {
         WP_Mock::tearDown();
         parent::tearDown();
     }
