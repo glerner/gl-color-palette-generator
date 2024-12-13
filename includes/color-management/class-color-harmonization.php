@@ -34,21 +34,21 @@ class Color_Harmonization implements Color_Harmonizer_Interface {
      *
      * @var Color_Analyzer
      */
-    private Color_Analyzer $analyzer;
+    protected Color_Analyzer $analyzer;
 
     /**
      * Color utility instance
      *
      * @var Color_Utility
      */
-    private Color_Utility $utility;
+    protected Color_Utility $utility;
 
     /**
      * Settings manager instance
      *
      * @var Settings_Manager
      */
-    private Settings_Manager $settings;
+    protected Settings_Manager $settings;
 
     /**
      * Harmony rules and specifications

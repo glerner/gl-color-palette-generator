@@ -6,10 +6,10 @@ use GLColorPalette\Traits\Color_Shade_Generator_Trait;
 
 class ColorExporter {
     use Color_Shade_Generator_Trait;
-    private $formatter;
-    private $validator;
-    private $settings;
-    private $shade_generator;
+    protected $formatter;
+    protected $validator;
+    protected $settings;
+    protected $shade_generator;
 
     /**
      * Constructor

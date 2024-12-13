@@ -62,14 +62,14 @@ class Error_Handler {
      *
      * @var Logger
      */
-    private $logger;
+    protected $logger;
 
     /**
      * Last error details
      *
      * @var array|null
      */
-    private $last_error = null;
+    protected $last_error = null;
 
     /**
      * Constructor

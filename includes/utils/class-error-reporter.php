@@ -2,12 +2,16 @@
 namespace GLColorPalette;
 
 class ErrorReporter {
-    private $error_log = [];
-    private $error_levels = [
-        'info' => 0,
-        'warning' => 1,
-        'error' => 2,
-        'critical' => 3
+    protected $error_log = [];
+    protected $error_levels = [
+        'emergency' => 0,
+        'alert'     => 1,
+        'critical'  => 2,
+        'error'     => 3,
+        'warning'   => 4,
+        'notice'    => 5,
+        'info'      => 6,
+        'debug'     => 7
     ];
 
     /**

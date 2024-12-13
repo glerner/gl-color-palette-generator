@@ -39,14 +39,14 @@ class OpenAI_Provider extends AI_Provider_Base implements AI_Provider_Interface 
      *
      * @var string
      */
-    private string $api_url = 'https://api.openai.com/v1/';
+    protected string $api_url = 'https://api.openai.com/v1/';
 
     /**
      * API credentials
      *
      * @var array{api_key: string, organization?: string}
      */
-    private array $credentials;
+    protected array $credentials;
 
     /**
      * Constructor

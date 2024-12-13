@@ -32,14 +32,14 @@ class Advanced_Color_Analysis {
      *
      * @var Color_Utility
      */
-    private Color_Utility $color_utility;
+    protected Color_Utility $color_utility;
 
     /**
      * Accessibility checker instance
      *
      * @var Accessibility_Checker
      */
-    private Accessibility_Checker $accessibility_checker;
+    protected Accessibility_Checker $accessibility_checker;
 
     /**
      * Constructor

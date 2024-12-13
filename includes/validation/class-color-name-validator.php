@@ -8,7 +8,7 @@ namespace GLColorPalette\Validation;
  */
 class Color_Name_Validator {
     /** @var array Validation rules configuration */
-    private $rules = [
+    protected $rules = [
         'length' => [
             'min' => 3,
             'max' => 50
@@ -25,8 +25,8 @@ class Color_Name_Validator {
         ]
     ];
 
-    private $errors = [];
-    private $warnings = [];
+    protected $errors = [];
+    protected $warnings = [];
 
     /**
      * Validate a color name

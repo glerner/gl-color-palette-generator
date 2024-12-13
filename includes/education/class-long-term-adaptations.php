@@ -34,10 +34,10 @@ class LongTermAdaptations {
     ];
 
     /** @var array Adaptation monitor */
-    private $adaptation_monitor;
+    protected $adaptation_monitor;
 
     /** @var array Chronic exposure analyzer */
-    private $chronic_exposure_analyzer;
+    protected $chronic_exposure_analyzer;
 
     /**
      * Constructor

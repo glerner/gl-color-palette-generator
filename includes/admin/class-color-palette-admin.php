@@ -31,7 +31,7 @@ class Color_Palette_Admin {
      * @var Settings_Manager The settings manager object
      * @since 1.0.0
      */
-    private $settings;
+    protected $settings;
 
     /**
      * Initialize the admin

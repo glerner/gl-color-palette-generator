@@ -41,7 +41,7 @@ class Color_Validator {
      *
      * @var Logger
      */
-    private $logger;
+    protected $logger;
 
     /**
      * Constructor

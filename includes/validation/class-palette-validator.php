@@ -8,7 +8,7 @@ namespace GLColorPalette\Validation;
  */
 class Palette_Validator {
     /** @var array Validation rules and thresholds */
-    private $rules = [
+    protected $rules = [
         'min_colors' => 2,
         'max_colors' => 10,
         'min_contrast' => 4.5,
@@ -18,9 +18,9 @@ class Palette_Validator {
         'min_lightness_range' => 30
     ];
 
-    private $errors = [];
-    private $warnings = [];
-    private $suggestions = [];
+    protected $errors = [];
+    protected $warnings = [];
+    protected $suggestions = [];
 
     /**
      * Validate a color palette

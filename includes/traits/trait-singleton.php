@@ -3,7 +3,7 @@
 namespace GLColorPalette\Traits;
 
 trait Singleton {
-    private static $instance = null;
+    protected static $instance = null;
 
     public static function get_instance() {
         if (self::$instance === null) {

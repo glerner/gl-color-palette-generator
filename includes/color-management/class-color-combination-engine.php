@@ -18,21 +18,21 @@ class Color_Combination_Engine {
      *
      * @var Color_Analyzer
      */
-    private $color_analyzer;
+    protected $color_analyzer;
 
     /**
      * Harmony calculator instance
      *
      * @var Harmony_Calculator
      */
-    private $harmony_calculator;
+    protected $harmony_calculator;
 
     /**
      * Context evaluator instance
      *
      * @var Context_Evaluator
      */
-    private $context_evaluator;
+    protected $context_evaluator;
 
     /**
      * Advanced combination configurations

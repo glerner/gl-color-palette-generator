@@ -43,14 +43,14 @@ class Logger {
      *
      * @var string
      */
-    private $log_file;
+    protected $log_file;
 
     /**
      * Current minimum log level
      *
      * @var int
      */
-    private $min_level;
+    protected $min_level;
 
     /**
      * Constructor

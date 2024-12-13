@@ -26,7 +26,7 @@ class Color_Palette_Optimizer {
      * Analyzer instance
      * @var Color_Palette_Analyzer
      */
-    private $analyzer;
+    protected $analyzer;
 
     /**
      * Constructor

@@ -2,8 +2,8 @@
 namespace GL_Color_Palette_Generator\Generators;
 
 class ML_Color_Engine {
-    private $settings;
-    private $cache_duration = 3600; // 1 hour in seconds
+    protected $settings;
+    protected $cache_duration = 3600; // 1 hour in seconds
 
     public function __construct() {
         $this->settings = get_option('gl_color_palette_generator_settings', []);

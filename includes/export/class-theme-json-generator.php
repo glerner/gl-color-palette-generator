@@ -14,10 +14,10 @@ if (!defined('ABSPATH')) {
 }
 
 class ThemeJsonGenerator {
-    private $contrast_checker;
-    private $color_processor;
-    private $base_theme_json;
-    private $variation_generator;
+    protected $contrast_checker;
+    protected $color_processor;
+    protected $base_theme_json;
+    protected $variation_generator;
 
     /**
      * Constructor

@@ -8,7 +8,7 @@ namespace GLColorPalette;
  */
 class SettingsValidator {
     /** @var array Validation rules and constraints */
-    private $rules = [
+    protected $rules = [
         'naming_service' => [
             'type' => 'string',
             'required' => true,
@@ -41,8 +41,8 @@ class SettingsValidator {
         ]
     ];
 
-    private $errors = [];
-    private $warnings = [];
+    protected $errors = [];
+    protected $warnings = [];
 
     /**
      * Validate settings

@@ -2,8 +2,8 @@
 namespace GL_Color_Palette_Generator\Generators;
 
 class Name_Generator {
-    private $openai_api_key;
-    private $cache_duration = 2592000; // 30 days in seconds
+    protected $openai_api_key;
+    protected $cache_duration = 2592000; // 30 days in seconds
 
     public function __construct($openai_api_key = null) {
         $this->openai_api_key = $openai_api_key;

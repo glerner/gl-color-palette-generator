@@ -30,14 +30,14 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      *
      * @var Color_Utility
      */
-    private Color_Utility $utility;
+    protected Color_Utility $utility;
 
     /**
      * Color calculator instance
      *
      * @var Color_Calculator
      */
-    private Color_Calculator $calculator;
+    protected Color_Calculator $calculator;
 
     /**
      * Constructor

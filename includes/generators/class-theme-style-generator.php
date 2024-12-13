@@ -14,7 +14,7 @@ namespace GL_Color_Palette_Generator\Generators;
  * @since   1.0.0
  */
 class Theme_Style_Generator {
-    private $settings;
+    protected $settings;
 
     public function __construct() {
         $this->settings = get_option('gl_color_palette_generator_settings', []);

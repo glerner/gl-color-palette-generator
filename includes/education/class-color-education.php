@@ -208,13 +208,13 @@ class ColorEducation {
     ];
 
     /** @var array Learning progress tracker */
-    private $learning_tracker;
+    protected $learning_tracker;
 
     /** @var array Progress analyzer */
-    private $progress_analyzer;
+    protected $progress_analyzer;
 
     /** @var array User interaction manager */
-    private $interaction_manager;
+    protected $interaction_manager;
 
     /**
      * Constructor

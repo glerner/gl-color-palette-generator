@@ -2,10 +2,10 @@
 namespace GLColorPalette;
 
 class FileHandler {
-    private $base_theme;
-    private $upload_dir;
-    private $theme_path;
-    private $styles_path;
+    protected $base_theme;
+    protected $upload_dir;
+    protected $theme_path;
+    protected $styles_path;
 
     public function __construct($base_theme = 'twentytwentyfour') {
         $this->base_theme = $base_theme;
@@ -13,7 +13,7 @@ class FileHandler {
         $this->theme_path = get_theme_root() . '/' . $this->base_theme;
         $this->styles_path = $this->theme_path . '/styles';
 
-        / Create necessary directories
+        // Create necessary directories
         $this->init_directories();
     }
 
@@ -21,18 +21,18 @@ class FileHandler {
      * Initialize necessary directories
      */
     private function init_directories() {
-        / Create temporary working directory in uploads
+        // Create temporary working directory in uploads
         $temp_dir = $this->upload_dir['basedir'] . '/color-palette-temp';
         if (!file_exists($temp_dir)) {
             wp_mkdir_p($temp_dir);
         }
 
-        / Create styles directory if it doesn't exist
+        // Create styles directory if it doesn't exist
         if (!file_exists($this->styles_path)) {
             wp_mkdir_p($this->styles_path);
         }
 
-        / Add .htaccess to protect temp directory
+        // Add .htaccess to protect temp directory
         $htaccess = $temp_dir . '/.htaccess';
         if (!file_exists($htaccess)) {
             file_put_contents($htaccess, 'Deny from all');
@@ -46,13 +46,13 @@ class FileHandler {
         $theme_json_path = $this->theme_path . '/theme.json';
 
         try {
-            / Backup existing theme.json if it exists
+            // Backup existing theme.json if it exists
             if (file_exists($theme_json_path)) {
                 $backup_path = $theme_json_path . '.backup-' . date('Y-m-d-His');
                 copy($theme_json_path, $backup_path);
             }
 
-            / Save new theme.json
+            // Save new theme.json
             $result = file_put_contents(
                 $theme_json_path,
                 json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)

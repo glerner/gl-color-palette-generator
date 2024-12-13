@@ -47,14 +47,14 @@ class Rate_Limiter {
      *
      * @var Logger
      */
-    private $logger;
+    protected $logger;
 
     /**
      * Error handler instance
      *
      * @var Error_Handler
      */
-    private $error_handler;
+    protected $error_handler;
 
     /**
      * Rate limit window in seconds

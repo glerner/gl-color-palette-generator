@@ -8,12 +8,12 @@ use GLColorPalette\Traits\Color_Shade_Generator_Trait;
 class ColorExportSystem {
     use Color_Shade_Generator_Trait;
 
-    private $format_converter;
-    private $asset_generator;
-    private $batch_processor;
-    private $color_exporter;
-    private $palette_exporter;
-    private $shade_generator;
+    protected $format_converter;
+    protected $asset_generator;
+    protected $batch_processor;
+    protected $color_exporter;
+    protected $palette_exporter;
+    protected $shade_generator;
 
     /**
      * Export system configurations
