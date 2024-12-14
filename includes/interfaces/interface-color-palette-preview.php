@@ -1,104 +1,104 @@
-<?php declare(strict_types=1);
-
+<?php
 /**
  * Color Palette Preview Interface
  *
- * Defines the contract for generating previews of color palettes.
- *
  * @package GL_Color_Palette_Generator
  * @subpackage Interfaces
- * @since 1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Interfaces;
 
+use WP_Error;
+
 /**
- * Color Palette Preview Interface
- *
- * @since 1.0.0
+ * Interface for color palette previews
  */
 interface Color_Palette_Preview_Interface {
     /**
-     * Generates UI preview.
+     * Generate preview image
      *
-     * @param array $palette Palette to preview.
-     * @param array $options {
-     *     Optional. UI options.
-     *     @type string $template      UI template.
-     *     @type array  $components    UI components.
-     *     @type array  $interactions  Interactive features.
-     *     @type array  $metadata      Preview metadata.
-     * }
-     * @return array {
-     *     UI results.
-     *     @type string $preview       Preview content.
-     *     @type array  $components    Component data.
-     *     @type array  $assets        Required assets.
-     *     @type array  $metadata      Preview metadata.
-     * }
+     * @param array  $colors Array of hex colors
+     * @param string $format Output format ('png', 'jpg', 'svg')
+     * @param array  $options Preview options
+     * @return string|WP_Error Preview image data URI or error
      */
-    public function generate_ui_preview(array $palette, array $options = []): array;
+    public function generate_preview($colors, $format = 'png', $options = []);
 
     /**
-     * Generates design preview.
+     * Generate preview HTML
      *
-     * @param array $palette Palette to preview.
-     * @param array $options {
-     *     Optional. Design options.
-     *     @type string $template      Design template.
-     *     @type array  $elements      Design elements.
-     *     @type array  $styles        Design styles.
-     *     @type array  $metadata      Preview metadata.
-     * }
-     * @return array {
-     *     Design results.
-     *     @type string $preview       Preview content.
-     *     @type array  $elements      Element data.
-     *     @type array  $assets        Required assets.
-     *     @type array  $metadata      Preview metadata.
-     * }
+     * @param array $colors Array of hex colors
+     * @param array $options Preview options
+     * @return string|WP_Error Preview HTML or error
      */
-    public function generate_design_preview(array $palette, array $options = []): array;
+    public function generate_html($colors, $options = []);
 
     /**
-     * Generates code preview.
+     * Generate preview CSS
      *
-     * @param array $palette Palette to preview.
-     * @param array $options {
-     *     Optional. Code options.
-     *     @type string $language      Code language.
-     *     @type array  $format        Code format.
-     *     @type array  $syntax        Syntax options.
-     *     @type array  $metadata      Preview metadata.
-     * }
-     * @return array {
-     *     Code results.
-     *     @type string $preview       Preview content.
-     *     @type array  $syntax        Syntax data.
-     *     @type array  $assets        Required assets.
-     *     @type array  $metadata      Preview metadata.
-     * }
+     * @param array $colors Array of hex colors
+     * @param array $options Preview options
+     * @return string|WP_Error Preview CSS or error
      */
-    public function generate_code_preview(array $palette, array $options = []): array;
+    public function generate_css($colors, $options = []);
 
     /**
-     * Generates mockup preview.
+     * Generate preview for specific context
      *
-     * @param array $palette Palette to preview.
-     * @param array $options {
-     *     Optional. Mockup options.
-     *     @type string $template      Mockup template.
-     *     @type array  $context       Mockup context.
-     *     @type array  $devices       Device options.
-     *     @type array  $metadata      Preview metadata.
-     * }
-     * @return array {
-     *     Mockup results.
-     *     @type string $preview       Preview content.
-     *     @type array  $context       Context data.
-     *     @type array  $assets        Required assets.
-     *     @type array  $metadata      Preview metadata.
-     * }
+     * @param array  $colors Array of hex colors
+     * @param string $context Preview context ('website', 'branding', 'print')
+     * @param array  $options Preview options
+     * @return string|WP_Error Preview data or error
      */
-    public function generate_mockup_preview(array $palette, array $options = []): array;
-} 
+    public function generate_context_preview($colors, $context, $options = []);
+
+    /**
+     * Get preview templates
+     *
+     * @return array List of available preview templates
+     */
+    public function get_templates();
+
+    /**
+     * Apply preview template
+     *
+     * @param array  $colors Array of hex colors
+     * @param string $template_id Template identifier
+     * @param array  $options Template options
+     * @return string|WP_Error Preview data or error
+     */
+    public function apply_template($colors, $template_id, $options = []);
+
+    /**
+     * Generate color swatches
+     *
+     * @param array $colors Array of hex colors
+     * @param array $options Swatch options
+     * @return string|WP_Error Swatch HTML or error
+     */
+    public function generate_swatches($colors, $options = []);
+
+    /**
+     * Generate color information
+     *
+     * @param array $colors Array of hex colors
+     * @param array $options Information options
+     * @return array|WP_Error Color information or error
+     */
+    public function generate_info($colors, $options = []);
+
+    /**
+     * Check if preview format is supported
+     *
+     * @param string $format Format to check
+     * @return bool True if format is supported
+     */
+    public function is_format_supported($format);
+
+    /**
+     * Get supported preview formats
+     *
+     * @return array List of supported formats
+     */
+    public function get_supported_formats();
+}

@@ -1,15 +1,27 @@
 <?php
+/**
+ * Tests for Color Palette Cache Interface
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Interfaces
+ */
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
-use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\ColorPaletteCache;
+use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Cache;
 
-class ColorPaletteCacheTest extends TestCase {
+/**
+ * Test Color Palette Cache Interface implementation
+ */
+class Test_Color_Palette_Cache extends Test_Case {
+    /** @var Color_Palette_Cache */
     private $cache;
 
     public function setUp(): void {
-        $this->cache = $this->createMock(ColorPaletteCache::class);
+        parent::setUp();
+        $this->cache = $this->getMockBuilder(Color_Palette_Cache::class)
+                           ->getMockForAbstractClass();
     }
 
     public function test_store_caches_palette_data(): void {

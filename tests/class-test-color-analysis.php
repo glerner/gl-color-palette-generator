@@ -1,10 +1,19 @@
 <?php
+/**
+ * Tests for Color Analysis functionality
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests
+ */
 
 namespace GL_Color_Palette_Generator\Tests;
 
 use GL_Color_Palette_Generator\Color_Analysis;
 use WP_UnitTestCase;
 
+/**
+ * Test Color Analysis functionality
+ */
 class Test_Color_Analysis extends WP_UnitTestCase {
     private $analyzer;
     private $test_colors;
@@ -122,5 +131,22 @@ class Test_Color_Analysis extends WP_UnitTestCase {
 
         // Test mixed temperature balance
         $this->assertEquals('mixed', $temp['balance']);
+    }
+
+    public function test_analyze_color_contrast() {
+        $color1 = '#FFFFFF';  // White
+        $color2 = '#000000';  // Black
+        
+        $contrast = $this->analyzer->analyze_color_contrast($color1, $color2);
+        $this->assertEquals(21, $contrast);
+    }
+
+    public function test_analyze_color_harmony() {
+        $colors = ['#FF0000', '#00FF00', '#0000FF'];
+        
+        $harmony = $this->analyzer->analyze_color_harmony($colors);
+        $this->assertIsArray($harmony);
+        $this->assertArrayHasKey('complementary', $harmony);
+        $this->assertArrayHasKey('analogous', $harmony);
     }
 } 

@@ -1,130 +1,161 @@
 <?php
-
-namespace GLColorPalette\Interfaces;
-
 /**
  * Color Palette Manager Interface
  *
- * Defines the contract for managing collections of color palettes.
- *
- * @package GLColorPalette
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
- * @since   1.0.0
+ * @package GL_Color_Palette_Generator
+ * @subpackage Interfaces
  */
-interface ColorPaletteManager {
+
+namespace GL_Color_Palette_Generator\Interfaces;
+
+use WP_Error;
+
+/**
+ * Interface for color palette management
+ */
+interface Color_Palette_Manager_Interface {
     /**
-     * Creates new palette.
+     * Create a new palette
      *
-     * @param array $palette Palette data.
-     * @param array $options {
-     *     Optional. Creation options.
-     *     @type array  $validation    Validation rules.
-     *     @type array  $defaults      Default values.
-     *     @type array  $metadata      Creation metadata.
-     * }
-     * @return array {
-     *     Creation results.
-     *     @type array  $palette       Created palette.
-     *     @type array  $validation    Validation results.
-     *     @type array  $metadata      Creation metadata.
-     * }
+     * @param array $colors Array of hex colors
+     * @param array $options Palette options
+     * @return int|WP_Error Palette ID or error
      */
-    public function create_palette(array $palette, array $options = []): array;
+    public function create_palette($colors, $options = []);
 
     /**
-     * Updates existing palette.
+     * Update an existing palette
      *
-     * @param string $id Palette identifier.
-     * @param array $updates Update data.
-     * @param array $options {
-     *     Optional. Update options.
-     *     @type array  $validation    Validation rules.
-     *     @type array  $merge         Merge strategy.
-     *     @type array  $metadata      Update metadata.
-     * }
-     * @return array {
-     *     Update results.
-     *     @type array  $palette       Updated palette.
-     *     @type array  $changes       Applied changes.
-     *     @type array  $metadata      Update metadata.
-     * }
+     * @param int   $palette_id Palette ID
+     * @param array $colors Array of hex colors
+     * @param array $options Palette options
+     * @return bool|WP_Error True on success or error
      */
-    public function update_palette(string $id, array $updates, array $options = []): array;
+    public function update_palette($palette_id, $colors, $options = []);
 
     /**
-     * Deletes palette.
+     * Delete a palette
      *
-     * @param string $id Palette identifier.
-     * @param array $options {
-     *     Optional. Deletion options.
-     *     @type bool   $force         Force deletion.
-     *     @type array  $backup        Backup options.
-     *     @type array  $metadata      Deletion metadata.
-     * }
-     * @return array {
-     *     Deletion results.
-     *     @type bool   $success       Deletion status.
-     *     @type array  $backup        Backup data.
-     *     @type array  $metadata      Deletion metadata.
-     * }
+     * @param int $palette_id Palette ID
+     * @return bool|WP_Error True on success or error
      */
-    public function delete_palette(string $id, array $options = []): array;
+    public function delete_palette($palette_id);
 
     /**
-     * Lists palettes.
+     * Get a palette by ID
      *
-     * @param array $filters Filter criteria.
-     * @param array $options {
-     *     Optional. List options.
-     *     @type array  $pagination    Page options.
-     *     @type array  $sorting       Sort options.
-     *     @type array  $metadata      List metadata.
-     * }
-     * @return array {
-     *     List results.
-     *     @type array  $palettes      Found palettes.
-     *     @type array  $pagination    Page details.
-     *     @type array  $metadata      List metadata.
-     * }
+     * @param int $palette_id Palette ID
+     * @return array|WP_Error Palette data or error
      */
-    public function list_palettes(array $filters = [], array $options = []): array;
+    public function get_palette($palette_id);
 
     /**
-     * Gets palette by ID.
+     * Get all palettes
      *
-     * @param string $id Palette identifier.
-     * @param array $options {
-     *     Optional. Retrieval options.
-     *     @type array  $fields        Field selection.
-     *     @type array  $relations     Related data.
-     *     @type array  $metadata      Retrieval metadata.
-     * }
-     * @return array {
-     *     Retrieval results.
-     *     @type array  $palette       Found palette.
-     *     @type array  $relations     Related data.
-     *     @type array  $metadata      Retrieval metadata.
-     * }
+     * @param array $args Query arguments
+     * @return array|WP_Error Array of palettes or error
      */
-    public function get_palette(string $id, array $options = []): array;
+    public function get_palettes($args = []);
 
     /**
-     * Searches palettes.
+     * Search palettes
      *
-     * @param array $criteria Search criteria.
-     * @param array $options {
-     *     Optional. Search options.
-     *     @type array  $pagination    Page options.
-     *     @type array  $sorting       Sort options.
-     *     @type array  $metadata      Search metadata.
-     * }
-     * @return array {
-     *     Search results.
-     *     @type array  $palettes      Found palettes.
-     *     @type array  $pagination    Page details.
-     *     @type array  $metadata      Search metadata.
-     * }
+     * @param string $query Search query
+     * @param array  $args Search arguments
+     * @return array|WP_Error Array of matching palettes or error
      */
-    public function search_palettes(array $criteria, array $options = []): array;
-} 
+    public function search_palettes($query, $args = []);
+
+    /**
+     * Add color to palette
+     *
+     * @param int    $palette_id Palette ID
+     * @param string $color Color in hex format
+     * @param array  $options Color options
+     * @return bool|WP_Error True on success or error
+     */
+    public function add_color($palette_id, $color, $options = []);
+
+    /**
+     * Remove color from palette
+     *
+     * @param int    $palette_id Palette ID
+     * @param string $color Color in hex format
+     * @return bool|WP_Error True on success or error
+     */
+    public function remove_color($palette_id, $color);
+
+    /**
+     * Update color in palette
+     *
+     * @param int    $palette_id Palette ID
+     * @param string $old_color Old color in hex format
+     * @param string $new_color New color in hex format
+     * @param array  $options Color options
+     * @return bool|WP_Error True on success or error
+     */
+    public function update_color($palette_id, $old_color, $new_color, $options = []);
+
+    /**
+     * Reorder colors in palette
+     *
+     * @param int   $palette_id Palette ID
+     * @param array $order New color order
+     * @return bool|WP_Error True on success or error
+     */
+    public function reorder_colors($palette_id, $order);
+
+    /**
+     * Get palette metadata
+     *
+     * @param int    $palette_id Palette ID
+     * @param string $key Optional metadata key
+     * @return mixed|WP_Error Metadata value(s) or error
+     */
+    public function get_metadata($palette_id, $key = '');
+
+    /**
+     * Update palette metadata
+     *
+     * @param int    $palette_id Palette ID
+     * @param string $key Metadata key
+     * @param mixed  $value Metadata value
+     * @return bool|WP_Error True on success or error
+     */
+    public function update_metadata($palette_id, $key, $value);
+
+    /**
+     * Delete palette metadata
+     *
+     * @param int    $palette_id Palette ID
+     * @param string $key Metadata key
+     * @return bool|WP_Error True on success or error
+     */
+    public function delete_metadata($palette_id, $key);
+
+    /**
+     * Export palette
+     *
+     * @param int    $palette_id Palette ID
+     * @param string $format Export format
+     * @return string|WP_Error Export data or error
+     */
+    public function export_palette($palette_id, $format = 'json');
+
+    /**
+     * Import palette
+     *
+     * @param string $data Import data
+     * @param string $format Import format
+     * @return int|WP_Error Palette ID or error
+     */
+    public function import_palette($data, $format = 'json');
+
+    /**
+     * Get palette statistics
+     *
+     * @param int $palette_id Optional palette ID
+     * @return array|WP_Error Statistics data or error
+     */
+    public function get_statistics($palette_id = 0);
+}

@@ -14,14 +14,14 @@
 namespace GL_Color_Palette_Generator\Abstracts;
 
 /**
- * Abstract class BaseColorProcessor
+ * Abstract class Color_Processor
  *
  * Defines the core structure for color processing and validation operations.
  * Supports multiple color spaces and provides palette management functionality.
  *
  * @since 1.0.0
  */
-abstract class BaseColorProcessor {
+abstract class Color_Processor {
     /**
      * List of supported color spaces
      *

@@ -1,11 +1,40 @@
 <?php
-namespace GLColorPalette;
+/**
+ * Neurological Responses Class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage AI_ML\Strategies
+ */
 
-class NeurologicalResponses {
+namespace GL_Color_Palette_Generator\AI_ML\Strategies;
+
+use WP_Error;
+
+/**
+ * Class Neurological_Responses
+ *
+ * Analyzes neurological responses to colors
+ *
+ * @since 1.0.0
+ */
+class Neurological_Responses {
+    /**
+     * Brain activity analyzer instance
+     *
+     * @var object
+     */
     private $brain_activity_analyzer;
+
+    /**
+     * Neural pattern mapper instance
+     *
+     * @var object
+     */
     private $neural_pattern_mapper;
 
-    / Comprehensive neurological response mapping
+    /**
+     * Comprehensive neurological response mapping
+     */
     private const NEUROLOGICAL_RESPONSES = [
         'visual_processing' => [
             'primary_visual_cortex' => [

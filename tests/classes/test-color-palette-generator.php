@@ -2,25 +2,32 @@
 /**
  * Color Palette Generator Tests
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Classes
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
 
-namespace GLColorPalette\Tests;
+namespace GL_Color_Palette_Generator\Tests\Classes;
 
-use PHPUnit\Framework\TestCase;
-use GLColorPalette\ColorPaletteGenerator;
-use GLColorPalette\ColorPaletteFormatter;
+use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Classes\Color_Palette_Generator;
+use GL_Color_Palette_Generator\Classes\Color_Palette_Formatter;
 
-class ColorPaletteGeneratorTest extends TestCase {
-    private ColorPaletteGenerator $generator;
-    private ColorPaletteFormatter $formatter;
+/**
+ * Tests for the Color Palette Generator class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Classes
+ */
+class Test_Color_Palette_Generator extends Test_Case {
+    private Color_Palette_Generator $generator;
+    private Color_Palette_Formatter $formatter;
 
     public function setUp(): void {
-        $this->formatter = new ColorPaletteFormatter();
-        $this->generator = new ColorPaletteGenerator($this->formatter);
+        $this->formatter = new Color_Palette_Formatter();
+        $this->generator = new Color_Palette_Generator($this->formatter);
     }
 
     public function test_generate_palette_default(): void {

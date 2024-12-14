@@ -14,7 +14,7 @@ namespace GL_Color_Palette_Generator\Exceptions;
 /**
  * Exception thrown when palette generation fails
  */
-class PaletteGenerationException extends \Exception {
+class Palette_Generation_Exception extends \Exception {
     /**
      * Constructor
      *

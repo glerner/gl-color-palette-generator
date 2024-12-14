@@ -1,162 +1,74 @@
 <?php
-namespace GLColorPalette;
+/**
+ * Personality Matching Class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage AI_ML\Analysis
+ */
 
-class PersonalityMatching {
+namespace GL_Color_Palette_Generator\AI_ML\Analysis;
+
+use WP_Error;
+
+/**
+ * Class Personality_Matching
+ *
+ * Handles matching colors to personality traits and preferences
+ *
+ * @since 1.0.0
+ */
+class Personality_Matching {
+    /**
+     * Personality analyzer instance
+     *
+     * @var object
+     */
     private $personality_analyzer;
+
+    /**
+     * Preference calculator instance
+     *
+     * @var object
+     */
     private $preference_calculator;
+
+    /**
+     * Context evaluator instance
+     *
+     * @var object
+     */
     private $context_evaluator;
 
-    / Comprehensive personality-color mapping
-    private const PERSONALITY_COLOR_MAPPING = [
-        'personality_dimensions' => [
-            'openness' => [
-                'high' => [
-                    'primary_colors' => [
-                        'purple' => [
-                            'traits' => ['creativity', 'imagination', 'curiosity'],
-                            'variations' => [
-                                'deep_purple' => ['intellectual_depth', 'artistic_appreciation'],
-                                'bright_purple' => ['innovation', 'experimentation'],
-                                'soft_purple' => ['intuition', 'sensitivity']
-                            ],
-                            'combinations' => [
-                                'creative' => ['purple', 'blue', 'teal'],
-                                'artistic' => ['purple', 'gold', 'deep_blue'],
-                                'experimental' => ['purple', 'orange', 'chartreuse']
-                            ]
-                        ],
-                        'teal' => [
-                            'traits' => ['unconventional', 'progressive', 'explorative'],
-                            'applications' => ['creative_spaces', 'learning_environments']
-                        ]
-                    ],
-                    'color_characteristics' => [
-                        'complexity' => 'high',
-                        'uniqueness' => 'preferred',
-                        'harmony_type' => 'experimental'
-                    ]
-                ],
-                'low' => [
-                    'primary_colors' => [
-                        'brown' => [
-                            'traits' => ['traditional', 'practical', 'grounded'],
-                            'variations' => [
-                                'warm_brown' => ['comfort', 'reliability'],
-                                'dark_brown' => ['stability', 'convention']
-                            ]
-                        ]
-                    ],
-                    'color_characteristics' => [
-                        'complexity' => 'low',
-                        'uniqueness' => 'avoided',
-                        'harmony_type' => 'traditional'
-                    ]
-                ]
-            ],
-
-            'conscientiousness' => [
-                'high' => [
-                    'primary_colors' => [
-                        'navy_blue' => [
-                            'traits' => ['organization', 'efficiency', 'reliability'],
-                            'variations' => [
-                                'deep_navy' => ['authority', 'competence'],
-                                'structured_blue' => ['order', 'precision']
-                            ],
-                            'applications' => ['work_spaces', 'productivity_tools']
-                        ],
-                        'gray' => [
-                            'traits' => ['methodical', 'structured', 'disciplined'],
-                            'variations' => [
-                                'charcoal' => ['professionalism', 'focus'],
-                                'silver' => ['refinement', 'attention_to_detail']
-                            ]
-                        ]
-                    ],
-                    'color_characteristics' => [
-                        'organization' => 'structured',
-                        'precision' => 'high',
-                        'harmony_type' => 'systematic'
-                    ]
-                ]
-            ],
-
-            'extraversion' => [
-                'high' => [
-                    'primary_colors' => [
-                        'orange' => [
-                            'traits' => ['sociability', 'energy', 'enthusiasm'],
-                            'variations' => [
-                                'bright_orange' => ['excitement', 'stimulation'],
-                                'coral' => ['warmth', 'friendliness']
-                            ],
-                            'social_contexts' => [
-                                'gathering_spaces' => ['vibrancy' => 'high', 'energy' => 'dynamic'],
-                                'communication_tools' => ['engagement' => 'active', 'interaction' => 'encouraged']
-                            ]
-                        ],
-                        'yellow' => [
-                            'traits' => ['optimism', 'expressiveness', 'outgoing'],
-                            'applications' => ['social_spaces', 'entertainment_venues']
-                        ]
-                    ],
-                    'color_characteristics' => [
-                        'brightness' => 'high',
-                        'energy' => 'vibrant',
-                        'harmony_type' => 'dynamic'
-                    ]
-                ]
-            ],
-
-            'agreeableness' => [
-                'high' => [
-                    'primary_colors' => [
-                        'green' => [
-                            'traits' => ['harmony', 'compassion', 'cooperation'],
-                            'variations' => [
-                                'sage' => ['nurturing', 'balance'],
-                                'mint' => ['freshness', 'approachability']
-                            ],
-                            'relationship_contexts' => [
-                                'collaborative_spaces' => ['harmony' => 'emphasized', 'comfort' => 'priority'],
-                                'healing_environments' => ['peace' => 'central', 'support' => 'evident']
-                            ]
-                        ]
-                    ]
-                ]
-            ],
-
-            'emotional_stability' => [
-                'high' => [
-                    'primary_colors' => [
-                        'blue' => [
-                            'traits' => ['calmness', 'stability', 'resilience'],
-                            'variations' => [
-                                'sky_blue' => ['serenity', 'clarity'],
-                                'deep_blue' => ['depth', 'confidence']
-                            ],
-                            'emotional_contexts' => [
-                                'personal_spaces' => ['tranquility' => 'primary', 'balance' => 'key'],
-                                'professional_environments' => ['stability' => 'emphasized', 'trust' => 'conveyed']
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+    /**
+     * Personality color mappings
+     *
+     * @var array
+     */
+    private const PERSONALITY_MAPPINGS = [
+        'openness' => [
+            'high' => ['blue', 'purple', 'turquoise'],
+            'moderate' => ['green', 'yellow', 'orange'],
+            'low' => ['brown', 'gray', 'black']
         ],
-
-        'interaction_patterns' => [
-            'color_combinations' => [
-                'social_confidence' => ['orange', 'blue', 'yellow'],
-                'creative_focus' => ['purple', 'gray', 'teal'],
-                'balanced_energy' => ['green', 'coral', 'navy'],
-                'structured_innovation' => ['blue', 'purple', 'silver']
-            ],
-            'environmental_adaptations' => [
-                'work' => ['productivity' => 'primary', 'creativity' => 'secondary'],
-                'social' => ['engagement' => 'primary', 'comfort' => 'secondary'],
-                'personal' => ['reflection' => 'primary', 'expression' => 'secondary']
-            ]
+        'conscientiousness' => [
+            'high' => ['navy', 'gray', 'black'],
+            'moderate' => ['blue', 'brown', 'green'],
+            'low' => ['red', 'orange', 'yellow']
+        ],
+        'extraversion' => [
+            'high' => ['red', 'orange', 'yellow'],
+            'moderate' => ['green', 'purple', 'pink'],
+            'low' => ['blue', 'gray', 'brown']
+        ],
+        'agreeableness' => [
+            'high' => ['pink', 'peach', 'light_blue'],
+            'moderate' => ['green', 'yellow', 'lavender'],
+            'low' => ['red', 'black', 'dark_gray']
+        ],
+        'neuroticism' => [
+            'high' => ['gray', 'black', 'brown'],
+            'moderate' => ['blue', 'green', 'purple'],
+            'low' => ['yellow', 'orange', 'pink']
         ]
     ];
 

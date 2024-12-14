@@ -1,165 +1,174 @@
 <?php
-namespace GLColorPalette;
+/**
+ * Psychological Effects Class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage AI_ML\Strategies
+ */
 
-class PsychologicalEffects {
-    / Adding to the existing PSYCHOLOGICAL_EFFECTS constant
+namespace GL_Color_Palette_Generator\AI_ML\Strategies;
+
+use WP_Error;
+
+/**
+ * Class Psychological_Effects
+ *
+ * Analyzes and applies psychological effects of colors
+ *
+ * @since 1.0.0
+ */
+class Psychological_Effects {
+    /**
+     * Psychological effects mapping
+     *
+     * @var array
+     */
     private const PSYCHOLOGICAL_EFFECTS = [
         'cognitive_impacts' => [
-            / ... (previous effects remain) ...
-
+            'attention' => [
+                'red' => ['high_arousal', 'increased_focus'],
+                'blue' => ['improved_concentration', 'mental_clarity'],
+                'yellow' => ['enhanced_memory', 'mental_stimulation']
+            ],
+            'decision_making' => [
+                'green' => ['balanced_judgment', 'reduced_anxiety'],
+                'purple' => ['creative_thinking', 'intuitive_decisions'],
+                'brown' => ['practical_reasoning', 'grounded_choices']
+            ],
             'problem_solving' => [
-                'blue' => [
-                    'primary_effects' => [
-                        'analytical_thinking' => [
-                            'clarity' => [
-                                'mental_organization' => ['improved_structure', 'logical_flow'],
-                                'information_processing' => ['efficiency' => 'enhanced', 'accuracy' => 'increased']
-                            ],
-                            'strategic_thinking' => [
-                                'pattern_recognition' => ['accuracy' => '15-20%', 'speed' => 'improved'],
-                                'solution_generation' => ['quality' => 'enhanced', 'variety' => 'increased']
-                            ]
-                        ],
-                        'cognitive_endurance' => [
-                            'sustained_focus' => ['duration' => 'extended', 'quality' => 'maintained'],
-                            'mental_stamina' => ['resilience' => 'improved', 'recovery' => 'efficient']
-                        ]
-                    ],
-                    'applications' => [
-                        'work_environments' => ['analysis_centers', 'research_facilities'],
-                        'educational_settings' => ['study_areas', 'exam_rooms']
-                    ]
-                ]
-            ],
-
-            'spatial_awareness' => [
-                'green' => [
-                    'primary_effects' => [
-                        'depth_perception' => [
-                            'accuracy' => ['improvement' => '10-15%', 'consistency' => 'high'],
-                            'distance_estimation' => ['precision' => 'enhanced', 'reliability' => 'improved']
-                        ],
-                        'environmental_mapping' => [
-                            'navigation' => ['efficiency' => 'increased', 'confidence' => 'enhanced'],
-                            'spatial_memory' => ['retention' => 'improved', 'recall' => 'accurate']
-                        ]
-                    ],
-                    'applications' => [
-                        'architectural_spaces' => ['wayfinding_systems', 'spatial_design'],
-                        'virtual_environments' => ['3D_interfaces', 'gaming_spaces']
-                    ]
-                ]
+                'orange' => ['creative_solutions', 'optimistic_approach'],
+                'white' => ['clear_thinking', 'organized_approach'],
+                'black' => ['analytical_thinking', 'focused_solutions']
             ]
         ],
-
-        'emotional_depth' => [
-            'empathy' => [
-                'soft_purple' => [
-                    'primary_effects' => [
-                        'emotional_understanding' => [
-                            'sensitivity' => ['awareness' => 'heightened', 'receptivity' => 'increased'],
-                            'connection_capacity' => ['depth' => 'enhanced', 'authenticity' => 'improved']
-                        ],
-                        'compassion_response' => [
-                            'emotional_resonance' => ['strength' => 'significant', 'duration' => 'sustained'],
-                            'supportive_behavior' => ['likelihood' => 'increased', 'quality' => 'enhanced']
-                        ]
-                    ],
-                    'applications' => [
-                        'counseling_spaces' => ['therapy_rooms', 'support_centers'],
-                        'community_areas' => ['gathering_spaces', 'healing_centers']
-                    ]
-                ]
+        'emotional_responses' => [
+            'primary_emotions' => [
+                'red' => ['excitement', 'passion', 'anger'],
+                'blue' => ['calmness', 'trust', 'sadness'],
+                'yellow' => ['happiness', 'optimism', 'anxiety'],
+                'green' => ['peace', 'harmony', 'envy']
             ],
-
-            'emotional_resilience' => [
-                'deep_blue' => [
-                    'primary_effects' => [
-                        'stress_management' => [
-                            'coping_capacity' => ['strength' => 'improved', 'sustainability' => 'long_term'],
-                            'emotional_regulation' => ['control' => 'enhanced', 'stability' => 'increased']
-                        ],
-                        'recovery_processes' => [
-                            'emotional_healing' => ['efficiency' => 'accelerated', 'depth' => 'thorough'],
-                            'adaptation_ability' => ['flexibility' => 'enhanced', 'responsiveness' => 'improved']
-                        ]
-                    ]
-                ]
+            'complex_emotions' => [
+                'purple' => ['creativity', 'mystery', 'spirituality'],
+                'orange' => ['enthusiasm', 'adventure', 'confidence'],
+                'pink' => ['love', 'nurturing', 'compassion'],
+                'brown' => ['stability', 'reliability', 'stubbornness']
             ]
         ],
-
-        'motivational_dynamics' => [
-            'achievement_drive' => [
-                'gold' => [
-                    'primary_effects' => [
-                        'goal_orientation' => [
-                            'focus' => ['clarity' => 'enhanced', 'persistence' => 'increased'],
-                            'achievement_motivation' => ['strength' => 'high', 'sustainability' => 'long_term']
-                        ],
-                        'success_visualization' => [
-                            'outcome_clarity' => ['vividness' => 'enhanced', 'detail' => 'improved'],
-                            'confidence_building' => ['self_belief' => 'strengthened', 'determination' => 'increased']
-                        ]
-                    ],
-                    'applications' => [
-                        'performance_spaces' => ['training_centers', 'competition_venues'],
-                        'goal_setting_areas' => ['planning_rooms', 'vision_boards']
-                    ]
-                ]
+        'behavioral_triggers' => [
+            'motivation' => [
+                'red' => ['action', 'urgency', 'competition'],
+                'orange' => ['socialization', 'confidence', 'adventure'],
+                'yellow' => ['learning', 'communication', 'optimism']
             ],
-
-            'growth_mindset' => [
-                'emerald_green' => [
-                    'primary_effects' => [
-                        'learning_orientation' => [
-                            'curiosity' => ['engagement' => 'increased', 'exploration' => 'encouraged'],
-                            'development_focus' => ['persistence' => 'enhanced', 'adaptability' => 'improved']
-                        ],
-                        'progress_perception' => [
-                            'milestone_recognition' => ['awareness' => 'heightened', 'celebration' => 'encouraged'],
-                            'growth_tracking' => ['attention' => 'focused', 'motivation' => 'sustained']
-                        ]
-                    ]
-                ]
-            ]
-        ],
-
-        'social_dynamics' => [
-            'leadership_presence' => [
-                'royal_purple' => [
-                    'primary_effects' => [
-                        'authority_perception' => [
-                            'credibility' => ['establishment' => 'rapid', 'maintenance' => 'sustained'],
-                            'influence_capacity' => ['strength' => 'significant', 'reach' => 'broad']
-                        ],
-                        'leadership_qualities' => [
-                            'decisiveness' => ['confidence' => 'enhanced', 'clarity' => 'improved'],
-                            'vision_communication' => ['effectiveness' => 'increased', 'impact' => 'memorable']
-                        ]
-                    ],
-                    'applications' => [
-                        'executive_spaces' => ['boardrooms', 'leadership_offices'],
-                        'presentation_areas' => ['stages', 'conference_rooms']
-                    ]
-                ]
+            'relaxation' => [
+                'blue' => ['rest', 'reflection', 'peace'],
+                'green' => ['balance', 'restoration', 'growth'],
+                'purple' => ['meditation', 'introspection', 'creativity']
             ],
-
-            'collaborative_synergy' => [
-                'teal' => [
-                    'primary_effects' => [
-                        'team_dynamics' => [
-                            'cooperation' => ['efficiency' => 'improved', 'quality' => 'enhanced'],
-                            'communication_flow' => ['clarity' => 'increased', 'openness' => 'encouraged']
-                        ],
-                        'group_cohesion' => [
-                            'unity_building' => ['strength' => 'reinforced', 'sustainability' => 'long_term'],
-                            'shared_purpose' => ['alignment' => 'enhanced', 'commitment' => 'strengthened']
-                        ]
-                    ]
-                ]
+            'productivity' => [
+                'white' => ['focus', 'efficiency', 'organization'],
+                'gray' => ['neutrality', 'professionalism', 'balance'],
+                'brown' => ['reliability', 'practicality', 'groundedness']
             ]
         ]
     ];
 
-    / ... (existing methods remain the same) ...
+    /**
+     * Analyze psychological effects of a color
+     *
+     * @param string $color Color to analyze
+     * @param array  $context Context parameters
+     * @return array Analysis results
+     */
+    public function analyze_psychological_effects($color, $context = []) {
+        $effects = [];
+        foreach (self::PSYCHOLOGICAL_EFFECTS as $category => $subcategories) {
+            foreach ($subcategories as $subcategory => $colors) {
+                if (isset($colors[$color])) {
+                    $effects[$category][$subcategory] = $colors[$color];
+                }
+            }
+        }
+        return $effects;
+    }
+
+    /**
+     * Generate psychologically optimized color scheme
+     *
+     * @param array $target_effects Desired psychological effects
+     * @param array $context Context parameters
+     * @return array Color scheme
+     */
+    public function generate_psychological_scheme($target_effects, $context = []) {
+        $scheme = [];
+        foreach ($target_effects as $effect) {
+            foreach (self::PSYCHOLOGICAL_EFFECTS as $category => $subcategories) {
+                foreach ($subcategories as $subcategory => $colors) {
+                    foreach ($colors as $color => $effects) {
+                        if (in_array($effect, $effects)) {
+                            $scheme[$effect] = $color;
+                            break 3;
+                        }
+                    }
+                }
+            }
+        }
+        return $scheme;
+    }
+
+    /**
+     * Get emotional impact of a color combination
+     *
+     * @param array $colors Array of colors to analyze
+     * @return array Emotional impact analysis
+     */
+    public function get_emotional_impact($colors) {
+        $impact = [];
+        foreach ($colors as $color) {
+            if (isset(self::PSYCHOLOGICAL_EFFECTS['emotional_responses']['primary_emotions'][$color])) {
+                $impact['primary'][] = self::PSYCHOLOGICAL_EFFECTS['emotional_responses']['primary_emotions'][$color];
+            }
+            if (isset(self::PSYCHOLOGICAL_EFFECTS['emotional_responses']['complex_emotions'][$color])) {
+                $impact['complex'][] = self::PSYCHOLOGICAL_EFFECTS['emotional_responses']['complex_emotions'][$color];
+            }
+        }
+        return $impact;
+    }
+
+    /**
+     * Get cognitive effects of a color combination
+     *
+     * @param array $colors Array of colors to analyze
+     * @return array Cognitive effects analysis
+     */
+    public function get_cognitive_effects($colors) {
+        $effects = [];
+        foreach ($colors as $color) {
+            foreach (self::PSYCHOLOGICAL_EFFECTS['cognitive_impacts'] as $aspect => $color_effects) {
+                if (isset($color_effects[$color])) {
+                    $effects[$aspect][] = $color_effects[$color];
+                }
+            }
+        }
+        return $effects;
+    }
+
+    /**
+     * Get behavioral triggers of a color combination
+     *
+     * @param array $colors Array of colors to analyze
+     * @return array Behavioral triggers analysis
+     */
+    public function get_behavioral_triggers($colors) {
+        $triggers = [];
+        foreach ($colors as $color) {
+            foreach (self::PSYCHOLOGICAL_EFFECTS['behavioral_triggers'] as $category => $color_triggers) {
+                if (isset($color_triggers[$color])) {
+                    $triggers[$category][] = $color_triggers[$color];
+                }
+            }
+        }
+        return $triggers;
+    }
 }

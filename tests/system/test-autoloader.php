@@ -1,22 +1,25 @@
 <?php
 /**
- * Test Autoloader Class
+ * Tests for Autoloader class
  *
  * @package GL_Color_Palette_Generator
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
+ * @subpackage Tests\System
+ * @since 1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Tests\System;
 
+use GL_Color_Palette_Generator\Tests\Test_Case;
 use GL_Color_Palette_Generator\System\Autoloader;
-use PHPUnit\Framework\TestCase;
 use Mockery;
 
 /**
- * Class Test_Autoloader
+ * Tests for the Autoloader class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\System
  */
-class Test_Autoloader extends TestCase {
+class Test_Autoloader extends Test_Case {
     use \Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
     /**

@@ -36,12 +36,12 @@ abstract class Test_Case extends WP_Mock_TestCase {
      *
      * @return mixed Method return.
      */
-    protected function invoke_method( $object, $method_name, array $parameters = [] ) {
-        $reflection = new \ReflectionClass( get_class( $object ) );
-        $method = $reflection->getMethod( $method_name );
-        $method->setAccessible( true );
+    protected function invoke_method($object, $method_name, array $parameters = []) {
+        $reflection = new \ReflectionClass(get_class($object));
+        $method = $reflection->getMethod($method_name);
+        $method->setAccessible(true);
 
-        return $method->invokeArgs( $object, $parameters );
+        return $method->invokeArgs($object, $parameters);
     }
 
     /**
@@ -52,11 +52,11 @@ abstract class Test_Case extends WP_Mock_TestCase {
      *
      * @return mixed Property value.
      */
-    protected function get_private_property( $object, $property_name ) {
-        $reflection = new \ReflectionClass( get_class( $object ) );
-        $property = $reflection->getProperty( $property_name );
-        $property->setAccessible( true );
+    protected function get_private_property($object, $property_name) {
+        $reflection = new \ReflectionClass(get_class($object));
+        $property = $reflection->getProperty($property_name);
+        $property->setAccessible(true);
 
-        return $property->getValue( $object );
+        return $property->getValue($object);
     }
 }

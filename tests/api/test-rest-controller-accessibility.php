@@ -1,50 +1,49 @@
 <?php
 /**
- * Test REST Controller Accessibility Endpoint
+ * Tests for REST Controller Accessibility
  *
  * @package GL_Color_Palette_Generator
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
+ * @subpackage Tests\API
  */
 
 namespace GL_Color_Palette_Generator\Tests\API;
 
-use GL_Color_Palette_Generator\API\Rest_Controller;
-use WP_REST_Request;
-use WP_REST_Response;
-use WP_Error;
-use PHPUnit\Framework\TestCase;
-use Mockery;
+use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\API\Rest_Controller_Accessibility;
+use WP_Mock;
 
 /**
- * Class Test_Rest_Controller_Accessibility
+ * Test REST Controller Accessibility functionality
  */
-class Test_Rest_Controller_Accessibility extends TestCase {
-    use \Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
-
-    /**
-     * Controller instance
-     *
-     * @var Rest_Controller
-     */
+class Test_Rest_Controller_Accessibility extends Test_Case {
+    /** @var Rest_Controller_Accessibility */
     private $controller;
 
-    /**
-     * Setup test environment
-     */
     public function setUp(): void {
         parent::setUp();
-        \Brain\Monkey\setUp();
-        $this->controller = new Rest_Controller();
+        WP_Mock::setUp();
+        $this->controller = new Rest_Controller_Accessibility();
     }
 
-    /**
-     * Teardown test environment
-     */
     public function tearDown(): void {
-        Mockery::close();
-        \Brain\Monkey\tearDown();
+        WP_Mock::tearDown();
         parent::tearDown();
+    }
+
+    public function test_register_routes() {
+        WP_Mock::userFunction('register_rest_route')->once();
+        $this->controller->register_routes();
+    }
+
+    public function test_check_contrast() {
+        $request = $this->createMock('WP_REST_Request');
+        $request->expects($this->once())
+                ->method('get_param')
+                ->willReturn(['#FFFFFF', '#000000']);
+
+        $response = $this->controller->check_contrast($request);
+        $this->assertIsArray($response);
+        $this->assertArrayHasKey('contrast_ratio', $response);
     }
 
     /**

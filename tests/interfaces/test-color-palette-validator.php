@@ -1,15 +1,15 @@
 <?php
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\ColorPaletteValidator;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Validator;
 
-class ColorPaletteValidatorTest extends TestCase {
+class Test_Color_Palette_Validator extends TestCase {
     private $validator;
 
     public function setUp(): void {
-        $this->validator = $this->createMock(ColorPaletteValidator::class);
+        $this->validator = $this->createMock(Color_Palette_Validator::class);
     }
 
     public function test_validate_colors_checks_values(): void {

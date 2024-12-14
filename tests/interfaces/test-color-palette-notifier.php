@@ -2,21 +2,21 @@
 /**
  * Color Palette Notifier Interface Tests
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Tests\Interfaces
  * @since 1.0.0
  */
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\ColorPaletteNotifier;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Notifier;
 
-class ColorPaletteNotifierTest extends TestCase {
+class Test_Color_Palette_Notifier extends TestCase {
     private $notifier;
 
     public function setUp(): void {
-        $this->notifier = $this->createMock(ColorPaletteNotifier::class);
+        $this->notifier = $this->createMock(Color_Palette_Notifier::class);
     }
 
     /**

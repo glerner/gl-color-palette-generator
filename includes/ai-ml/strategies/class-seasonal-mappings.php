@@ -1,8 +1,28 @@
 <?php
-namespace GLColorPalette;
+/**
+ * Seasonal Mappings Class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage AI_ML\Strategies
+ */
 
-class SeasonalMappings {
-    / Comprehensive seasonal color mappings
+namespace GL_Color_Palette_Generator\AI_ML\Strategies;
+
+use WP_Error;
+
+/**
+ * Class Seasonal_Mappings
+ *
+ * Handles seasonal color mappings and associations
+ *
+ * @since 1.0.0
+ */
+class Seasonal_Mappings {
+    /**
+     * Comprehensive seasonal color mappings
+     *
+     * @var array
+     */
     private const SEASONAL_MAPPINGS = [
         'east_asian' => [
             'spring' => [

@@ -2,26 +2,24 @@
 /**
  * Accessibility Checker Class
  *
- * Checks color combinations for WCAG 2.1 compliance and accessibility requirements.
- * Provides comprehensive accessibility testing including contrast ratios,
- * color blindness simulation, and readability analysis.
- *
  * @package GL_Color_Palette_Generator
  * @subpackage Accessibility
- * @since 1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Accessibility;
 
+use WP_Error;
+use GL_Color_Palette_Generator\Color_Management\Color_Utility;
+
 /**
- * Class AccessibilityChecker
+ * Class Accessibility_Checker
  *
  * Handles accessibility testing and validation for color combinations.
  * Implements WCAG 2.1 guidelines and provides color blindness simulation.
  *
  * @since 1.0.0
  */
-class AccessibilityChecker {
+class Accessibility_Checker {
     /**
      * WCAG 2.1 contrast ratios
      *
@@ -69,11 +67,11 @@ class AccessibilityChecker {
 
             // Check WCAG levels
             $text_size = $options['large_text'] ?? false;
-            $required_aa = $text_size ? 
-                $this->contrast_ratios['AA']['large'] : 
+            $required_aa = $text_size ?
+                $this->contrast_ratios['AA']['large'] :
                 $this->contrast_ratios['AA']['normal'];
-            $required_aaa = $text_size ? 
-                $this->contrast_ratios['AAA']['large'] : 
+            $required_aaa = $text_size ?
+                $this->contrast_ratios['AAA']['large'] :
                 $this->contrast_ratios['AAA']['normal'];
 
             $results['passes_aa'] = $ratio >= $required_aa;
@@ -250,7 +248,7 @@ class AccessibilityChecker {
                 break;
         }
 
-        return sprintf('#%02x%02x%02x', 
+        return sprintf('#%02x%02x%02x',
             min(255, max(0, round($r))),
             min(255, max(0, round($g))),
             min(255, max(0, round($b)))

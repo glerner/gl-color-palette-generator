@@ -1,8 +1,35 @@
 <?php
-namespace GLColorPalette;
+/**
+ * Autonomic Responses Class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage AI_ML\Analysis
+ */
 
-class AutonomicResponses {
+namespace GL_Color_Palette_Generator\AI_ML\Analysis;
+
+use WP_Error;
+
+/**
+ * Class Autonomic_Responses
+ *
+ * Analyzes autonomic responses to colors
+ *
+ * @since 1.0.0
+ */
+class Autonomic_Responses {
+    /**
+     * Physiological monitor instance
+     *
+     * @var object
+     */
     private $physiological_monitor;
+
+    /**
+     * Response analyzer instance
+     *
+     * @var object
+     */
     private $response_analyzer;
 
     // Detailed autonomic response mapping

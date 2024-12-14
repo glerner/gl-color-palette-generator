@@ -1,12 +1,23 @@
 <?php
-namespace GLColorPalette;
-
 /**
  * Settings Validator Class
  *
- * Validates and sanitizes plugin settings
+ * @package GL_Color_Palette_Generator
+ * @subpackage Validation
  */
-class SettingsValidator {
+
+namespace GL_Color_Palette_Generator\Validation;
+
+use WP_Error;
+
+/**
+ * Class Settings_Validator
+ *
+ * Validates and sanitizes plugin settings
+ *
+ * @since 1.0.0
+ */
+class Settings_Validator {
     /** @var array Validation rules and constraints */
     protected $rules = [
         'naming_service' => [

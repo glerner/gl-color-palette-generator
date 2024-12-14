@@ -1,22 +1,27 @@
 <?php
 /**
- * Color Palette Exporter Interface Tests
+ * Tests for Color Palette Exporter Interface
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Tests\Interfaces
- * @since 1.0.0
  */
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
-use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\ColorPaletteExporter;
+use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Exporter;
 
-class ColorPaletteExporterTest extends TestCase {
+/**
+ * Test Color Palette Exporter Interface implementation
+ */
+class Test_Color_Palette_Exporter extends Test_Case {
+    /** @var Color_Palette_Exporter */
     private $exporter;
 
     public function setUp(): void {
-        $this->exporter = $this->createMock(ColorPaletteExporter::class);
+        parent::setUp();
+        $this->exporter = $this->getMockBuilder(Color_Palette_Exporter::class)
+                              ->getMockForAbstractClass();
     }
 
     /**

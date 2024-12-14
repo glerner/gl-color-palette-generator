@@ -2,29 +2,29 @@
 /**
  * Color Palette Exporter Tests
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
 
-namespace GLColorPalette\Tests;
+namespace GL_Color_Palette_Generator\Tests;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\ColorPalette;
-use GLColorPalette\ColorPaletteExporter;
-use GLColorPalette\ColorPaletteFormatter;
+use GL_Color_Palette_Generator\Color_Palette;
+use GL_Color_Palette_Generator\Color_Palette_Exporter;
+use GL_Color_Palette_Generator\Color_Palette_Formatter;
 
-class ColorPaletteExporterTest extends TestCase {
-    protected ColorPaletteExporter $exporter;
-    protected ColorPaletteFormatter $formatter;
-    protected ColorPalette $test_palette;
+class Test_Color_Palette_Exporter extends TestCase {
+    protected Color_Palette_Exporter $exporter;
+    protected Color_Palette_Formatter $formatter;
+    protected Color_Palette $test_palette;
     protected string $temp_dir;
 
     public function setUp(): void {
-        $this->formatter = new ColorPaletteFormatter();
-        $this->exporter = new ColorPaletteExporter($this->formatter);
-        $this->test_palette = new ColorPalette([
+        $this->formatter = new Color_Palette_Formatter();
+        $this->exporter = new Color_Palette_Exporter($this->formatter);
+        $this->test_palette = new Color_Palette([
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00', '#0000FF'],
             'metadata' => [
@@ -169,7 +169,7 @@ class ColorPaletteExporterTest extends TestCase {
     }
 
     public function test_export_empty_palette(): void {
-        $empty_palette = new ColorPalette([
+        $empty_palette = new Color_Palette([
             'name' => 'Empty Palette',
             'colors' => []
         ]);

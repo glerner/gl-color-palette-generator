@@ -1,85 +1,106 @@
 <?php
-
-namespace GLColorPalette\Interfaces;
-
 /**
  * Color Validator Interface
  *
- * Defines the contract for validating colors and color combinations.
- *
- * @package GLColorPalette
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
- * @since   1.0.0
+ * @package GL_Color_Palette_Generator
+ * @subpackage Interfaces
  */
-interface ColorValidator {
+
+namespace GL_Color_Palette_Generator\Interfaces;
+
+use WP_Error;
+
+/**
+ * Interface for color validation
+ */
+interface Color_Validator_Interface {
     /**
-     * Validates a single color value.
+     * Validate a color value
      *
-     * @param string $color Color to validate (hex, rgb, hsl, etc.).
-     * @param string $format Expected color format (default 'hex').
-     * @return array {
-     *     Validation results.
-     *     @type bool   $is_valid    Whether the color is valid.
-     *     @type string $format      Detected color format.
-     *     @type array  $normalized  Normalized color values.
-     *     @type array  $errors      Validation errors if any.
-     * }
+     * @param string $color Color value to validate
+     * @param string $format Expected format ('hex', 'rgb', 'hsl', etc.)
+     * @return bool|WP_Error True if valid, error with details if invalid
      */
-    public function validate_color(string $color, string $format = 'hex'): array;
+    public function validate_color($color, $format);
 
     /**
-     * Validates color combinations for harmony and contrast.
+     * Validate a color palette
      *
-     * @param array $colors Array of colors to validate together.
-     * @param array $rules {
-     *     Optional. Validation rules.
-     *     @type float  $min_contrast      Minimum contrast ratio.
-     *     @type string $harmony_type      Expected harmony type.
-     *     @type bool   $check_accessibility Check WCAG compliance.
-     *     @type array  $custom_rules      Additional custom rules.
-     * }
-     * @return array {
-     *     Validation results.
-     *     @type bool   $passes_rules    Overall validation status.
-     *     @type array  $harmony_scores  Harmony analysis scores.
-     *     @type array  $contrast_ratios Contrast ratios between colors.
-     *     @type array  $violations      Rule violations if any.
-     * }
+     * @param array $colors Array of color values
+     * @param array $options Validation options
+     * @return bool|WP_Error True if valid, error with details if invalid
      */
-    public function validate_combination(array $colors, array $rules = []): array;
+    public function validate_palette($colors, $options = []);
 
     /**
-     * Gets detailed color information.
+     * Check if color is in valid hex format
      *
-     * @param string $color Color value to analyze.
-     * @return array {
-     *     Color information.
-     *     @type array  $formats     Color in various formats (hex, rgb, hsl).
-     *     @type array  $properties  Color properties (brightness, saturation, etc.).
-     *     @type string $name        Closest named color match.
-     *     @type array  $metadata    Additional color metadata.
-     * }
+     * @param string $color Color value to check
+     * @return bool True if valid hex color
      */
-    public function get_color_info(string $color): array;
+    public function is_valid_hex($color);
 
     /**
-     * Validates color against brand guidelines.
+     * Check if color is in valid RGB format
      *
-     * @param string $color Color to validate.
-     * @param array $guidelines {
-     *     Brand guidelines.
-     *     @type array  $allowed_colors   List of allowed colors.
-     *     @type array  $allowed_ranges   Acceptable HSL ranges.
-     *     @type float  $tolerance       Color matching tolerance.
-     * }
-     * @return array {
-     *     Validation results.
-     *     @type bool   $compliant     Whether color complies with guidelines.
-     *     @type array  $matches       Matching guideline colors if any.
-     *     @type array  $suggestions   Alternative compliant colors.
-     *     @type array  $violations    Guideline violations if any.
-     * }
+     * @param string|array $color Color value to check
+     * @return bool True if valid RGB color
      */
-    public function validate_against_guidelines(string $color, array $guidelines): array;
-} 
+    public function is_valid_rgb($color);
+
+    /**
+     * Check if color is in valid HSL format
+     *
+     * @param string|array $color Color value to check
+     * @return bool True if valid HSL color
+     */
+    public function is_valid_hsl($color);
+
+    /**
+     * Check if color is in valid HSV format
+     *
+     * @param string|array $color Color value to check
+     * @return bool True if valid HSV color
+     */
+    public function is_valid_hsv($color);
+
+    /**
+     * Check if color is in valid CMYK format
+     *
+     * @param string|array $color Color value to check
+     * @return bool True if valid CMYK color
+     */
+    public function is_valid_cmyk($color);
+
+    /**
+     * Check if color is in valid LAB format
+     *
+     * @param string|array $color Color value to check
+     * @return bool True if valid LAB color
+     */
+    public function is_valid_lab($color);
+
+    /**
+     * Get validation errors for a color
+     *
+     * @param string $color Color value to validate
+     * @param string $format Expected format
+     * @return array Array of validation errors
+     */
+    public function get_validation_errors($color, $format);
+
+    /**
+     * Get supported color formats
+     *
+     * @return array List of supported formats
+     */
+    public function get_supported_formats();
+
+    /**
+     * Check if format is supported
+     *
+     * @param string $format Format to check
+     * @return bool True if format is supported
+     */
+    public function is_format_supported($format);
+}

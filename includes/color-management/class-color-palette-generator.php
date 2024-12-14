@@ -16,11 +16,12 @@ use GL_Color_Palette_Generator\AI\AI_Provider_Factory;
 use GL_Color_Palette_Generator\AI\AI_Provider_Interface;
 use GL_Color_Palette_Generator\Types\Color_Types;
 use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
+use GL_Color_Palette_Generator\Interfaces\Color_Scheme_Generator_Interface;
 
 /**
  * Class Color_Palette_Generator
  */
-class Color_Palette_Generator {
+class Color_Palette_Generator implements Color_Scheme_Generator_Interface {
     /**
      * Settings manager instance
      *
@@ -264,5 +265,343 @@ EOT;
             'gl-color-palette-generator',
             $cache_duration
         );
+    }
+
+    /**
+     * Generate a color scheme from a base color
+     *
+     * @param string $base_color Base color in hex format
+     * @param array  $options Generation options
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_scheme($base_color, $options = []) {
+        try {
+            $scheme_type = $options['type'] ?? 'analogous';
+            $count = $options['count'] ?? 5;
+
+            switch ($scheme_type) {
+                case 'monochromatic':
+                    return $this->generate_monochromatic($base_color, $count);
+                case 'analogous':
+                    return $this->generate_analogous($base_color, $count);
+                case 'complementary':
+                    return $this->generate_complementary($base_color, $count);
+                case 'split_complementary':
+                    return $this->generate_split_complementary($base_color, $count);
+                case 'triadic':
+                    return $this->generate_triadic($base_color, $count);
+                case 'tetradic':
+                    return $this->generate_tetradic($base_color, $count);
+                default:
+                    return new \WP_Error(
+                        'invalid_scheme_type',
+                        __('Invalid scheme type specified', 'gl-color-palette-generator')
+                    );
+            }
+        } catch (\Exception $e) {
+            return new \WP_Error(
+                'scheme_generation_failed',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Generate a monochromatic scheme
+     *
+     * @param string $base_color Base color in hex format
+     * @param int    $count Number of colors to generate
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_monochromatic($base_color, $count = 5) {
+        try {
+            $color_util = new Color_Utility();
+            return $color_util->generate_monochromatic($base_color, $count);
+        } catch (\Exception $e) {
+            return new \WP_Error(
+                'monochromatic_generation_failed',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Generate an analogous scheme
+     *
+     * @param string $base_color Base color in hex format
+     * @param int    $count Number of colors to generate
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_analogous($base_color, $count = 5) {
+        try {
+            $color_util = new Color_Utility();
+            return $color_util->generate_analogous($base_color, $count);
+        } catch (\Exception $e) {
+            return new \WP_Error(
+                'analogous_generation_failed',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Generate a complementary scheme
+     *
+     * @param string $base_color Base color in hex format
+     * @param int    $count Number of colors to generate
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_complementary($base_color, $count = 4) {
+        try {
+            $color_util = new Color_Utility();
+            return $color_util->generate_complementary($base_color, $count);
+        } catch (\Exception $e) {
+            return new \WP_Error(
+                'complementary_generation_failed',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Generate a split complementary scheme
+     *
+     * @param string $base_color Base color in hex format
+     * @param int    $count Number of colors to generate
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_split_complementary($base_color, $count = 3) {
+        try {
+            $color_util = new Color_Utility();
+            return $color_util->generate_split_complementary($base_color, $count);
+        } catch (\Exception $e) {
+            return new \WP_Error(
+                'split_complementary_generation_failed',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Generate a triadic scheme
+     *
+     * @param string $base_color Base color in hex format
+     * @param int    $count Number of colors to generate
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_triadic($base_color, $count = 3) {
+        try {
+            $color_util = new Color_Utility();
+            return $color_util->generate_triadic($base_color, $count);
+        } catch (\Exception $e) {
+            return new \WP_Error(
+                'triadic_generation_failed',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Generate a tetradic scheme
+     *
+     * @param string $base_color Base color in hex format
+     * @param int    $count Number of colors to generate
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_tetradic($base_color, $count = 4) {
+        try {
+            $color_util = new Color_Utility();
+            return $color_util->generate_tetradic($base_color, $count);
+        } catch (\Exception $e) {
+            return new \WP_Error(
+                'tetradic_generation_failed',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Generate a custom scheme based on color theory rules
+     *
+     * @param string $base_color Base color in hex format
+     * @param array  $rules Color theory rules to apply
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_custom_scheme($base_color, $rules) {
+        try {
+            $color_util = new Color_Utility();
+            return $color_util->generate_custom_scheme($base_color, $rules);
+        } catch (\Exception $e) {
+            return new \WP_Error(
+                'custom_scheme_generation_failed',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Generate a scheme from an image
+     *
+     * @param string $image_path Path to image file
+     * @param array  $options Extraction options
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_from_image($image_path, $options = []) {
+        try {
+            $color_util = new Color_Utility();
+            return $color_util->extract_colors_from_image($image_path, $options);
+        } catch (\Exception $e) {
+            return new \WP_Error(
+                'image_extraction_failed',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Generate a scheme based on a theme or mood
+     *
+     * @param string $theme Theme or mood name
+     * @param array  $options Generation options
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_themed_scheme($theme, $options = []) {
+        try {
+            // Use AI to generate a themed color scheme
+            $prompt = sprintf(
+                'Generate a color palette for theme: %s. Consider %s style and mood.',
+                $theme,
+                $options['style'] ?? 'modern'
+            );
+            
+            $colors = $this->generate_from_prompt($prompt);
+            return $colors['colors'] ?? [];
+        } catch (\Exception $e) {
+            return new \WP_Error(
+                'themed_scheme_generation_failed',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Adjust scheme colors for better contrast
+     *
+     * @param array $colors Array of colors in hex format
+     * @param array $options Adjustment options
+     * @return array|WP_Error Adjusted colors or error
+     */
+    public function adjust_scheme_contrast($colors, $options = []) {
+        try {
+            $color_util = new Color_Utility();
+            return $color_util->adjust_contrast($colors, $options);
+        } catch (\Exception $e) {
+            return new \WP_Error(
+                'contrast_adjustment_failed',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Get available color scheme types
+     *
+     * @return array List of available scheme types
+     */
+    public function get_available_schemes() {
+        return [
+            'monochromatic',
+            'analogous',
+            'complementary',
+            'split_complementary',
+            'triadic',
+            'tetradic',
+            'custom',
+            'themed',
+            'from_image'
+        ];
+    }
+
+    /**
+     * Get color theory rules for scheme generation
+     *
+     * @return array List of available color theory rules
+     */
+    public function get_color_theory_rules() {
+        return [
+            'harmony' => [
+                'complementary',
+                'analogous',
+                'triadic',
+                'tetradic',
+                'split_complementary',
+                'monochromatic'
+            ],
+            'contrast' => [
+                'high',
+                'medium',
+                'low'
+            ],
+            'saturation' => [
+                'vibrant',
+                'muted',
+                'pastel'
+            ],
+            'brightness' => [
+                'light',
+                'medium',
+                'dark'
+            ]
+        ];
+    }
+
+    /**
+     * Validate a generated scheme
+     *
+     * @param array $colors Array of colors in hex format
+     * @param array $rules Validation rules
+     * @return bool|WP_Error True if valid, error if not
+     */
+    public function validate_scheme($colors, $rules = []) {
+        try {
+            $color_util = new Color_Utility();
+            
+            // Basic color format validation
+            foreach ($colors as $color) {
+                if (!preg_match('/^#[0-9a-f]{6}$/i', $color)) {
+                    return new \WP_Error(
+                        'invalid_color_format',
+                        sprintf(__('Invalid color format: %s', 'gl-color-palette-generator'), $color)
+                    );
+                }
+            }
+
+            // Check color distinctiveness if required
+            if (!isset($rules['skip_distinctiveness']) || !$rules['skip_distinctiveness']) {
+                if (!$color_util->are_colors_distinct($colors)) {
+                    return new \WP_Error(
+                        'colors_not_distinct',
+                        __('Colors are not visually distinct enough', 'gl-color-palette-generator')
+                    );
+                }
+            }
+
+            // Check contrast if required
+            if (isset($rules['min_contrast']) && is_numeric($rules['min_contrast'])) {
+                if (!$color_util->check_contrast($colors, $rules['min_contrast'])) {
+                    return new \WP_Error(
+                        'insufficient_contrast',
+                        __('Colors do not meet minimum contrast requirements', 'gl-color-palette-generator')
+                    );
+                }
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            return new \WP_Error(
+                'validation_failed',
+                $e->getMessage()
+            );
+        }
     }
 }

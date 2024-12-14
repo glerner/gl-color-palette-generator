@@ -1,30 +1,42 @@
 <?php
+/**
+ * Tests for Ajax Handler
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests
+ */
+
 namespace GL_Color_Palette_Generator\Tests;
 
 use GL_Color_Palette_Generator\Ajax_Handler;
-use WP_UnitTestCase;
+use Test_Case_Integration;
+use Brain\Monkey\Functions;
 
-class Test_Ajax_Handler extends WP_UnitTestCase {
-    private $ajax_handler;
-    private $user_id;
+/**
+ * Test Ajax Handler functionality
+ */
+class Test_Ajax_Handler extends Test_Case_Integration {
+    private Ajax_Handler $handler;
 
     public function setUp(): void {
         parent::setUp();
-        WP_Mock::setUp();
-
-        $this->ajax_handler = new Ajax_Handler();
-
-        // Create and set admin user
-        $this->user_id = $this->factory->user->create([
-            'role' => 'administrator'
-        ]);
-        wp_set_current_user($this->user_id);
+        $this->handler = new Ajax_Handler();
     }
 
     public function tearDown(): void {
-        WP_Mock::tearDown();
         parent::tearDown();
-        wp_delete_user($this->user_id);
+    }
+
+    public function test_register_hooks() {
+        Functions\expect('add_action')
+            ->once()
+            ->with('wp_ajax_gl_generate_palette', [$this->handler, 'handle_generate_palette']);
+        
+        Functions\expect('add_action')
+            ->once()
+            ->with('wp_ajax_nopriv_gl_generate_palette', [$this->handler, 'handle_generate_palette']);
+
+        $this->handler->register_hooks();
     }
 
     /**

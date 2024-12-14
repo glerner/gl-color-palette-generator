@@ -2,74 +2,50 @@
 /**
  * AI Service Interface
  *
- * Defines the contract for AI-powered color services.
- *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Interfaces
- * @since 1.0.0
  */
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
+
+use WP_Error;
 
 /**
- * Interface AIService
+ * Interface AI_Service
  *
- * Provides methods for AI-powered color analysis and suggestions.
+ * Defines the contract for AI services
+ *
+ * @since 1.0.0
  */
-interface AIService {
+interface AI_Service {
     /**
      * Initialize the AI service
      *
-     * @return bool True if initialization was successful
-     * @throws \Exception If service initialization fails
+     * @param array $config Service configuration
+     * @return bool|WP_Error True on success, WP_Error on failure
      */
-    public function initialize_service(): bool;
+    public function initialize($config);
 
     /**
-     * Get color suggestions based on specified criteria
+     * Process input data
      *
-     * @param array $criteria {
-     *     Criteria for color suggestions
-     *     @type string $context     Usage context (e.g., 'web', 'print', 'branding')
-     *     @type string $mood        Desired mood or emotion
-     *     @type array  $constraints Color constraints or requirements
-     *     @type int    $count       Number of suggestions to return
-     * }
-     * @return array {
-     *     Color suggestions
-     *     @type array  $colors      List of suggested colors
-     *     @type array  $rationale   Explanation for each suggestion
-     *     @type float  $confidence  Confidence score for suggestions (0-1)
-     * }
-     * @throws \InvalidArgumentException If criteria is invalid
+     * @param mixed $input Input data to process
+     * @param array $options Processing options
+     * @return mixed|WP_Error Processed data or error
      */
-    public function get_color_suggestions(array $criteria): array;
+    public function process_input($input, $options = []);
 
     /**
-     * Analyze a combination of colors
+     * Get service status
      *
-     * @param array $colors List of colors to analyze
-     * @return array {
-     *     Analysis results
-     *     @type float  $harmony_score    Color harmony score (0-1)
-     *     @type array  $relationships    Color relationships analysis
-     *     @type array  $improvements     Suggested improvements
-     *     @type array  $accessibility    Accessibility considerations
-     * }
-     * @throws \InvalidArgumentException If colors array is invalid
+     * @return array Service status information
      */
-    public function analyze_color_combination(array $colors): array;
+    public function get_status();
 
     /**
-     * Get current service status
+     * Get service capabilities
      *
-     * @return array {
-     *     Service status information
-     *     @type bool   $available    Whether service is available
-     *     @type string $status       Current status ('ready', 'busy', 'error')
-     *     @type array  $limits       Rate limiting information
-     *     @type array  $capabilities Available service capabilities
-     * }
+     * @return array List of service capabilities
      */
-    public function get_service_status(): array;
-} 
+    public function get_capabilities();
+}

@@ -1,8 +1,8 @@
 <?php
 
-namespace GLColorPalette\Tests\Integration;
+namespace GL_Color_Palette_Generator\Tests\Integration;
 
-use GLColorPalette\Providers\OpenAI_Provider;
+use GL_Color_Palette_Generator\Providers\OpenAI_Provider;
 
 class Test_OpenAI_Integration extends Test_Provider_Integration {
     protected function get_test_credentials(): array {

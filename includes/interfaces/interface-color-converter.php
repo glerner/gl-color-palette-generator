@@ -2,124 +2,111 @@
 /**
  * Color Converter Interface
  *
- * Defines the contract for color space conversion operations.
- *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Interfaces
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
- * @since   1.0.0
  */
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
+
+use WP_Error;
 
 /**
- * Interface ColorConverter
- *
- * Provides methods for converting colors between different color spaces.
+ * Interface for color space conversion
  */
-interface ColorConverter {
+interface Color_Converter_Interface {
     /**
-     * Converts RGB color values to hexadecimal format
+     * Convert color from one format to another
      *
-     * @param array $rgb {
-     *     RGB color values
-     *     @type int $r Red component (0-255)
-     *     @type int $g Green component (0-255)
-     *     @type int $b Blue component (0-255)
-     * }
-     * @return string Hexadecimal color value (e.g., '#FF0000')
-     * @throws \InvalidArgumentException If RGB values are invalid
+     * @param string $color Color value to convert
+     * @param string $from_format Source format ('hex', 'rgb', 'hsl', etc.)
+     * @param string $to_format Target format ('hex', 'rgb', 'hsl', etc.)
+     * @return string|WP_Error Converted color value or error
      */
-    public function rgb_to_hex(array $rgb): string;
+    public function convert($color, $from_format, $to_format);
 
     /**
-     * Converts hexadecimal color value to RGB format
+     * Convert color to RGB
      *
-     * @param string $hex Hexadecimal color value (e.g., '#FF0000' or 'FF0000')
-     * @return array {
-     *     RGB color values
-     *     @type int $r Red component (0-255)
-     *     @type int $g Green component (0-255)
-     *     @type int $b Blue component (0-255)
-     * }
-     * @throws \InvalidArgumentException If hex value is invalid
+     * @param string $color Color value to convert
+     * @param string $from_format Source format
+     * @return array|WP_Error RGB values [r, g, b] or error
      */
-    public function hex_to_rgb(string $hex): array;
+    public function to_rgb($color, $from_format);
 
     /**
-     * Converts RGB color values to HSL format
+     * Convert color to HSL
      *
-     * @param array $rgb {
-     *     RGB color values
-     *     @type int $r Red component (0-255)
-     *     @type int $g Green component (0-255)
-     *     @type int $b Blue component (0-255)
-     * }
-     * @return array {
-     *     HSL color values
-     *     @type float $h Hue component (0-360)
-     *     @type float $s Saturation component (0-100)
-     *     @type float $l Lightness component (0-100)
-     * }
-     * @throws \InvalidArgumentException If RGB values are invalid
+     * @param string $color Color value to convert
+     * @param string $from_format Source format
+     * @return array|WP_Error HSL values [h, s, l] or error
      */
-    public function rgb_to_hsl(array $rgb): array;
+    public function to_hsl($color, $from_format);
 
     /**
-     * Converts HSL color values to RGB format
+     * Convert color to HSV
      *
-     * @param array $hsl {
-     *     HSL color values
-     *     @type float $h Hue component (0-360)
-     *     @type float $s Saturation component (0-100)
-     *     @type float $l Lightness component (0-100)
-     * }
-     * @return array {
-     *     RGB color values
-     *     @type int $r Red component (0-255)
-     *     @type int $g Green component (0-255)
-     *     @type int $b Blue component (0-255)
-     * }
-     * @throws \InvalidArgumentException If HSL values are invalid
+     * @param string $color Color value to convert
+     * @param string $from_format Source format
+     * @return array|WP_Error HSV values [h, s, v] or error
      */
-    public function hsl_to_rgb(array $hsl): array;
+    public function to_hsv($color, $from_format);
 
     /**
-     * Converts RGB color values to LAB format
+     * Convert color to CMYK
      *
-     * @param array $rgb {
-     *     RGB color values
-     *     @type int $r Red component (0-255)
-     *     @type int $g Green component (0-255)
-     *     @type int $b Blue component (0-255)
-     * }
-     * @return array {
-     *     LAB color values
-     *     @type float $l Lightness component (0-100)
-     *     @type float $a A component (typically -128 to 127)
-     *     @type float $b B component (typically -128 to 127)
-     * }
-     * @throws \InvalidArgumentException If RGB values are invalid
+     * @param string $color Color value to convert
+     * @param string $from_format Source format
+     * @return array|WP_Error CMYK values [c, m, y, k] or error
      */
-    public function rgb_to_lab(array $rgb): array;
+    public function to_cmyk($color, $from_format);
 
     /**
-     * Converts LAB color values to RGB format
+     * Convert color to LAB
      *
-     * @param array $lab {
-     *     LAB color values
-     *     @type float $l Lightness component (0-100)
-     *     @type float $a A component (typically -128 to 127)
-     *     @type float $b B component (typically -128 to 127)
-     * }
-     * @return array {
-     *     RGB color values
-     *     @type int $r Red component (0-255)
-     *     @type int $g Green component (0-255)
-     *     @type int $b Blue component (0-255)
-     * }
-     * @throws \InvalidArgumentException If LAB values are invalid
+     * @param string $color Color value to convert
+     * @param string $from_format Source format
+     * @return array|WP_Error LAB values [l, a, b] or error
      */
-    public function lab_to_rgb(array $lab): array;
+    public function to_lab($color, $from_format);
+
+    /**
+     * Convert color to XYZ
+     *
+     * @param string $color Color value to convert
+     * @param string $from_format Source format
+     * @return array|WP_Error XYZ values [x, y, z] or error
+     */
+    public function to_xyz($color, $from_format);
+
+    /**
+     * Convert color to hex
+     *
+     * @param string|array $color Color value to convert
+     * @param string $from_format Source format
+     * @return string|WP_Error Hex color value or error
+     */
+    public function to_hex($color, $from_format);
+
+    /**
+     * Get supported color formats
+     *
+     * @return array List of supported formats
+     */
+    public function get_supported_formats();
+
+    /**
+     * Check if format is supported
+     *
+     * @param string $format Format to check
+     * @return bool True if format is supported
+     */
+    public function is_format_supported($format);
+
+    /**
+     * Get format of color value
+     *
+     * @param string|array $color Color value to check
+     * @return string|WP_Error Format name or error if format cannot be determined
+     */
+    public function get_format($color);
 }

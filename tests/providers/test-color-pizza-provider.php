@@ -8,16 +8,19 @@ declare(strict_types=1);
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Providers;
 
+use GL_Color_Palette_Generator\Tests\Test_Case;
 use GL_Color_Palette_Generator\Providers\Color_Pizza_Provider;
 use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
 use WP_Mock;
 
 /**
- * Color Pizza Provider test case
+ * Tests for the Color Pizza Provider
  */
-class Test_Color_Pizza_Provider extends Test_Provider_Mock {
+class Test_Color_Pizza_Provider extends Test_Case {
+    protected $provider;
+
     public function setUp(): void {
         parent::setUp();
         $this->provider = new Color_Pizza_Provider($this->get_test_credentials());
@@ -32,6 +35,21 @@ class Test_Color_Pizza_Provider extends Test_Provider_Mock {
             'api_key' => 'test_key_123',
             'base_url' => 'https://api.color.pizza/v1'
         ];
+    }
+
+    /**
+     * Test generating a palette
+     */
+    public function test_generate_palette() {
+        $params = [
+            'prompt' => 'Modern tech company',
+            'count' => 5,
+            'format' => 'hex'
+        ];
+
+        $colors = $this->provider->generate_palette($params);
+        $this->assertIsArray($colors);
+        $this->assertCount(5, $colors);
     }
 
     protected function test_get_random_colors() {

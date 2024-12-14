@@ -1,9 +1,6 @@
 <?php declare(strict_types=1);
 /**
- * HuggingFace Provider Class
- *
- * Implements AI provider interface for HuggingFace's models.
- * Handles color palette generation using HuggingFace's Inference API.
+ * HuggingFace Provider
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Providers
@@ -12,108 +9,142 @@
 
 namespace GL_Color_Palette_Generator\Providers;
 
-use GL_Color_Palette_Generator\Interfaces\AI_Provider_Interface;
 use GL_Color_Palette_Generator\Abstracts\AI_Provider_Base;
 use GL_Color_Palette_Generator\Types\Provider_Config;
-use GL_Color_Palette_Generator\Types\Color_Types;
 use WP_Error;
 
 /**
- * HuggingFace Provider Class
- *
- * @since 1.0.0
+ * HuggingFace Provider implementation
  */
-class HuggingFace_Provider extends AI_Provider_Base implements AI_Provider_Interface {
+class HuggingFace_Provider extends AI_Provider_Base {
+    /** @var string */
+    private $api_key;
+
+    /** @var string */
+    private $model = 'gpt2';
+
     /**
      * Constructor
      *
-     * @param array $credentials API credentials
+     * @param Provider_Config|null $config Provider configuration
      */
-    public function __construct(array $credentials) {
-        $this->api_url = 'https://api-inference.huggingface.co/models/';
-        parent::__construct($credentials);
+    public function __construct(?Provider_Config $config = null) {
+        parent::__construct($config);
+        $config = $config ?? new Provider_Config();
+        $this->api_key = $config->get_api_key();
+        $this->model = $config->get_model() ?? 'gpt2';
     }
 
     /**
-     * Get provider name
+     * Generate color palette
      *
-     * @return string
+     * @param array $params Generation parameters
+     * @return array|WP_Error Generated colors or error
      */
-    public function get_name(): string {
-        return 'huggingface';
-    }
-
-    /**
-     * Get provider display name
-     *
-     * @return string
-     */
-    public function get_display_name(): string {
-        return 'HuggingFace';
-    }
-
-    /**
-     * Get provider capabilities
-     *
-     * @return array
-     */
-    public function get_capabilities(): array {
-        return [
-            'max_colors' => 12,
-            'supports_streaming' => false,
-            'supports_batch' => true,
-            'supports_style_transfer' => true,
-            'max_prompt_length' => 2048,
-            'rate_limit' => [
-                'requests_per_minute' => 120,
-                'tokens_per_minute' => 200000
-            ]
-        ];
-    }
-
-    public function generate_palette(array $params) {
-        $validation = $this->validate_params($params);
-        if (is_wp_error($validation)) {
-            return $validation;
+    public function generate_palette($params) {
+        if (empty($this->api_key)) {
+            return new WP_Error('missing_api_key', 'HuggingFace API key is required');
         }
 
-        $prompt = $this->format_prompt($params);
-        $response = $this->make_request($this->credentials['model_id'], [
-            'inputs' => $prompt,
-            'parameters' => [
-                'max_new_tokens' => 100,
-                'return_full_text' => false,
-            ]
+        $prompt = $this->build_prompt($params);
+        $response = wp_remote_post('https://api-inference.huggingface.co/models/' . $this->model, [
+            'headers' => [
+                'Authorization' => "Bearer {$this->api_key}",
+                'Content-Type' => 'application/json',
+            ],
+            'body' => wp_json_encode([
+                'inputs' => $prompt,
+                'parameters' => [
+                    'temperature' => 0.7,
+                    'max_new_tokens' => 100,
+                    'return_full_text' => false,
+                ],
+            ]),
+            'timeout' => 15,
         ]);
 
         if (is_wp_error($response)) {
             return $response;
         }
 
-        return $this->parse_response($response);
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+
+        if (!isset($data[0]['generated_text'])) {
+            return new WP_Error('invalid_response', 'Invalid response from HuggingFace');
+        }
+
+        try {
+            $colors = json_decode($data[0]['generated_text'], true);
+            return $this->validate_colors($colors);
+        } catch (\Exception $e) {
+            return new WP_Error('parse_error', 'Failed to parse HuggingFace response');
+        }
     }
 
-    protected function get_headers(): array {
+    /**
+     * Get provider name
+     *
+     * @return string Provider name
+     */
+    public function get_name() {
+        return 'huggingface';
+    }
+
+    /**
+     * Get provider display name
+     *
+     * @return string Provider display name
+     */
+    public function get_display_name() {
+        return 'HuggingFace';
+    }
+
+    /**
+     * Get provider capabilities
+     *
+     * @return array Provider capabilities
+     */
+    public function get_capabilities() {
         return [
-            'Authorization' => 'Bearer ' . $this->credentials['api_key'],
-            'Content-Type' => 'application/json',
+            'max_colors' => 10,
+            'supports_streaming' => false,
+            'supports_batch' => true
         ];
     }
 
-    public function validate_credentials() {
-        $required = ['api_key', 'model_id'];
-        foreach ($required as $field) {
-            if (empty($this->credentials[$field])) {
-                return new WP_Error('missing_credential', "Missing required field: $field");
+    /**
+     * Build prompt for HuggingFace API
+     *
+     * @param array $params Generation parameters
+     * @return string Prompt
+     */
+    private function build_prompt($params) {
+        return sprintf(
+            'Generate a color palette with %d colors based on this description: %s. Return only a JSON array of hex color codes.',
+            $params['num_colors'] ?? 5,
+            $params['prompt'] ?? ''
+        );
+    }
+
+    /**
+     * Validate generated colors
+     *
+     * @param array $colors Colors to validate
+     * @return array Validated colors
+     * @throws \Exception If colors are invalid
+     */
+    private function validate_colors($colors) {
+        if (!is_array($colors)) {
+            throw new \Exception('Invalid colors array');
+        }
+
+        foreach ($colors as $color) {
+            if (!preg_match('/^#[0-9A-F]{6}$/i', $color)) {
+                throw new \Exception(sprintf('Invalid color code: %s', $color));
             }
         }
-        return true;
-    }
 
-    public function get_requirements(): array {
-        return [
-            'api_key' => 'HuggingFace API Key',
-            'model_id' => 'Model ID (e.g., gpt2)',
-        ];
+        return $colors;
     }
-} 
+}

@@ -1,8 +1,28 @@
 <?php
-namespace GLColorPalette;
+/**
+ * Cultural Mappings Class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage AI_ML\Strategies
+ */
 
-class CulturalMappings {
-    / Comprehensive cultural color mappings
+namespace GL_Color_Palette_Generator\AI_ML\Strategies;
+
+use WP_Error;
+
+/**
+ * Class Cultural_Mappings
+ *
+ * Handles cultural color mappings and associations
+ *
+ * @since 1.0.0
+ */
+class Cultural_Mappings {
+    /**
+     * Comprehensive cultural color mappings
+     *
+     * @var array
+     */
     private const COLOR_MAPPINGS = [
         'east_asian' => [
             'red' => [

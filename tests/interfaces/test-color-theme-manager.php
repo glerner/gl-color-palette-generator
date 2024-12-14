@@ -2,21 +2,21 @@
 /**
  * Color Theme Manager Interface Tests
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Tests\Interfaces
  * @since 1.0.0
  */
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\ColorThemeManager;
+use GL_Color_Palette_Generator\Interfaces\Color_Theme_Manager;
 
-class ColorThemeManagerTest extends TestCase {
+class Test_Color_Theme_Manager extends TestCase {
     private $manager;
 
     public function setUp(): void {
-        $this->manager = $this->createMock(ColorThemeManager::class);
+        $this->manager = $this->createMock(Color_Theme_Manager::class);
     }
 
     /**

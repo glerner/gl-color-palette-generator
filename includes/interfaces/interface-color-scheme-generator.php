@@ -1,98 +1,138 @@
 <?php
-
-namespace GLColorPalette\Interfaces;
-
 /**
  * Color Scheme Generator Interface
  *
- * Defines the contract for generating complete color schemes with semantic roles.
- *
- * @package GLColorPalette
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
- * @since   1.0.0
+ * @package GL_Color_Palette_Generator
+ * @subpackage Interfaces
  */
-interface ColorSchemeGenerator {
+
+namespace GL_Color_Palette_Generator\Interfaces;
+
+use WP_Error;
+
+/**
+ * Interface for generating color schemes
+ */
+interface Color_Scheme_Generator_Interface {
     /**
-     * Generates a complete color scheme based on criteria.
+     * Generate a color scheme from a base color
      *
-     * @param array $criteria {
-     *     Optional. Generation criteria.
-     *     @type string $base_color     Primary/brand color to build around.
-     *     @type string $style          Design style ('modern', 'classic', etc.).
-     *     @type string $purpose        Intended use ('web', 'print', 'brand').
-     *     @type array  $constraints    Color constraints and requirements.
-     *     @type bool   $accessibility  Enforce WCAG compliance.
-     * }
-     * @return array {
-     *     Generated color scheme.
-     *     @type array $primary    Primary color variations.
-     *     @type array $secondary  Secondary color variations.
-     *     @type array $accent     Accent colors.
-     *     @type array $neutral    Neutral/gray scale colors.
-     *     @type array $semantic {
-     *         Semantic color assignments.
-     *         @type string $success  Success state color.
-     *         @type string $warning  Warning state color.
-     *         @type string $error    Error state color.
-     *         @type string $info     Information state color.
-     *     }
-     *     @type array $metadata   Generation metadata and rationale.
-     * }
-     * @throws \InvalidArgumentException If criteria are invalid.
+     * @param string $base_color Base color in hex format
+     * @param array  $options Generation options
+     * @return array|WP_Error Array of colors or error
      */
-    public function generate_scheme(array $criteria = []): array;
+    public function generate_scheme($base_color, $options = []);
 
     /**
-     * Gets color variations for a specific role.
+     * Generate a monochromatic scheme
      *
-     * @param string $base_color Base color to generate variations from.
-     * @param string $role Color role ('primary', 'secondary', 'accent').
-     * @param array $options {
-     *     Optional. Variation options.
-     *     @type int   $steps          Number of variations to generate.
-     *     @type array $value_range    Brightness range for variations.
-     *     @type bool  $include_base   Include base color in variations.
-     * }
-     * @return array {
-     *     Color variations.
-     *     @type array  $colors     Generated color variations.
-     *     @type array  $metadata   Variation generation details.
-     * }
+     * @param string $base_color Base color in hex format
+     * @param int    $count Number of colors to generate
+     * @return array|WP_Error Array of colors or error
      */
-    public function get_color_variations(string $base_color, string $role, array $options = []): array;
+    public function generate_monochromatic($base_color, $count = 5);
 
     /**
-     * Generates semantic color assignments.
+     * Generate an analogous scheme
      *
-     * @param array $base_scheme Base color scheme to derive from.
-     * @param array $options {
-     *     Optional. Semantic options.
-     *     @type bool  $use_defaults    Use standard semantic colors.
-     *     @type array $custom_mapping  Custom semantic color mappings.
-     *     @type bool  $ensure_contrast Ensure contrast with backgrounds.
-     * }
-     * @return array {
-     *     Semantic color assignments.
-     *     @type array $colors      Assigned semantic colors.
-     *     @type array $rationale   Assignment reasoning.
-     *     @type array $contrast    Contrast analysis results.
-     * }
+     * @param string $base_color Base color in hex format
+     * @param int    $count Number of colors to generate
+     * @return array|WP_Error Array of colors or error
      */
-    public function generate_semantic_colors(array $base_scheme, array $options = []): array;
+    public function generate_analogous($base_color, $count = 5);
 
     /**
-     * Validates and analyzes a color scheme.
+     * Generate a complementary scheme
      *
-     * @param array $scheme Color scheme to analyze.
-     * @return array {
-     *     Analysis results.
-     *     @type bool   $is_valid       Whether scheme is valid.
-     *     @type array  $accessibility  Accessibility analysis.
-     *     @type array  $harmony        Harmony analysis.
-     *     @type array  $coverage       Color space coverage analysis.
-     *     @type array  $improvements   Suggested improvements.
-     * }
+     * @param string $base_color Base color in hex format
+     * @param int    $count Number of colors to generate
+     * @return array|WP_Error Array of colors or error
      */
-    public function analyze_scheme(array $scheme): array;
-} 
+    public function generate_complementary($base_color, $count = 4);
+
+    /**
+     * Generate a split complementary scheme
+     *
+     * @param string $base_color Base color in hex format
+     * @param int    $count Number of colors to generate
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_split_complementary($base_color, $count = 3);
+
+    /**
+     * Generate a triadic scheme
+     *
+     * @param string $base_color Base color in hex format
+     * @param int    $count Number of colors to generate
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_triadic($base_color, $count = 3);
+
+    /**
+     * Generate a tetradic scheme
+     *
+     * @param string $base_color Base color in hex format
+     * @param int    $count Number of colors to generate
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_tetradic($base_color, $count = 4);
+
+    /**
+     * Generate a custom scheme based on color theory rules
+     *
+     * @param string $base_color Base color in hex format
+     * @param array  $rules Color theory rules to apply
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_custom_scheme($base_color, $rules);
+
+    /**
+     * Generate a scheme from an image
+     *
+     * @param string $image_path Path to image file
+     * @param array  $options Extraction options
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_from_image($image_path, $options = []);
+
+    /**
+     * Generate a scheme based on a theme or mood
+     *
+     * @param string $theme Theme or mood name
+     * @param array  $options Generation options
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_themed_scheme($theme, $options = []);
+
+    /**
+     * Adjust scheme colors for better contrast
+     *
+     * @param array $colors Array of colors in hex format
+     * @param array $options Adjustment options
+     * @return array|WP_Error Adjusted colors or error
+     */
+    public function adjust_scheme_contrast($colors, $options = []);
+
+    /**
+     * Get available color scheme types
+     *
+     * @return array List of available scheme types
+     */
+    public function get_available_schemes();
+
+    /**
+     * Get color theory rules for scheme generation
+     *
+     * @return array List of available color theory rules
+     */
+    public function get_color_theory_rules();
+
+    /**
+     * Validate a generated scheme
+     *
+     * @param array $colors Array of colors in hex format
+     * @param array $rules Validation rules
+     * @return bool|WP_Error True if valid, error if not
+     */
+    public function validate_scheme($colors, $rules = []);
+}

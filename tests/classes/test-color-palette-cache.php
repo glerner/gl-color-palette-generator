@@ -2,29 +2,36 @@
 /**
  * Color Palette Cache Tests
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Classes
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
 
-namespace GLColorPalette\Tests;
+namespace GL_Color_Palette_Generator\Tests\Classes;
 
-use PHPUnit\Framework\TestCase;
-use GLColorPalette\ColorPalette;
-use GLColorPalette\ColorPaletteCache;
+use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Classes\Color_Palette_Cache;
+use GL_Color_Palette_Generator\Classes\Color_Palette;
 use Brain\Monkey\Functions;
 
-class ColorPaletteCacheTest extends TestCase {
-    protected ColorPaletteCache $cache;
-    protected ColorPalette $test_palette;
+/**
+ * Tests for the Color Palette Cache class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Classes
+ */
+class Test_Color_Palette_Cache extends Test_Case {
+    protected Color_Palette_Cache $cache;
+    protected Color_Palette $test_palette;
 
     public function setUp(): void {
         parent::setUp();
         \Brain\Monkey\setUp();
 
-        $this->cache = new ColorPaletteCache();
-        $this->test_palette = new ColorPalette([
+        $this->cache = new Color_Palette_Cache();
+        $this->test_palette = new Color_Palette([
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00', '#0000FF'],
             'metadata' => ['type' => 'test']
@@ -56,7 +63,7 @@ class ColorPaletteCacheTest extends TestCase {
 
         $palette = $this->cache->get('test_key');
 
-        $this->assertInstanceOf(ColorPalette::class, $palette);
+        $this->assertInstanceOf(Color_Palette::class, $palette);
         $this->assertEquals('Test Palette', $palette->getName());
         $this->assertCount(3, $palette->getColors());
     }

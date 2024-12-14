@@ -1,15 +1,27 @@
 <?php
+/**
+ * Tests for Color Palette Analyzer Interface
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Interfaces
+ */
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
-use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\ColorPaletteAnalyzer;
+use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Analyzer;
 
-class ColorPaletteAnalyzerTest extends TestCase {
+/**
+ * Test Color Palette Analyzer Interface implementation
+ */
+class Test_Color_Palette_Analyzer extends Test_Case {
+    /** @var Color_Palette_Analyzer */
     private $analyzer;
 
     public function setUp(): void {
-        $this->analyzer = $this->createMock(ColorPaletteAnalyzer::class);
+        parent::setUp();
+        $this->analyzer = $this->getMockBuilder(Color_Palette_Analyzer::class)
+                              ->getMockForAbstractClass();
     }
 
     public function test_analyze_harmony_evaluates_relationships(): void {

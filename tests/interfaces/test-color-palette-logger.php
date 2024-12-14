@@ -1,15 +1,24 @@
 <?php
+/**
+ * Color Palette Logger Interface Tests
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Interfaces
+ */
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\ColorPaletteLogger;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Logger;
 
-class ColorPaletteLoggerTest extends TestCase {
+/**
+ * Test Color Palette Logger Interface implementation
+ */
+class Test_Color_Palette_Logger extends TestCase {
     private $logger;
 
     public function setUp(): void {
-        $this->logger = $this->createMock(ColorPaletteLogger::class);
+        $this->logger = $this->createMock(Color_Palette_Logger::class);
     }
 
     public function test_log_creates_log_entry(): void {

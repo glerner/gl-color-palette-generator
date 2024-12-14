@@ -3,9 +3,12 @@
 namespace GL_Color_Palette_Generator\Tests\Providers;
 
 use GL_Color_Palette_Generator\Providers\AI_Provider_Factory;
-use GL_Color_Palette_Generator\Tests\TestCase;
+use GL_Color_Palette_Generator\Tests\Test_Case;
 
-class Test_AI_Provider_Factory extends TestCase {
+/**
+ * Tests for the AI Provider Factory
+ */
+class Test_AI_Provider_Factory extends Test_Case {
     protected $factory;
 
     public function setUp(): void {
@@ -23,8 +26,8 @@ class Test_AI_Provider_Factory extends TestCase {
     }
 
     public function test_get_invalid_provider() {
-        $provider = $this->factory->get_provider('invalid', ['api_key' => 'test_key']);
-        $this->assertInstanceOf(\WP_Error::class, $provider);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->factory->get_provider('invalid', ['api_key' => 'test_key']);
     }
 
     public function test_get_all_providers() {

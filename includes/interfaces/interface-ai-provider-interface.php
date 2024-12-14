@@ -2,53 +2,43 @@
 /**
  * AI Provider Interface
  *
- * Defines the contract for AI service providers that generate color palettes.
- * This interface ensures consistent implementation across different AI providers.
- *
  * @package GL_Color_Palette_Generator
  * @subpackage Interfaces
- * @since 1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Interfaces;
 
+use WP_Error;
+
 /**
  * Interface AI_Provider_Interface
  *
- * Defines the contract for AI service providers that generate color palettes.
- * Includes methods for palette generation, provider information, and capabilities.
+ * Defines the contract for AI providers
  *
  * @since 1.0.0
  */
 interface AI_Provider_Interface {
     /**
-     * Generate a color palette based on input parameters.
+     * Generate text completion
      *
-     * @param string $prompt     Text prompt describing desired palette
-     * @param int    $num_colors Number of colors to generate
-     * @param array  $options    Provider-specific options
-     * @return array Generated color palette
+     * @param string $prompt The prompt to generate completion for
+     * @param array  $options Optional parameters for the generation
+     * @return string|WP_Error Generated text or error
      */
-    public function generate_colors(string $prompt, int $num_colors, array $options = []): array;
+    public function generate_completion($prompt, $options = []);
 
     /**
-     * Get the provider's name.
+     * Generate embeddings
      *
-     * @return string Provider name
+     * @param string $text Text to generate embeddings for
+     * @return array|WP_Error Array of embeddings or error
      */
-    public function get_name(): string;
+    public function generate_embeddings($text);
 
     /**
-     * Get the provider's display name.
+     * Get model information
      *
-     * @return string Provider display name
+     * @return array Model information including name, version, capabilities
      */
-    public function get_display_name(): string;
-
-    /**
-     * Get the provider's capabilities.
-     *
-     * @return array Provider capabilities
-     */
-    public function get_capabilities(): array;
+    public function get_model_info();
 }

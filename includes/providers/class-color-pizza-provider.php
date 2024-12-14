@@ -1,81 +1,124 @@
 <?php
 /**
- * Color.pizza API Provider
+ * Color Pizza Provider
  *
- * @package    GL_Color_Palette_Generator
+ * @package GL_Color_Palette_Generator
  * @subpackage Providers
- * @since      1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Providers;
 
+use GL_Color_Palette_Generator\Abstracts\AI_Provider_Base;
+use GL_Color_Palette_Generator\Types\Provider_Config;
 use WP_Error;
 
 /**
- * Color.pizza API Provider
- * 
- * Integrates with the color.pizza API to fetch creative color names
- * from their extensive database.
+ * Color Pizza Provider implementation
  */
-class Color_Pizza_Provider {
-    private const API_BASE_URL = 'https://api.color.pizza/v1/';
-    private const BATCH_SIZE = 50; // Maximum colors per request
+class Color_Pizza_Provider extends AI_Provider_Base {
+    /** @var string */
+    private $api_key;
 
     /**
-     * Get color names for a list of hex colors
+     * Constructor
      *
-     * @param array $hex_colors Array of hex color codes without #
-     * @param string $list Optional. The name list to use (default: 'bestOf')
-     * @return array Array of color names keyed by hex code
-     * @throws \Exception If API request fails
+     * @param Provider_Config|null $config Provider configuration
      */
-    public function get_names($hex_colors, $list = 'bestOf') {
-        $results = [];
-
-        // Process colors in batches to avoid URL length limits
-        foreach (array_chunk($hex_colors, self::BATCH_SIZE) as $batch) {
-            $url = self::API_BASE_URL . '?' . http_build_query([
-                'values' => implode(',', $batch),
-                'list' => $list
-            ]);
-
-            $response = wp_remote_get($url);
-
-            if (is_wp_error($response)) {
-                throw new \Exception('Failed to fetch color names: ' . $response->get_error_message());
-            }
-
-            $body = wp_remote_retrieve_body($response);
-            $data = json_decode($body, true);
-
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception('Invalid response from color.pizza API');
-            }
-
-            if (!isset($data['colors']) || !is_array($data['colors'])) {
-                throw new \Exception('Unexpected response format from color.pizza API');
-            }
-
-            foreach ($data['colors'] as $color) {
-                if (isset($color['hex'], $color['name'])) {
-                    $results[strtolower($color['hex'])] = $color['name'];
-                }
-            }
-        }
-
-        return $results;
+    public function __construct(?Provider_Config $config = null) {
+        parent::__construct($config);
+        $config = $config ?? new Provider_Config();
+        $this->api_key = $config->get_api_key();
     }
 
     /**
-     * Get a single color name
+     * Generate color palette
      *
-     * @param string $hex_color Hex color code without #
-     * @param string $list Optional. The name list to use
-     * @return string|null Color name or null if not found
-     * @throws \Exception If API request fails
+     * @param array $params Generation parameters
+     * @return array|WP_Error Generated colors or error
      */
-    public function get_name($hex_color, $list = 'bestOf') {
-        $names = $this->get_names([$hex_color], $list);
-        return $names[strtolower($hex_color)] ?? null;
+    public function generate_palette($params) {
+        if (empty($this->api_key)) {
+            return new WP_Error('missing_api_key', 'Color Pizza API key is required');
+        }
+
+        $response = wp_remote_get('https://api.color.pizza/v1/colors/' . $params['num_colors'] ?? 5, [
+            'headers' => [
+                'Authorization' => "Bearer {$this->api_key}",
+                'Content-Type' => 'application/json',
+            ],
+            'timeout' => 15,
+        ]);
+
+        if (is_wp_error($response)) {
+            return $response;
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+
+        if (!isset($data['colors'])) {
+            return new WP_Error('invalid_response', 'Invalid response from Color Pizza');
+        }
+
+        try {
+            $colors = array_map(function($color) {
+                return $color['hex'];
+            }, $data['colors']);
+            return $this->validate_colors($colors);
+        } catch (\Exception $e) {
+            return new WP_Error('parse_error', 'Failed to parse Color Pizza response');
+        }
+    }
+
+    /**
+     * Get provider name
+     *
+     * @return string Provider name
+     */
+    public function get_name() {
+        return 'color-pizza';
+    }
+
+    /**
+     * Get provider display name
+     *
+     * @return string Provider display name
+     */
+    public function get_display_name() {
+        return 'Color Pizza';
+    }
+
+    /**
+     * Get provider capabilities
+     *
+     * @return array Provider capabilities
+     */
+    public function get_capabilities() {
+        return [
+            'max_colors' => 100,
+            'supports_streaming' => false,
+            'supports_batch' => false
+        ];
+    }
+
+    /**
+     * Validate generated colors
+     *
+     * @param array $colors Colors to validate
+     * @return array Validated colors
+     * @throws \Exception If colors are invalid
+     */
+    private function validate_colors($colors) {
+        if (!is_array($colors)) {
+            throw new \Exception('Invalid colors array');
+        }
+
+        foreach ($colors as $color) {
+            if (!preg_match('/^#[0-9A-F]{6}$/i', $color)) {
+                throw new \Exception(sprintf('Invalid color code: %s', $color));
+            }
+        }
+
+        return $colors;
     }
 }

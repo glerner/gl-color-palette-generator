@@ -4,17 +4,18 @@
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Tests\Types
+ * @since 1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Tests\Types;
 
+use GL_Color_Palette_Generator\Tests\Test_Case;
 use GL_Color_Palette_Generator\Types\Color_Types;
-use PHPUnit\Framework\TestCase;
 
 /**
- * Color Types test case.
+ * Tests for the Color Types class
  */
-class Test_Color_Types extends TestCase {
+class Test_Color_Types extends Test_Case {
     /**
      * Test hex color validation
      *

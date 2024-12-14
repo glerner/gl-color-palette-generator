@@ -1,15 +1,24 @@
 <?php
+/**
+ * Color Palette Analytics Interface Tests
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Interfaces
+ */
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\ColorPaletteAnalytics;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Analytics;
 
-class ColorPaletteAnalyticsTest extends TestCase {
+/**
+ * Test Color Palette Analytics Interface implementation
+ */
+class Test_Color_Palette_Analytics extends TestCase {
     private $analytics;
 
     public function setUp(): void {
-        $this->analytics = $this->createMock(ColorPaletteAnalytics::class);
+        $this->analytics = $this->createMock(Color_Palette_Analytics::class);
     }
 
     public function test_analyze_usage_returns_comprehensive_analysis(): void {

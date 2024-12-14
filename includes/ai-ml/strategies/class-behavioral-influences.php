@@ -1,12 +1,47 @@
 <?php
-namespace GLColorPalette;
+/**
+ * Behavioral Influences Class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage AI_ML\Strategies
+ */
 
-class BehavioralInfluences {
+namespace GL_Color_Palette_Generator\AI_ML\Strategies;
+
+use WP_Error;
+
+/**
+ * Class Behavioral_Influences
+ *
+ * Analyzes and applies behavioral influences of colors
+ *
+ * @since 1.0.0
+ */
+class Behavioral_Influences {
+    /**
+     * Behavior analyzer instance
+     *
+     * @var object
+     */
     private $behavior_analyzer;
+
+    /**
+     * Response tracker instance
+     *
+     * @var object
+     */
     private $response_tracker;
+
+    /**
+     * Context evaluator instance
+     *
+     * @var object
+     */
     private $context_evaluator;
 
-    / Comprehensive behavioral influence mapping
+    /**
+     * Comprehensive behavioral influence mapping
+     */
     private const BEHAVIORAL_INFLUENCES = [
         'decision_making' => [
             'purchase_behavior' => [
@@ -153,6 +188,10 @@ class BehavioralInfluences {
 
     /**
      * Analyze behavioral influence patterns
+     *
+     * @param array $colors
+     * @param array $context
+     * @return array
      */
     public function analyze_behavioral_patterns($colors, $context = []) {
         return [
@@ -165,6 +204,10 @@ class BehavioralInfluences {
 
     /**
      * Generate behavior-optimized color schemes
+     *
+     * @param string $target_behavior
+     * @param array $context
+     * @return array
      */
     public function generate_behavioral_scheme($target_behavior, $context = []) {
         return [
@@ -177,6 +220,9 @@ class BehavioralInfluences {
 
     /**
      * Analyze user behavior patterns
+     *
+     * @param array $palette
+     * @return array
      */
     public function analyze_behavior_patterns($palette) {
         return [
@@ -189,6 +235,9 @@ class BehavioralInfluences {
 
     /**
      * Generate behavioral predictions
+     *
+     * @param array $palette
+     * @return array
      */
     public function generate_behavioral_predictions($palette) {
         $psychological = new PsychologicalEffects();
@@ -204,6 +253,10 @@ class BehavioralInfluences {
 
     /**
      * Optimize for desired behaviors
+     *
+     * @param array $palette
+     * @param string $desired_behavior
+     * @return array
      */
     public function optimize_for_behavior($palette, $desired_behavior) {
         $current_analysis = $this->analyze_behavior_patterns($palette);

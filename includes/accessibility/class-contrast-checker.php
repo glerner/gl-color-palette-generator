@@ -2,25 +2,24 @@
 /**
  * Contrast Checker Class
  *
- * Handles contrast ratio calculations and WCAG compliance checks for
- * color combinations. Implements WCAG 2.1 guidelines for text contrast.
- *
  * @package GL_Color_Palette_Generator
  * @subpackage Accessibility
- * @since 1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Accessibility;
 
+use WP_Error;
+use GL_Color_Palette_Generator\Color_Management\Color_Utility;
+
 /**
- * Class ContrastChecker
+ * Class Contrast_Checker
  *
  * Calculates and validates contrast ratios according to WCAG 2.1 standards.
  * Provides methods for checking text readability and color contrast compliance.
  *
  * @since 1.0.0
  */
-class ContrastChecker {
+class Contrast_Checker {
     /**
      * WCAG 2.1 minimum contrast requirements
      */

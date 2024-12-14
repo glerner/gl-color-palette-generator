@@ -2,37 +2,37 @@
 /**
  * Color Converter Interface Tests
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Tests\Interfaces
  * @since 1.0.0
  */
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\ColorConverter;
+use GL_Color_Palette_Generator\Interfaces\Color_Converter;
 
-class ColorConverterTest extends TestCase {
+class Test_Color_Converter extends TestCase {
     private $converter;
 
     public function setUp(): void {
         // Create a mock implementation of the interface
-        $this->converter = $this->createMock(ColorConverter::class);
+        $this->converter = $this->createMock(Color_Converter::class);
     }
 
-    public function test_rgb_to_hex_returns_valid_format(): void {
+    public function test_convert_rgb_to_hex_returns_valid_format(): void {
         // Arrange
         $rgb = ['r' => 255, 'g' => 0, 'b' => 0];
         $expected = '#FF0000';
 
         $this->converter
             ->expects($this->once())
-            ->method('rgb_to_hex')
+            ->method('convert_rgb_to_hex')
             ->with($rgb)
             ->willReturn($expected);
 
         // Act
-        $result = $this->converter->rgb_to_hex($rgb);
+        $result = $this->converter->convert_rgb_to_hex($rgb);
 
         // Assert
         $this->assertIsString($result);
@@ -40,19 +40,19 @@ class ColorConverterTest extends TestCase {
         $this->assertEquals($expected, $result);
     }
 
-    public function test_hex_to_rgb_returns_valid_array(): void {
+    public function test_convert_hex_to_rgb_returns_valid_array(): void {
         // Arrange
         $hex = '#FF0000';
         $expected = ['r' => 255, 'g' => 0, 'b' => 0];
 
         $this->converter
             ->expects($this->once())
-            ->method('hex_to_rgb')
+            ->method('convert_hex_to_rgb')
             ->with($hex)
             ->willReturn($expected);
 
         // Act
-        $result = $this->converter->hex_to_rgb($hex);
+        $result = $this->converter->convert_hex_to_rgb($hex);
 
         // Assert
         $this->assertIsArray($result);
@@ -62,19 +62,19 @@ class ColorConverterTest extends TestCase {
         $this->assertEquals($expected, $result);
     }
 
-    public function test_rgb_to_hsl_returns_valid_array(): void {
+    public function test_convert_rgb_to_hsl_returns_valid_array(): void {
         // Arrange
         $rgb = ['r' => 255, 'g' => 0, 'b' => 0];
         $expected = ['h' => 0, 's' => 100, 'l' => 50];
 
         $this->converter
             ->expects($this->once())
-            ->method('rgb_to_hsl')
+            ->method('convert_rgb_to_hsl')
             ->with($rgb)
             ->willReturn($expected);
 
         // Act
-        $result = $this->converter->rgb_to_hsl($rgb);
+        $result = $this->converter->convert_rgb_to_hsl($rgb);
 
         // Assert
         $this->assertIsArray($result);
@@ -84,19 +84,19 @@ class ColorConverterTest extends TestCase {
         $this->assertEquals($expected, $result);
     }
 
-    public function test_hsl_to_rgb_returns_valid_array(): void {
+    public function test_convert_hsl_to_rgb_returns_valid_array(): void {
         // Arrange
         $hsl = ['h' => 0, 's' => 100, 'l' => 50];
         $expected = ['r' => 255, 'g' => 0, 'b' => 0];
 
         $this->converter
             ->expects($this->once())
-            ->method('hsl_to_rgb')
+            ->method('convert_hsl_to_rgb')
             ->with($hsl)
             ->willReturn($expected);
 
         // Act
-        $result = $this->converter->hsl_to_rgb($hsl);
+        $result = $this->converter->convert_hsl_to_rgb($hsl);
 
         // Assert
         $this->assertIsArray($result);
@@ -106,19 +106,19 @@ class ColorConverterTest extends TestCase {
         $this->assertEquals($expected, $result);
     }
 
-    public function test_rgb_to_lab_returns_valid_array(): void {
+    public function test_convert_rgb_to_lab_returns_valid_array(): void {
         // Arrange
         $rgb = ['r' => 255, 'g' => 0, 'b' => 0];
         $expected = ['l' => 53.23, 'a' => 80.11, 'b' => 67.22];
 
         $this->converter
             ->expects($this->once())
-            ->method('rgb_to_lab')
+            ->method('convert_rgb_to_lab')
             ->with($rgb)
             ->willReturn($expected);
 
         // Act
-        $result = $this->converter->rgb_to_lab($rgb);
+        $result = $this->converter->convert_rgb_to_lab($rgb);
 
         // Assert
         $this->assertIsArray($result);
@@ -128,19 +128,19 @@ class ColorConverterTest extends TestCase {
         $this->assertEquals($expected, $result);
     }
 
-    public function test_lab_to_rgb_returns_valid_array(): void {
+    public function test_convert_lab_to_rgb_returns_valid_array(): void {
         // Arrange
         $lab = ['l' => 53.23, 'a' => 80.11, 'b' => 67.22];
         $expected = ['r' => 255, 'g' => 0, 'b' => 0];
 
         $this->converter
             ->expects($this->once())
-            ->method('lab_to_rgb')
+            ->method('convert_lab_to_rgb')
             ->with($lab)
             ->willReturn($expected);
 
         // Act
-        $result = $this->converter->lab_to_rgb($lab);
+        $result = $this->converter->convert_lab_to_rgb($lab);
 
         // Assert
         $this->assertIsArray($result);
@@ -153,29 +153,29 @@ class ColorConverterTest extends TestCase {
     /**
      * @dataProvider invalidRgbProvider
      */
-    public function test_rgb_to_hex_throws_exception_for_invalid_input(array $rgb): void {
+    public function test_convert_rgb_to_hex_throws_exception_for_invalid_input(array $rgb): void {
         $this->converter
             ->expects($this->once())
-            ->method('rgb_to_hex')
+            ->method('convert_rgb_to_hex')
             ->with($rgb)
             ->willThrowException(new \InvalidArgumentException());
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->converter->rgb_to_hex($rgb);
+        $this->converter->convert_rgb_to_hex($rgb);
     }
 
     /**
      * @dataProvider invalidHexProvider
      */
-    public function test_hex_to_rgb_throws_exception_for_invalid_input(string $hex): void {
+    public function test_convert_hex_to_rgb_throws_exception_for_invalid_input(string $hex): void {
         $this->converter
             ->expects($this->once())
-            ->method('hex_to_rgb')
+            ->method('convert_hex_to_rgb')
             ->with($hex)
             ->willThrowException(new \InvalidArgumentException());
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->converter->hex_to_rgb($hex);
+        $this->converter->convert_hex_to_rgb($hex);
     }
 
     public function invalidRgbProvider(): array {

@@ -1,9 +1,6 @@
 <?php declare(strict_types=1);
 /**
- * Google PaLM Provider Class
- *
- * Implements AI provider interface for Google's PaLM models.
- * Handles color palette generation using PaLM API.
+ * PaLM Provider
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Providers
@@ -12,32 +9,84 @@
 
 namespace GL_Color_Palette_Generator\Providers;
 
-use GL_Color_Palette_Generator\Interfaces\AI_Provider_Interface;
 use GL_Color_Palette_Generator\Abstracts\AI_Provider_Base;
 use GL_Color_Palette_Generator\Types\Provider_Config;
-use GL_Color_Palette_Generator\Types\Color_Types;
 use WP_Error;
 
 /**
- * PaLM Provider Class
+ * PaLM Provider implementation
  *
  * @since 1.0.0
  */
-class Palm_Provider extends AI_Provider_Base implements AI_Provider_Interface {
+class Palm_Provider extends AI_Provider_Base {
+    /** @var string */
+    private $api_key;
+
+    /** @var string */
+    private $model = 'text-bison-001';
+
     /**
      * Constructor
      *
-     * @param array $credentials API credentials
+     * @param Provider_Config|null $config Provider configuration
      */
-    public function __construct(array $credentials) {
-        $this->api_url = 'https://generativelanguage.googleapis.com/v1beta/models/';
-        parent::__construct($credentials);
+    public function __construct(?Provider_Config $config = null) {
+        parent::__construct($config);
+        $config = $config ?? new Provider_Config();
+        $this->api_key = $config->get_api_key();
+        $this->model = $config->get_model() ?? 'text-bison-001';
+    }
+
+    /**
+     * Generate color palette
+     *
+     * @param array $params Generation parameters
+     * @return array|WP_Error Generated colors or error
+     */
+    public function generate_palette($params) {
+        if (empty($this->api_key)) {
+            return new WP_Error('missing_api_key', 'PaLM API key is required');
+        }
+
+        $prompt = $this->build_prompt($params);
+        $response = wp_remote_post('https://generativelanguage.googleapis.com/v1beta3/models/' . $this->model . ':generateText', [
+            'headers' => [
+                'Authorization' => "Bearer {$this->api_key}",
+                'Content-Type' => 'application/json',
+            ],
+            'body' => wp_json_encode([
+                'prompt' => [
+                    'text' => $prompt
+                ],
+                'temperature' => 0.7,
+                'candidate_count' => 1,
+            ]),
+            'timeout' => 15,
+        ]);
+
+        if (is_wp_error($response)) {
+            return $response;
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+
+        if (!isset($data['candidates'][0]['output'])) {
+            return new WP_Error('invalid_response', 'Invalid response from PaLM');
+        }
+
+        try {
+            $colors = json_decode($data['candidates'][0]['output'], true);
+            return $this->validate_colors($colors);
+        } catch (\Exception $e) {
+            return new WP_Error('parse_error', 'Failed to parse PaLM response');
+        }
     }
 
     /**
      * Get provider name
      *
-     * @return string
+     * @return string Provider name
      */
     public function get_name(): string {
         return 'palm';
@@ -46,70 +95,57 @@ class Palm_Provider extends AI_Provider_Base implements AI_Provider_Interface {
     /**
      * Get provider display name
      *
-     * @return string
+     * @return string Provider display name
      */
     public function get_display_name(): string {
-        return 'Google PaLM';
+        return 'PaLM';
     }
 
     /**
      * Get provider capabilities
      *
-     * @return array
+     * @return array Provider capabilities
      */
     public function get_capabilities(): array {
         return [
-            'max_colors' => 8,
+            'max_colors' => 10,
             'supports_streaming' => false,
-            'supports_batch' => true,
-            'supports_style_transfer' => true,
-            'max_prompt_length' => 4096,
-            'rate_limit' => [
-                'requests_per_minute' => 60,
-                'tokens_per_minute' => 100000
-            ]
+            'supports_batch' => true
         ];
     }
 
-    public function generate_palette(array $params) {
-        $validation = $this->validate_params($params);
-        if (is_wp_error($validation)) {
-            return $validation;
+    /**
+     * Build prompt for PaLM API
+     *
+     * @param array $params Generation parameters
+     * @return string Prompt
+     */
+    private function build_prompt($params) {
+        return sprintf(
+            'Generate a color palette with %d colors based on this description: %s. Return only a JSON array of hex color codes.',
+            $params['num_colors'] ?? 5,
+            $params['prompt'] ?? ''
+        );
+    }
+
+    /**
+     * Validate generated colors
+     *
+     * @param array $colors Colors to validate
+     * @return array Validated colors
+     * @throws \Exception If colors are invalid
+     */
+    private function validate_colors($colors) {
+        if (!is_array($colors)) {
+            throw new \Exception('Invalid colors array');
         }
 
-        $prompt = $this->format_prompt($params);
-        $response = $this->make_request('text-bison-001:generateText', [
-            'prompt' => [
-                'text' => $prompt
-            ],
-            'temperature' => 0.7,
-            'candidate_count' => 1,
-        ]);
-
-        if (is_wp_error($response)) {
-            return $response;
+        foreach ($colors as $color) {
+            if (!preg_match('/^#[0-9A-F]{6}$/i', $color)) {
+                throw new \Exception(sprintf('Invalid color code: %s', $color));
+            }
         }
 
-        return $this->parse_response($response);
+        return $colors;
     }
-
-    protected function get_headers(): array {
-        return [
-            'Authorization' => 'Bearer ' . $this->credentials['api_key'],
-            'Content-Type' => 'application/json',
-        ];
-    }
-
-    public function validate_credentials() {
-        if (empty($this->credentials['api_key'])) {
-            return new WP_Error('missing_api_key', 'Google PaLM API key is required');
-        }
-        return true;
-    }
-
-    public function get_requirements(): array {
-        return [
-            'api_key' => 'Google PaLM API Key',
-        ];
-    }
-} 
+}

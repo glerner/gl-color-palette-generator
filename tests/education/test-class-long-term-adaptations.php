@@ -1,17 +1,25 @@
 <?php
+/**
+ * Tests for Long Term Adaptations
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Education
+ */
 
-namespace GLColorPalette\Tests\Education;
+namespace GL_Color_Palette_Generator\Tests\Education;
 
-use GLColorPalette\LongTermAdaptations;
-use WP_UnitTestCase;
+use GL_Color_Palette_Generator\Tests\Test_Case_Integration;
+use GL_Color_Palette_Generator\Education\Long_Term_Adaptations;
 
-class Test_Long_Term_Adaptations extends WP_UnitTestCase {
-    private $adaptations;
+/**
+ * Test Long Term Adaptations functionality
+ */
+class Test_Long_Term_Adaptations extends Test_Case_Integration {
+    private Long_Term_Adaptations $adaptations;
 
     public function setUp(): void {
         parent::setUp();
-        WP_Mock::setUp();
-        $this->adaptations = new LongTermAdaptations();
+        $this->adaptations = new Long_Term_Adaptations();
     }
 
     public function test_get_adaptation_map(): void {
@@ -153,7 +161,6 @@ class Test_Long_Term_Adaptations extends WP_UnitTestCase {
     }
 
     public function tearDown(): void {
-        WP_Mock::tearDown();
         parent::tearDown();
     }
 }

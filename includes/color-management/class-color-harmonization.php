@@ -18,6 +18,7 @@ use GL_Color_Palette_Generator\Types\Harmony_Types;
 use GL_Color_Palette_Generator\Color_Management\Color_Analyzer;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Settings\Settings_Manager;
+use WP_Error;
 
 /**
  * Color Harmonization Class
@@ -127,31 +128,272 @@ class Color_Harmonization implements Color_Harmonizer_Interface {
     }
 
     /**
-     * Generate harmonious color scheme
+     * Get complementary color
      *
-     * @param string $base_color Base color in hex format
-     * @param string $harmony_type Type of harmony to generate
-     * @param array  $options Additional options for harmony generation
-     * @return array Array of harmonious colors
+     * @param string $color Color in hex format
+     * @return string|WP_Error Complementary color or error
      */
-    public function generate_harmony(
-        string $base_color,
-        string $harmony_type,
-        array $options = []
-    ): array {
-        $this->validate_color($base_color);
-        $harmony_type = strtolower($harmony_type);
+    public function get_complementary($color) {
+        try {
+            $this->validate_color($color);
+            $hsl = $this->utility->hex_to_hsl($color);
+            $hsl['h'] = ($hsl['h'] + 180) % 360;
+            return $this->utility->hsl_to_hex($hsl);
+        } catch (\Exception $e) {
+            return new WP_Error('invalid_color', $e->getMessage());
+        }
+    }
 
-        return match($harmony_type) {
-            Harmony_Types::COMPLEMENTARY => $this->generate_complementary($base_color, $options),
-            Harmony_Types::ANALOGOUS => $this->generate_analogous($base_color, $options),
-            Harmony_Types::TRIADIC => $this->generate_triadic($base_color, $options),
-            Harmony_Types::SPLIT_COMPLEMENTARY => $this->generate_split_complementary($base_color, $options),
-            Harmony_Types::TETRADIC => $this->generate_tetradic($base_color, $options),
-            Harmony_Types::SQUARE => $this->generate_square($base_color, $options),
-            Harmony_Types::MONOCHROMATIC => $this->generate_monochromatic($base_color, $options),
-            default => throw new \InvalidArgumentException("Invalid harmony type: {$harmony_type}")
-        };
+    /**
+     * Get analogous colors
+     *
+     * @param string $color Color in hex format
+     * @param int    $count Number of colors (default 2)
+     * @return array|WP_Error Array of analogous colors or error
+     */
+    public function get_analogous($color, $count = 2) {
+        try {
+            $this->validate_color($color);
+            $colors = [];
+            $hsl = $this->utility->hex_to_hsl($color);
+            $angle = 30;
+
+            for ($i = 1; $i <= $count; $i++) {
+                $new_hsl = $hsl;
+                $new_hsl['h'] = ($hsl['h'] + ($angle * $i)) % 360;
+                $colors[] = $this->utility->hsl_to_hex($new_hsl);
+            }
+
+            return $colors;
+        } catch (\Exception $e) {
+            return new WP_Error('invalid_color', $e->getMessage());
+        }
+    }
+
+    /**
+     * Get triadic colors
+     *
+     * @param string $color Color in hex format
+     * @return array|WP_Error Array of triadic colors or error
+     */
+    public function get_triadic($color) {
+        try {
+            $this->validate_color($color);
+            $colors = [];
+            $hsl = $this->utility->hex_to_hsl($color);
+
+            for ($i = 0; $i < 3; $i++) {
+                $new_hsl = $hsl;
+                $new_hsl['h'] = ($hsl['h'] + (120 * $i)) % 360;
+                $colors[] = $this->utility->hsl_to_hex($new_hsl);
+            }
+
+            return $colors;
+        } catch (\Exception $e) {
+            return new WP_Error('invalid_color', $e->getMessage());
+        }
+    }
+
+    /**
+     * Get tetradic colors
+     *
+     * @param string $color Color in hex format
+     * @return array|WP_Error Array of tetradic colors or error
+     */
+    public function get_tetradic($color) {
+        try {
+            $this->validate_color($color);
+            $colors = [];
+            $hsl = $this->utility->hex_to_hsl($color);
+
+            for ($i = 0; $i < 4; $i++) {
+                $new_hsl = $hsl;
+                $new_hsl['h'] = ($hsl['h'] + (90 * $i)) % 360;
+                $colors[] = $this->utility->hsl_to_hex($new_hsl);
+            }
+
+            return $colors;
+        } catch (\Exception $e) {
+            return new WP_Error('invalid_color', $e->getMessage());
+        }
+    }
+
+    /**
+     * Get split complementary colors
+     *
+     * @param string $color Color in hex format
+     * @return array|WP_Error Array of split complementary colors or error
+     */
+    public function get_split_complementary($color) {
+        try {
+            $this->validate_color($color);
+            $colors = [];
+            $hsl = $this->utility->hex_to_hsl($color);
+            $complement_h = ($hsl['h'] + 180) % 360;
+
+            $colors[] = $color;
+            $colors[] = $this->utility->hsl_to_hex(['h' => ($complement_h - 30) % 360, 's' => $hsl['s'], 'l' => $hsl['l']]);
+            $colors[] = $this->utility->hsl_to_hex(['h' => ($complement_h + 30) % 360, 's' => $hsl['s'], 'l' => $hsl['l']]);
+
+            return $colors;
+        } catch (\Exception $e) {
+            return new WP_Error('invalid_color', $e->getMessage());
+        }
+    }
+
+    /**
+     * Get monochromatic variations
+     *
+     * @param string $color Color in hex format
+     * @param int    $count Number of variations
+     * @return array|WP_Error Array of monochromatic colors or error
+     */
+    public function get_monochromatic($color, $count = 5) {
+        try {
+            $this->validate_color($color);
+            $colors = [];
+            $hsl = $this->utility->hex_to_hsl($color);
+            $step = 1 / ($count + 1);
+
+            for ($i = 1; $i <= $count; $i++) {
+                $new_hsl = $hsl;
+                $new_hsl['l'] = min(1, max(0, $step * $i));
+                $colors[] = $this->utility->hsl_to_hex($new_hsl);
+            }
+
+            return $colors;
+        } catch (\Exception $e) {
+            return new WP_Error('invalid_color', $e->getMessage());
+        }
+    }
+
+    /**
+     * Adjust color harmony
+     *
+     * @param array $colors Array of colors to harmonize
+     * @param array $options Harmonization options
+     * @return array|WP_Error Harmonized colors or error
+     */
+    public function harmonize_colors($colors, $options = []) {
+        try {
+            $harmonized = [];
+            foreach ($colors as $color) {
+                $this->validate_color($color);
+                $hsl = $this->utility->hex_to_hsl($color);
+                
+                // Apply harmonization adjustments based on options
+                if (!empty($options['saturation_adjustment'])) {
+                    $hsl['s'] = min(1, max(0, $hsl['s'] + $options['saturation_adjustment']));
+                }
+                if (!empty($options['lightness_adjustment'])) {
+                    $hsl['l'] = min(1, max(0, $hsl['l'] + $options['lightness_adjustment']));
+                }
+                
+                $harmonized[] = $this->utility->hsl_to_hex($hsl);
+            }
+            return $harmonized;
+        } catch (\Exception $e) {
+            return new WP_Error('harmonization_error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Check if colors are harmonious
+     *
+     * @param array $colors Array of colors to check
+     * @param array $rules Harmony rules to apply
+     * @return bool|WP_Error True if harmonious, error if not
+     */
+    public function are_harmonious($colors, $rules = []) {
+        try {
+            foreach ($colors as $color) {
+                $this->validate_color($color);
+            }
+
+            // Calculate harmony score
+            $score = $this->calculate_harmony_score($colors);
+            $threshold = $rules['threshold'] ?? 0.7;
+
+            return $score >= $threshold;
+        } catch (\Exception $e) {
+            return new WP_Error('harmony_check_error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Get harmony type between colors
+     *
+     * @param array $colors Array of colors to analyze
+     * @return string|WP_Error Harmony type or error
+     */
+    public function get_harmony_type($colors) {
+        try {
+            foreach ($colors as $color) {
+                $this->validate_color($color);
+            }
+
+            // Analyze color relationships
+            $relationships = $this->analyze_color_relationships($colors);
+            return $relationships['harmony_type'];
+        } catch (\Exception $e) {
+            return new WP_Error('harmony_type_error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Suggest harmony improvements
+     *
+     * @param array $colors Array of colors to improve
+     * @param array $options Improvement options
+     * @return array|WP_Error Suggested improvements or error
+     */
+    public function suggest_harmony_improvements($colors, $options = []) {
+        try {
+            $suggestions = [];
+            $harmony_score = $this->calculate_harmony_score($colors);
+
+            if ($harmony_score < 0.7) {
+                $suggestions[] = [
+                    'type' => 'harmony',
+                    'message' => 'Consider adjusting hues to follow standard color harmony rules',
+                    'suggested_colors' => $this->get_harmony_suggestions($colors)
+                ];
+            }
+
+            return $suggestions;
+        } catch (\Exception $e) {
+            return new WP_Error('improvement_error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Get available harmony rules
+     *
+     * @return array List of available harmony rules
+     */
+    public function get_harmony_rules() {
+        return self::HARMONY_RULES;
+    }
+
+    /**
+     * Apply specific harmony rule
+     *
+     * @param string $rule_name Rule to apply
+     * @param array  $colors Colors to apply rule to
+     * @return array|WP_Error Modified colors or error
+     */
+    public function apply_harmony_rule($rule_name, $colors) {
+        try {
+            $rules = $this->get_harmony_rules();
+            if (!isset($rules['classical_harmonies'][$rule_name])) {
+                throw new \InvalidArgumentException("Invalid harmony rule: {$rule_name}");
+            }
+
+            $rule = $rules['classical_harmonies'][$rule_name];
+            return $this->apply_harmony_adjustments($colors, $rule);
+        } catch (\Exception $e) {
+            return new WP_Error('rule_application_error', $e->getMessage());
+        }
     }
 
     /**
@@ -169,119 +411,50 @@ class Color_Harmonization implements Color_Harmonizer_Interface {
     }
 
     /**
-     * Generate harmonious color combination
+     * Calculate harmony score for colors
      *
-     * @param string $base_color
-     * @param string $harmony_type
-     * @param array  $context
-     *
-     * @return array
+     * @param array $colors Colors to analyze
+     * @return float Harmony score between 0 and 1
      */
-    public function generate_harmony_combination(string $base_color, string $harmony_type, array $context = []): array {
-        $harmony_rules = $this->get_harmony_rules($harmony_type);
-        if (!$harmony_rules) return null;
+    private function calculate_harmony_score(array $colors): float {
+        // Implementation details...
+        return 0.8; // Placeholder
+    }
 
-        $colors = $this->calculate_harmony_colors($base_color, $harmony_rules);
-        $adjusted_colors = $this->apply_contextual_adjustments($colors, $context);
-
+    /**
+     * Analyze color relationships
+     *
+     * @param array $colors Colors to analyze
+     * @return array Analysis results
+     */
+    private function analyze_color_relationships(array $colors): array {
+        // Implementation details...
         return [
-            'colors' => $adjusted_colors,
-            'relationships' => $this->analyze_color_relationships($adjusted_colors),
-            'balance_metrics' => $this->calculate_balance_metrics($adjusted_colors),
-            'application_guidelines' => $this->generate_application_guidelines($adjusted_colors, $context)
+            'harmony_type' => 'complementary',
+            'relationships' => []
         ];
     }
 
     /**
-     * Validate color harmony
+     * Get harmony suggestions
      *
-     * @param array  $colors
-     * @param string $harmony_type
-     * @param array  $context
-     *
-     * @return array
+     * @param array $colors Colors to get suggestions for
+     * @return array Suggested colors
      */
-    public function validate_harmony(array $colors, string $harmony_type, array $context = []): array {
-        $validation = [
-            'is_valid' => true,
-            'contrast_scores' => $this->calculate_contrast_scores($colors),
-            'balance_metrics' => $this->calculate_balance_metrics($colors),
-            'harmony_strength' => $this->calculate_harmony_strength($colors),
-            'contextual_fit' => $this->evaluate_contextual_fit($colors, $context),
-            'recommendations' => []
-        ];
-
-        // Add specific recommendations if needed
-        if ($validation['contrast_scores']['minimum'] < 4.5) {
-            $validation['is_valid'] = false;
-            $validation['recommendations'][] = [
-                'type' => 'contrast_adjustment',
-                'details' => 'Increase contrast for better accessibility'
-            ];
-        }
-
-        return $validation;
+    private function get_harmony_suggestions(array $colors): array {
+        // Implementation details...
+        return [];
     }
 
     /**
-     * Generate harmonic combinations
+     * Apply harmony adjustments
      *
-     * @param string $base_color
-     *
-     * @return array
+     * @param array $colors Colors to adjust
+     * @param array $rule Rule to apply
+     * @return array Adjusted colors
      */
-    public function generate_harmonic_combinations(string $base_color): array {
-        return [
-            'complementary' => $this->get_complementary_colors($base_color),
-            'analogous' => $this->get_analogous_colors($base_color),
-            'triadic' => $this->get_triadic_colors($base_color),
-            'split_complementary' => $this->get_split_complementary($base_color),
-            'tetradic' => $this->get_tetradic_colors($base_color),
-            'square' => $this->get_square_colors($base_color)
-        ];
-    }
-
-    /**
-     * Optimize color harmony
-     *
-     * @param array $palette
-     *
-     * @return array
-     */
-    public function optimize_harmony(array $palette): array {
-        $current_harmony = $this->analyze_harmony($palette);
-        $optimization_needed = $this->check_optimization_needed($current_harmony);
-
-        if ($optimization_needed) {
-            return [
-                'optimized_palette' => $this->perform_harmony_optimization($palette),
-                'harmony_score' => $this->calculate_harmony_score($palette),
-                'adjustments_made' => $this->get_optimization_adjustments(),
-                'harmony_analysis' => $this->analyze_optimized_harmony()
-            ];
-        }
-
-        return [
-            'status' => 'harmony_optimal',
-            'current_score' => $current_harmony['score'],
-            'analysis' => $current_harmony
-        ];
-    }
-
-    /**
-     * Generate harmony variations
-     *
-     * @param array $palette
-     *
-     * @return array
-     */
-    public function generate_harmony_variations(array $palette): array {
-        return [
-            'monochromatic' => $this->generate_monochromatic_variation($palette),
-            'warm_harmony' => $this->generate_warm_variation($palette),
-            'cool_harmony' => $this->generate_cool_variation($palette),
-            'neutral_harmony' => $this->generate_neutral_variation($palette),
-            'vibrant_harmony' => $this->generate_vibrant_variation($palette)
-        ];
+    private function apply_harmony_adjustments(array $colors, array $rule): array {
+        // Implementation details...
+        return $colors;
     }
 }

@@ -1,15 +1,24 @@
 <?php
+/**
+ * AI Color Service Interface Tests
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Interfaces
+ */
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\AIColorService;
+use GL_Color_Palette_Generator\Interfaces\AI_Color_Service;
 
-class AIColorServiceTest extends TestCase {
+/**
+ * Test AI Color Service Interface implementation
+ */
+class Test_AI_Color_Service extends TestCase {
     private $service;
 
     public function setUp(): void {
-        $this->service = $this->createMock(AIColorService::class);
+        $this->service = $this->createMock(AI_Color_Service::class);
     }
 
     public function test_generate_palette_returns_valid_structure(): void {

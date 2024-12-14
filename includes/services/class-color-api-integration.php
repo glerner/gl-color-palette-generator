@@ -1,9 +1,42 @@
 <?php
-namespace GLColorPalette;
+/**
+ * Color API Integration Class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Services
+ */
 
-class ColorAPIIntegration {
+namespace GL_Color_Palette_Generator\Services;
+
+use WP_Error;
+
+/**
+ * Class Color_API_Integration
+ *
+ * Handles integration with external color APIs and services
+ *
+ * @since 1.0.0
+ */
+class Color_API_Integration {
+    /**
+     * API connector instance
+     *
+     * @var object
+     */
     private $api_connector;
+
+    /**
+     * Data synchronizer instance
+     *
+     * @var object
+     */
     private $data_synchronizer;
+
+    /**
+     * Cache manager instance
+     *
+     * @var object
+     */
     private $cache_manager;
 
     / API integration configurations
