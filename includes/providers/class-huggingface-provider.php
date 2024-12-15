@@ -36,12 +36,74 @@ class HuggingFace_Provider extends AI_Provider_Base {
     }
 
     /**
+     * Validate provider credentials
+     *
+     * @return bool|WP_Error True if valid, WP_Error otherwise
+     */
+    public function validate_credentials(): bool|WP_Error {
+        if (empty($this->api_key)) {
+            return new WP_Error('missing_api_key', 'HuggingFace API key is required');
+        }
+
+        // Make a simple API call to validate the key
+        $response = wp_remote_post('https://api-inference.huggingface.co/models/' . $this->model, [
+            'headers' => [
+                'Authorization' => "Bearer {$this->api_key}",
+                'Content-Type' => 'application/json',
+            ],
+            'body' => wp_json_encode([
+                'inputs' => 'Test',
+                'max_length' => 1,
+            ]),
+        ]);
+
+        if (is_wp_error($response)) {
+            return $response;
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+        if ($code !== 200) {
+            $body = wp_remote_retrieve_body($response);
+            $error = json_decode($body, true);
+            return new WP_Error(
+                'invalid_credentials',
+                $error['error'] ?? 'Invalid API key or configuration'
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Get provider requirements
+     *
+     * @return array Array of requirements
+     */
+    public function get_requirements(): array {
+        return [
+            'api_key' => [
+                'required' => true,
+                'type' => 'string',
+                'description' => 'HuggingFace API key',
+                'link' => 'https://huggingface.co/settings/tokens',
+            ],
+            'model' => [
+                'required' => false,
+                'type' => 'string',
+                'description' => 'HuggingFace model to use',
+                'default' => 'gpt2',
+                'options' => ['gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'],
+            ],
+        ];
+    }
+
+    /**
      * Generate color palette
      *
      * @param array $params Generation parameters
      * @return array|WP_Error Generated colors or error
      */
-    public function generate_palette($params) {
+    public function generate_palette(array $params): array|WP_Error {
         if (empty($this->api_key)) {
             return new WP_Error('missing_api_key', 'HuggingFace API key is required');
         }
@@ -87,7 +149,7 @@ class HuggingFace_Provider extends AI_Provider_Base {
      *
      * @return string Provider name
      */
-    public function get_name() {
+    public function get_name(): string {
         return 'huggingface';
     }
 
@@ -96,7 +158,7 @@ class HuggingFace_Provider extends AI_Provider_Base {
      *
      * @return string Provider display name
      */
-    public function get_display_name() {
+    public function get_display_name(): string {
         return 'HuggingFace';
     }
 
@@ -105,7 +167,7 @@ class HuggingFace_Provider extends AI_Provider_Base {
      *
      * @return array Provider capabilities
      */
-    public function get_capabilities() {
+    public function get_capabilities(): array {
         return [
             'max_colors' => 10,
             'supports_streaming' => false,

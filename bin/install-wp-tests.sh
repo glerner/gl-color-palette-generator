@@ -123,5 +123,14 @@ if [ "$SKIP_DB_CREATE" = "false" ]; then
     mysqladmin create $DB_NAME --user=$DB_USER --password=$DB_PASS --host=$DB_HOST --protocol=tcp || true
 fi
 
+# Update the error message in WordPress's bootstrap.php
+if [ -f "$WP_TESTS_DIR/includes/bootstrap.php" ]; then
+    # Create a temporary file for the sed command
+    TEMP_FILE=$(mktemp)
+    # Use a different delimiter (|) since the paths contain slashes
+    sed "s|echo 'Error: wp-tests-config.php is missing! Please use wp-tests-config-sample.php to create a config file.' . PHP_EOL;|echo 'Error: wp-tests-config.php is missing from ' . \$config_file_path . '!' . PHP_EOL . 'Please run bin/install-wp-tests.sh to set up the testing environment.' . PHP_EOL;|" "$WP_TESTS_DIR/includes/bootstrap.php" > "$TEMP_FILE"
+    mv "$TEMP_FILE" "$WP_TESTS_DIR/includes/bootstrap.php"
+fi
+
 install_test_suite
 echo "WordPress test suite installed at $WP_TESTS_DIR"

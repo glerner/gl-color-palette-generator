@@ -9,21 +9,22 @@
 
 namespace GL_Color_Palette_Generator\Tests\Providers;
 
-use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use GL_Color_Palette_Generator\Providers\Anthropic_Provider;
+use GL_Color_Palette_Generator\Providers\Provider;
 use WP_Mock;
 
 /**
  * Tests for the Anthropic Provider
  */
-class Test_Anthropic_Provider extends Test_Case {
-    protected $provider;
+class Test_Anthropic_Provider extends Test_Provider_Mock {
+    protected Provider $provider;
 
     public function setUp(): void
     {
         parent::setUp();
         WP_Mock::setUp();
-        $this->provider = new Anthropic_Provider(['api_key' => 'test_key']);
+        $this->provider = new Anthropic_Provider($this->get_test_credentials());
     }
 
     public function tearDown(): void
@@ -32,10 +33,15 @@ class Test_Anthropic_Provider extends Test_Case {
         parent::tearDown();
     }
 
+    protected function get_test_credentials(): array
+    {
+        return ['api_key' => 'test_key'];
+    }
+
     /**
      * Test generating a palette
      */
-    public function test_generate_palette() {
+    public function test_generate_palette(): void {
         $params = [
             'prompt' => 'Modern tech company',
             'count' => 5,

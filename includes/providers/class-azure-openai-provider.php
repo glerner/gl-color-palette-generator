@@ -25,6 +25,9 @@ class Azure_OpenAI_Provider extends AI_Provider_Base {
     /** @var string */
     private $deployment;
 
+    /** @var string */
+    private $model = 'gpt-4';
+
     /**
      * Constructor
      *
@@ -35,7 +38,8 @@ class Azure_OpenAI_Provider extends AI_Provider_Base {
         $config = $config ?? new Provider_Config();
         $this->api_key = $config->get_api_key();
         $this->endpoint = $config->get_endpoint();
-        $this->deployment = $config->get_deployment_id();
+        $this->deployment = $config->get_deployment();
+        $this->model = $config->get_model() ?? 'gpt-4';
     }
 
     /**
@@ -44,7 +48,7 @@ class Azure_OpenAI_Provider extends AI_Provider_Base {
      * @param array $params Generation parameters
      * @return array|WP_Error Generated colors or error
      */
-    public function generate_palette($params) {
+    public function generate_palette(array $params): array|WP_Error {
         if (empty($this->api_key) || empty($this->endpoint) || empty($this->deployment)) {
             return new WP_Error('missing_config', 'Azure OpenAI endpoint, API key and deployment ID are required');
         }
@@ -56,17 +60,15 @@ class Azure_OpenAI_Provider extends AI_Provider_Base {
                 'Content-Type' => 'application/json',
             ],
             'body' => wp_json_encode([
+                'model' => $this->model,
                 'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => 'You are a color palette generator. Return only a JSON array of hex color codes.'
-                    ],
                     [
                         'role' => 'user',
                         'content' => $prompt
                     ]
                 ],
                 'temperature' => 0.7,
+                'max_tokens' => 100,
             ]),
             'timeout' => 15,
         ]);
@@ -95,7 +97,7 @@ class Azure_OpenAI_Provider extends AI_Provider_Base {
      *
      * @return string Provider name
      */
-    public function get_name() {
+    public function get_name(): string {
         return 'azure-openai';
     }
 
@@ -104,7 +106,7 @@ class Azure_OpenAI_Provider extends AI_Provider_Base {
      *
      * @return string Provider display name
      */
-    public function get_display_name() {
+    public function get_display_name(): string {
         return 'Azure OpenAI';
     }
 
@@ -113,11 +115,97 @@ class Azure_OpenAI_Provider extends AI_Provider_Base {
      *
      * @return array Provider capabilities
      */
-    public function get_capabilities() {
+    public function get_capabilities(): array {
         return [
             'max_colors' => 10,
             'supports_streaming' => true,
             'supports_batch' => true
+        ];
+    }
+
+    /**
+     * Validate provider credentials
+     *
+     * @return bool|WP_Error True if valid, WP_Error otherwise
+     */
+    public function validate_credentials(): bool|WP_Error {
+        if (empty($this->api_key)) {
+            return new WP_Error('missing_api_key', 'Azure OpenAI API key is required');
+        }
+
+        if (empty($this->endpoint)) {
+            return new WP_Error('missing_endpoint', 'Azure OpenAI endpoint is required');
+        }
+
+        if (empty($this->deployment)) {
+            return new WP_Error('missing_deployment', 'Azure OpenAI deployment ID is required');
+        }
+
+        // Make a simple API call to validate the credentials
+        $response = wp_remote_post("{$this->endpoint}/openai/deployments/{$this->deployment}/chat/completions?api-version=2023-05-15", [
+            'headers' => [
+                'api-key' => $this->api_key,
+                'Content-Type' => 'application/json',
+            ],
+            'body' => wp_json_encode([
+                'model' => $this->model,
+                'messages' => [
+                    [
+                        'role' => 'user',
+                        'content' => 'Hi'
+                    ]
+                ],
+                'max_tokens' => 1,
+            ]),
+        ]);
+
+        if (is_wp_error($response)) {
+            return $response;
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+        if ($code !== 200) {
+            $body = wp_remote_retrieve_body($response);
+            $error = json_decode($body, true);
+            return new WP_Error(
+                'invalid_credentials',
+                $error['error']['message'] ?? 'Invalid API key or configuration'
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Get provider requirements
+     *
+     * @return array Array of requirements
+     */
+    public function get_requirements(): array {
+        return [
+            'api_key' => [
+                'required' => true,
+                'type' => 'string',
+                'description' => 'Azure OpenAI API key',
+                'link' => 'https://portal.azure.com/',
+            ],
+            'endpoint' => [
+                'required' => true,
+                'type' => 'string',
+                'description' => 'Azure OpenAI endpoint URL',
+            ],
+            'deployment' => [
+                'required' => true,
+                'type' => 'string',
+                'description' => 'Azure OpenAI deployment ID',
+            ],
+            'model' => [
+                'required' => false,
+                'type' => 'string',
+                'description' => 'Azure OpenAI model to use',
+                'default' => 'gpt-4',
+                'options' => ['gpt-4', 'gpt-35-turbo'],
+            ],
         ];
     }
 
@@ -127,9 +215,9 @@ class Azure_OpenAI_Provider extends AI_Provider_Base {
      * @param array $params Generation parameters
      * @return string Prompt
      */
-    private function build_prompt($params) {
+    private function build_prompt(array $params): string {
         return sprintf(
-            'Generate a color palette with %d colors based on this description: %s',
+            'Generate a color palette with %d colors based on this description: %s. Return only a JSON array of hex color codes.',
             $params['num_colors'] ?? 5,
             $params['prompt'] ?? ''
         );
@@ -142,7 +230,7 @@ class Azure_OpenAI_Provider extends AI_Provider_Base {
      * @return array Validated colors
      * @throws \Exception If colors are invalid
      */
-    private function validate_colors($colors) {
+    private function validate_colors(array $colors): array {
         if (!is_array($colors)) {
             throw new \Exception('Invalid colors array');
         }

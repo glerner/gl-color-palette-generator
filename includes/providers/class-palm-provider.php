@@ -38,12 +38,77 @@ class Palm_Provider extends AI_Provider_Base {
     }
 
     /**
+     * Validate provider credentials
+     *
+     * @return bool|WP_Error True if valid, WP_Error otherwise
+     */
+    public function validate_credentials(): bool|WP_Error {
+        if (empty($this->api_key)) {
+            return new WP_Error('missing_api_key', 'PaLM API key is required');
+        }
+
+        // Make a simple API call to validate the key
+        $response = wp_remote_post('https://generativelanguage.googleapis.com/v1beta/models/' . $this->model . ':generateText', [
+            'headers' => [
+                'Authorization' => "Bearer {$this->api_key}",
+                'Content-Type' => 'application/json',
+            ],
+            'body' => wp_json_encode([
+                'prompt' => [
+                    'text' => 'Test',
+                ],
+                'temperature' => 0,
+                'candidate_count' => 1,
+            ]),
+        ]);
+
+        if (is_wp_error($response)) {
+            return $response;
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+        if ($code !== 200) {
+            $body = wp_remote_retrieve_body($response);
+            $error = json_decode($body, true);
+            return new WP_Error(
+                'invalid_credentials',
+                $error['error']['message'] ?? 'Invalid API key or configuration'
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Get provider requirements
+     *
+     * @return array Array of requirements
+     */
+    public function get_requirements(): array {
+        return [
+            'api_key' => [
+                'required' => true,
+                'type' => 'string',
+                'description' => 'Google PaLM API key',
+                'link' => 'https://makersuite.google.com/app/apikey',
+            ],
+            'model' => [
+                'required' => false,
+                'type' => 'string',
+                'description' => 'PaLM model to use',
+                'default' => 'text-bison-001',
+                'options' => ['text-bison-001'],
+            ],
+        ];
+    }
+
+    /**
      * Generate color palette
      *
      * @param array $params Generation parameters
      * @return array|WP_Error Generated colors or error
      */
-    public function generate_palette($params) {
+    public function generate_palette(array $params): array|WP_Error {
         if (empty($this->api_key)) {
             return new WP_Error('missing_api_key', 'PaLM API key is required');
         }
@@ -120,7 +185,7 @@ class Palm_Provider extends AI_Provider_Base {
      * @param array $params Generation parameters
      * @return string Prompt
      */
-    private function build_prompt($params) {
+    private function build_prompt(array $params): string {
         return sprintf(
             'Generate a color palette with %d colors based on this description: %s. Return only a JSON array of hex color codes.',
             $params['num_colors'] ?? 5,
@@ -135,7 +200,7 @@ class Palm_Provider extends AI_Provider_Base {
      * @return array Validated colors
      * @throws \Exception If colors are invalid
      */
-    private function validate_colors($colors) {
+    private function validate_colors(array $colors): array {
         if (!is_array($colors)) {
             throw new \Exception('Invalid colors array');
         }

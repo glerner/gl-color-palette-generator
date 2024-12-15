@@ -9,25 +9,35 @@
 
 namespace GL_Color_Palette_Generator\Tests\Providers;
 
-use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use GL_Color_Palette_Generator\Providers\OpenAI_Provider;
+use GL_Color_Palette_Generator\Providers\Provider;
+use GL_Color_Palette_Generator\Types\Provider_Config;
 use WP_Mock;
 
 /**
  * Tests for the OpenAI Provider
  */
-class Test_OpenAI_Provider extends Test_Case {
-    protected $provider;
+class Test_OpenAI_Provider extends Test_Provider_Mock {
+    protected Provider $provider;
 
     public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
-        $this->provider = new OpenAI_Provider(['api_key' => 'test_key']);
+        $this->provider = new OpenAI_Provider(new Provider_Config($this->get_test_credentials()));
     }
 
     public function tearDown(): void {
         WP_Mock::tearDown();
         parent::tearDown();
+    }
+
+    protected function get_test_credentials(): array
+    {
+        return [
+            'api_key' => 'test_key_123',
+            'model' => 'gpt-4'
+        ];
     }
 
     /**

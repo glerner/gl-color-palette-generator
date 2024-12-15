@@ -1,12 +1,26 @@
 <?xml version="1.0"?>
-<phpunit
-    bootstrap="tests/bootstrap-wp-mock.php"
-    backupGlobals="false"
-    colors="true"
-    convertErrorsToExceptions="true"
-    convertNoticesToExceptions="true"
-    convertWarningsToExceptions="true"
-    >
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
+         backupGlobals="false"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         bootstrap="tests/bootstrap-wp-mock.php"
+         >
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">includes</directory>
+        </include>
+        <exclude>
+            <directory suffix=".php">vendor</directory>
+            <directory suffix=".php">tests</directory>
+        </exclude>
+        <report>
+            <clover outputFile="build/logs/clover.xml"/>
+            <html outputDirectory="build/coverage"/>
+        </report>
+    </coverage>
     <php>
         <env name="WP_TESTS_DIR" value="/app/wordpress-phpunit"/>
     </php>
@@ -21,17 +35,4 @@
             <directory prefix="test-" suffix=".php">tests/integration</directory>
         </testsuite>
     </testsuites>
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">includes</directory>
-            <exclude>
-                <directory suffix=".php">vendor</directory>
-                <directory suffix=".php">tests</directory>
-            </exclude>
-        </whitelist>
-    </filter>
-    <logging>
-        <log type="coverage-clover" target="build/logs/clover.xml"/>
-        <log type="coverage-html" target="build/coverage"/>
-    </logging>
 </phpunit>

@@ -9,17 +9,21 @@
 
 namespace GL_Color_Palette_Generator\Tests;
 
+use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use GL_Color_Palette_Generator\Providers\Cohere_Provider;
-use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
+use GL_Color_Palette_Generator\Providers\Provider;
+use GL_Color_Palette_Generator\Types\Provider_Config;
 use WP_Mock;
 
 /**
- * Cohere Provider test case
+ * Tests for the Cohere Provider
  */
 class Test_Cohere_Provider extends Test_Provider_Mock {
+    protected Provider $provider;
+
     public function setUp(): void {
         parent::setUp();
-        $this->provider = new Cohere_Provider($this->get_test_credentials());
+        $this->provider = new Cohere_Provider(new Provider_Config($this->get_test_credentials()));
     }
 
     public function tearDown(): void {
@@ -29,7 +33,7 @@ class Test_Cohere_Provider extends Test_Provider_Mock {
     protected function get_test_credentials(): array {
         return [
             'api_key' => 'test_key_123',
-            'base_url' => 'https://api.cohere.ai/v1'
+            'model' => 'command'
         ];
     }
 

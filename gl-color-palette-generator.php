@@ -40,14 +40,14 @@ require_once GL_CPG_PLUGIN_DIR . 'includes/system/class-autoloader.php';
  */
 function gl_cpg_check_compatibility() {
     global $wp_version;
-    
+
     $php_version = phpversion();
-    $min_php_version = '8.0';
+    $min_php_version = '8.1';
     $min_wp_version = '6.2';
-    
+
     $compatible = true;
     $messages = [];
-    
+
     if (version_compare($php_version, $min_php_version, '<')) {
         $messages[] = sprintf(
             __('GL Color Palette Generator requires PHP version %s or higher. Your current version is %s.', 'gl-color-palette-generator'),
@@ -56,7 +56,7 @@ function gl_cpg_check_compatibility() {
         );
         $compatible = false;
     }
-    
+
     if (version_compare($wp_version, $min_wp_version, '<')) {
         $messages[] = sprintf(
             __('GL Color Palette Generator requires WordPress version %s or higher. Your current version is %s.', 'gl-color-palette-generator'),
@@ -65,7 +65,7 @@ function gl_cpg_check_compatibility() {
         );
         $compatible = false;
     }
-    
+
     if (!$compatible) {
         deactivate_plugins(plugin_basename(__FILE__));
         foreach ($messages as $message) {
@@ -77,7 +77,7 @@ function gl_cpg_check_compatibility() {
             unset($_GET['activate']);
         }
     }
-    
+
     return $compatible;
 }
 
@@ -90,7 +90,7 @@ function gl_cpg_check_for_updates() {
     if (!class_exists('\GL_Color_Palette_Generator\Core\Update_Checker')) {
         require_once GL_CPG_PLUGIN_DIR . 'includes/core/class-update-checker.php';
     }
-    
+
     $update_checker = new \GL_Color_Palette_Generator\Core\Update_Checker(
         'https://website-tech.glerner.com/updates/gl-color-palette-generator/update-manifest.json',
         __FILE__,
@@ -117,10 +117,10 @@ function gl_cpg_init() {
     // Initialize core setup
     $setup = new \GL_Color_Palette_Generator\Core\Setup();
     $setup->init();
-    
+
     // Check for updates
     gl_cpg_check_for_updates();
-    
+
     // Initialize hooks
     gl_cpg_register_hooks();
 }

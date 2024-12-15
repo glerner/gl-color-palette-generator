@@ -42,6 +42,74 @@ class OpenAI_Provider extends AI_Provider_Base {
     }
 
     /**
+     * Validate provider credentials
+     *
+     * @return bool|WP_Error True if valid, WP_Error otherwise
+     */
+    public function validate_credentials(): bool|WP_Error {
+        if (empty($this->api_key)) {
+            return new WP_Error('missing_api_key', 'OpenAI API key is required');
+        }
+
+        // Make a simple API call to validate the key
+        $response = wp_remote_post('https://api.openai.com/v1/chat/completions', [
+            'headers' => [
+                'Authorization' => "Bearer {$this->api_key}",
+                'Content-Type' => 'application/json',
+            ],
+            'body' => wp_json_encode([
+                'model' => $this->model,
+                'messages' => [
+                    [
+                        'role' => 'user',
+                        'content' => 'Test'
+                    ]
+                ],
+                'max_tokens' => 1,
+            ]),
+        ]);
+
+        if (is_wp_error($response)) {
+            return $response;
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+        if ($code !== 200) {
+            $body = wp_remote_retrieve_body($response);
+            $error = json_decode($body, true);
+            return new WP_Error(
+                'invalid_credentials',
+                $error['error']['message'] ?? 'Invalid API key or configuration'
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Get provider requirements
+     *
+     * @return array Array of requirements
+     */
+    public function get_requirements(): array {
+        return [
+            'api_key' => [
+                'required' => true,
+                'type' => 'string',
+                'description' => 'OpenAI API key',
+                'link' => 'https://platform.openai.com/api-keys',
+            ],
+            'model' => [
+                'required' => false,
+                'type' => 'string',
+                'description' => 'OpenAI model to use',
+                'default' => 'gpt-4',
+                'options' => ['gpt-4', 'gpt-4-32k', 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k'],
+            ],
+        ];
+    }
+
+    /**
      * Generate color palette
      *
      * @param array $params Generation parameters

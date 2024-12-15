@@ -13,6 +13,16 @@ namespace GL_Color_Palette_Generator\System;
  * Class Autoloader
  */
 class Autoloader {
+    private $base_dir;
+
+    /**
+     * Constructor
+     */
+    public function __construct() {
+        // Go up two directories from the autoloader location to get to the plugin root
+        $this->base_dir = dirname(dirname(__DIR__)) . '/';
+    }
+
     /**
      * Register autoloader
      */
@@ -56,7 +66,7 @@ class Autoloader {
             $class_path = str_replace($class_file, 'class-' . $class_file, $class_path);
         }
 
-        return GL_CPG_PLUGIN_DIR . 'includes/' . $class_path . '.php';
+        return $this->base_dir . 'includes/' . $class_path . '.php';
     }
 }
 

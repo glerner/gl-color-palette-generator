@@ -9,8 +9,10 @@
 
 namespace GL_Color_Palette_Generator\Tests;
 
+use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use GL_Color_Palette_Generator\Providers\Azure_OpenAI_Provider;
 use GL_Color_Palette_Generator\Providers\Provider;
+use GL_Color_Palette_Generator\Types\Provider_Config;
 use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
 use WP_Mock;
 
@@ -18,9 +20,11 @@ use WP_Mock;
  * Azure OpenAI Provider test case
  */
 class Test_Azure_OpenAI_Provider extends Test_Provider_Mock {
+    protected Provider $provider;
+
     public function setUp(): void {
         parent::setUp();
-        $this->provider = new Azure_OpenAI_Provider($this->get_test_credentials());
+        $this->provider = new Azure_OpenAI_Provider(new Provider_Config($this->get_test_credentials()));
     }
 
     public function tearDown(): void {
@@ -31,18 +35,19 @@ class Test_Azure_OpenAI_Provider extends Test_Provider_Mock {
         return [
             'api_key' => 'test_key_123',
             'endpoint' => 'https://test.openai.azure.com',
-            'deployment' => 'test-deployment'
+            'deployment' => 'test-deployment',
+            'model' => 'gpt-4'
         ];
     }
 
     public function test_validate_credentials() {
-        $provider = new Azure_OpenAI_Provider([]);
+        $provider = new Azure_OpenAI_Provider(new Provider_Config([]));
         $this->assertInstanceOf(\WP_Error::class, $provider->validate_credentials());
 
-        $provider = new Azure_OpenAI_Provider(['api_key' => 'test']);
+        $provider = new Azure_OpenAI_Provider(new Provider_Config(['api_key' => 'test']));
         $this->assertInstanceOf(\WP_Error::class, $provider->validate_credentials());
 
-        $provider = new Azure_OpenAI_Provider(['api_key' => 'test', 'endpoint' => 'test']);
+        $provider = new Azure_OpenAI_Provider(new Provider_Config(['api_key' => 'test', 'endpoint' => 'test']));
         $this->assertInstanceOf(\WP_Error::class, $provider->validate_credentials());
 
         $this->assertTrue($this->provider->validate_credentials());

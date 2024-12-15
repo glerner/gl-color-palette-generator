@@ -9,17 +9,21 @@
 
 namespace GL_Color_Palette_Generator\Tests;
 
+use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use GL_Color_Palette_Generator\Providers\HuggingFace_Provider;
-use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
+use GL_Color_Palette_Generator\Providers\Provider;
+use GL_Color_Palette_Generator\Types\Provider_Config;
 use WP_Mock;
 
 /**
- * HuggingFace Provider test case
+ * Tests for the HuggingFace Provider
  */
 class Test_HuggingFace_Provider extends Test_Provider_Mock {
+    protected Provider $provider;
+
     public function setUp(): void {
         parent::setUp();
-        $this->provider = new HuggingFace_Provider($this->get_test_credentials());
+        $this->provider = new HuggingFace_Provider(new Provider_Config($this->get_test_credentials()));
     }
 
     public function tearDown(): void {
@@ -34,10 +38,10 @@ class Test_HuggingFace_Provider extends Test_Provider_Mock {
     }
 
     public function test_validate_credentials() {
-        $provider = new HuggingFace_Provider([]);
+        $provider = new HuggingFace_Provider(new Provider_Config([]));
         $this->assertInstanceOf(\WP_Error::class, $provider->validate_credentials());
 
-        $provider = new HuggingFace_Provider(['api_key' => 'test_key']);
+        $provider = new HuggingFace_Provider(new Provider_Config(['api_key' => 'test_key']));
         $this->assertInstanceOf(\WP_Error::class, $provider->validate_credentials());
 
         $this->assertTrue($this->provider->validate_credentials());

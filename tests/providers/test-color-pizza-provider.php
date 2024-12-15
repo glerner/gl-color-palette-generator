@@ -10,20 +10,21 @@ declare(strict_types=1);
 
 namespace GL_Color_Palette_Generator\Tests\Providers;
 
-use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use GL_Color_Palette_Generator\Providers\Color_Pizza_Provider;
-use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
+use GL_Color_Palette_Generator\Providers\Provider;
+use GL_Color_Palette_Generator\Types\Provider_Config;
 use WP_Mock;
 
 /**
  * Tests for the Color Pizza Provider
  */
-class Test_Color_Pizza_Provider extends Test_Case {
-    protected $provider;
+class Test_Color_Pizza_Provider extends Test_Provider_Mock {
+    protected Provider $provider;
 
     public function setUp(): void {
         parent::setUp();
-        $this->provider = new Color_Pizza_Provider($this->get_test_credentials());
+        $this->provider = new Color_Pizza_Provider(new Provider_Config($this->get_test_credentials()));
     }
 
     public function tearDown(): void {

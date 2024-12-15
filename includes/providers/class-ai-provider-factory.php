@@ -10,6 +10,13 @@
 namespace GL_Color_Palette_Generator\Providers;
 
 use GL_Color_Palette_Generator\Interfaces\AI_Provider;
+use GL_Color_Palette_Generator\Providers\Anthropic_Provider;
+use GL_Color_Palette_Generator\Providers\Azure_OpenAI_Provider;
+use GL_Color_Palette_Generator\Providers\Cohere_Provider;
+use GL_Color_Palette_Generator\Providers\Color_Pizza_Provider;
+use GL_Color_Palette_Generator\Providers\HuggingFace_Provider;
+use GL_Color_Palette_Generator\Providers\OpenAI_Provider;
+use GL_Color_Palette_Generator\Providers\Palm_Provider;
 use GL_Color_Palette_Generator\Types\Provider_Config;
 use WP_Error;
 
@@ -21,70 +28,51 @@ use WP_Error;
  * @since 1.0.0
  */
 class AI_Provider_Factory {
-    /** @var array */
-    private $providers = [];
-
-    /** @var Provider_Config */
-    private $config;
-
-    /**
-     * Constructor
-     *
-     * @param Provider_Config|null $config Configuration for providers
-     */
-    public function __construct(?Provider_Config $config = null) {
-        $this->config = $config ?? new Provider_Config();
-        $this->register_default_providers();
-    }
-
-    /**
-     * Register default providers
-     */
-    private function register_default_providers() {
-        $this->providers = [
-            'openai' => OpenAI_Provider::class,
-            'anthropic' => Anthropic_Provider::class,
-            'palm' => Palm_Provider::class,
-            'azure-openai' => Azure_OpenAI_Provider::class,
-            'cohere' => Cohere_Provider::class,
-            'huggingface' => HuggingFace_Provider::class,
-            'color-pizza' => Color_Pizza_Provider::class
-        ];
-    }
-
     /**
      * Get provider instance
      *
-     * @param string $provider_name Name of the provider
+     * @param string $provider_name Provider name
+     * @param Provider_Config $config Provider configuration
      * @return AI_Provider|WP_Error Provider instance or error if not found
      */
-    public function get_provider(string $provider_name): AI_Provider|WP_Error {
-        if (!isset($this->providers[$provider_name])) {
-            return new WP_Error(
-                'invalid_provider',
-                sprintf('Invalid provider type: %s', $provider_name)
-            );
-        }
-
-        $provider_class = $this->providers[$provider_name];
-        $provider_config = $this->config->get_provider_config($provider_name);
-
-        try {
-            return new $provider_class($provider_config);
-        } catch (\Exception $e) {
-            return new WP_Error(
-                'provider_creation_failed',
-                $e->getMessage()
-            );
+    public function get_provider(string $provider_name, Provider_Config $config): AI_Provider|WP_Error {
+        switch ($provider_name) {
+            case 'anthropic':
+                return new Anthropic_Provider($config);
+            case 'azure-openai':
+                return new Azure_OpenAI_Provider($config);
+            case 'cohere':
+                return new Cohere_Provider($config);
+            case 'color-pizza':
+                return new Color_Pizza_Provider($config);
+            case 'huggingface':
+                return new HuggingFace_Provider($config);
+            case 'openai':
+                return new OpenAI_Provider($config);
+            case 'palm':
+                return new Palm_Provider($config);
+            default:
+                return new WP_Error(
+                    'invalid_provider',
+                    sprintf('Invalid provider type: %s', $provider_name)
+                );
         }
     }
 
     /**
-     * Get all registered providers
+     * Get all available providers
      *
-     * @return array List of provider names
+     * @return array Array of provider names and display names
      */
     public function get_registered_providers(): array {
-        return array_keys($this->providers);
+        return [
+            'anthropic' => 'Anthropic',
+            'azure-openai' => 'Azure OpenAI',
+            'cohere' => 'Cohere',
+            'color-pizza' => 'Color Pizza',
+            'huggingface' => 'HuggingFace',
+            'openai' => 'OpenAI',
+            'palm' => 'PaLM',
+        ];
     }
 }

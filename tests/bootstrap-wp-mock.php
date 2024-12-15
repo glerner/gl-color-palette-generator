@@ -8,6 +8,9 @@
 // Load Composer autoloader
 require_once dirname( __FILE__ ) . '/../vendor/autoload.php';
 
+// Load plugin autoloader
+require_once dirname( __FILE__ ) . '/../includes/system/class-autoloader.php';
+
 // Verify WP_Mock is available
 if ( ! class_exists( '\WP_Mock' ) ) {
     throw new RuntimeException(

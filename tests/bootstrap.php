@@ -13,27 +13,26 @@
 // Load Composer autoloader
 require_once dirname( __FILE__ ) . '/../vendor/autoload.php';
 
-// Determine if we're running wp-mock tests based on the --group parameter
-$is_wp_mock = false;
-foreach ($_SERVER['argv'] as $arg) {
-    if (strpos($arg, '--group') === 0) {
-        // Handle both --group wp-mock and --group=wp-mock formats
-        if (strpos($arg, '=') !== false) {
-            // Format: --group=wp-mock
-            $group = substr($arg, strpos($arg, '=') + 1);
-        } else if (isset($_SERVER['argv'][array_search($arg, $_SERVER['argv']) + 1])) {
-            // Format: --group wp-mock
-            $group = $_SERVER['argv'][array_search($arg, $_SERVER['argv']) + 1];
-        }
-
-        if (isset($group) && $group === 'wp-mock') {
-            $is_wp_mock = true;
+// Determine test type based on testsuite parameter
+$is_unit_test = false;
+foreach ($_SERVER['argv'] as $i => $arg) {
+    if ($arg === '--testsuite' || $arg === '-t') {
+        $next_arg = $_SERVER['argv'][$i + 1] ?? '';
+        if ($next_arg === 'unit') {
+            $is_unit_test = true;
+            echo "\nRunning Unit Tests with WP_Mock...\n\n";
+            break;
+        } else if ($next_arg === 'integration') {
+            echo "\nRunning Integration Tests with WordPress Test Framework...\n\n";
             break;
         }
     }
 }
 
-if ($is_wp_mock) {
+if ($is_unit_test) {
+    // Load plugin autoloader for unit tests
+    require_once dirname( __FILE__ ) . '/../includes/system/class-autoloader.php';
+
     // Initialize WP_Mock for isolated tests
     \WP_Mock::setUsePatchwork(true);
     \WP_Mock::bootstrap();
@@ -52,12 +51,13 @@ if ($is_wp_mock) {
         define('WPINC', 'wp-includes');
     }
 
+    // Load test dependencies
+    require_once __DIR__ . '/class-test-case.php';
+    require_once __DIR__ . '/providers/test-provider-mock.php';
+
     // Load only WP-Mock test files
     $mock_test_directories = ['providers', 'api', 'admin'];
     $test_root = dirname(__FILE__);
-
-    // Load the base provider mock test class first
-    require_once $test_root . '/providers/test-provider-mock.php';
 
     // Then load all other WP-Mock test files
     foreach ($mock_test_directories as $dir) {
@@ -73,35 +73,33 @@ if ($is_wp_mock) {
         }
     }
 } else {
-    // Only load WordPress test suite for non-WP-Mock tests
+    // WordPress integration test setup
     $_tests_dir = getenv('WP_TESTS_DIR');
-    if (!$_tests_dir) {
-        $_tests_dir = '/app/wordpress-phpunit';
-    }
 
-    // Check if we're running integration tests
-    if (!file_exists($_tests_dir . '/includes/functions.php')) {
-        die("WordPress test suite not found at {$_tests_dir}. Please run setup-plugin-tests.sh first.\n");
-    }
+    // Support for the plugin being the root of a Git repository
+    if (false !== $_tests_dir) {
+        require_once $_tests_dir . '/includes/functions.php';
+        require_once $_tests_dir . '/includes/bootstrap.php';
 
-    // Load WordPress test environment
-    require_once $_tests_dir . '/includes/functions.php';
-    require_once $_tests_dir . '/includes/bootstrap.php';
+        // Load integration test files
+        $wp_test_directories = [
+            'integration',
+            'interfaces',
+            'system',
+            '.'  // Root directory for files like test-color-analysis.php
+        ];
 
-    // Load integration test files
-    $wp_test_directories = [
-        'integration',
-        'interfaces',
-        'system',
-        '.'  // Root directory for files like test-color-analysis.php
-    ];
-
-    foreach ($wp_test_directories as $dir) {
-        $dir_path = dirname(__FILE__) . '/' . $dir;
-        if (is_dir($dir_path)) {
-            foreach (glob($dir_path . '/test-*.php') as $test_file) {
-                require_once $test_file;
+        foreach ($wp_test_directories as $dir) {
+            $dir_path = dirname(__FILE__) . '/' . $dir;
+            if (is_dir($dir_path)) {
+                foreach (glob($dir_path . '/test-*.php') as $test_file) {
+                    require_once $test_file;
+                }
             }
         }
+    } else {
+        echo "\nError: WP_TESTS_DIR environment variable is not set.\n";
+        echo "Please run bin/install-wp-tests.sh to set up WordPress test environment.\n\n";
+        exit(1);
     }
 }

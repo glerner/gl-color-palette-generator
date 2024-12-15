@@ -9,6 +9,7 @@ use WP_Mock\Tools\TestCase;
  */
 abstract class Test_Provider_Mock extends TestCase {
     protected Provider $provider;
+
     protected array $test_params = [
         'prompt' => 'Modern tech company',
         'count' => 5,
@@ -21,7 +22,7 @@ abstract class Test_Provider_Mock extends TestCase {
         $this->maybe_skip_test();
     }
 
-    protected function maybe_skip_test() {
+    protected function maybe_skip_test(): void {
         $creds = $this->get_test_credentials();
         if (empty($creds['api_key'])) {
             $this->markTestSkipped('API credentials not available');

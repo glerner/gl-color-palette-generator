@@ -2,14 +2,23 @@
 
 namespace GL_Color_Palette_Generator\Tests\Providers;
 
+use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use GL_Color_Palette_Generator\Providers\AI_Provider_Factory;
-use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Providers\Provider;
+use GL_Color_Palette_Generator\Types\Provider_Config;
+use WP_Mock;
 
 /**
  * Tests for the AI Provider Factory
+ * 
+ * Note: This test extends Test_Provider_Mock rather than Test_Case because it tests
+ * the factory that creates providers, not a provider implementation itself.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests
  */
-class Test_AI_Provider_Factory extends Test_Case {
-    protected $factory;
+class Test_AI_Provider_Factory extends Test_Provider_Mock {
+    protected AI_Provider_Factory $factory;
 
     public function setUp(): void {
         parent::setUp();
@@ -21,13 +30,22 @@ class Test_AI_Provider_Factory extends Test_Case {
     }
 
     public function test_get_provider() {
-        $provider = $this->factory->get_provider('openai', ['api_key' => 'test_key']);
-        $this->assertInstanceOf('GL_Color_Palette_Generator\Providers\OpenAI_Provider', $provider);
+        $config = new Provider_Config([
+            'api_key' => 'test_key_123',
+            'model' => 'gpt-4'
+        ]);
+
+        $provider = $this->factory->get_provider('openai', $config);
+        $this->assertInstanceOf(Provider::class, $provider);
     }
 
     public function test_get_invalid_provider() {
+        $config = new Provider_Config([
+            'api_key' => 'test_key_123'
+        ]);
+
         $this->expectException(\InvalidArgumentException::class);
-        $this->factory->get_provider('invalid', ['api_key' => 'test_key']);
+        $this->factory->get_provider('invalid', $config);
     }
 
     public function test_get_all_providers() {

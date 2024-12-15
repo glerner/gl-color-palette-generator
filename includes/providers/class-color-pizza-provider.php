@@ -31,12 +31,63 @@ class Color_Pizza_Provider extends AI_Provider_Base {
     }
 
     /**
+     * Validate provider credentials
+     *
+     * @return bool|WP_Error True if valid, WP_Error otherwise
+     */
+    public function validate_credentials(): bool|WP_Error {
+        if (empty($this->api_key)) {
+            return new WP_Error('missing_api_key', 'Color Pizza API key is required');
+        }
+
+        // Make a simple API call to validate the key
+        $response = wp_remote_get('https://api.color.pizza/v1/colors/1', [
+            'headers' => [
+                'Authorization' => "Bearer {$this->api_key}",
+                'Content-Type' => 'application/json',
+            ],
+        ]);
+
+        if (is_wp_error($response)) {
+            return $response;
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+        if ($code !== 200) {
+            $body = wp_remote_retrieve_body($response);
+            $error = json_decode($body, true);
+            return new WP_Error(
+                'invalid_credentials',
+                $error['message'] ?? 'Invalid API key or configuration'
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Get provider requirements
+     *
+     * @return array Array of requirements
+     */
+    public function get_requirements(): array {
+        return [
+            'api_key' => [
+                'required' => true,
+                'type' => 'string',
+                'description' => 'Color Pizza API key',
+                'link' => 'https://api.color.pizza/',
+            ],
+        ];
+    }
+
+    /**
      * Generate color palette
      *
      * @param array $params Generation parameters
      * @return array|WP_Error Generated colors or error
      */
-    public function generate_palette($params) {
+    public function generate_palette(array $params): array|WP_Error {
         if (empty($this->api_key)) {
             return new WP_Error('missing_api_key', 'Color Pizza API key is required');
         }
@@ -75,7 +126,7 @@ class Color_Pizza_Provider extends AI_Provider_Base {
      *
      * @return string Provider name
      */
-    public function get_name() {
+    public function get_name(): string {
         return 'color-pizza';
     }
 
@@ -84,7 +135,7 @@ class Color_Pizza_Provider extends AI_Provider_Base {
      *
      * @return string Provider display name
      */
-    public function get_display_name() {
+    public function get_display_name(): string {
         return 'Color Pizza';
     }
 
@@ -93,7 +144,7 @@ class Color_Pizza_Provider extends AI_Provider_Base {
      *
      * @return array Provider capabilities
      */
-    public function get_capabilities() {
+    public function get_capabilities(): array {
         return [
             'max_colors' => 100,
             'supports_streaming' => false,

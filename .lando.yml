@@ -1,0 +1,104 @@
+name: gl-color-palette-generator
+recipe: wordpress
+config:
+  php: '8.1'
+  ssl: true
+  xdebug: true
+  config:
+    php: php.ini
+  ServerName: gl-color-palette-generator.lndo.site
+  database: mysql:8.0
+  webroot: .
+
+services:
+  appserver:
+    config:
+      php: php.ini
+    composer:
+      phpunit/phpunit: '^10.5'
+      10up/wp_mock: '^0.5.0'
+      yoast/phpunit-polyfills: '^2.0'
+    build:
+      - composer install
+    run_as_root:
+      - touch /tmp/xdebug.log && chmod 666 /tmp/xdebug.log
+    overrides:
+      environment:
+        XDEBUG_MODE: 'debug,develop,trace'
+        XDEBUG_CONFIG: 'client_host=host.docker.internal client_port=9003 log=/tmp/xdebug.log'
+        WP_TESTS_DIR: /app/wordpress-phpunit
+        WP_CORE_DIR: /app/wordpress/
+        TEST_DB_NAME: wordpress_test
+        TEST_DB_USER: wordpress
+        TEST_DB_PASS: wordpress
+        TEST_DB_HOST: database
+        SIMPLETEST_BASE_URL: 'https://gl-color-palette-generator.lndo.site/'
+        BROWSERTEST_OUTPUT_DIRECTORY: /app/sites/simpletest/browser_output
+
+  database:
+    type: mysql
+    healthcheck: mysql -uroot --silent --execute "SHOW DATABASES;"
+
+  mailhog:
+    type: mailhog
+    hogfrom:
+      - appserver
+
+  pma:
+    type: phpmyadmin
+    hosts:
+      - database
+
+tooling:
+  composer:
+    service: appserver
+
+  setup-wp-tests:
+    service: appserver
+    description: Set up WordPress test environment
+    cmd: bash bin/install-wp-tests.sh wordpress_test wordpress wordpress database latest true
+
+  test:
+    service: appserver
+    description: Run all tests
+    cmd: bin/test.sh --all
+
+  test:unit:
+    service: appserver
+    description: Run unit tests (providers, api, admin)
+    cmd: bin/test.sh --unit
+
+  test:mock:
+    service: appserver
+    description: Run WP Mock tests
+    cmd: bin/test.sh --mock
+
+  test:integration:
+    service: appserver
+    description: Run integration tests
+    cmd: bin/test.sh --integration
+
+  test:providers:
+    service: appserver
+    description: Run provider tests
+    cmd: bin/test.sh --providers
+
+  test:api:
+    service: appserver
+    description: Run API tests
+    cmd: bin/test.sh --api
+
+  test:admin:
+    service: appserver
+    description: Run admin tests
+    cmd: bin/test.sh --admin
+
+  test:core:
+    service: appserver
+    description: Run core tests
+    cmd: bin/test.sh --core
+
+  test:coverage:
+    service: appserver
+    description: Generate code coverage report
+    cmd: bin/test.sh --coverage
