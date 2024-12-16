@@ -1,0 +1,16 @@
+{
+    "redefinable-internals": [
+        "file_get_contents",
+        "file_put_contents",
+        "fopen",
+        "fclose",
+        "fwrite",
+        "fread",
+        "unlink",
+        "mkdir",
+        "rmdir",
+        "is_dir",
+        "is_file",
+        "file_exists"
+    ]
+}

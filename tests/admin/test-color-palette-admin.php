@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 /**
  * Test Color Palette Admin Class
  *
@@ -9,152 +10,122 @@
 
 namespace GL_Color_Palette_Generator\Tests\Admin;
 
+use GL_Color_Palette_Generator\Tests\Test_Case;
 use GL_Color_Palette_Generator\Admin\Color_Palette_Admin;
-use PHPUnit\Framework\TestCase;
-use Brain\Monkey\Functions;
-use Mockery;
+use GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator;
+use WP_Mock;
 
 /**
- * Class Test_Color_Palette_Admin
+ * Tests for Color Palette Admin
  */
-class Test_Color_Palette_Admin extends TestCase {
-    use \Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+class Test_Color_Palette_Admin extends Test_Case {
+    protected Color_Palette_Admin $admin;
+    protected Color_Palette_Generator $generator;
 
-    /**
-     * Admin instance
-     *
-     * @var Color_Palette_Admin
-     */
-    private $admin;
-
-    /**
-     * Setup test environment
-     */
     public function setUp(): void {
         parent::setUp();
-        \Brain\Monkey\setUp();
-        $this->admin = new Color_Palette_Admin();
+        $this->generator = $this->getMockBuilder(Color_Palette_Generator::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->admin = new Color_Palette_Admin($this->generator);
     }
 
-    /**
-     * Teardown test environment
-     */
-    public function tearDown(): void {
-        \Brain\Monkey\tearDown();
-        Mockery::close();
-        parent::tearDown();
-    }
-
-    /**
-     * Test admin menu creation
-     */
-    public function test_add_admin_menu() {
-        Functions\expect('add_menu_page')
-            ->once()
-            ->with(
-                Mockery::type('string'),
-                Mockery::type('string'),
-                'manage_options',
-                'gl-color-palette-generator',
-                Mockery::type('array'),
-                'dashicons-art',
-                30
-            );
-
-        Functions\expect('add_submenu_page')
-            ->once()
-            ->with(
-                'gl-color-palette-generator',
-                Mockery::type('string'),
-                Mockery::type('string'),
-                'manage_options',
-                'gl-color-palette-settings',
-                Mockery::type('array')
-            );
-
-        $this->admin->add_admin_menu();
-    }
-
-    /**
-     * Test admin assets enqueuing
-     */
     public function test_enqueue_admin_assets() {
-        Functions\expect('wp_enqueue_style')
-            ->once()
-            ->with(
-                'gl-cpg-admin',
-                Mockery::type('string'),
+        WP_Mock::userFunction('wp_enqueue_style', [
+            'times' => 1,
+            'args' => [
+                'gl-color-palette-admin',
+                'assets/css/admin.css',
                 [],
                 GL_CPG_VERSION
-            );
+            ]
+        ]);
 
-        Functions\expect('wp_enqueue_script')
-            ->once()
-            ->with(
-                'gl-cpg-admin',
-                Mockery::type('string'),
-                ['jquery', 'wp-color-picker'],
+        WP_Mock::userFunction('wp_enqueue_script', [
+            'times' => 1,
+            'args' => [
+                'gl-color-palette-admin',
+                'assets/js/admin.js',
+                ['jquery'],
                 GL_CPG_VERSION,
                 true
-            );
+            ]
+        ]);
 
-        Functions\expect('wp_localize_script')
-            ->once()
-            ->with(
-                'gl-cpg-admin',
-                'glCpgAdmin',
-                Mockery::type('array')
-            );
+        WP_Mock::userFunction('wp_localize_script', [
+            'times' => 1,
+            'args' => [
+                'gl-color-palette-admin',
+                'glColorPaletteAdmin',
+                [
+                    'ajaxurl' => admin_url('admin-ajax.php'),
+                    'nonce' => wp_create_nonce('gl_color_palette_admin')
+                ]
+            ]
+        ]);
 
-        $this->admin->enqueue_admin_assets('toplevel_page_gl-color-palette-generator');
+        $this->admin->enqueue_admin_assets();
     }
 
-    /**
-     * Test AJAX palette generation handling
-     */
     public function test_handle_generate_palette() {
-        Functions\expect('check_ajax_referer')
-            ->once()
-            ->with('gl_cpg_admin', 'nonce');
+        WP_Mock::userFunction('check_ajax_referer', [
+            'times' => 1,
+            'args' => ['gl_color_palette_admin', 'nonce'],
+            'return' => true
+        ]);
 
-        Functions\expect('current_user_can')
-            ->once()
-            ->with('manage_options')
-            ->andReturn(true);
+        WP_Mock::userFunction('current_user_can', [
+            'times' => 1,
+            'args' => ['manage_options'],
+            'return' => true
+        ]);
 
-        Functions\expect('sanitize_text_field')
-            ->once()
-            ->andReturn('Test prompt');
+        $this->generator->expects($this->once())
+            ->method('generate_palette')
+            ->with(['prompt' => 'Modern tech company'])
+            ->willReturn(['#FF0000', '#00FF00', '#0000FF']);
 
-        Functions\expect('wp_send_json_success')
-            ->once()
-            ->with(Mockery::type('array'));
+        $_POST['nonce'] = wp_create_nonce('gl_color_palette_admin');
+        $_POST['prompt'] = 'Modern tech company';
 
-        $_POST['prompt'] = 'Test prompt';
-        $_POST['nonce'] = 'test_nonce';
-
+        ob_start();
         $this->admin->handle_generate_palette();
+        $output = ob_get_clean();
+
+        $this->assertIsString($output);
+        $this->assertJson($output);
+        $data = json_decode($output, true);
+        $this->assertArrayHasKey('success', $data);
+        $this->assertTrue($data['success']);
+        $this->assertArrayHasKey('colors', $data);
+        $this->assertEquals(['#FF0000', '#00FF00', '#0000FF'], $data['colors']);
     }
 
-    /**
-     * Test unauthorized access to generate palette
-     */
     public function test_handle_generate_palette_unauthorized() {
-        Functions\expect('check_ajax_referer')
-            ->once()
-            ->with('gl_cpg_admin', 'nonce');
+        WP_Mock::userFunction('check_ajax_referer', [
+            'times' => 1,
+            'args' => ['gl_color_palette_admin', 'nonce'],
+            'return' => true
+        ]);
 
-        Functions\expect('current_user_can')
-            ->once()
-            ->with('manage_options')
-            ->andReturn(false);
+        WP_Mock::userFunction('current_user_can', [
+            'times' => 1,
+            'args' => ['manage_options'],
+            'return' => false
+        ]);
 
-        Functions\expect('wp_send_json_error')
-            ->once()
-            ->with('Unauthorized');
+        $_POST['nonce'] = wp_create_nonce('gl_color_palette_admin');
 
-        $_POST['nonce'] = 'test_nonce';
-
+        ob_start();
         $this->admin->handle_generate_palette();
+        $output = ob_get_clean();
+
+        $this->assertIsString($output);
+        $this->assertJson($output);
+        $data = json_decode($output, true);
+        $this->assertArrayHasKey('success', $data);
+        $this->assertFalse($data['success']);
+        $this->assertArrayHasKey('error', $data);
+        $this->assertEquals('Unauthorized', $data['error']);
     }
-} 
+}

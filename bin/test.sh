@@ -45,7 +45,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         --unit)
             BOOTSTRAP="tests/bootstrap-wp-mock.php"
-            DIRECTORY="tests/providers tests/api tests/admin"
+            TESTSUITE="unit"
             shift
             ;;
         --mock)

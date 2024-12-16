@@ -58,6 +58,20 @@ class Settings_Manager {
     }
 
     /**
+     * Initialize default settings
+     *
+     * @return void
+     */
+    public static function init_settings(): void {
+        $default_settings = Settings_Types::DEFAULT_SETTINGS;
+        
+        // Only set defaults if they don't exist
+        if (!get_option('gl_cpg_options')) {
+            update_option('gl_cpg_options', $default_settings);
+        }
+    }
+
+    /**
      * Register settings
      *
      * @return void

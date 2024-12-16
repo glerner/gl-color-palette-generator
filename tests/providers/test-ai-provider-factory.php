@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace GL_Color_Palette_Generator\Tests\Providers;
 
@@ -29,27 +29,29 @@ class Test_AI_Provider_Factory extends Test_Provider_Mock {
         parent::tearDown();
     }
 
-    public function test_get_provider() {
-        $config = new Provider_Config([
+    protected function get_test_credentials(): array {
+        return [
             'api_key' => 'test_key_123',
             'model' => 'gpt-4'
-        ]);
+        ];
+    }
+
+    public function test_get_provider() {
+        $config = new Provider_Config($this->get_test_credentials());
 
         $provider = $this->factory->get_provider('openai', $config);
         $this->assertInstanceOf(Provider::class, $provider);
     }
 
     public function test_get_invalid_provider() {
-        $config = new Provider_Config([
-            'api_key' => 'test_key_123'
-        ]);
+        $config = new Provider_Config($this->get_test_credentials());
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\WP_Error::class);
         $this->factory->get_provider('invalid', $config);
     }
 
     public function test_get_all_providers() {
-        $providers = $this->factory->get_all_providers();
+        $providers = $this->factory->get_registered_providers();
         $this->assertIsArray($providers);
         $this->assertNotEmpty($providers);
         

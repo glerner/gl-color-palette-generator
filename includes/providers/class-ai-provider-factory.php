@@ -9,7 +9,6 @@
 
 namespace GL_Color_Palette_Generator\Providers;
 
-use GL_Color_Palette_Generator\Interfaces\AI_Provider;
 use GL_Color_Palette_Generator\Providers\Anthropic_Provider;
 use GL_Color_Palette_Generator\Providers\Azure_OpenAI_Provider;
 use GL_Color_Palette_Generator\Providers\Cohere_Provider;
@@ -33,9 +32,9 @@ class AI_Provider_Factory {
      *
      * @param string $provider_name Provider name
      * @param Provider_Config $config Provider configuration
-     * @return AI_Provider|WP_Error Provider instance or error if not found
+     * @return Provider|WP_Error Provider instance or error if not found
      */
-    public function get_provider(string $provider_name, Provider_Config $config): AI_Provider|WP_Error {
+    public function get_provider(string $provider_name, Provider_Config $config): Provider|\WP_Error {
         switch ($provider_name) {
             case 'anthropic':
                 return new Anthropic_Provider($config);
@@ -52,7 +51,7 @@ class AI_Provider_Factory {
             case 'palm':
                 return new Palm_Provider($config);
             default:
-                return new WP_Error(
+                return new \WP_Error(
                     'invalid_provider',
                     sprintf('Invalid provider type: %s', $provider_name)
                 );
@@ -60,9 +59,9 @@ class AI_Provider_Factory {
     }
 
     /**
-     * Get all available providers
+     * Get all registered providers
      *
-     * @return array Array of provider names and display names
+     * @return array List of provider names
      */
     public function get_registered_providers(): array {
         return [
