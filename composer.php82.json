@@ -1,0 +1,27 @@
+{
+    "name": "glerner/gl-color-palette-generator",
+    "description": "Generate beautiful and accessible color palettes for your WordPress website using AI",
+    "type": "wordpress-plugin",
+    "require": {
+        "php": ">=8.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "yoast/phpunit-polyfills": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "GL_Color_Palette_Generator\\": "includes/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "GL_Color_Palette_Generator\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

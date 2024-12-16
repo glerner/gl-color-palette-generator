@@ -79,9 +79,18 @@ if ($is_unit_test) {
     // Support for the plugin being the root of a Git repository
     if (false !== $_tests_dir) {
         require_once $_tests_dir . '/includes/functions.php';
+
+        // Load plugin autoloader before WordPress
+        require_once dirname(__FILE__) . '/../vendor/autoload.php';
+
+        // Load WordPress test environment
         require_once $_tests_dir . '/includes/bootstrap.php';
 
-        // Load integration test files
+        // Load base test case first
+        require_once dirname(__FILE__) . '/test-case.php';
+        require_once dirname(__FILE__) . '/integration/test-provider-integration.php';
+
+        // Then load other integration test files
         $wp_test_directories = [
             'integration',
             'interfaces',
@@ -93,7 +102,11 @@ if ($is_unit_test) {
             $dir_path = dirname(__FILE__) . '/' . $dir;
             if (is_dir($dir_path)) {
                 foreach (glob($dir_path . '/test-*.php') as $test_file) {
-                    require_once $test_file;
+                    // Skip already loaded files
+                    if ($test_file !== dirname(__FILE__) . '/test-case.php' &&
+                        $test_file !== dirname(__FILE__) . '/integration/test-provider-integration.php') {
+                        require_once $test_file;
+                    }
                 }
             }
         }

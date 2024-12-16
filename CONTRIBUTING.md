@@ -1,6 +1,6 @@
-# Contributing to Color Palette Generator
+# Contributing to GL Color Palette Generator
 
-Thank you for your interest in contributing to the Color Palette Generator! This document provides guidelines and steps for contributing.
+Thank you for your interest in contributing to the GL Color Palette Generator! This document provides guidelines and steps for contributing.
 
 ## Documentation
 
