@@ -3,12 +3,11 @@
 namespace GL_Color_Palette_Generator\Tests\Integration;
 
 use GL_Color_Palette_Generator\Providers\Anthropic_Provider;
-use WP_Mock;
 
 /**
  * Integration tests for the Anthropic provider
  */
-class Test_Anthropic_Integration extends Test_Provider_Integration {
+class Test_Anthropic_Integration extends \GL_Color_Palette_Generator\Tests\Integration\Test_Provider_Integration {
     /**
      * Returns the test credentials for the Anthropic provider
      *
@@ -24,24 +23,15 @@ class Test_Anthropic_Integration extends Test_Provider_Integration {
      * Sets up the test environment
      */
     public function setUp(): void {
-        WP_Mock::setUp();
         parent::setUp();
         $this->maybe_skip_test();
         $this->provider = new Anthropic_Provider($this->get_test_credentials());
     }
 
     /**
-     * Tears down the test environment
-     */
-    public function tearDown(): void {
-        WP_Mock::tearDown();
-        parent::tearDown();
-    }
-
-    /**
      * Test that the provider can generate a palette
      */
-    public function test_generate_palette() {
+    public function test_generate_palette(): void {
         $colors = $this->provider->generate_palette($this->test_params);
         $this->assertNotWPError($colors);
         $this->assertIsArray($colors);

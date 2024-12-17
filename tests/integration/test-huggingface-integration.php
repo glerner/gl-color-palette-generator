@@ -1,27 +1,40 @@
 <?php
 
-namespace GLColorPalette\Tests\Integration;
+namespace GL_Color_Palette_Generator\Tests\Integration;
 
-use GLColorPalette\Providers\HuggingFace_Provider;
+use GL_Color_Palette_Generator\Providers\HuggingFace_Provider;
 
+/**
+ * Integration tests for the HuggingFace provider
+ */
 class Test_HuggingFace_Integration extends Test_Provider_Integration {
+    /**
+     * Returns the test credentials for the HuggingFace provider
+     *
+     * @return array
+     */
     protected function get_test_credentials(): array {
         return [
-            'api_key' => getenv('HUGGINGFACE_API_KEY'),
-            'model_id' => getenv('HUGGINGFACE_MODEL_ID')
+            'api_key' => getenv('HUGGINGFACE_API_KEY')
         ];
     }
 
+    /**
+     * Sets up the test environment
+     */
     public function setUp(): void {
         parent::setUp();
-        WP_Mock::setUp();
         $this->maybe_skip_test();
         $this->provider = new HuggingFace_Provider($this->get_test_credentials());
     }
 
-    public function test_generate_palette() {
+    /**
+     * Test that the provider can generate a palette
+     */
+    public function test_generate_palette(): void {
         $colors = $this->provider->generate_palette($this->test_params);
         $this->assertNotWPError($colors);
-        $this->validate_palette_response($colors);
+        $this->assertIsArray($colors);
+        $this->assertCount($this->test_params['count'], $colors);
     }
-} 
+}

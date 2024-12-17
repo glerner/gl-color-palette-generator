@@ -9,7 +9,7 @@
 
 namespace GL_Color_Palette_Generator\Tests\Integration;
 
-use GL_Color_Palette_Generator\Tests\Test_Case;
+use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Providers\Provider;
 use WP_Error;
 
@@ -22,7 +22,7 @@ use WP_Error;
  *
  * @since 1.0.0
  */
-abstract class Test_Provider_Integration extends Test_Case {
+abstract class Test_Provider_Integration extends TestCase {
     /**
      * The provider instance being tested
      *
@@ -40,6 +40,22 @@ abstract class Test_Provider_Integration extends Test_Case {
         'count' => 5,
         'format' => 'hex'
     ];
+
+    /**
+     * Set up the test environment before each test
+     */
+    public function setUp(): void {
+        parent::setUp();
+        $this->maybe_skip_test();
+    }
+
+    /**
+     * Tear down the test environment after each test
+     */
+    public function tearDown(): void {
+        parent::tearDown();
+        $this->provider = null;
+    }
 
     /**
      * Skips the test if API credentials are not available
@@ -73,7 +89,9 @@ abstract class Test_Provider_Integration extends Test_Case {
      * @param string $message Optional error message
      */
     public function assertNotWPError($actual, $message = '') {
-        $this->assertFalse(is_wp_error($actual),
-            $message ?: ($actual instanceof WP_Error ? $actual->get_error_message() : ''));
+        $this->assertFalse(
+            is_wp_error($actual),
+            $message ?: ($actual instanceof WP_Error ? $actual->get_error_message() : '')
+        );
     }
 }

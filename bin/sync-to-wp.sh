@@ -2,21 +2,22 @@
 
 # Define paths (use environment variables if set, otherwise use defaults)
 PLUGIN_SOURCE=${PLUGIN_SOURCE:-"$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"}
-WP_ROOT=${WP_ROOT:-"/home/george/sites/wordpress"}
-PLUGIN_DEST="${WP_ROOT}/wp-content/plugins/gl-color-palette-generator"
-WP_TESTS_DIR="${WP_ROOT}/wordpress-phpunit"
+FILESYSTEM_WP_ROOT="/home/george/sites/wordpress"
+PLUGIN_DEST="${FILESYSTEM_WP_ROOT}/wp-content/plugins/gl-color-palette-generator"
+WP_TESTS_DIR="${FILESYSTEM_WP_ROOT}/wordpress-phpunit"
 
 echo "Using paths:"
 echo "  Plugin source: $PLUGIN_SOURCE"
-echo "  WordPress root: $WP_ROOT"
+echo "  WordPress root: $FILESYSTEM_WP_ROOT"
 echo "  Plugin destination: $PLUGIN_DEST"
 
 # Check if .lando.example.yml is newer than WordPress .lando.yml
-if [ -f "${WP_ROOT}/.lando.yml" ] && [ -f "${PLUGIN_SOURCE}/.lando.example.yml" ]; then
-    if [ "${PLUGIN_SOURCE}/.lando.example.yml" -nt "${WP_ROOT}/.lando.yml" ]; then
+if [ -f "${FILESYSTEM_WP_ROOT}/.lando.yml" ] && [ -f "${PLUGIN_SOURCE}/.lando.example.yml" ]; then
+    if [ "${PLUGIN_SOURCE}/.lando.example.yml" -nt "${FILESYSTEM_WP_ROOT}/.lando.yml" ]; then
         echo "⚠️  Warning: .lando.example.yml has been updated."
         echo "   Please review changes and update your .lando.yml:"
-        echo "   cp ${PLUGIN_SOURCE}/.lando.example.yml ${WP_ROOT}/.lando.yml"
+        echo "   cp ${PLUGIN_SOURCE}/.lando.example.yml ${FILESYSTEM_WP_ROOT}/.lando.yml"
+        echo "   Then run: lando rebuild -y"
         echo ""
     fi
 fi
@@ -66,38 +67,13 @@ cd "$PLUGIN_DEST" || exit 1
 echo "Regenerating autoloader files..."
 composer dump-autoload
 
-# Ensure proper permissions
+# Handle permissions
 if command -v lando >/dev/null 2>&1; then
     echo "Setting permissions using Lando..."
-    cd "${WP_ROOT}" && lando ssh -c "chown -R www-data:www-data /app/wp-content/plugins/gl-color-palette-generator"
+    cd "${FILESYSTEM_WP_ROOT}" && lando ssh -c "chown -R www-data:www-data /app/wp-content/plugins/gl-color-palette-generator"
 else
-    echo "Setting permissions for local environment..."
-    # Try to get web server user
-    if [ -f /etc/apache2/envvars ]; then
-        # Apache
-        WEB_USER=$(. /etc/apache2/envvars && echo $APACHE_RUN_USER)
-        WEB_GROUP=$(. /etc/apache2/envvars && echo $APACHE_RUN_GROUP)
-    elif [ -f /etc/nginx/nginx.conf ]; then
-        # Nginx
-        WEB_USER=$(grep -r "user[[:space:]]" /etc/nginx/nginx.conf | awk '{print $2}' | sed 's/;//')
-        WEB_GROUP=$WEB_USER
-    else
-        # Fallback to common defaults
-        WEB_USER="www-data"
-        WEB_GROUP="www-data"
-    fi
-
-    # Set permissions
-    if [ "$(id -u)" -eq 0 ]; then
-        # If running as root
-        chown -R "$WEB_USER:$WEB_GROUP" "$PLUGIN_DEST"
-    else
-        # If not root, try sudo if available
-        if command -v sudo >/dev/null 2>&1; then
-            echo "Requesting sudo access to set permissions..."
-            sudo chown -R "$WEB_USER:$WEB_GROUP" "$PLUGIN_DEST"
-        else
-            echo "Warning: Could not set permissions. Please ensure your web server has proper access to: $PLUGIN_DEST"
-        fi
-    fi
+    echo "Please set appropriate permissions for your environment on: $PLUGIN_DEST"
 fi
+
+# Return to plugin destination directory
+cd "$PLUGIN_DEST"

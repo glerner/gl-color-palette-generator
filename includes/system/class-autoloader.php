@@ -59,10 +59,15 @@ class Autoloader {
         $class_path = str_replace('_', '-', $class_path);
         $class_path = str_replace('\\', '/', $class_path);
 
-        // Add 'class-' prefix if not an interface or trait
-        if (!strpos($class_path, 'interface-') && !strpos($class_path, 'trait-')) {
-            $class_parts = explode('/', $class_path);
-            $class_file = end($class_parts);
+        // Add appropriate prefix based on type
+        $class_parts = explode('/', $class_path);
+        $class_file = end($class_parts);
+
+        if (strpos($class_path, 'traits/') !== false) {
+            $class_path = str_replace($class_file, 'trait-' . $class_file, $class_path);
+        } elseif (strpos($class_path, 'interfaces/') !== false) {
+            $class_path = str_replace($class_file, 'interface-' . $class_file, $class_path);
+        } else {
             $class_path = str_replace($class_file, 'class-' . $class_file, $class_path);
         }
 

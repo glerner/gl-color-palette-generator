@@ -5,7 +5,7 @@
  * Description: Generate harmonious color palettes using AI, with support for multiple AI providers.
  * Version: 1.0.0
  * Requires at least: 6.2
- * Requires PHP: 8.0
+ * Requires PHP: 8.1
  * Author: George Lerner
  * Author URI: https://website-tech.glerner.com/
  * Update URI: https://website-tech.glerner.com/plugins/color-palette-generator/
@@ -81,7 +81,7 @@ function gl_cpg_check_compatibility() {
  */
 function gl_cpg_init() {
     if (gl_cpg_check_compatibility()) {
-        $plugin = new \GL_Color_Palette_Generator\Core\Plugin();
+        $plugin = GL_Color_Palette_Generator\Core\Plugin::get_instance();
         $plugin->init();
     }
 }

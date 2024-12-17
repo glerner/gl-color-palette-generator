@@ -6,6 +6,16 @@ Generate beautiful and accessible color palettes for your WordPress website usin
 
 GL Color Palette Generator (named with "GL" to distinguish it from other color palette plugins) is a WordPress plugin that helps you create and manage color palettes for your website design. It uses AI to generate harmonious color combinations while ensuring accessibility standards are met.
 
+### Theme Variations
+
+Theme variations are optional design configurations within a block theme that allow you to change the look of your website without switching to a different theme. This plugin generates 16 harmonious variations for you to choose from.
+
+To switch between variations:
+1. Go to your WordPress dashboard, navigate to Appearance > Editor
+2. Under Design, click on Styles
+3. Click on a variation in the left panel to preview how your site looks
+4. Once you're satisfied with a variation, click the "Save" button to apply it to your site
+
 This plugin is designed to work with the TwentyTwentyFour theme (and future WordPress default themes) and is part of the course materials for ["WordPress Websites: From Overwhelm to Mastery"](https://website-overwhelm-to-mastery.glerner.com/).
 
 **Author:** [George Lerner](https://website-tech.glerner.com/)
@@ -13,6 +23,9 @@ This plugin is designed to work with the TwentyTwentyFour theme (and future Word
 
 ### Features
 
+- Generate 16 AI-powered theme variations
+- Preview variations in real-time within the Site Editor
+- Switch variations easily without changing themes
 - AI-powered color palette generation
 - Multiple AI provider support (OpenAI, Anthropic, etc.)
 - Accessibility checking (WCAG 2.1)
@@ -31,8 +44,8 @@ For development setup and contribution guidelines, please see:
 
 ### Requirements
 
-- WordPress 6.2 or higher
-- PHP 8.0 or higher
+- WordPress 6.2 - 6.7.1
+- PHP 8.1 or higher
 - Node.js 16+ (for development)
 - Composer (for development)
 
@@ -76,7 +89,7 @@ If you want to contribute to the plugin development:
    ```bash
    npm run build
    ```
-   
+
    For development with auto-rebuild:
    ```bash
    npm run dev

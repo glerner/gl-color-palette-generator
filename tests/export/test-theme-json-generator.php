@@ -241,4 +241,112 @@ class Test_Theme_JSON_Generator extends TestCase {
         $unique_arrangements = array_unique($arrangements);
         $this->assertCount($expected_count, $unique_arrangements);
     }
+
+    /**
+     * Test color variations meet accessibility requirements
+     */
+    public function test_color_variations_accessibility() {
+        $base_colors = [
+            '#2C3338', // Dark gray
+            '#135E96', // Blue
+            '#D63638', // Red
+            '#00A32A'  // Green
+        ];
+        
+        $variations = $this->generator->generate_style_variations($base_colors);
+        
+        foreach ($variations as $variation) {
+            $palette = $variation['settings']['color']['palette'];
+            
+            // Test each color against white and black backgrounds
+            foreach ($palette as $color) {
+                if ($color['slug'] === 'transparent') {
+                    continue;
+                }
+                
+                // Test against white background
+                $white_contrast = $this->generator->get_contrast_checker()->get_contrast_ratio($color['color'], '#FFFFFF');
+                $this->assertGreaterThanOrEqual(4.5, $white_contrast, 
+                    sprintf("Color %s (%s) fails contrast with white background", $color['name'], $color['color']));
+                
+                // Test against black background
+                $black_contrast = $this->generator->get_contrast_checker()->get_contrast_ratio($color['color'], '#000000');
+                $this->assertGreaterThanOrEqual(4.5, $black_contrast,
+                    sprintf("Color %s (%s) fails contrast with black background", $color['name'], $color['color']));
+            }
+        }
+    }
+
+    /**
+     * Test color variations maintain semantic relationships
+     */
+    public function test_color_variations_semantics() {
+        $base_colors = [
+            '#1E40AF', // Primary
+            '#15803D', // Secondary
+            '#B91C1C', // Accent
+            '#1F2937'  // Background
+        ];
+        
+        $variations = $this->generator->generate_style_variations($base_colors);
+        
+        foreach ($variations as $variation) {
+            $palette = $variation['settings']['color']['palette'];
+            
+            // Group colors by role
+            $color_groups = [];
+            foreach ($palette as $color) {
+                $role = explode('-', $color['slug'])[0];
+                if (!isset($color_groups[$role])) {
+                    $color_groups[$role] = [];
+                }
+                $color_groups[$role][] = $color;
+            }
+            
+            // Test primary color variations
+            if (isset($color_groups['primary'])) {
+                $primary_colors = $color_groups['primary'];
+                usort($primary_colors, function($a, $b) {
+                    return $this->generator->get_contrast_checker()->calculate_relative_luminance($a['color']) 
+                         - $this->generator->get_contrast_checker()->calculate_relative_luminance($b['color']);
+                });
+                
+                // Test that variations get progressively lighter
+                for ($i = 1; $i < count($primary_colors); $i++) {
+                    $this->assertGreaterThan(
+                        $this->generator->get_contrast_checker()->calculate_relative_luminance($primary_colors[$i-1]['color']),
+                        $this->generator->get_contrast_checker()->calculate_relative_luminance($primary_colors[$i]['color']),
+                        sprintf(
+                            "Color %s should be lighter than %s",
+                            $primary_colors[$i]['name'],
+                            $primary_colors[$i-1]['name']
+                        )
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * Test theme.json gradient generation
+     */
+    public function test_generate_gradients() {
+        $base_colors = [
+            '#1E40AF', // Blue
+            '#15803D'  // Green
+        ];
+        
+        $variations = $this->generator->generate_style_variations($base_colors);
+        $first_variation = reset($variations);
+        
+        $gradients = $first_variation['settings']['color']['gradients'];
+        
+        $this->assertNotEmpty($gradients);
+        foreach ($gradients as $gradient) {
+            $this->assertArrayHasKey('name', $gradient);
+            $this->assertArrayHasKey('slug', $gradient);
+            $this->assertArrayHasKey('gradient', $gradient);
+            $this->assertStringContainsString('linear-gradient', $gradient['gradient']);
+        }
+    }
 }

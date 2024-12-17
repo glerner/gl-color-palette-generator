@@ -168,6 +168,10 @@ define( 'WP_PHP_BINARY', 'php' );
 
 \$table_prefix = 'wptests_';
 EOF
+
+    # Create symlink to wp-tests-config.php in the tests directory
+    echo "Creating symlink to wp-tests-config.php..."
+    ln -sf "$WP_TESTS_DIR/wp-tests-config.php" "$PLUGIN_DIR/tests/wp-tests-config.php"
 }
 
 # Install test database
@@ -516,9 +520,16 @@ verify_database_tables() {
 # Run database verification after WordPress test setup
 verify_database_tables
 if [ $? -eq 0 ]; then
-    echo "✅ Test environment setup complete!"
+    echo "✅ WordPress plugin test setup completed successfully."
+    if [ ! -z "${LANDO_INFO:-}" ]; then
+        echo ""
+        echo "🔄 IMPORTANT: Run this command to apply all changes:"
+        echo "   cd ${WP_ROOT} && lando rebuild -y"
+        echo ""
+    fi
+    exit 0
 else
-    echo "❌ Test environment setup failed - database tables not properly initialized"
+    echo "❌ Database verification failed"
     exit 1
 fi
 

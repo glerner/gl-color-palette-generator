@@ -223,7 +223,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
     }
 
     /**
-     * Get semantic color analysis
+     * Get semantic analysis of the color
      *
      * @param string $color Hex color code.
      * @return array Semantic analysis.
@@ -237,23 +237,6 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
             'color_properties' => $this->analyze_color_properties($rgb, $hsl),
             'color_harmony' => $this->analyze_color_harmony($hsl)
         ];
-    }
-
-    /**
-     * Calculate color purity
-     *
-     * @param array $rgb RGB values.
-     * @return float Purity value.
-     */
-    private function calculate_color_purity($rgb) {
-        $max = max($rgb['r'], $rgb['g'], $rgb['b']);
-        $min = min($rgb['r'], $rgb['g'], $rgb['b']);
-
-        if ($max === 0) {
-            return 0;
-        }
-
-        return ($max - $min) / $max;
     }
 
     /**
@@ -338,20 +321,6 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      */
     private function calculate_neutrality_factor($hsl) {
         return 1 - ($hsl['s'] / 100);
-    }
-
-    /**
-     * Calculate brightness
-     *
-     * @param array $rgb RGB values.
-     * @return float Brightness value.
-     */
-    private function calculate_brightness($rgb) {
-        return sqrt(
-            $rgb['r'] * $rgb['r'] * 0.241 +
-            $rgb['g'] * $rgb['g'] * 0.691 +
-            $rgb['b'] * $rgb['b'] * 0.068
-        ) / 255;
     }
 
     /**
@@ -915,10 +884,10 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
 
         // Store original color for reference
         $original_color = $color_candidates[0];
-        
+
         // Generate accessible variations
         $variations = $this->generate_color_variations($original_color);
-        
+
         // Return both original and variations
         return [
             'original' => $original_color,
@@ -1030,9 +999,12 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
         // Calculate contrast ratios with black and white
         $contrast_ratios = [];
         foreach ($optimized_colors as $color) {
+            $white_contrast = $this->accessibility_checker->calculate_contrast_ratio($color, '#FFFFFF');
+            $black_contrast = $this->accessibility_checker->calculate_contrast_ratio($color, '#000000');
+
             $contrast_ratios[$color] = [
-                'black' => $this->accessibility_checker->calculate_contrast_ratio($color, '#000000'),
-                'white' => $this->accessibility_checker->calculate_contrast_ratio($color, '#FFFFFF')
+                'black' => $black_contrast,
+                'white' => $white_contrast
             ];
         }
 
@@ -1126,7 +1098,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
         // Convert HSL to LAB for better perceptual distance calculation
         $color1_hex = $this->color_utility->hsl_to_hex($color1_hsl);
         $color2_hex = $this->color_utility->hsl_to_hex($color2_hsl);
-        
+
         $color1_lab = $this->color_utility->hex_to_lab($color1_hex);
         $color2_lab = $this->color_utility->hex_to_lab($color2_hex);
 
@@ -1263,112 +1235,13 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
     }
 
     /**
-     * Get perceptual metrics for a color
-     *
-     * @param string $color Hex color code
-     * @return array Perceptual metrics data
-     */
-    private function get_perceptual_metrics(string $color): array {
-        $rgb = $this->utility->hex_to_rgb($color);
-        $lab = $this->utility->rgb_to_lab($rgb);
-
-        return [
-            'perceived_brightness' => $lab['L'],
-            'perceived_colorfulness' => sqrt(pow($lab['a'], 2) + pow($lab['b'], 2)),
-            'perceived_hue' => atan2($lab['b'], $lab['a'])
-        ];
-    }
-
-    /**
-     * Get color space values
-     *
-     * @param string $color Hex color code
-     * @return array Color space values
-     */
-    private function get_color_space_values(string $color): array {
-        $rgb = $this->utility->hex_to_rgb($color);
-        return [
-            'rgb' => $rgb,
-            'hsl' => $this->utility->rgb_to_hsl($rgb),
-            'lab' => $this->utility->rgb_to_lab($rgb),
-            'xyz' => $this->utility->rgb_to_xyz($rgb)
-        ];
-    }
-
-    /**
-     * Get psychological metrics
-     *
-     * @param string $color Hex color code
-     * @return array Psychological metrics data
-     */
-    private function get_psychological_metrics(string $color): array {
-        $rgb = $this->utility->hex_to_rgb($color);
-        $hsl = $this->utility->rgb_to_hsl($rgb);
-
-        return [
-            'temperature' => $this->calculate_temperature($rgb),
-            'weight' => $this->calculate_weight($hsl),
-            'activity' => $this->calculate_activity($rgb, $hsl)
-        ];
-    }
-
-    /**
-     * Get accessibility metrics
-     *
-     * @param string $color Hex color code
-     * @return array Accessibility metrics data
-     */
-    private function get_accessibility_metrics(string $color): array {
-        $rgb = $this->utility->hex_to_rgb($color);
-        
-        return [
-            'wcag_contrast_white' => $this->calculator->calculate_contrast_ratio($rgb, ['r' => 255, 'g' => 255, 'b' => 255]),
-            'wcag_contrast_black' => $this->calculator->calculate_contrast_ratio($rgb, ['r' => 0, 'g' => 0, 'b' => 0]),
-            'meets_aa_normal' => $this->check_wcag_aa_compliance($rgb, 'normal'),
-            'meets_aa_large' => $this->check_wcag_aa_compliance($rgb, 'large'),
-            'meets_aaa' => $this->check_wcag_aaa_compliance($rgb)
-        ];
-    }
-
-    /**
-     * Get semantic analysis of the color
-     *
-     * @param string $color Hex color code.
-     * @return array Semantic analysis data
-     */
-    private function get_semantic_analysis(string $color): array {
-        $rgb = $this->utility->hex_to_rgb($color);
-        $hsl = $this->utility->rgb_to_hsl($rgb);
-
-        return [
-            'color_category' => $this->determine_color_category($hsl),
-            'color_properties' => $this->analyze_color_properties($rgb, $hsl),
-            'color_harmony' => $this->analyze_color_harmony($hsl)
-        ];
-    }
-
-    /**
-     * Validate color value
-     *
-     * @param string $color Color to validate
-     * @throws \InvalidArgumentException If color is invalid
-     */
-    private function validate_color(string $color): void {
-        if (!preg_match('/^#[a-f0-9]{6}$/i', $color)) {
-            throw new \InvalidArgumentException(
-                'Invalid color format. Must be a 6-digit hex color (e.g., #FF0000)'
-            );
-        }
-    }
-
-    /**
      * Calculate color temperature
      *
      * @param array $rgb RGB color values
      * @return float Color temperature value
      */
     private function calculate_temperature(array $rgb): float {
-        return (($rgb['r'] * 2) + $rgb['b']) / (($rgb['b'] * 2) + $rgb['r']);
+        return (($rgb['r'] * 2) + $rgb['g'] + $rgb['b']) / 4;
     }
 
     /**
@@ -1378,7 +1251,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      * @return float Weight value
      */
     private function calculate_weight(array $hsl): float {
-        return 1 - ($hsl['l'] / 100);
+        return (1 - $hsl['l']) * (1 + $hsl['s'] * 0.5);
     }
 
     /**
@@ -1389,9 +1262,9 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      * @return float Activity level
      */
     private function calculate_activity(array $rgb, array $hsl): float {
-        $saturation_impact = $hsl['s'] / 100;
-        $contrast = max($rgb['r'], $rgb['g'], $rgb['b']) - min($rgb['r'], $rgb['g'], $rgb['b']);
-        return ($saturation_impact + ($contrast / 255)) / 2;
+        $saturation_factor = $hsl['s'];
+        $contrast_factor = max($rgb['r'], $rgb['g'], $rgb['b']) - min($rgb['r'], $rgb['g'], $rgb['b']);
+        return ($saturation_factor + $contrast_factor / 255) / 2;
     }
 
     /**

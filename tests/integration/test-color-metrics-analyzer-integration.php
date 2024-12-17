@@ -4,23 +4,44 @@ namespace GL_Color_Palette_Generator\Tests\Integration;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Metrics_Analyzer;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
-use WP_UnitTestCase;
+use PHPUnit\Framework\TestCase;
 
-class Test_Color_Metrics_Analyzer_Integration extends WP_UnitTestCase {
+/**
+ * Integration tests for Color Metrics Analyzer
+ */
+class Test_Color_Metrics_Analyzer_Integration extends TestCase {
+    /**
+     * @var Color_Metrics_Analyzer
+     */
     private $analyzer;
+
+    /**
+     * @var Color_Utility
+     */
     private $color_utility;
 
+    /**
+     * Set up the test environment
+     */
     public function setUp(): void {
         parent::setUp();
-        WP_Mock::setUp();
         $this->analyzer = new Color_Metrics_Analyzer();
         $this->color_utility = new Color_Utility();
     }
 
     /**
+     * Clean up the test environment
+     */
+    public function tearDown(): void {
+        parent::tearDown();
+        $this->analyzer = null;
+        $this->color_utility = null;
+    }
+
+    /**
      * Test complete color analysis workflow
      */
-    public function test_complete_color_analysis_workflow() {
+    public function test_complete_color_analysis_workflow(): void {
         $test_color = '#336699';
 
         // Perform complete analysis
@@ -49,7 +70,7 @@ class Test_Color_Metrics_Analyzer_Integration extends WP_UnitTestCase {
     /**
      * Test cross-device color consistency
      */
-    public function test_cross_device_color_consistency() {
+    public function test_cross_device_color_consistency(): void {
         $test_colors = [
             '#FF0000' => 'red',
             '#00FF00' => 'green',
@@ -73,7 +94,7 @@ class Test_Color_Metrics_Analyzer_Integration extends WP_UnitTestCase {
     /**
      * Test print-to-screen color matching
      */
-    public function test_print_screen_color_matching() {
+    public function test_print_screen_color_matching(): void {
         $test_color = '#CC3366';
 
         // Get print and screen analyses
@@ -95,4 +116,4 @@ class Test_Color_Metrics_Analyzer_Integration extends WP_UnitTestCase {
             'Print and screen gamut coverage should have significant overlap'
         );
     }
-} 
+}

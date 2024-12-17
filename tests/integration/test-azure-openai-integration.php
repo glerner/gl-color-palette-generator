@@ -1,27 +1,39 @@
 <?php
-namespace GLColorPalette\Tests\Integration;
+namespace GL_Color_Palette_Generator\Tests\Integration;
 
-use GLColorPalette\Providers\Azure_OpenAI_Provider;
+use GL_Color_Palette_Generator\Providers\Azure_OpenAI_Provider;
 
+/**
+ * Integration tests for the Azure OpenAI provider
+ */
 class Test_Azure_OpenAI_Integration extends Test_Provider_Integration {
+    /**
+     * Returns the test credentials for the Azure OpenAI provider
+     *
+     * @return array
+     */
     protected function get_test_credentials(): array {
         return [
-            'api_key' => getenv('AZURE_OPENAI_API_KEY'),
-            'resource_name' => getenv('AZURE_OPENAI_RESOURCE'),
-            'deployment_id' => getenv('AZURE_OPENAI_DEPLOYMENT')
+            'api_key' => getenv('AZURE_OPENAI_API_KEY')
         ];
     }
 
+    /**
+     * Sets up the test environment
+     */
     public function setUp(): void {
         parent::setUp();
-        WP_Mock::setUp();
         $this->maybe_skip_test();
         $this->provider = new Azure_OpenAI_Provider($this->get_test_credentials());
     }
 
-    public function test_generate_palette() {
+    /**
+     * Test that the provider can generate a palette
+     */
+    public function test_generate_palette(): void {
         $colors = $this->provider->generate_palette($this->test_params);
         $this->assertNotWPError($colors);
-        $this->validate_palette_response($colors);
+        $this->assertIsArray($colors);
+        $this->assertCount($this->test_params['count'], $colors);
     }
-} 
+}

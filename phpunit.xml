@@ -22,17 +22,29 @@
         </report>
     </coverage>
     <php>
-        <env name="WP_TESTS_DIR" value="/app/wordpress-phpunit"/>
+        <env name="WP_TESTS_DIR" value="${WP_ROOT}/wordpress-phpunit"/>
+        <env name="WP_TESTS_DB_NAME" value="wordpress_test"/>
+        <env name="WP_TESTS_DB_USER" value="wordpress"/>
+        <env name="WP_TESTS_DB_PASSWORD" value="wordpress"/>
+        <env name="WP_TESTS_DB_HOST" value="database"/>
     </php>
     <testsuites>
         <testsuite name="unit">
             <directory prefix="test-" suffix=".php">tests/providers</directory>
             <directory prefix="test-" suffix=".php">tests/api</directory>
             <directory prefix="test-" suffix=".php">tests/admin</directory>
+            <directory prefix="test-" suffix=".php">tests/core</directory>
+            <directory prefix="test-" suffix=".php">tests/color-management</directory>
+            <directory prefix="test-" suffix=".php">tests/generators</directory>
+            <directory prefix="test-" suffix=".php">tests/includes</directory>
+            <directory prefix="test-" suffix=".php">tests/security</directory>
+            <directory prefix="test-" suffix=".php">tests/settings</directory>
+            <directory prefix="test-" suffix=".php">tests/utils</directory>
             <exclude>tests/integration</exclude>
         </testsuite>
         <testsuite name="integration">
             <directory prefix="test-" suffix=".php">tests/integration</directory>
+            <file phpVersion="8.1" phpVersionOperator=">=">tests/bootstrap-wp.php</file>
         </testsuite>
     </testsuites>
 </phpunit>
