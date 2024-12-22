@@ -8,18 +8,18 @@
 
 namespace GL_Color_Palette_Generator\Tests\Color_Management;
 
+use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Color_Management\Color_Accessibility;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Color_Management\Color_Metrics;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use WP_Error;
-use WP_UnitTestCase;
 use Mockery;
 
 /**
  * Class Test_Color_Accessibility
  */
-class Test_Color_Accessibility extends WP_UnitTestCase {
+class Test_Color_Accessibility extends TestCase {
     /**
      * Test instance
      *
