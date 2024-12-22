@@ -15,23 +15,6 @@ use GL_Color_Palette_Generator\Interfaces\Color_Constants;
  * Class Accessibility_Checker
  */
 class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Accessibility_Checker {
-    /**
-     * WCAG 2.1 contrast ratios and enhanced requirements
-     */
-    const WCAG_AAA_LARGE = Color_Constants::WCAG_CONTRAST_AA;
-    const WCAG_AAA_SMALL = Color_Constants::WCAG_CONTRAST_AAA;
-    const WCAG_AA_LARGE = Color_Constants::WCAG_CONTRAST_AA_LARGE;
-    const WCAG_AA_SMALL = Color_Constants::WCAG_CONTRAST_AA;
-
-    // Enhanced contrast requirements
-    const OPTIMAL_CONTRAST_MIN = Color_Constants::WCAG_CONTRAST_TARGET;    // Target AAA for best readability
-    const OPTIMAL_CONTRAST_MAX = Color_Constants::CONTRAST_MAX;   // Upper limit to prevent harsh contrast
-    const DECORATIVE_CONTRAST_MIN = Color_Constants::DECORATIVE_CONTRAST_MIN; // Minimum for decorative elements
-
-    // Luminance thresholds
-    const LIGHT_LUMINANCE = Color_Constants::LIGHT_LUMINANCE_THRESHOLD;
-    const DARK_LUMINANCE = Color_Constants::DARK_LUMINANCE_THRESHOLD;
-    const MID_LUMINANCE = 0.5;
 
     /**
      * Check color combination accessibility
@@ -45,11 +28,11 @@ class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Ac
 
         return [
             'contrast_ratio' => round($contrast_ratio, 2),
-            'aa_large' => $contrast_ratio >= self::WCAG_AA_LARGE,
-            'aa_small' => $contrast_ratio >= self::WCAG_AA_SMALL,
-            'aaa_large' => $contrast_ratio >= self::WCAG_AAA_LARGE,
-            'aaa_small' => $contrast_ratio >= self::WCAG_AAA_SMALL,
-            'readable' => $contrast_ratio >= self::WCAG_AA_LARGE,
+            'aa_large' => $this->meets_aa_large($foreground, $background),
+            'aa_small' => $this->meets_aa_small($foreground, $background),
+            'aaa_large' => $this->meets_aaa_large($foreground, $background),
+            'aaa_small' => $this->meets_aaa_small($foreground, $background),
+            'readable' => $this->meets_aa_large($foreground, $background),
             'recommendations' => $this->get_recommendations($contrast_ratio)
         ];
     }
@@ -133,6 +116,54 @@ class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Ac
     }
 
     /**
+     * Check if a color combination meets WCAG AAA requirements for large text
+     *
+     * @param string $color1 First color in hex format
+     * @param string $color2 Second color in hex format
+     * @return bool True if meets requirements, false otherwise
+     */
+    public function meets_aaa_large($color1, $color2) {
+        $ratio = $this->calculate_contrast_ratio($color1, $color2);
+        return $ratio >= Color_Constants::WCAG_CONTRAST_AA;
+    }
+
+    /**
+     * Check if a color combination meets WCAG AAA requirements for small text
+     *
+     * @param string $color1 First color in hex format
+     * @param string $color2 Second color in hex format
+     * @return bool True if meets requirements, false otherwise
+     */
+    public function meets_aaa_small($color1, $color2) {
+        $ratio = $this->calculate_contrast_ratio($color1, $color2);
+        return $ratio >= Color_Constants::WCAG_CONTRAST_AAA;
+    }
+
+    /**
+     * Check if a color combination meets WCAG AA requirements for large text
+     *
+     * @param string $color1 First color in hex format
+     * @param string $color2 Second color in hex format
+     * @return bool True if meets requirements, false otherwise
+     */
+    public function meets_aa_large($color1, $color2) {
+        $ratio = $this->calculate_contrast_ratio($color1, $color2);
+        return $ratio >= Color_Constants::WCAG_CONTRAST_AA_LARGE;
+    }
+
+    /**
+     * Check if a color combination meets WCAG AA requirements for small text
+     *
+     * @param string $color1 First color in hex format
+     * @param string $color2 Second color in hex format
+     * @return bool True if meets requirements, false otherwise
+     */
+    public function meets_aa_small($color1, $color2) {
+        $ratio = $this->calculate_contrast_ratio($color1, $color2);
+        return $ratio >= Color_Constants::WCAG_CONTRAST_AA;
+    }
+
+    /**
      * Get recommendations based on contrast ratio
      *
      * @param float $ratio Contrast ratio.
@@ -141,15 +172,15 @@ class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Ac
     private function get_recommendations($ratio) {
         $recommendations = [];
 
-        if ($ratio < self::WCAG_AA_LARGE) {
+        if ($ratio < Color_Constants::WCAG_CONTRAST_AA) {
             $recommendations[] = __('Increase contrast for better readability', 'gl-color-palette-generator');
         }
 
-        if ($ratio < self::WCAG_AA_SMALL) {
+        if ($ratio < Color_Constants::WCAG_CONTRAST_AA) {
             $recommendations[] = __('Not suitable for body text', 'gl-color-palette-generator');
         }
 
-        if ($ratio < self::WCAG_AAA_LARGE) {
+        if ($ratio < Color_Constants::WCAG_CONTRAST_AAA) {
             $recommendations[] = __('Consider using larger text sizes', 'gl-color-palette-generator');
         }
 
@@ -170,10 +201,10 @@ class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Ac
             $ratio = $result['results']['contrast_ratio'];
             $score = 0;
 
-            if ($ratio >= self::WCAG_AAA_SMALL) $score = 100;
-            elseif ($ratio >= self::WCAG_AAA_LARGE) $score = 90;
-            elseif ($ratio >= self::WCAG_AA_SMALL) $score = 80;
-            elseif ($ratio >= self::WCAG_AA_LARGE) $score = 70;
+            if ($ratio >= Color_Constants::WCAG_CONTRAST_AAA) $score = 100;
+            elseif ($ratio >= Color_Constants::WCAG_CONTRAST_AA) $score = 90;
+            elseif ($ratio >= Color_Constants::WCAG_CONTRAST_AA) $score = 80;
+            elseif ($ratio >= Color_Constants::WCAG_CONTRAST_AA_LARGE) $score = 70;
             else $score = min(60, max(0, round($ratio * 10)));
 
             $total_score += $score;
@@ -193,7 +224,7 @@ class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Ac
         $failing_pairs = [];
 
         foreach ($results as $result) {
-            if ($result['results']['contrast_ratio'] < self::WCAG_AA_LARGE) {
+            if ($result['results']['contrast_ratio'] < Color_Constants::WCAG_CONTRAST_AA) {
                 $failing_pairs[] = sprintf(
                     __('Colors %s and %s have insufficient contrast', 'gl-color-palette-generator'),
                     $result['colors'][0],
@@ -220,14 +251,14 @@ class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Ac
      */
     public function analyze_contrast($color1, $color2, $is_decorative = false) {
         $contrast_ratio = $this->calculate_contrast_ratio($color1, $color2);
-        $min_required = $is_decorative ? self::DECORATIVE_CONTRAST_MIN : self::WCAG_AA_SMALL;
+        $min_required = $is_decorative ? Color_Constants::DECORATIVE_CONTRAST_MIN : Color_Constants::WCAG_CONTRAST_AA;
 
         return [
             'contrast_ratio' => round($contrast_ratio, 2),
             'meets_minimum' => $contrast_ratio >= $min_required,
-            'meets_optimal' => $contrast_ratio >= self::OPTIMAL_CONTRAST_MIN,
-            'is_too_harsh' => $contrast_ratio > self::OPTIMAL_CONTRAST_MAX,
-            'needs_adjustment' => $contrast_ratio < $min_required || $contrast_ratio > self::OPTIMAL_CONTRAST_MAX,
+            'meets_optimal' => $contrast_ratio >= Color_Constants::WCAG_CONTRAST_TARGET,
+            'is_too_harsh' => $contrast_ratio > Color_Constants::CONTRAST_MAX,
+            'needs_adjustment' => $contrast_ratio < $min_required || $contrast_ratio > Color_Constants::CONTRAST_MAX,
             'target_contrast' => $this->calculate_target_contrast($contrast_ratio, $is_decorative)
         ];
     }
@@ -241,15 +272,15 @@ class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Ac
      */
     private function calculate_target_contrast($current_ratio, $is_decorative) {
         if ($is_decorative) {
-            return max(self::DECORATIVE_CONTRAST_MIN, min($current_ratio, self::WCAG_AA_LARGE));
+            return max(Color_Constants::DECORATIVE_CONTRAST_MIN, min($current_ratio, Color_Constants::WCAG_CONTRAST_AA_LARGE));
         }
 
-        if ($current_ratio < self::WCAG_AA_SMALL) {
-            return self::WCAG_AA_SMALL;
-        } elseif ($current_ratio > self::OPTIMAL_CONTRAST_MAX) {
-            return self::OPTIMAL_CONTRAST_MAX;
-        } elseif ($current_ratio < self::OPTIMAL_CONTRAST_MIN) {
-            return self::OPTIMAL_CONTRAST_MIN;
+        if ($current_ratio < Color_Constants::WCAG_CONTRAST_AA) {
+            return Color_Constants::WCAG_CONTRAST_AA;
+        } elseif ($current_ratio > Color_Constants::CONTRAST_MAX) {
+            return Color_Constants::CONTRAST_MAX;
+        } elseif ($current_ratio < Color_Constants::WCAG_CONTRAST_TARGET) {
+            return Color_Constants::WCAG_CONTRAST_TARGET;
         }
 
         return $current_ratio;
@@ -267,9 +298,9 @@ class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Ac
 
         return [
             'luminance' => round($luminance, 3),
-            'is_light' => $luminance > self::MID_LUMINANCE,
-            'is_very_light' => $luminance >= self::LIGHT_LUMINANCE,
-            'is_very_dark' => $luminance <= self::DARK_LUMINANCE,
+            'is_light' => $luminance > 0.5,
+            'is_very_light' => $luminance >= Color_Constants::LIGHT_LUMINANCE_THRESHOLD,
+            'is_very_dark' => $luminance <= Color_Constants::DARK_LUMINANCE_THRESHOLD,
             'rgb' => $rgb,
             'perceived_brightness' => $this->calculate_perceived_brightness($rgb)
         ];
@@ -303,23 +334,23 @@ class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Ac
     private function get_recommendations_for_improvement($contrast_ratio) {
         $recommendations = [];
 
-        if ($contrast_ratio < self::WCAG_AA_SMALL) {
+        if ($contrast_ratio < Color_Constants::WCAG_CONTRAST_AA) {
             $recommendations[] = [
                 'priority' => 'high',
                 'message' => 'Increase contrast to meet WCAG AA minimum (4.5:1)',
-                'target' => self::WCAG_AA_SMALL
+                'target' => Color_Constants::WCAG_CONTRAST_AA
             ];
-        } elseif ($contrast_ratio < self::OPTIMAL_CONTRAST_MIN) {
+        } elseif ($contrast_ratio < Color_Constants::WCAG_CONTRAST_TARGET) {
             $recommendations[] = [
                 'priority' => 'medium',
                 'message' => 'Consider increasing contrast to meet WCAG AAA (7:1)',
-                'target' => self::OPTIMAL_CONTRAST_MIN
+                'target' => Color_Constants::WCAG_CONTRAST_TARGET
             ];
-        } elseif ($contrast_ratio > self::OPTIMAL_CONTRAST_MAX) {
+        } elseif ($contrast_ratio > Color_Constants::CONTRAST_MAX) {
             $recommendations[] = [
                 'priority' => 'low',
                 'message' => 'Consider reducing contrast to prevent visual strain',
-                'target' => self::OPTIMAL_CONTRAST_MAX
+                'target' => Color_Constants::CONTRAST_MAX
             ];
         }
 

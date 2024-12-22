@@ -39,35 +39,29 @@ class Theme_Style_Generator implements Color_Constants {
 
         $styles = [];
         foreach ($colors as $color) {
-            switch ($type) {
-                case 'monochromatic':
-                    $styles[] = $this->generate_monochromatic_style($color);
-                    break;
-                case 'analogous':
-                    $styles[] = $this->generate_analogous_style($color);
-                    break;
-                case 'complementary':
-                    $styles[] = $this->generate_complementary_style($color);
-                    break;
-                case 'split_complementary':
-                    $styles[] = $this->generate_split_complementary_style($color);
-                    break;
-                case 'triadic':
-                    $styles[] = $this->generate_triadic_style($color);
-                    break;
-                case 'tetradic':
-                    $styles[] = $this->generate_tetradic_style($color);
-                    break;
-                case 'all':
-                default:
-                    $styles[] = array_merge(
-                        $this->generate_monochromatic_style($color),
-                        $this->generate_analogous_style($color),
-                        $this->generate_complementary_style($color)
-                    );
+            if ($type === 'all') {
+                // Generate all available styles
+                $styles = array_merge(
+                    $styles,
+                    array_map(
+                        function($relationship_type) use ($color) {
+                            $method = 'generate_' . str_replace('-', '_', $relationship_type) . '_style';
+                            return method_exists($this, $method) ? $this->$method($color) : [];
+                        },
+                        array_keys(Color_Constants::COLOR_ROLE_RELATIONSHIPS)
+                    )
+                );
+            } else {
+                // Map relationship type to method name
+                $method = 'generate_' . str_replace('-', '_', $type) . '_style';
+                if (method_exists($this, $method)) {
+                    $styles[] = $this->$method($color);
+                }
             }
         }
 
+        // Filter out empty results and limit to requested count
+        $styles = array_filter($styles);
         return array_slice(array_merge(...$styles), 0, $count);
     }
 

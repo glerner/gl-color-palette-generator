@@ -19,7 +19,7 @@ interface PaletteGenerator {
      * @param array $criteria {
      *     Optional. Criteria for palette generation.
      *     @type string $base_color    Base color to build palette around.
-     *     @type string $harmony_type  Type of color harmony ('complementary', 'analogous', etc.).
+     *     @type string $harmony_type  Type of color harmony (see Color_Constants::COLOR_HARMONY_TYPES).
      *     @type int    $color_count   Number of colors in palette (default 5).
      *     @type array  $constraints   Color constraints (brightness, saturation ranges).
      *     @type bool   $accessibility Whether to enforce WCAG compliance.
@@ -44,7 +44,7 @@ interface PaletteGenerator {
      *     Optional. Validation rules.
      *     @type bool   $check_contrast    Check color contrast.
      *     @type bool   $check_harmony     Verify color harmony.
-     *     @type string $accessibility     WCAG compliance level ('AA', 'AAA').
+     *     @type string $accessibility     WCAG compliance level (see Color_Constants::WCAG_LEVELS).
      *     @type array  $required_colors   Colors that must be included.
      * }
      * @return array {
@@ -63,7 +63,7 @@ interface PaletteGenerator {
      * @param array $palette Original palette hex colors.
      * @param array $options {
      *     Optional. Variation options.
-     *     @type string $variation_type  Type of variation ('lighter', 'darker', 'saturated', etc.).
+     *     @type string $variation_type  Type of variation (see Color_Constants::VARIATION_TYPES).
      *     @type int    $variation_count Number of variations to generate.
      *     @type float  $intensity       Intensity of variation (0-1).
      *     @type bool   $preserve_harmony Maintain original color harmony.

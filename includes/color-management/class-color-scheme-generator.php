@@ -14,7 +14,7 @@ use WP_Error;
 
 /**
  * Class Color_Scheme_Generator
- * 
+ *
  * Implements color scheme generation functionality
  */
 class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
@@ -344,43 +344,5 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
         } catch (\Exception $e) {
             return new WP_Error('image_processing_error', $e->getMessage());
         }
-    }
-
-    /**
-     * Generate a scheme based on a theme or mood
-     *
-     * @param string $theme Theme or mood name
-     * @param array  $options Generation options
-     * @return array|WP_Error Array of colors or error
-     */
-    public function generate_theme_scheme($theme, $options = []) {
-        $theme = strtolower($theme);
-        $count = isset($options['count']) ? $options['count'] : 5;
-
-        // Predefined base colors for different themes
-        $theme_bases = [
-            'warm' => '#ff9900',
-            'cool' => '#0099cc',
-            'natural' => '#7ab55c',
-            'elegant' => '#4a4a4a',
-            'vibrant' => '#ff3366',
-            'pastel' => '#ffb3ba',
-            'dark' => '#2c2c2c',
-            'light' => '#f5f5f5',
-            'autumn' => '#d35400',
-            'spring' => '#2ecc71',
-            'summer' => '#f1c40f',
-            'winter' => '#3498db',
-        ];
-
-        if (!isset($theme_bases[$theme])) {
-            return new WP_Error('invalid_theme', 'Invalid theme name provided');
-        }
-
-        // Generate scheme based on theme's base color
-        return $this->generate_scheme($theme_bases[$theme], [
-            'type' => isset($options['type']) ? $options['type'] : 'monochromatic',
-            'count' => $count,
-        ]);
     }
 }

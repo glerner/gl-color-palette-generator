@@ -208,81 +208,12 @@ class Color_AI_Generator implements Color_Generator_Interface {
      * @return array Psychological effects
      */
     private function get_psychological_effects(float $hue): array {
-        // Define color ranges and their effects
-        $color_effects = [
-            'red' => [
-                'range' => [0, 15],
-                'effects' => [
-                    'primary' => ['energy', 'passion', 'excitement'],
-                    'negative' => ['aggression', 'danger'],
-                    'business_contexts' => ['food', 'entertainment', 'sports']
-                ]
-            ],
-            'orange' => [
-                'range' => [15, 45],
-                'effects' => [
-                    'primary' => ['creativity', 'adventure', 'confidence'],
-                    'negative' => ['frivolity', 'immaturity'],
-                    'business_contexts' => ['youth', 'arts', 'food']
-                ]
-            ],
-            'yellow' => [
-                'range' => [45, 75],
-                'effects' => [
-                    'primary' => ['optimism', 'clarity', 'warmth'],
-                    'negative' => ['caution', 'cowardice'],
-                    'business_contexts' => ['education', 'children', 'leisure']
-                ]
-            ],
-            'green' => [
-                'range' => [75, 165],
-                'effects' => [
-                    'primary' => ['growth', 'harmony', 'nature'],
-                    'negative' => ['envy', 'boredom'],
-                    'business_contexts' => ['environment', 'health', 'finance']
-                ]
-            ],
-            'blue' => [
-                'range' => [165, 255],
-                'effects' => [
-                    'primary' => ['trust', 'stability', 'professionalism'],
-                    'negative' => ['coldness', 'aloofness'],
-                    'business_contexts' => ['technology', 'finance', 'healthcare']
-                ]
-            ],
-            'purple' => [
-                'range' => [255, 315],
-                'effects' => [
-                    'primary' => ['luxury', 'creativity', 'mystery'],
-                    'negative' => ['decadence', 'moodiness'],
-                    'business_contexts' => ['luxury', 'beauty', 'spirituality']
-                ]
-            ],
-            'pink' => [
-                'range' => [315, 360],
-                'effects' => [
-                    'primary' => ['love', 'nurturing', 'sensitivity'],
-                    'negative' => ['weakness', 'immaturity'],
-                    'business_contexts' => ['beauty', 'fashion', 'romance']
-                ]
-            ]
-        ];
-
-        // Normalize hue to 0-360 range
-        $hue = $hue % 360;
-        if ($hue < 0) {
-            $hue += 360;
-        }
-
-        // Find matching color range
-        foreach ($color_effects as $color => $data) {
-            if ($hue >= $data['range'][0] && $hue <= $data['range'][1]) {
-                return $data['effects'];
+        foreach (Color_Constants::COLOR_RANGES as $color => $range) {
+            if ($hue >= $range[0] && $hue < $range[1]) {
+                return Color_Constants::COLOR_PSYCHOLOGICAL_EFFECTS[$color]['effects'];
             }
         }
-
-        // Default to red if no match found (shouldn't happen with normalized hue)
-        return $color_effects['red']['effects'];
+        return [];
     }
 
     /**
@@ -372,39 +303,48 @@ class Color_AI_Generator implements Color_Generator_Interface {
         $analyzer = new Color_Analysis();
         $base_hsl = $analyzer->hex_to_hsl($base_hex);
 
-        // Initialize variations
+        // Initialize variations using constants
         $variations = [
-            'lighter' => ['l' => min($base_hsl['l'] + 40, 95)],
-            'light' => ['l' => min($base_hsl['l'] + 20, 85)],
-            'dark' => ['l' => max($base_hsl['l'] - 20, 15)],
-            'darker' => ['l' => max($base_hsl['l'] - 40, 5)]
+            Color_Constants::COLOR_VARIATIONS['lighter'] => [
+                'l' => min($base_hsl['l'] + 40, Color_Constants::MAX_LIGHTNESS)
+            ],
+            Color_Constants::COLOR_VARIATIONS['light'] => [
+                'l' => min($base_hsl['l'] + 20, Color_Constants::HIGH_LIGHTNESS)
+            ],
+            Color_Constants::COLOR_VARIATIONS['dark'] => [
+                'l' => max($base_hsl['l'] - 20, Color_Constants::LOW_LIGHTNESS)
+            ],
+            Color_Constants::COLOR_VARIATIONS['darker'] => [
+                'l' => max($base_hsl['l'] - 40, Color_Constants::MIN_LIGHTNESS)
+            ]
         ];
 
         $results = [];
         foreach ($variations as $name => $adjustment) {
             $variation_hsl = $base_hsl;
             $variation_hsl['l'] = $adjustment['l'];
-
             $hex = $analyzer->hsl_to_hex($variation_hsl);
 
             // Verify contrast
-            $black_contrast = $analyzer->calculate_contrast_ratio($hex, '#000000');
-            $white_contrast = $analyzer->calculate_contrast_ratio($hex, '#FFFFFF');
+            $black_contrast = $analyzer->calculate_contrast_ratio($hex, Color_Constants::COLOR_BLACK);
+            $white_contrast = $analyzer->calculate_contrast_ratio($hex, Color_Constants::COLOR_WHITE);
 
             // Adjust if needed
-            if ($name === 'lighter' || $name === 'light') {
+            if (in_array($name, [Color_Constants::COLOR_VARIATIONS['lighter'], Color_Constants::COLOR_VARIATIONS['light']])) {
                 // Should contrast with black text
-                while ($black_contrast < Color_Constants::ACCESSIBILITY_CONFIG['contrast']['min_ratio'] && $variation_hsl['l'] < 95) {
-                    $variation_hsl['l'] += 5;
+                while ($black_contrast < Color_Constants::WCAG_CONTRAST_MIN &&
+                       $variation_hsl['l'] < Color_Constants::MAX_LIGHTNESS) {
+                    $variation_hsl['l'] += Color_Constants::LIGHTNESS_STEP;
                     $hex = $analyzer->hsl_to_hex($variation_hsl);
-                    $black_contrast = $analyzer->calculate_contrast_ratio($hex, '#000000');
+                    $black_contrast = $analyzer->calculate_contrast_ratio($hex, Color_Constants::COLOR_BLACK);
                 }
             } else {
                 // Should contrast with white text
-                while ($white_contrast < Color_Constants::ACCESSIBILITY_CONFIG['contrast']['min_ratio'] && $variation_hsl['l'] > 5) {
-                    $variation_hsl['l'] -= 5;
+                while ($white_contrast < Color_Constants::WCAG_CONTRAST_MIN &&
+                       $variation_hsl['l'] > Color_Constants::MIN_LIGHTNESS) {
+                    $variation_hsl['l'] -= Color_Constants::LIGHTNESS_STEP;
                     $hex = $analyzer->hsl_to_hex($variation_hsl);
-                    $white_contrast = $analyzer->calculate_contrast_ratio($hex, '#FFFFFF');
+                    $white_contrast = $analyzer->calculate_contrast_ratio($hex, Color_Constants::COLOR_WHITE);
                 }
             }
 
@@ -524,26 +464,26 @@ class Color_AI_Generator implements Color_Generator_Interface {
         $analyzer = new Color_Metrics();
 
         // Check contrast with black and white
-        $black_contrast = $analyzer->calculate_contrast_ratio($hex, '#000000');
-        $white_contrast = $analyzer->calculate_contrast_ratio($hex, '#FFFFFF');
+        $black_contrast = $analyzer->calculate_contrast_ratio($hex, Color_Constants::COLOR_BLACK);
+        $white_contrast = $analyzer->calculate_contrast_ratio($hex, Color_Constants::COLOR_WHITE);
 
         // Adjust lightness until we achieve minimum contrast with either black or white
-        $min_contrast = Color_Constants::ACCESSIBILITY_CONFIG['contrast']['min_ratio'];
+        $min_contrast = Color_Constants::WCAG_CONTRAST_MIN;
 
         if ($black_contrast < $min_contrast && $white_contrast < $min_contrast) {
             if ($variation_hsl['l'] < 50) {
                 // Dark color - adjust lighter for black text
-                while ($black_contrast < $min_contrast && $variation_hsl['l'] < 95) {
+                while ($black_contrast < $min_contrast && $variation_hsl['l'] < Color_Constants::MAX_LIGHTNESS) {
                     $variation_hsl['l'] += 5;
                     $hex = $this->color_converter->hsl_to_hex($variation_hsl);
-                    $black_contrast = $analyzer->calculate_contrast_ratio($hex, '#000000');
+                    $black_contrast = $analyzer->calculate_contrast_ratio($hex, Color_Constants::COLOR_BLACK);
                 }
             } else {
                 // Light color - adjust darker for white text
-                while ($white_contrast < $min_contrast && $variation_hsl['l'] > 5) {
+                while ($white_contrast < $min_contrast && $variation_hsl['l'] > Color_Constants::MIN_LIGHTNESS) {
                     $variation_hsl['l'] -= 5;
                     $hex = $this->color_converter->hsl_to_hex($variation_hsl);
-                    $white_contrast = $analyzer->calculate_contrast_ratio($hex, '#FFFFFF');
+                    $white_contrast = $analyzer->calculate_contrast_ratio($hex, Color_Constants::COLOR_WHITE);
                 }
             }
         }

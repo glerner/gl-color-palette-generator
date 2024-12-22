@@ -8,6 +8,8 @@
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
+
 /**
  * Class Color_Palette_Analyzer
  *
@@ -20,16 +22,6 @@ namespace GL_Color_Palette_Generator\Color_Management;
  * @since 1.0.0
  */
 class Color_Palette_Analyzer {
-    /**
-     * Minimum contrast ratio for WCAG AA compliance
-     */
-    const WCAG_AA_CONTRAST = 4.5;
-
-    /**
-     * Minimum contrast ratio for WCAG AAA compliance
-     */
-    const WCAG_AAA_CONTRAST = 7.0;
-
     /**
      * Analyze a color palette
      *
@@ -95,8 +87,8 @@ class Color_Palette_Analyzer {
                 $contrast_pairs[] = [
                     'colors' => [$color1, $color2],
                     'ratio' => $ratio,
-                    'meets_aa' => $ratio >= self::WCAG_AA_CONTRAST,
-                    'meets_aaa' => $ratio >= self::WCAG_AAA_CONTRAST
+                    'meets_aa' => $ratio >= Color_Constants::WCAG_CONTRAST_AA,
+                    'meets_aaa' => $ratio >= Color_Constants::WCAG_CONTRAST_AAA
                 ];
             }
         }
@@ -166,9 +158,9 @@ class Color_Palette_Analyzer {
             foreach (array_slice($colors, $i + 1) as $color2) {
                 $ratio = $this->get_contrast_ratio($color1, $color2);
 
-                if ($ratio >= self::WCAG_AAA_CONTRAST) {
+                if ($ratio >= Color_Constants::WCAG_CONTRAST_AAA) {
                     $analysis['wcag_aaa_pairs'][] = [$color1, $color2];
-                } elseif ($ratio >= self::WCAG_AA_CONTRAST) {
+                } elseif ($ratio >= Color_Constants::WCAG_CONTRAST_AA) {
                     $analysis['wcag_aa_pairs'][] = [$color1, $color2];
                 }
             }

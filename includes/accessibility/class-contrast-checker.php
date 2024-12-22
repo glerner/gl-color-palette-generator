@@ -10,6 +10,7 @@ namespace GL_Color_Palette_Generator\Accessibility;
 
 use WP_Error;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 
 /**
  * Class Contrast_Checker
@@ -20,14 +21,6 @@ use GL_Color_Palette_Generator\Color_Management\Color_Utility;
  * @since 1.0.0
  */
 class Contrast_Checker {
-    /**
-     * WCAG 2.1 minimum contrast requirements
-     */
-    const WCAG_AA_NORMAL_MIN = 4.5;  // Normal text (Level AA)
-    const WCAG_AA_LARGE_MIN = 3.0;   // Large text (Level AA)
-    const WCAG_AAA_NORMAL_MIN = 7.0; // Normal text (Level AAA)
-    const WCAG_AAA_LARGE_MIN = 4.5;  // Large text (Level AAA)
-
     /**
      * Calculate relative luminance
      *
@@ -81,5 +74,27 @@ class Contrast_Checker {
         $darker = min($l1, $l2);
 
         return ($lighter + 0.05) / ($darker + 0.05);
+    }
+
+    /**
+     * Check if contrast ratio meets WCAG AA requirements
+     *
+     * @param float $ratio The contrast ratio to check
+     * @param bool $is_large_text Whether this is for large text
+     * @return bool True if meets requirements, false otherwise
+     */
+    public function meets_wcag_aa($ratio, $is_large_text = false) {
+        return $ratio >= ($is_large_text ? Color_Constants::WCAG_CONTRAST_AA_LARGE : Color_Constants::WCAG_CONTRAST_AA);
+    }
+
+    /**
+     * Check if contrast ratio meets WCAG AAA requirements
+     *
+     * @param float $ratio The contrast ratio to check
+     * @param bool $is_large_text Whether this is for large text
+     * @return bool True if meets requirements, false otherwise
+     */
+    public function meets_wcag_aaa($ratio, $is_large_text = false) {
+        return $ratio >= ($is_large_text ? Color_Constants::WCAG_CONTRAST_AA : Color_Constants::WCAG_CONTRAST_AAA);
     }
 }

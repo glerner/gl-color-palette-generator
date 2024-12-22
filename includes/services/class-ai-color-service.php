@@ -202,27 +202,27 @@ class AIColorService implements AIColorServiceInterface {
     }
 
     /**
-     * Get fallback color name
-     *
+     * Get a basic color name as a fallback
+     * 
      * @param string $hex_color Hex color code
      * @return string Basic color name
      */
     private function get_fallback_name($hex_color) {
         $basic_colors = [
-            '#FF0000' => 'Red',
-            '#00FF00' => 'Green',
-            '#0000FF' => 'Blue',
-            '#FFFF00' => 'Yellow',
-            '#FF00FF' => 'Magenta',
-            '#00FFFF' => 'Cyan',
-            '#000000' => 'Black',
-            '#FFFFFF' => 'White',
-            '#808080' => 'Gray'
+            Color_Constants::COLOR_PRIMARY_RED[0] => __( Color_Constants::COLOR_PRIMARY_RED[1], 'gl-color-palette-generator' ),
+            Color_Constants::COLOR_PRIMARY_GREEN[0] => __( Color_Constants::COLOR_PRIMARY_GREEN[1], 'gl-color-palette-generator' ),
+            Color_Constants::COLOR_PRIMARY_BLUE[0] => __( Color_Constants::COLOR_PRIMARY_BLUE[1], 'gl-color-palette-generator' ),
+            Color_Constants::COLOR_PRIMARY_YELLOW[0] => __( Color_Constants::COLOR_PRIMARY_YELLOW[1], 'gl-color-palette-generator' ),
+            Color_Constants::COLOR_PRIMARY_MAGENTA[0] => __( Color_Constants::COLOR_PRIMARY_MAGENTA[1], 'gl-color-palette-generator' ),
+            Color_Constants::COLOR_PRIMARY_CYAN[0] => __( Color_Constants::COLOR_PRIMARY_CYAN[1], 'gl-color-palette-generator' ),
+            Color_Constants::COLOR_BLACK => __('Black', 'gl-color-palette-generator'),
+            Color_Constants::COLOR_WHITE => __('White', 'gl-color-palette-generator'),
+            Color_Constants::COLOR_MID_GRAY => __('Gray', 'gl-color-palette-generator')
         ];
 
         // Find closest basic color
         $min_distance = PHP_FLOAT_MAX;
-        $closest_name = 'Color';
+        $closest_name = __('Unknown', 'gl-color-palette-generator');
 
         foreach ($basic_colors as $basic_hex => $name) {
             $distance = $this->calculate_color_distance($hex_color, $basic_hex);

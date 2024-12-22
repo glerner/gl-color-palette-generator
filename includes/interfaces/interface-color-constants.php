@@ -380,9 +380,19 @@ interface Color_Constants {
     const DECORATIVE_CONTRAST_MIN = 0.30;    // Minimum for decorative elements
 
     /**
-     * Standard Theme Colors
-     * Used for testing and defaults
+     * Primary Colors - RGB and CMY
      */
+    const COLOR_PRIMARY_RED = ['#FF0000', 'Red'];
+    const COLOR_PRIMARY_GREEN = ['#00FF00', 'Green'];
+    const COLOR_PRIMARY_BLUE = ['#0000FF', 'Blue'];
+    const COLOR_PRIMARY_CYAN = ['#00FFFF', 'Cyan'];
+    const COLOR_PRIMARY_MAGENTA = ['#FF00FF', 'Magenta'];
+    const COLOR_PRIMARY_YELLOW = ['#FFFF00', 'Yellow'];
+
+    /**
+     * Neutral Colors
+     */
+    const COLOR_BLACK = '#000000';      // Pure black
     const COLOR_WHITE = '#FFFFFF';      // Pure white
     const COLOR_OFF_WHITE = '#F8F9FA';  // Light mode base
     const COLOR_NEAR_BLACK = '#1A1A1A'; // Dark mode base
@@ -391,22 +401,11 @@ interface Color_Constants {
     const COLOR_LIGHT_GRAY = '#CCCCCC'; // Light contrast
 
     /**
-     * Color Variation Generation
+     * Lightness levels for color variations
      */
-    const TINTS_PER_COLOR = 2;          // Light, Lighter
-    const SHADES_PER_COLOR = 2;         // Dark, Darker
-    const VARIATIONS_PER_MODE = 24;     // max 4 colors, so max 4! permutations
-
-    /**
-     * Color Validation Rules
-     */
-    const MIN_HUE_VARIANCE = 30;        // Non-monochromatic schemes
-    const MIN_DISTINCTION = 20;         // Perceptual difference
-    const MIN_SATURATION_RANGE = 20;    // For variations
-    const MAX_SATURATION = 100;         // Maximum saturation
-    const MIN_BRIGHTNESS_RANGE = 30;    // For variations
-    const MIN_LIGHTNESS = 5;           // Minimum lightness
-    const MAX_LIGHTNESS = 95;          // Maximum lightness
+    const HIGH_LIGHTNESS = 85;         // High lightness for light variations
+    const LOW_LIGHTNESS = 15;          // Low lightness for dark variations
+    const LIGHTNESS_STEP = 5;          // Step size for lightness adjustments
 
     /**
      * Color wheel configuration
@@ -583,6 +582,69 @@ interface Color_Constants {
             'just_noticeable' => 2.3,
             'distinct' => 5.0,
             'obvious' => 10.0
+        ]
+    ];
+
+    /**
+     * Color Psychological Effects
+     * Maps color ranges to their psychological and business effects
+     */
+    const COLOR_PSYCHOLOGICAL_EFFECTS = [
+        'red' => [
+            'range' => [0, 15],
+            'effects' => [
+                'primary' => ['energy', 'passion', 'excitement'],
+                'negative' => ['aggression', 'danger'],
+                'business_contexts' => ['food', 'entertainment', 'sports']
+            ]
+        ],
+        'orange' => [
+            'range' => [15, 45],
+            'effects' => [
+                'primary' => ['creativity', 'adventure', 'confidence'],
+                'negative' => ['frivolity', 'immaturity'],
+                'business_contexts' => ['youth', 'arts', 'food']
+            ]
+        ],
+        'yellow' => [
+            'range' => [45, 75],
+            'effects' => [
+                'primary' => ['optimism', 'clarity', 'warmth'],
+                'negative' => ['caution', 'cowardice'],
+                'business_contexts' => ['education', 'children', 'leisure']
+            ]
+        ],
+        'green' => [
+            'range' => [75, 165],
+            'effects' => [
+                'primary' => ['growth', 'harmony', 'nature'],
+                'negative' => ['envy', 'boredom'],
+                'business_contexts' => ['environment', 'health', 'finance']
+            ]
+        ],
+        'blue' => [
+            'range' => [165, 255],
+            'effects' => [
+                'primary' => ['trust', 'stability', 'professionalism'],
+                'negative' => ['coldness', 'aloofness'],
+                'business_contexts' => ['technology', 'finance', 'healthcare']
+            ]
+        ],
+        'purple' => [
+            'range' => [255, 315],
+            'effects' => [
+                'primary' => ['luxury', 'creativity', 'mystery'],
+                'negative' => ['decadence', 'moodiness'],
+                'business_contexts' => ['luxury', 'beauty', 'spirituality']
+            ]
+        ],
+        'pink' => [
+            'range' => [315, 360],
+            'effects' => [
+                'primary' => ['love', 'nurturing', 'sensitivity'],
+                'negative' => ['weakness', 'immaturity'],
+                'business_contexts' => ['beauty', 'fashion', 'romance']
+            ]
         ]
     ];
 }
