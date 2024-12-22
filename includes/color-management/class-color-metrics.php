@@ -9,6 +9,7 @@
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Interfaces\Color_Metrics_Interface;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use WP_Error;
 
 /**
@@ -61,8 +62,21 @@ class Color_Metrics implements Color_Metrics_Interface {
     public function calculate_brightness($color) {
         try {
             $rgb = $this->color_util->hex_to_rgb($color);
+            $coefficients = Color_Constants::COLOR_SPACE_CONVERSION['perceived_brightness'];
+            
             // Using perceived brightness formula (ITU-R BT.709)
-            return (0.2126 * $rgb['r'] + 0.7152 * $rgb['g'] + 0.0722 * $rgb['b']) / 255;
+            $brightness = ($coefficients['r'] * $rgb['r'] + 
+                         $coefficients['g'] * $rgb['g'] + 
+                         $coefficients['b'] * $rgb['b']) / 255;
+            
+            // Check if color is considered light or dark based on thresholds
+            if ($brightness >= Color_Constants::COLOR_METRICS['brightness']['light_threshold']) {
+                return Color_Constants::COLOR_ROLE_LIGHT;
+            } elseif ($brightness <= Color_Constants::COLOR_METRICS['brightness']['dark_threshold']) {
+                return Color_Constants::COLOR_ROLE_DARK;
+            }
+            
+            return $brightness;
         } catch (\Exception $e) {
             return new WP_Error(
                 'brightness_calculation_failed',
@@ -80,7 +94,15 @@ class Color_Metrics implements Color_Metrics_Interface {
     public function calculate_saturation($color) {
         try {
             $hsl = $this->color_util->hex_to_hsl($color);
-            return $hsl['s'];
+            $saturation = $hsl['s'];
+            
+            // Validate saturation is within acceptable range
+            if ($saturation < Color_Constants::COLOR_METRICS['saturation']['min'] || 
+                $saturation > Color_Constants::COLOR_METRICS['saturation']['max']) {
+                throw new \Exception(__('Saturation out of valid range', 'gl-color-palette-generator'));
+            }
+            
+            return $saturation;
         } catch (\Exception $e) {
             return new WP_Error(
                 'saturation_calculation_failed',
@@ -319,12 +341,16 @@ class Color_Metrics implements Color_Metrics_Interface {
      *
      * @param string $color1 First color in hex format
      * @param string $color2 Second color in hex format
-     * @return float|WP_Error Contrast ratio (1-21) or error
+     * @return float|WP_Error Contrast ratio or error
      */
     public function calculate_contrast_ratio($color1, $color2) {
         try {
-            $l1 = $this->color_util->get_relative_luminance($color1);
-            $l2 = $this->color_util->get_relative_luminance($color2);
+            $l1 = $this->calculate_relative_luminance($color1);
+            $l2 = $this->calculate_relative_luminance($color2);
+            
+            if (is_wp_error($l1) || is_wp_error($l2)) {
+                throw new \Exception(__('Failed to calculate luminance', 'gl-color-palette-generator'));
+            }
             
             $lighter = max($l1, $l2);
             $darker = min($l1, $l2);
@@ -335,6 +361,46 @@ class Color_Metrics implements Color_Metrics_Interface {
                 'contrast_ratio_calculation_failed',
                 $e->getMessage()
             );
+        }
+    }
+
+    /**
+     * Calculate relative luminance
+     *
+     * @param string $color Color in hex format
+     * @return float|WP_Error Relative luminance value or error
+     */
+    public function calculate_relative_luminance($color) {
+        try {
+            $rgb = $this->color_util->hex_to_rgb($color);
+            $coefficients = Color_Constants::COLOR_SPACE_CONVERSION['rgb_to_xyz'][1]; // Use Y row
+            
+            // Convert to linear RGB values
+            $r = $this->linearize_rgb($rgb['r'] / 255);
+            $g = $this->linearize_rgb($rgb['g'] / 255);
+            $b = $this->linearize_rgb($rgb['b'] / 255);
+            
+            // Calculate luminance using coefficients from sRGB to XYZ conversion
+            return $coefficients[0] * $r + $coefficients[1] * $g + $coefficients[2] * $b;
+        } catch (\Exception $e) {
+            return new WP_Error(
+                'luminance_calculation_failed',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Linearize RGB value
+     *
+     * @param float $value RGB value
+     * @return float Linearized RGB value
+     */
+    private function linearize_rgb($value) {
+        if ($value <= 0.04045) {
+            return $value / 12.92;
+        } else {
+            return pow(($value + 0.055) / 1.055, 2.4);
         }
     }
 

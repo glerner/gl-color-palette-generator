@@ -33,25 +33,6 @@ class Color_Utility implements Color_Utility_Interface {
     use Error_Handler, Logger;
 
     /**
-     * Color space conversion matrices
-     *
-     * @var array
-     * @since 1.0.0
-     */
-    private const COLOR_MATRICES = [
-        'rgb_to_xyz' => [
-            [0.4124564, 0.3575761, 0.1804375],
-            [0.2126729, 0.7151522, 0.0721750],
-            [0.0193339, 0.1191920, 0.9503041]
-        ],
-        'xyz_to_rgb' => [
-            [3.2404542, -1.5371385, -0.4985314],
-            [-0.9692660, 1.8760108, 0.0415560],
-            [0.0556434, -0.2040259, 1.0572252]
-        ]
-    ];
-
-    /**
      * Get perceptual color difference between two colors
      * Uses Delta E (CIE76) formula for simplicity and performance
      *
@@ -164,24 +145,47 @@ class Color_Utility implements Color_Utility_Interface {
     /**
      * Convert RGB to XYZ color space
      *
-     * @param array $rgb RGB values (0-1).
-     * @return array XYZ values.
-     * @since 1.0.0
+     * @param array $rgb RGB color values
+     * @return array XYZ color values
      */
     private function rgb_to_xyz(array $rgb): array {
-        // Convert RGB to linear RGB
-        foreach ($rgb as &$val) {
-            $val = ($val > 0.04045)
-                ? pow(($val + 0.055) / 1.055, 2.4)
-                : $val / 12.92;
-        }
+        $rgb = array_map(function($value) {
+            $value = $value / 255;
+            return $value <= 0.04045 
+                ? $value / 12.92 
+                : pow(($value + 0.055) / 1.055, 2.4);
+        }, $rgb);
 
-        // Convert to XYZ using sRGB/D65 matrix
+        $matrix = Color_Constants::COLOR_SPACE_CONVERSION['rgb_to_xyz'];
+        
         return [
-            'x' => $rgb['r'] * 0.4124 + $rgb['g'] * 0.3576 + $rgb['b'] * 0.1805,
-            'y' => $rgb['r'] * 0.2126 + $rgb['g'] * 0.7152 + $rgb['b'] * 0.0722,
-            'z' => $rgb['r'] * 0.0193 + $rgb['g'] * 0.1192 + $rgb['b'] * 0.9505,
+            'x' => $matrix[0][0] * $rgb['r'] + $matrix[0][1] * $rgb['g'] + $matrix[0][2] * $rgb['b'],
+            'y' => $matrix[1][0] * $rgb['r'] + $matrix[1][1] * $rgb['g'] + $matrix[1][2] * $rgb['b'],
+            'z' => $matrix[2][0] * $rgb['r'] + $matrix[2][1] * $rgb['g'] + $matrix[2][2] * $rgb['b']
         ];
+    }
+
+    /**
+     * Convert XYZ to RGB color space
+     *
+     * @param array $xyz XYZ color values
+     * @return array RGB color values
+     */
+    private function xyz_to_rgb(array $xyz): array {
+        $matrix = Color_Constants::COLOR_SPACE_CONVERSION['xyz_to_rgb'];
+        
+        $rgb = [
+            'r' => $matrix[0][0] * $xyz['x'] + $matrix[0][1] * $xyz['y'] + $matrix[0][2] * $xyz['z'],
+            'g' => $matrix[1][0] * $xyz['x'] + $matrix[1][1] * $xyz['y'] + $matrix[1][2] * $xyz['z'],
+            'b' => $matrix[2][0] * $xyz['x'] + $matrix[2][1] * $xyz['y'] + $matrix[2][2] * $xyz['z']
+        ];
+
+        return array_map(function($value) {
+            $value = $value <= 0.0031308 
+                ? 12.92 * $value 
+                : 1.055 * pow($value, 1/2.4) - 0.055;
+            return round(max(0, min(255, $value * 255)));
+        }, $rgb);
     }
 
     /**

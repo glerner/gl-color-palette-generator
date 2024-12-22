@@ -1,6 +1,8 @@
 <?php
 namespace GL_Color_Palette_Generator\Generators;
 
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
+
 /**
  * Theme Style Generator Class
  *
@@ -13,7 +15,7 @@ namespace GL_Color_Palette_Generator\Generators;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-class Theme_Style_Generator {
+class Theme_Style_Generator implements Color_Constants {
     protected $settings;
 
     public function __construct() {
@@ -337,5 +339,41 @@ class Theme_Style_Generator {
         $b = round(($b + $m) * 255);
 
         return sprintf('#%02X%02X%02X', $r, $g, $b);
+    }
+
+    /**
+     * Generate light mode styles
+     */
+    protected function generate_light_mode_styles($base_color) {
+        $luminance = $this->calculate_luminance($base_color);
+
+        // For light mode, base should be very light
+        if ($luminance < self::LIGHT_LUMINANCE_THRESHOLD) {
+            $base_color = $this->adjust_luminance($base_color, self::LIGHT_LUMINANCE_THRESHOLD);
+        }
+
+        return [
+            'base' => $base_color,
+            'contrast' => self::COLOR_NEAR_BLACK,
+            'accent' => $this->generate_accent_color($base_color, false)
+        ];
+    }
+
+    /**
+     * Generate dark mode styles
+     */
+    protected function generate_dark_mode_styles($base_color) {
+        $luminance = $this->calculate_luminance($base_color);
+
+        // For dark mode, base should be very dark
+        if ($luminance > self::DARK_LUMINANCE_THRESHOLD) {
+            $base_color = $this->adjust_luminance($base_color, self::DARK_LUMINANCE_THRESHOLD);
+        }
+
+        return [
+            'base' => $base_color,
+            'contrast' => self::COLOR_WHITE,
+            'accent' => $this->generate_accent_color($base_color, true)
+        ];
     }
 }

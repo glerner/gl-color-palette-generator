@@ -54,28 +54,24 @@ class Color_Palette_Analyzer {
      * @param array $colors Array of hex colors
      * @return array Relationship analysis
      */
-    public function analyze_relationships(array $colors): array {
+    private function analyze_relationships(array $colors): array {
         $relationships = [];
+        $count = count($colors);
 
-        foreach ($colors as $i => $color1) {
-            foreach (array_slice($colors, $i + 1) as $color2) {
+        for ($i = 0; $i < $count; $i++) {
+            for ($j = $i + 1; $j < $count; $j++) {
+                $color1 = $colors[$i];
+                $color2 = $colors[$j];
+
                 $hue1 = $this->get_hue($color1);
                 $hue2 = $this->get_hue($color2);
 
                 $difference = abs($hue1 - $hue2);
-
-                if ($difference <= 30) {
-                    $relationships[] = [
-                        'type' => 'analogous',
-                        'colors' => [$color1, $color2]
-                    ];
+                if ($difference <= Color_Constants::COLOR_WHEEL_CONFIG['min_hue_step']) {
+                    $relationships['analogous'][] = [$color1, $color2];
                 }
-
-                if (abs($difference - 180) <= 30) {
-                    $relationships[] = [
-                        'type' => 'complementary',
-                        'colors' => [$color1, $color2]
-                    ];
+                if (abs($difference - Color_Constants::COLOR_HARMONY_RULES['complementary']['angle']) <= Color_Constants::COLOR_WHEEL_CONFIG['min_hue_step']) {
+                    $relationships['complementary'][] = [$color1, $color2];
                 }
             }
         }
@@ -148,7 +144,7 @@ class Color_Palette_Analyzer {
             'hue_variance' => $this->calculate_variance($hues),
             'saturation_variance' => $this->calculate_variance($saturations),
             'value_variance' => $this->calculate_variance($values),
-            'is_monochromatic' => max($hues) - min($hues) <= 30,
+            'is_monochromatic' => max($hues) - min($hues) <= Color_Constants::COLOR_WHEEL_CONFIG['monochromatic_threshold'],
             'is_balanced' => $this->is_palette_balanced($hues, $saturations, $values)
         ];
     }
@@ -255,16 +251,15 @@ class Color_Palette_Analyzer {
         $min = min($r, $g, $b);
         $delta = $max - $min;
 
-        if ($delta == 0) {
-            return 0;
-        }
-
-        if ($max == $r) {
-            $hue = 60 * fmod((($g - $b) / $delta), 6);
-        } elseif ($max == $g) {
-            $hue = 60 * ((($b - $r) / $delta) + 2);
-        } else {
-            $hue = 60 * ((($r - $g) / $delta) + 4);
+        $hue = 0;
+        if ($delta > 0) {
+            if ($max === $r) {
+                $hue = Color_Constants::COLOR_WHEEL_CONFIG['hue_calculation_base'] * fmod((($g - $b) / $delta), 6);
+            } elseif ($max === $g) {
+                $hue = Color_Constants::COLOR_WHEEL_CONFIG['hue_calculation_base'] * ((($b - $r) / $delta) + 2);
+            } else {
+                $hue = Color_Constants::COLOR_WHEEL_CONFIG['hue_calculation_base'] * ((($r - $g) / $delta) + 4);
+            }
         }
 
         return $hue < 0 ? $hue + 360 : $hue;

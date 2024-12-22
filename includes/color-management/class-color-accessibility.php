@@ -9,6 +9,7 @@
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Interfaces\Color_Accessibility_Interface;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use WP_Error;
 
 /**
@@ -46,6 +47,148 @@ class Color_Accessibility implements Color_Accessibility_Interface {
      */
     public function get_contrast_ratio($color1, $color2) {
         return $this->color_metrics->calculate_contrast_ratio($color1, $color2);
+    }
+
+    /**
+     * Check if color combination meets accessibility standards
+     *
+     * @param string $color      Foreground color hex code
+     * @param string $background Background color hex code
+     * @param array  $options    Optional parameters for accessibility check
+     * @return array Accessibility check results
+     */
+    public function check_accessibility(string $color, string $background, array $options = []): array {
+        $options = wp_parse_args($options, [
+            'min_contrast_ratio' => Color_Constants::ACCESSIBILITY_CONFIG['contrast']['min_ratio'],
+            'min_brightness_diff' => Color_Constants::ACCESSIBILITY_CONFIG['brightness']['min_difference'],
+            'check_color_blind' => true
+        ]);
+
+        try {
+            $results = [
+                'passes_contrast' => false,
+                'passes_brightness' => false,
+                'color_blind_safe' => false,
+                'contrast_ratio' => 0,
+                'brightness_diff' => 0,
+                'suggestions' => []
+            ];
+
+            // Check contrast ratio
+            $contrast_ratio = $this->calculate_contrast_ratio($color, $background);
+            $results['contrast_ratio'] = $contrast_ratio;
+            $results['passes_contrast'] = $contrast_ratio >= $options['min_contrast_ratio'];
+
+            // Check brightness difference
+            $brightness1 = $this->color_metrics->calculate_brightness($color);
+            $brightness2 = $this->color_metrics->calculate_brightness($background);
+            if (is_wp_error($brightness1) || is_wp_error($brightness2)) {
+                throw new \Exception('Failed to calculate brightness');
+            }
+            $brightness_diff = abs($brightness1 - $brightness2) * 255;
+            $results['brightness_diff'] = $brightness_diff;
+            $results['passes_brightness'] = $brightness_diff >= $options['min_brightness_diff'];
+
+            // Check color blindness safety if requested
+            if ($options['check_color_blind']) {
+                $results['color_blind_safe'] = $this->is_color_blind_safe($color, $background);
+            }
+
+            // Generate suggestions if needed
+            if (!$results['passes_contrast'] || !$results['passes_brightness']) {
+                $results['suggestions'] = $this->generate_accessible_alternatives($color, $background);
+            }
+
+            return $results;
+
+        } catch (\Exception $e) {
+            return new \WP_Error('accessibility_check_failed', $e->getMessage());
+        }
+    }
+
+    /**
+     * Generate accessible color alternatives
+     *
+     * @param string $color      Original color hex code
+     * @param string $background Background color hex code
+     * @param array  $options    Optional parameters for generation
+     * @return array Array of accessible color alternatives
+     */
+    private function generate_accessible_alternatives(string $color, string $background, array $options = []): array {
+        $options = wp_parse_args($options, [
+            'preserve_hue' => true,
+            'max_suggestions' => 5
+        ]);
+
+        $alternatives = [];
+        $hsl = $this->color_util->hex_to_hsl($color);
+
+        // Try adjusting lightness first
+        for ($l = 0; $l <= 100; $l += Color_Constants::COLOR_PERCEPTION['lightness']['step']) {
+            if (count($alternatives) >= $options['max_suggestions']) break;
+
+            $test_color = $this->color_util->hsl_to_hex([
+                'h' => $options['preserve_hue'] ? $hsl['h'] : ($hsl['h'] + $l) % 360,
+                's' => $hsl['s'],
+                'l' => $l
+            ]);
+
+            if ($this->meets_accessibility_requirements($test_color, $background)) {
+                $alternatives[] = [
+                    'color' => $test_color,
+                    'contrast_ratio' => $this->calculate_contrast_ratio($test_color, $background),
+                    'modification' => 'lightness_adjusted'
+                ];
+            }
+        }
+
+        // If we need more results, try adjusting saturation too
+        if (count($alternatives) < $options['max_suggestions']) {
+            for ($l = 0; $l <= 100; $l += Color_Constants::COLOR_PERCEPTION['lightness']['step']) {
+                for ($s = 0; $s <= 100; $s += Color_Constants::COLOR_PERCEPTION['saturation']['step']) {
+                    if (count($alternatives) >= $options['max_suggestions']) break 2;
+
+                    $test_color = $this->color_util->hsl_to_hex([
+                        'h' => $options['preserve_hue'] ? $hsl['h'] : ($hsl['h'] + $l) % 360,
+                        's' => $s,
+                        'l' => $l
+                    ]);
+
+                    if ($this->meets_accessibility_requirements($test_color, $background)) {
+                        $alternatives[] = [
+                            'color' => $test_color,
+                            'contrast_ratio' => $this->calculate_contrast_ratio($test_color, $background),
+                            'modification' => 'lightness_and_saturation_adjusted'
+                        ];
+                    }
+                }
+            }
+        }
+
+        return $alternatives;
+    }
+
+    /**
+     * Check if a color combination is safe for color blind users
+     *
+     * @param string $color1 First color hex code
+     * @param string $color2 Second color hex code
+     * @return bool Whether the combination is color blind safe
+     */
+    private function is_color_blind_safe(string $color1, string $color2): bool {
+        $simulated1 = $this->simulate_color_blindness($color1);
+        $simulated2 = $this->simulate_color_blindness($color2);
+
+        foreach ($simulated1 as $type => $sim_color1) {
+            $sim_color2 = $simulated2[$type];
+            $contrast = $this->calculate_contrast_ratio($sim_color1, $sim_color2);
+            
+            if ($contrast < Color_Constants::ACCESSIBILITY_CONFIG['contrast']['min_ratio']) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -429,16 +572,16 @@ class Color_Accessibility implements Color_Accessibility_Interface {
     private function get_minimum_contrast_ratio($level, $size) {
         $ratios = [
             'AA' => [
-                'normal' => 4.5,
-                'large' => 3
+                'normal' => Color_Constants::WCAG_CONTRAST_AA,
+                'large' => Color_Constants::WCAG_CONTRAST_AA_LARGE
             ],
             'AAA' => [
-                'normal' => 7,
-                'large' => 4.5
+                'normal' => Color_Constants::WCAG_CONTRAST_AAA,
+                'large' => Color_Constants::WCAG_CONTRAST_AA
             ]
         ];
 
-        return $ratios[$level][$size] ?? 4.5;
+        return $ratios[$level][$size] ?? Color_Constants::WCAG_CONTRAST_MIN;
     }
 
     /**

@@ -6,8 +6,13 @@ class ColorLocalizer {
     private $cultural_data;
     private $settings;
     private $cache;
+    private $locale;
 
-    / Cultural color mappings
+    /**
+     * Cultural color mappings
+     *
+     * @var array
+     */
     private const CULTURAL_MAPPINGS = [
         'western' => [
             'red' => ['passion', 'danger', 'love'],
@@ -16,18 +21,51 @@ class ColorLocalizer {
             'yellow' => ['happiness', 'energy', 'warmth'],
             'purple' => ['royalty', 'luxury', 'creativity'],
             'white' => ['purity', 'cleanliness', 'simplicity'],
-            'black' => ['elegance', 'power', 'sophistication']
+            'black' => ['elegance', 'power', 'mystery']
         ],
         'eastern' => [
-            'red' => ['prosperity', 'luck', 'joy'],
+            'red' => ['luck', 'prosperity', 'happiness'],
             'blue' => ['immortality', 'healing', 'calmness'],
-            'green' => ['life', 'harmony', 'growth'],
+            'green' => ['eternity', 'family', 'harmony'],
             'yellow' => ['royalty', 'power', 'imperial'],
             'purple' => ['spirituality', 'nobility', 'wealth'],
             'white' => ['death', 'mourning', 'purity'],
             'black' => ['career', 'knowledge', 'power']
         ]
-        / Additional cultural mappings...
+    ];
+
+    /**
+     * Regional color variations
+     *
+     * @var array
+     */
+    private const REGIONAL_VARIATIONS = [
+        'us' => [
+            'primary' => ['#002868', '#BF0A30'],  // American flag colors
+            'accent' => ['#FFFFFF']
+        ],
+        'uk' => [
+            'primary' => ['#00247D', '#CF142B'],  // Union Jack colors
+            'accent' => ['#FFFFFF']
+        ],
+        'jp' => [
+            'primary' => ['#BC002D'],  // Japanese flag color
+            'accent' => ['#FFFFFF']
+        ]
+    ];
+
+    /**
+     * Business color associations
+     *
+     * @var array
+     */
+    private const BUSINESS_ASSOCIATIONS = [
+        'technology' => ['blue', 'gray', 'white'],
+        'finance' => ['blue', 'green', 'black'],
+        'healthcare' => ['blue', 'green', 'white'],
+        'retail' => ['red', 'yellow', 'orange'],
+        'food' => ['red', 'yellow', 'green'],
+        'luxury' => ['black', 'gold', 'purple']
     ];
 
     public function __construct() {
@@ -81,6 +119,29 @@ class ColorLocalizer {
         }
 
         return $localized_colors;
+    }
+
+    /**
+     * Get localized color names from constants
+     *
+     * @return array Localized color names
+     */
+    private function get_localized_names(): array {
+        return Color_Constants::COLOR_PERCEPTION['localized_names'][$this->locale] ??
+               Color_Constants::COLOR_PERCEPTION['localized_names']['en'];
+    }
+
+    /**
+     * Get color name in current locale
+     *
+     * @param string $hex_color Hex color code
+     * @return string Localized color name
+     */
+    public function get_localized_color_name(string $hex_color): string {
+        $base_name = $this->get_base_color_name($hex_color);
+        $localized_names = $this->get_localized_names();
+
+        return $localized_names[$base_name] ?? $base_name;
     }
 
     /**
@@ -202,7 +263,7 @@ class ColorLocalizer {
     }
 
     private function get_base_color_name($hex) {
-        / Convert hex to closest basic color name
+        // Convert hex to closest basic color name
         $color_map = [
             '#FF0000' => 'red',
             '#0000FF' => 'blue',
@@ -218,8 +279,8 @@ class ColorLocalizer {
     }
 
     private function find_closest_color($hex, $color_list) {
-        / Implementation of color distance calculation
-        / Returns the closest matching color from the list
-        return $color_list[0]; / Placeholder
+        // Implementation of color distance calculation
+        // Returns the closest matching color from the list
+        return $color_list[0]; // Placeholder
     }
 }

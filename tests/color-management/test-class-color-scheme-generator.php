@@ -10,6 +10,7 @@ namespace GL_Color_Palette_Generator\Tests\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Scheme_Generator;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
+use GL_Color_Palette_Generator\Color_Management\Color_Constants;
 use WP_Error;
 use WP_UnitTestCase;
 use Mockery;
@@ -17,7 +18,7 @@ use Mockery;
 /**
  * Class Test_Color_Scheme_Generator
  */
-class Test_Color_Scheme_Generator extends WP_UnitTestCase {
+class Test_Color_Scheme_Generator extends WP_UnitTestCase implements Color_Constants {
     /**
      * Test instance
      *
@@ -46,12 +47,18 @@ class Test_Color_Scheme_Generator extends WP_UnitTestCase {
      */
     public function test_generate_scheme() {
         $base_color = '#ff0000';
+        $expected_roles = array_keys(Color_Constants::COLOR_ROLES);
         
         // Test default options
         $result = $this->instance->generate_scheme($base_color);
         $this->assertIsArray($result);
-        $this->assertCount(5, $result);
+        $this->assertNotEmpty($result);
         
+        foreach ($expected_roles as $role) {
+            $this->assertArrayHasKey($role, $result);
+            $this->assertMatchesRegularExpression('/^#[0-9a-f]{6}$/i', $result[$role]);
+        }
+
         // Test with specific scheme type
         $result = $this->instance->generate_scheme($base_color, ['type' => 'complementary', 'count' => 4]);
         $this->assertIsArray($result);

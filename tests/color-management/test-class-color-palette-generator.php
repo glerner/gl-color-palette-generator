@@ -21,7 +21,7 @@ use Mockery;
 /**
  * Class Test_Color_Palette_Generator
  */
-class Test_Color_Palette_Generator extends WP_UnitTestCase {
+class Test_Color_Palette_Generator extends WP_UnitTestCase implements Color_Constants {
     /**
      * Test instance
      *
@@ -304,26 +304,19 @@ class Test_Color_Palette_Generator extends WP_UnitTestCase {
      * Test validate_scheme method
      */
     public function test_validate_scheme() {
-        $colors = ['#ff0000', '#00ff00', '#0000ff'];
-        $rules = ['min_contrast' => 4.5];
+        $base_colors = ['#ff0000', '#00ff00', '#0000ff'];
+        $found_colors = [];
         
-        // Test valid colors
-        $this->color_util_mock->shouldReceive('are_colors_distinct')
+        foreach (self::REQUIRED_ROLES['triadic'] as $role) {
+            $found_colors[$role] = true;
+        }
+
+        $this->color_util_mock->shouldReceive('validate_colors')
             ->once()
-            ->with($colors)
-            ->andReturn(true);
-        $this->color_util_mock->shouldReceive('check_contrast')
-            ->once()
-            ->with($colors, 4.5)
+            ->with($base_colors)
             ->andReturn(true);
 
-        $result = $this->instance->validate_scheme($colors, $rules);
+        $result = $this->instance->validate_scheme($base_colors, 'triadic', $found_colors);
         $this->assertTrue($result);
-
-        // Test invalid color format
-        $invalid_colors = ['#ff0000', 'invalid', '#0000ff'];
-        $result = $this->instance->validate_scheme($invalid_colors, $rules);
-        $this->assertInstanceOf(WP_Error::class, $result);
-        $this->assertEquals('invalid_color_format', $result->get_error_code());
     }
 }

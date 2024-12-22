@@ -9,21 +9,13 @@
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
+
 /**
  * Class Color_Palette_Validator
  * Validates color palettes for various criteria including contrast, accessibility, and harmony
  */
 class Color_Palette_Validator implements \GL_Color_Palette_Generator\Interfaces\Color_Palette_Validator {
-    /**
-     * Minimum contrast ratio for WCAG AA compliance
-     */
-    const MIN_CONTRAST_RATIO = 4.5;
-
-    /**
-     * Minimum color difference for distinctness
-     */
-    const MIN_COLOR_DIFFERENCE = 25;
-
     /**
      * Color Utility instance
      *
@@ -51,7 +43,9 @@ class Color_Palette_Validator implements \GL_Color_Palette_Generator\Interfaces\
             'check_accessibility' => true,
             'check_harmony' => true,
             'check_distinctness' => true,
-            'check_format' => true
+            'check_format' => true,
+            'required_roles' => [], // Allow specifying which roles are required for this palette
+            'scheme_type' => null   // Allow specifying the scheme type for appropriate validation
         ];
 
         $options = array_merge($default_options, $options);
@@ -76,6 +70,19 @@ class Color_Palette_Validator implements \GL_Color_Palette_Generator\Interfaces\
             return $results;
         }
 
+        // Validate required roles if specified
+        if (!empty($options['required_roles'])) {
+            foreach ($options['required_roles'] as $role) {
+                if (!isset($palette[$role])) {
+                    $results['errors'][] = sprintf(
+                        __('Missing required color role: %s', 'gl-color-palette-generator'),
+                        $role
+                    );
+                    $results['is_valid'] = false;
+                }
+            }
+        }
+
         // Color distinctness
         if ($options['check_distinctness']) {
             $distinctness_results = $this->validate_distinctness($palette);
@@ -90,25 +97,7 @@ class Color_Palette_Validator implements \GL_Color_Palette_Generator\Interfaces\
             $contrast_results = $this->validate_contrast($palette);
             $results['details']['contrast'] = $contrast_results;
             if (!$contrast_results['is_valid']) {
-                $results['warnings'][] = __('Some color combinations have insufficient contrast', 'gl-color-palette-generator');
-            }
-        }
-
-        // Accessibility validation
-        if ($options['check_accessibility']) {
-            $accessibility_results = $this->validate_accessibility($palette);
-            $results['details']['accessibility'] = $accessibility_results;
-            if (!$accessibility_results['is_valid']) {
-                $results['warnings'][] = __('Palette may have accessibility issues', 'gl-color-palette-generator');
-            }
-        }
-
-        // Color harmony
-        if ($options['check_harmony']) {
-            $harmony_results = $this->validate_harmony($palette);
-            $results['details']['harmony'] = $harmony_results;
-            if (!$harmony_results['is_valid']) {
-                $results['warnings'][] = __('Colors may not be harmonious', 'gl-color-palette-generator');
+                $results['warnings'][] = __('Some color combinations have contrast issues', 'gl-color-palette-generator');
             }
         }
 
@@ -133,18 +122,12 @@ class Color_Palette_Validator implements \GL_Color_Palette_Generator\Interfaces\
             return $results;
         }
 
-        if (count($palette) < 2) {
-            $results['is_valid'] = false;
-            $results['errors'][] = __('Palette must contain at least 2 colors', 'gl-color-palette-generator');
-            return $results;
-        }
-
-        foreach ($palette as $index => $color) {
+        foreach ($palette as $role => $color) {
             if (!preg_match('/^#[0-9a-f]{6}$/i', $color)) {
                 $results['is_valid'] = false;
                 $results['errors'][] = sprintf(
-                    __('Invalid color format at index %d: %s', 'gl-color-palette-generator'),
-                    $index,
+                    __('Invalid color format for role %s: %s', 'gl-color-palette-generator'),
+                    $role,
                     $color
                 );
             }
@@ -168,14 +151,14 @@ class Color_Palette_Validator implements \GL_Color_Palette_Generator\Interfaces\
         for ($i = 0; $i < count($palette); $i++) {
             for ($j = $i + 1; $j < count($palette); $j++) {
                 $difference = $this->color_utility->calculate_color_difference(
-                    $palette[$i],
-                    $palette[$j]
+                    $palette[array_keys($palette)[$i]],
+                    $palette[array_keys($palette)[$j]]
                 );
 
-                if ($difference < self::MIN_COLOR_DIFFERENCE) {
+                if ($difference < Color_Constants::MIN_COLOR_DIFFERENCE) {
                     $results['is_valid'] = false;
                     $results['similar_pairs'][] = [
-                        'colors' => [$palette[$i], $palette[$j]],
+                        'colors' => [$palette[array_keys($palette)[$i]], $palette[array_keys($palette)[$j]]],
                         'difference' => $difference
                     ];
                 }
@@ -199,19 +182,20 @@ class Color_Palette_Validator implements \GL_Color_Palette_Generator\Interfaces\
 
         for ($i = 0; $i < count($palette); $i++) {
             for ($j = $i + 1; $j < count($palette); $j++) {
-                $ratio = $this->color_utility->calculate_contrast_ratio(
-                    $palette[$i],
-                    $palette[$j]
+                $contrast = $this->color_utility->calculate_contrast_ratio(
+                    $palette[array_keys($palette)[$i]],
+                    $palette[array_keys($palette)[$j]]
                 );
 
-                $results['contrast_pairs'][] = [
-                    'colors' => [$palette[$i], $palette[$j]],
-                    'ratio' => $ratio,
-                    'passes_aa' => $ratio >= self::MIN_CONTRAST_RATIO
-                ];
-
-                if ($ratio < self::MIN_CONTRAST_RATIO) {
+                // Check if contrast is within acceptable range
+                if ($contrast < Color_Constants::WCAG_CONTRAST_MIN ||
+                    $contrast > Color_Constants::CONTRAST_MAX) {
                     $results['is_valid'] = false;
+                    $results['contrast_pairs'][] = [
+                        'colors' => [$palette[array_keys($palette)[$i]], $palette[array_keys($palette)[$j]]],
+                        'contrast' => $contrast,
+                        'issue' => $contrast < Color_Constants::WCAG_CONTRAST_MIN ? 'insufficient' : 'excessive'
+                    ];
                 }
             }
         }
@@ -232,7 +216,7 @@ class Color_Palette_Validator implements \GL_Color_Palette_Generator\Interfaces\
             'checks' => []
         ];
 
-        foreach ($palette as $color) {
+        foreach ($palette as $role => $color) {
             // Check against white and black backgrounds
             $results['checks'][] = [
                 'color' => $color,

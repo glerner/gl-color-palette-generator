@@ -394,14 +394,14 @@ class Color_AI_Generator implements Color_Generator_Interface {
             // Adjust if needed
             if ($name === 'lighter' || $name === 'light') {
                 // Should contrast with black text
-                while ($black_contrast < 4.5 && $variation_hsl['l'] < 95) {
+                while ($black_contrast < Color_Constants::ACCESSIBILITY_CONFIG['contrast']['min_ratio'] && $variation_hsl['l'] < 95) {
                     $variation_hsl['l'] += 5;
                     $hex = $analyzer->hsl_to_hex($variation_hsl);
                     $black_contrast = $analyzer->calculate_contrast_ratio($hex, '#000000');
                 }
             } else {
                 // Should contrast with white text
-                while ($white_contrast < 4.5 && $variation_hsl['l'] > 5) {
+                while ($white_contrast < Color_Constants::ACCESSIBILITY_CONFIG['contrast']['min_ratio'] && $variation_hsl['l'] > 5) {
                     $variation_hsl['l'] -= 5;
                     $hex = $analyzer->hsl_to_hex($variation_hsl);
                     $white_contrast = $analyzer->calculate_contrast_ratio($hex, '#FFFFFF');
@@ -513,5 +513,52 @@ class Color_AI_Generator implements Color_Generator_Interface {
         ];
     }
 
-    // ... (to be continued)
+    /**
+     * Adjust color for accessibility
+     *
+     * @param string $hex Original hex color
+     * @return string Adjusted hex color
+     */
+    private function adjust_for_accessibility(string $hex): string {
+        $variation_hsl = $this->color_converter->hex_to_hsl($hex);
+        $analyzer = new Color_Metrics();
+
+        // Check contrast with black and white
+        $black_contrast = $analyzer->calculate_contrast_ratio($hex, '#000000');
+        $white_contrast = $analyzer->calculate_contrast_ratio($hex, '#FFFFFF');
+
+        // Adjust lightness until we achieve minimum contrast with either black or white
+        $min_contrast = Color_Constants::ACCESSIBILITY_CONFIG['contrast']['min_ratio'];
+
+        if ($black_contrast < $min_contrast && $white_contrast < $min_contrast) {
+            if ($variation_hsl['l'] < 50) {
+                // Dark color - adjust lighter for black text
+                while ($black_contrast < $min_contrast && $variation_hsl['l'] < 95) {
+                    $variation_hsl['l'] += 5;
+                    $hex = $this->color_converter->hsl_to_hex($variation_hsl);
+                    $black_contrast = $analyzer->calculate_contrast_ratio($hex, '#000000');
+                }
+            } else {
+                // Light color - adjust darker for white text
+                while ($white_contrast < $min_contrast && $variation_hsl['l'] > 5) {
+                    $variation_hsl['l'] -= 5;
+                    $hex = $this->color_converter->hsl_to_hex($variation_hsl);
+                    $white_contrast = $analyzer->calculate_contrast_ratio($hex, '#FFFFFF');
+                }
+            }
+        }
+
+        return $hex;
+    }
+
+    /**
+     * Generate system colors that harmonize with the theme
+     *
+     * @param array $base_colors Array of base theme colors
+     * @return array Generated system colors
+     */
+    public function generate_system_colors(array $base_colors): array {
+        // Implementation coming soon
+        return [];
+    }
 }

@@ -25,35 +25,27 @@ use GL_Color_Palette_Generator\Color_Management\Color_Utility;
  */
 class Compliance_Checker implements Compliance_Checker_Interface {
     /**
-     * WCAG compliance configurations
+     * WCAG Requirements
      */
     private const WCAG_REQUIREMENTS = [
         'contrast_ratios' => [
             'AA' => [
                 'normal_text' => [
-                    'minimum' => 4.5,
-                    'recommended' => 5.0,
-                    'font_size' => ['min' => 12, 'unit' => 'px'],
+                    'minimum' => Color_Constants::ACCESSIBILITY_CONFIG['contrast']['levels']['aa']
                 ],
                 'large_text' => [
-                    'minimum' => 3.0,
-                    'recommended' => 3.5,
-                    'font_size' => ['min' => 18, 'unit' => 'px'],
-                ],
+                    'minimum' => Color_Constants::ACCESSIBILITY_CONFIG['contrast']['levels']['aa_large']
+                ]
             ],
             'AAA' => [
                 'normal_text' => [
-                    'minimum' => 7.0,
-                    'recommended' => 7.5,
-                    'font_size' => ['min' => 12, 'unit' => 'px'],
+                    'minimum' => Color_Constants::ACCESSIBILITY_CONFIG['contrast']['levels']['aaa']
                 ],
                 'large_text' => [
-                    'minimum' => 4.5,
-                    'recommended' => 5.0,
-                    'font_size' => ['min' => 18, 'unit' => 'px'],
-                ],
-            ],
-        ],
+                    'minimum' => Color_Constants::ACCESSIBILITY_CONFIG['contrast']['levels']['aa']
+                ]
+            ]
+        ]
     ];
 
     /**

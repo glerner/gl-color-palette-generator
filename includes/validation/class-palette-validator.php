@@ -1,21 +1,53 @@
 <?php
 namespace GLColorPalette\Validation;
 
+use GLColorPalette\Interfaces\Color_Constants;
+
 /**
  * Palette Validator
  *
  * Validates color palettes for harmony, contrast, and accessibility.
  */
-class Palette_Validator {
-    /** @var array Validation rules and thresholds */
-    protected $rules = [
-        'min_colors' => 2,
-        'max_colors' => 10,
-        'min_contrast' => 4.5,
-        'min_distinction' => 20,
-        'min_hue_variance' => 30,
-        'min_saturation_range' => 20,
-        'min_lightness_range' => 30
+class Palette_Validator implements Color_Constants {
+    /**
+     * Get validation rules from constants
+     *
+     * @return array Validation rules
+     */
+    private function get_validation_rules(): array {
+        return [
+            'contrast' => [
+                'min' => self::ACCESSIBILITY_CONFIG['contrast']['min_ratio'],
+                'max' => self::ACCESSIBILITY_CONFIG['contrast']['max_ratio']
+            ],
+            'saturation' => [
+                'min_range' => self::COLOR_METRICS['saturation']['min_range'],
+                'max' => self::COLOR_METRICS['saturation']['max']
+            ],
+            'brightness' => [
+                'min_range' => self::COLOR_METRICS['brightness']['min_range'],
+                'max' => self::COLOR_METRICS['brightness']['max']
+            ],
+            'colors' => [
+                'min' => self::MIN_COLORS_DEFAULT,
+                'max' => self::MAX_COLORS_DEFAULT
+            ],
+            'hue' => [
+                'min_variance' => self::MIN_HUE_VARIANCE
+            ],
+            'distinction' => [
+                'min' => self::MIN_DISTINCTION
+            ]
+        ];
+    }
+
+    /** @var array Color scheme types */
+    protected $schemes = [
+        self::SCHEME_MONOCHROMATIC,
+        self::SCHEME_COMPLEMENTARY,
+        self::SCHEME_ANALOGOUS,
+        self::SCHEME_TRIADIC,
+        self::SCHEME_TETRADIC
     ];
 
     protected $errors = [];
@@ -66,20 +98,22 @@ class Palette_Validator {
      * @return bool True if valid
      */
     private function validate_basic_requirements($colors) {
+        $rules = $this->get_validation_rules();
+
         // Check count
         $count = count($colors);
-        if ($count < $this->rules['min_colors']) {
+        if ($count < $rules['colors']['min']) {
             $this->errors[] = sprintf(
                 'Not enough colors (minimum %d)',
-                $this->rules['min_colors']
+                $rules['colors']['min']
             );
             return false;
         }
 
-        if ($count > $this->rules['max_colors']) {
+        if ($count > $rules['colors']['max']) {
             $this->errors[] = sprintf(
                 'Too many colors (maximum %d)',
-                $this->rules['max_colors']
+                $rules['colors']['max']
             );
             return false;
         }
@@ -109,21 +143,22 @@ class Palette_Validator {
         // Check hue variance
         $hues = array_column($hsv_colors, 'h');
         $hue_variance = $this->calculate_variance($hues);
-        if ($hue_variance < $this->rules['min_hue_variance']) {
+        $rules = $this->get_validation_rules();
+        if ($hue_variance < $rules['hue']['min_variance']) {
             $this->warnings[] = 'Low hue variance';
         }
 
         // Check saturation range
         $saturations = array_column($hsv_colors, 's');
         $saturation_range = max($saturations) - min($saturations);
-        if ($saturation_range < $this->rules['min_saturation_range']) {
+        if ($saturation_range < $rules['saturation']['min_range']) {
             $this->warnings[] = 'Limited saturation range';
         }
 
         // Check lightness range
         $values = array_column($hsv_colors, 'v');
         $value_range = max($values) - min($values);
-        if ($value_range < $this->rules['min_lightness_range']) {
+        if ($value_range < $rules['brightness']['min_range']) {
             $this->warnings[] = 'Limited lightness range';
         }
 
@@ -134,7 +169,8 @@ class Palette_Validator {
                     $hsv_colors[$i],
                     $hsv_colors[$j]
                 );
-                if ($distinction < $this->rules['min_distinction']) {
+                $rules = $this->get_validation_rules();
+                if ($distinction < $rules['distinction']['min']) {
                     $this->warnings[] = sprintf(
                         'Similar colors: %s and %s',
                         $colors[$i],
@@ -162,7 +198,8 @@ class Palette_Validator {
                 if ($i === $j) continue;
 
                 $contrast = $this->calculate_contrast_ratio($color1, $color2);
-                if ($contrast < $this->rules['min_contrast']) {
+                $rules = $this->get_validation_rules();
+                if ($contrast < $rules['contrast']['min']) {
                     $this->warnings[] = sprintf(
                         'Low contrast between %s and %s (%.1f:1)',
                         $color1,
@@ -311,11 +348,14 @@ class Palette_Validator {
         $g = hexdec(substr($hex, 2, 2)) / 255;
         $b = hexdec(substr($hex, 4, 2)) / 255;
 
-        $r = ($r <= 0.03928) ? $r / 12.92 : pow(($r + 0.055) / 1.055, 2.4);
-        $g = ($g <= 0.03928) ? $g / 12.92 : pow(($g + 0.055) / 1.055, 2.4);
-        $b = ($b <= 0.03928) ? $b / 12.92 : pow(($b + 0.055) / 1.055, 2.4);
+        $coefficients = Color_Constants::COLOR_METRICS['luminance'];
+        $threshold = Color_Constants::COLOR_METRICS['luminance']['threshold'];
+        
+        $r = ($r <= $threshold) ? $r / 12.92 : pow(($r + 0.055) / 1.055, 2.4);
+        $g = ($g <= $threshold) ? $g / 12.92 : pow(($g + 0.055) / 1.055, 2.4);
+        $b = ($b <= $threshold) ? $b / 12.92 : pow(($b + 0.055) / 1.055, 2.4);
 
-        return 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
+        return $coefficients['r'] * $r + $coefficients['g'] * $g + $coefficients['b'] * $b;
     }
 
     /**

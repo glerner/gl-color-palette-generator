@@ -9,7 +9,7 @@ use GL_Color_Palette_Generator\Cache\Color_Cache;
  * Class Palette_Generator
  * 
  * Generates color palettes based on various harmonies and accessibility requirements.
- * 
+ *
  * @package GL_Color_Palette_Generator
  * @subpackage Processors
  * @since 1.0.0
@@ -175,11 +175,15 @@ class Palette_Generator {
     }
 
     /**
-     * Ensure accessibility
+     * Ensure colors meet accessibility requirements
+     *
+     * @param array $colors Colors to check
+     * @param array $context Context for accessibility checks
+     * @return array Adjusted colors meeting accessibility requirements
      */
     private function ensure_accessibility($colors, $context) {
         $accessible_colors = [];
-        $background = $context['background'] ?? '#FFFFFF';
+        $background = $context['background'] ?? self::COLOR_OFF_WHITE;
 
         foreach ($colors as $color) {
             $contrast_ratio = $this->accessibility_checker->calculate_contrast_ratio(
@@ -187,8 +191,12 @@ class Palette_Generator {
                 $background
             );
 
-            if ($contrast_ratio < 4.5) {
-                $color = $this->adjust_for_contrast($color, $background, 4.5);
+            if ($contrast_ratio < self::CONTRAST_THRESHOLD_MIN) {
+                $color = $this->adjust_for_contrast(
+                    $color,
+                    $background,
+                    self::CONTRAST_THRESHOLD_TARGET
+                );
             }
 
             $accessible_colors[] = $color;

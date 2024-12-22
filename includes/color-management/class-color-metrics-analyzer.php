@@ -233,7 +233,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
         $hsl = $this->utility->rgb_to_hsl($rgb);
 
         return [
-            'color_category' => $this->determine_color_category($hsl),
+            'color_category' => $this->get_color_category($hsl),
             'color_properties' => $this->analyze_color_properties($rgb, $hsl),
             'color_harmony' => $this->analyze_color_harmony($hsl)
         ];
@@ -399,19 +399,27 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      * @return string Color category.
      */
     private function get_color_category($hsl) {
-        if ($hsl['s'] < 10) {
-            return $hsl['l'] < 20 ? 'black' : ($hsl['l'] > 80 ? 'white' : 'gray');
+        $hue = $hsl['h'];
+        $saturation = $hsl['s'];
+        $lightness = $hsl['l'];
+
+        $hue_ranges = Color_Constants::COLOR_WHEEL_CONFIG['hue_ranges'];
+        
+        // Check if it's a neutral color first
+        if ($saturation < Color_Constants::COLOR_METRICS['saturation']['neutral_threshold'] ||
+            $lightness < Color_Constants::COLOR_METRICS['lightness']['dark_threshold'] ||
+            $lightness > Color_Constants::COLOR_METRICS['lightness']['light_threshold']) {
+            return 'neutral';
         }
 
-        $hue = $hsl['h'];
-        if ($hue < 30) return 'red';
-        if ($hue < 60) return 'orange';
-        if ($hue < 90) return 'yellow';
-        if ($hue < 150) return 'green';
-        if ($hue < 210) return 'cyan';
-        if ($hue < 270) return 'blue';
-        if ($hue < 330) return 'purple';
-        return 'red';
+        // Find the color category based on hue
+        foreach ($hue_ranges as $category => $range) {
+            if ($hue >= $range['start'] && $hue <= $range['end']) {
+                return $category;
+            }
+        }
+
+        return 'undefined';
     }
 
     /**
@@ -490,14 +498,8 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
      *
      * @return array Color name mapping
      */
-    private function get_color_name_map() {
-        return [
-            // Basic colors
-            'red' => ['#FF0000', '#FF4444', '#FF6666'],
-            'green' => ['#00FF00', '#44FF44', '#66FF66'],
-            'blue' => ['#0000FF', '#4444FF', '#6666FF'],
-            // Add more color mappings as needed
-        ];
+    private function get_color_name_map(): array {
+        return Color_Constants::COLOR_PERCEPTION['color_names'];
     }
 
     /**
@@ -906,11 +908,11 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
         $hsl = $this->color_utility->hex_to_hsl($primary_color);
 
         // Adjust hue based on personality traits
-        $hue_shift = 30; // Default complementary shift
+        $hue_shift = Color_Constants::COLOR_HARMONY_RULES['analogous']['angle']; // Default complementary shift
         if (in_array('creative', $personality_traits)) {
-            $hue_shift = 60; // More contrasting for creative brands
+            $hue_shift = Color_Constants::COLOR_HARMONY_RULES['complementary']['angle'] / 3; // More contrasting for creative brands
         } elseif (in_array('traditional', $personality_traits)) {
-            $hue_shift = 15; // More subtle for traditional brands
+            $hue_shift = Color_Constants::COLOR_HARMONY_RULES['analogous']['angle']; // More subtle for traditional brands
         }
 
         $hsl['h'] = fmod($hsl['h'] + $hue_shift, 360);
@@ -935,7 +937,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
 
         // Create tertiary color by finding middle point and shifting
         $hsl = [
-            'h' => fmod(($primary_hsl['h'] + $secondary_hsl['h']) / 2 + 60, 360),
+            'h' => fmod(($primary_hsl['h'] + $secondary_hsl['h']) / 2 + Color_Constants::COLOR_HARMONY_RULES['complementary']['angle'] / 3, 360),
             's' => min(100, (($primary_hsl['s'] + $secondary_hsl['s']) / 2) * 0.85),
             'l' => min(100, (($primary_hsl['l'] + $secondary_hsl['l']) / 2) * 1.15)
         ];
@@ -953,7 +955,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
         $hsl = $this->color_utility->hex_to_hsl($primary_color);
 
         // Create vibrant accent by increasing saturation and shifting hue
-        $hsl['h'] = fmod($hsl['h'] + 120, 360); // Opposite hue
+        $hsl['h'] = fmod($hsl['h'] + Color_Constants::COLOR_HARMONY_RULES['complementary']['angle'], 360); // Opposite hue
         $hsl['s'] = min(100, $hsl['s'] * 1.2); // More saturated
         $hsl['l'] = min(100, $hsl['l'] * 0.9); // Slightly darker
 
@@ -1157,16 +1159,16 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
 
             // Add complementary color
             $complementary = $primary_hsl;
-            $complementary['h'] = fmod($complementary['h'] + 180, 360);
+            $complementary['h'] = fmod($complementary['h'] + Color_Constants::COLOR_HARMONY_RULES['complementary']['angle'], 360);
             $palette[] = $this->color_utility->hsl_to_hex($complementary);
 
             // Add analogous colors
             $analogous1 = $primary_hsl;
-            $analogous1['h'] = fmod($analogous1['h'] + 30, 360);
+            $analogous1['h'] = fmod($analogous1['h'] + Color_Constants::COLOR_HARMONY_RULES['analogous']['angle'], 360);
             $palette[] = $this->color_utility->hsl_to_hex($analogous1);
 
             $analogous2 = $primary_hsl;
-            $analogous2['h'] = fmod($analogous2['h'] - 30, 360);
+            $analogous2['h'] = fmod($analogous2['h'] - Color_Constants::COLOR_HARMONY_RULES['analogous']['angle'], 360);
             $palette[] = $this->color_utility->hsl_to_hex($analogous2);
         }
         // If two colors provided, generate intermediate and accent colors
@@ -1184,7 +1186,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
 
             // Add accent color
             $accent = $color1_hsl;
-            $accent['h'] = fmod($accent['h'] + 120, 360);
+            $accent['h'] = fmod($accent['h'] + Color_Constants::COLOR_HARMONY_RULES['complementary']['angle'] / 3, 360);
             $accent['s'] = min(100, $accent['s'] * 1.2);
             $palette[] = $this->color_utility->hsl_to_hex($accent);
         }
@@ -1192,7 +1194,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
         elseif ($count === 3) {
             $primary_hsl = $this->color_utility->hex_to_hsl($base_colors[0]);
             $accent = $primary_hsl;
-            $accent['h'] = fmod($accent['h'] + 180, 360);
+            $accent['h'] = fmod($accent['h'] + Color_Constants::COLOR_HARMONY_RULES['triadic']['angle'], 360);
             $accent['s'] = min(100, $accent['s'] * 1.1);
             $accent['l'] = min(100, $accent['l'] * 0.9);
             $palette[] = $this->color_utility->hsl_to_hex($accent);

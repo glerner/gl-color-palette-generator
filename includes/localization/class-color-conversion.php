@@ -49,9 +49,12 @@ class ColorConversion {
     }
 
     /**
-     * Generate color space transformations
+     * Generate color transformations
+     *
+     * @param array $color Color values
+     * @return array Transformed colors
      */
-    public function generate_transformations($color) {
+    private function generate_transformations($color) {
         return [
             'original' => $color,
             'spaces' => [
@@ -69,10 +72,16 @@ class ColorConversion {
         ];
     }
 
-    / Add private helper methods here
+    /**
+     * Normalize color value for conversion
+     *
+     * @param mixed $color Color value to normalize
+     * @param string $space Color space
+     * @return array Normalized color values
+     */
     private function normalize_color_value($color, $space) {
-        / Implementation
+        // Implementation
     }
 
-    / ... other helper methods
+    // ... other helper methods
 }

@@ -1,9 +1,10 @@
+<?php
 /**
  * Color Harmonization Class
  *
- * Implements color harmony rules and relationships for generating aesthetically
- * pleasing color combinations. Supports various harmony types including
- * complementary, analogous, triadic, and dynamic mood-based harmonies.
+ * Implements color harmony algorithms and relationships for generating
+ * aesthetically pleasing color combinations. Supports various harmony
+ * types and dynamic mood-based harmonies.
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Color_Management
@@ -13,6 +14,7 @@
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Interfaces\Color_Harmonizer_Interface;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use GL_Color_Palette_Generator\Types\Color_Types;
 use GL_Color_Palette_Generator\Types\Harmony_Types;
 use GL_Color_Palette_Generator\Color_Management\Color_Analyzer;
@@ -61,33 +63,33 @@ class Color_Harmonization implements Color_Harmonizer_Interface {
         'classical_harmonies' => [
             'complementary' => [
                 'primary_rules' => [
-                    'hue_difference' => 180,
+                    'hue_difference' => Color_Constants::COLOR_HARMONY_RULES['complementary']['angle'],
                     'saturation_balance' => true,
                     'lightness_contrast' => 'moderate'
                 ],
                 'variations' => [
                     'split' => [
-                        'angle_offset' => 30,
+                        'angle_offset' => Color_Constants::COLOR_HARMONY_RULES['split-complementary']['angle'],
                         'count' => 3
                     ],
                     'double' => [
-                        'pair_spacing' => 60,
+                        'pair_spacing' => Color_Constants::COLOR_HARMONY_RULES['tetradic']['angle'],
                         'count' => 4
                     ]
                 ]
             ],
             'analogous' => [
                 'primary_rules' => [
-                    'hue_range' => 30,
-                    'saturation_step' => 10,
-                    'lightness_step' => 5
+                    'hue_range' => Color_Constants::COLOR_HARMONY_RULES['analogous']['angle'],
+                    'saturation_step' => Color_Constants::SATURATION_STEP,
+                    'lightness_step' => Color_Constants::LIGHTNESS_STEP
                 ],
                 'variations' => [
                     'close' => [
-                        'hue_range' => 15
+                        'hue_range' => Color_Constants::COLOR_HARMONY_RULES['analogous']['angle'] / 2
                     ],
                     'wide' => [
-                        'hue_range' => 45
+                        'hue_range' => Color_Constants::COLOR_HARMONY_RULES['analogous']['angle'] * 1.5
                     ]
                 ]
             ]
@@ -97,7 +99,7 @@ class Color_Harmonization implements Color_Harmonizer_Interface {
                 'energetic' => [
                     'primary_hue_range' => [0, 60],
                     'contrast_level' => 'high',
-                    'saturation_range' => [70, 100],
+                    'saturation_range' => [Color_Constants::MIN_SATURATION_RANGE, Color_Constants::MAX_SATURATION],
                     'lightness_range' => [45, 65]
                 ],
                 'calm' => [
@@ -137,7 +139,7 @@ class Color_Harmonization implements Color_Harmonizer_Interface {
         try {
             $this->validate_color($color);
             $hsl = $this->utility->hex_to_hsl($color);
-            $hsl['h'] = ($hsl['h'] + 180) % 360;
+            $hsl['h'] = ($hsl['h'] + Color_Constants::COLOR_HARMONY_RULES['complementary']['angle']) % 360;
             return $this->utility->hsl_to_hex($hsl);
         } catch (\Exception $e) {
             return new WP_Error('invalid_color', $e->getMessage());
@@ -156,7 +158,7 @@ class Color_Harmonization implements Color_Harmonizer_Interface {
             $this->validate_color($color);
             $colors = [];
             $hsl = $this->utility->hex_to_hsl($color);
-            $angle = 30;
+            $angle = Color_Constants::COLOR_HARMONY_RULES['analogous']['angle'];
 
             for ($i = 1; $i <= $count; $i++) {
                 $new_hsl = $hsl;
@@ -181,10 +183,11 @@ class Color_Harmonization implements Color_Harmonizer_Interface {
             $this->validate_color($color);
             $colors = [];
             $hsl = $this->utility->hex_to_hsl($color);
+            $angle = Color_Constants::COLOR_HARMONY_RULES['triadic']['angle'];
 
             for ($i = 0; $i < 3; $i++) {
                 $new_hsl = $hsl;
-                $new_hsl['h'] = ($hsl['h'] + (120 * $i)) % 360;
+                $new_hsl['h'] = ($hsl['h'] + ($angle * $i)) % 360;
                 $colors[] = $this->utility->hsl_to_hex($new_hsl);
             }
 
@@ -280,7 +283,7 @@ class Color_Harmonization implements Color_Harmonizer_Interface {
             foreach ($colors as $color) {
                 $this->validate_color($color);
                 $hsl = $this->utility->hex_to_hsl($color);
-                
+
                 // Apply harmonization adjustments based on options
                 if (!empty($options['saturation_adjustment'])) {
                     $hsl['s'] = min(1, max(0, $hsl['s'] + $options['saturation_adjustment']));
@@ -288,7 +291,7 @@ class Color_Harmonization implements Color_Harmonizer_Interface {
                 if (!empty($options['lightness_adjustment'])) {
                     $hsl['l'] = min(1, max(0, $hsl['l'] + $options['lightness_adjustment']));
                 }
-                
+
                 $harmonized[] = $this->utility->hsl_to_hex($hsl);
             }
             return $harmonized;

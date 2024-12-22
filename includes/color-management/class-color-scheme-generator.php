@@ -9,6 +9,7 @@
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Interfaces\Color_Scheme_Generator_Interface;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use WP_Error;
 
 /**
@@ -54,6 +55,12 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
         $scheme_type = isset($options['type']) ? $options['type'] : 'monochromatic';
         $count = isset($options['count']) ? $options['count'] : 5;
 
+        // Validate scheme type
+        $valid_schemes = array_keys(Color_Constants::COLOR_SCHEMES);
+        if (!in_array($scheme_type, $valid_schemes)) {
+            return new WP_Error('invalid_scheme', 'Invalid scheme type provided');
+        }
+
         switch ($scheme_type) {
             case 'monochromatic':
                 return $this->generate_monochromatic($base_color, $count);
@@ -61,7 +68,7 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
                 return $this->generate_analogous($base_color, $count);
             case 'complementary':
                 return $this->generate_complementary($base_color, $count);
-            case 'split_complementary':
+            case 'split-complementary':
                 return $this->generate_split_complementary($base_color, $count);
             case 'triadic':
                 return $this->generate_triadic($base_color, $count);
@@ -111,7 +118,7 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
 
         $hsv = $this->color_utility->hex_to_hsv($base_color);
         $colors = [];
-        $hue_step = 30;
+        $hue_step = Color_Constants::COLOR_HARMONY_RULES['analogous']['angle'];
 
         for ($i = 0; $i < $count; $i++) {
             $hue = ($hsv['h'] + ($i - floor($count / 2)) * $hue_step + 360) % 360;
@@ -134,12 +141,13 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
         }
 
         $hsv = $this->color_utility->hex_to_hsv($base_color);
-        $complement_hue = ($hsv['h'] + 180) % 360;
+        $complement_angle = Color_Constants::COLOR_HARMONY_RULES['complementary']['angle'];
+        $complement_hue = ($hsv['h'] + $complement_angle) % 360;
         $colors = [$base_color];
 
         // Add variations of the base color and its complement
         for ($i = 1; $i < $count / 2; $i++) {
-            $saturation = max(0, min(100, $hsv['s'] - ($i * 20)));
+            $saturation = max(Color_Constants::MIN_SATURATION_RANGE, min(Color_Constants::MAX_SATURATION, $hsv['s'] - ($i * 20)));
             $colors[] = $this->color_utility->hsv_to_hex(['h' => $hsv['h'], 's' => $saturation, 'v' => $hsv['v']]);
             $colors[] = $this->color_utility->hsv_to_hex(['h' => $complement_hue, 's' => $saturation, 'v' => $hsv['v']]);
         }
@@ -164,8 +172,8 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
         $hsv = $this->color_utility->hex_to_hsv($base_color);
         $colors = [$base_color];
 
-        // Add split complements (150 and 210 degrees from base)
-        $split_angle = 150;
+        // Add split complements using the defined angle from constants
+        $split_angle = Color_Constants::COLOR_HARMONY_RULES['split-complementary']['angle'];
         $colors[] = $this->color_utility->hsv_to_hex(['h' => ($hsv['h'] + $split_angle) % 360, 's' => $hsv['s'], 'v' => $hsv['v']]);
         $colors[] = $this->color_utility->hsv_to_hex(['h' => ($hsv['h'] - $split_angle + 360) % 360, 's' => $hsv['s'], 'v' => $hsv['v']]);
 
@@ -187,9 +195,10 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
         $hsv = $this->color_utility->hex_to_hsv($base_color);
         $colors = [$base_color];
 
-        // Add colors at 120 and 240 degrees
-        $colors[] = $this->color_utility->hsv_to_hex(['h' => ($hsv['h'] + 120) % 360, 's' => $hsv['s'], 'v' => $hsv['v']]);
-        $colors[] = $this->color_utility->hsv_to_hex(['h' => ($hsv['h'] + 240) % 360, 's' => $hsv['s'], 'v' => $hsv['v']]);
+        // Add colors using the triadic angle from constants
+        $triadic_angle = Color_Constants::COLOR_HARMONY_RULES['triadic']['angle'];
+        $colors[] = $this->color_utility->hsv_to_hex(['h' => ($hsv['h'] + $triadic_angle) % 360, 's' => $hsv['s'], 'v' => $hsv['v']]);
+        $colors[] = $this->color_utility->hsv_to_hex(['h' => ($hsv['h'] + 2 * $triadic_angle) % 360, 's' => $hsv['s'], 'v' => $hsv['v']]);
 
         return array_slice($colors, 0, $count);
     }

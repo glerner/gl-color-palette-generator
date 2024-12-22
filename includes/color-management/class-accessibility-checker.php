@@ -9,17 +9,29 @@
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
+
 /**
  * Class Accessibility_Checker
  */
 class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Accessibility_Checker {
     /**
-     * WCAG 2.1 contrast ratios
+     * WCAG 2.1 contrast ratios and enhanced requirements
      */
-    const WCAG_AAA_LARGE = 4.5;
-    const WCAG_AAA_SMALL = 7.0;
-    const WCAG_AA_LARGE = 3.0;
-    const WCAG_AA_SMALL = 4.5;
+    const WCAG_AAA_LARGE = Color_Constants::WCAG_CONTRAST_AA;
+    const WCAG_AAA_SMALL = Color_Constants::WCAG_CONTRAST_AAA;
+    const WCAG_AA_LARGE = Color_Constants::WCAG_CONTRAST_AA_LARGE;
+    const WCAG_AA_SMALL = Color_Constants::WCAG_CONTRAST_AA;
+
+    // Enhanced contrast requirements
+    const OPTIMAL_CONTRAST_MIN = Color_Constants::WCAG_CONTRAST_TARGET;    // Target AAA for best readability
+    const OPTIMAL_CONTRAST_MAX = Color_Constants::CONTRAST_MAX;   // Upper limit to prevent harsh contrast
+    const DECORATIVE_CONTRAST_MIN = Color_Constants::DECORATIVE_CONTRAST_MIN; // Minimum for decorative elements
+
+    // Luminance thresholds
+    const LIGHT_LUMINANCE = Color_Constants::LIGHT_LUMINANCE_THRESHOLD;
+    const DARK_LUMINANCE = Color_Constants::DARK_LUMINANCE_THRESHOLD;
+    const MID_LUMINANCE = 0.5;
 
     /**
      * Check color combination accessibility
@@ -197,4 +209,120 @@ class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Ac
 
         return $recommendations;
     }
-} 
+
+    /**
+     * Check if a color meets optimal contrast requirements
+     *
+     * @param string $color1 First color hex.
+     * @param string $color2 Second color hex.
+     * @param bool   $is_decorative Whether the color is for decorative purposes.
+     * @return array Analysis results.
+     */
+    public function analyze_contrast($color1, $color2, $is_decorative = false) {
+        $contrast_ratio = $this->calculate_contrast_ratio($color1, $color2);
+        $min_required = $is_decorative ? self::DECORATIVE_CONTRAST_MIN : self::WCAG_AA_SMALL;
+
+        return [
+            'contrast_ratio' => round($contrast_ratio, 2),
+            'meets_minimum' => $contrast_ratio >= $min_required,
+            'meets_optimal' => $contrast_ratio >= self::OPTIMAL_CONTRAST_MIN,
+            'is_too_harsh' => $contrast_ratio > self::OPTIMAL_CONTRAST_MAX,
+            'needs_adjustment' => $contrast_ratio < $min_required || $contrast_ratio > self::OPTIMAL_CONTRAST_MAX,
+            'target_contrast' => $this->calculate_target_contrast($contrast_ratio, $is_decorative)
+        ];
+    }
+
+    /**
+     * Calculate ideal target contrast based on current ratio
+     *
+     * @param float $current_ratio Current contrast ratio.
+     * @param bool  $is_decorative Whether the color is decorative.
+     * @return float Target contrast ratio.
+     */
+    private function calculate_target_contrast($current_ratio, $is_decorative) {
+        if ($is_decorative) {
+            return max(self::DECORATIVE_CONTRAST_MIN, min($current_ratio, self::WCAG_AA_LARGE));
+        }
+
+        if ($current_ratio < self::WCAG_AA_SMALL) {
+            return self::WCAG_AA_SMALL;
+        } elseif ($current_ratio > self::OPTIMAL_CONTRAST_MAX) {
+            return self::OPTIMAL_CONTRAST_MAX;
+        } elseif ($current_ratio < self::OPTIMAL_CONTRAST_MIN) {
+            return self::OPTIMAL_CONTRAST_MIN;
+        }
+
+        return $current_ratio;
+    }
+
+    /**
+     * Analyze color luminance characteristics
+     *
+     * @param string $color Hex color code.
+     * @return array Color analysis results.
+     */
+    public function analyze_color($color) {
+        $luminance = $this->get_relative_luminance($color);
+        $rgb = $this->hex_to_rgb($color);
+
+        return [
+            'luminance' => round($luminance, 3),
+            'is_light' => $luminance > self::MID_LUMINANCE,
+            'is_very_light' => $luminance >= self::LIGHT_LUMINANCE,
+            'is_very_dark' => $luminance <= self::DARK_LUMINANCE,
+            'rgb' => $rgb,
+            'perceived_brightness' => $this->calculate_perceived_brightness($rgb)
+        ];
+    }
+
+    /**
+     * Calculate perceived brightness using HSP color model
+     *
+     * @param array $rgb RGB color values.
+     * @return float Perceived brightness value (0-1).
+     */
+    private function calculate_perceived_brightness($rgb) {
+        // HSP (Highly Sensitive Perceived brightness) color model coefficients
+        $sqrt_r = 0.299;
+        $sqrt_g = 0.587;
+        $sqrt_b = 0.114;
+
+        return sqrt(
+            $sqrt_r * ($rgb[0] / 255) ** 2 +
+            $sqrt_g * ($rgb[1] / 255) ** 2 +
+            $sqrt_b * ($rgb[2] / 255) ** 2
+        );
+    }
+
+    /**
+     * Get recommendations for improving contrast
+     *
+     * @param float $contrast_ratio Current contrast ratio.
+     * @return array Recommendations for improvement.
+     */
+    private function get_recommendations_for_improvement($contrast_ratio) {
+        $recommendations = [];
+
+        if ($contrast_ratio < self::WCAG_AA_SMALL) {
+            $recommendations[] = [
+                'priority' => 'high',
+                'message' => 'Increase contrast to meet WCAG AA minimum (4.5:1)',
+                'target' => self::WCAG_AA_SMALL
+            ];
+        } elseif ($contrast_ratio < self::OPTIMAL_CONTRAST_MIN) {
+            $recommendations[] = [
+                'priority' => 'medium',
+                'message' => 'Consider increasing contrast to meet WCAG AAA (7:1)',
+                'target' => self::OPTIMAL_CONTRAST_MIN
+            ];
+        } elseif ($contrast_ratio > self::OPTIMAL_CONTRAST_MAX) {
+            $recommendations[] = [
+                'priority' => 'low',
+                'message' => 'Consider reducing contrast to prevent visual strain',
+                'target' => self::OPTIMAL_CONTRAST_MAX
+            ];
+        }
+
+        return $recommendations;
+    }
+}

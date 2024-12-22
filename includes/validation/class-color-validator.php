@@ -2,14 +2,24 @@
 /**
  * Color Validator Class
  *
+ * Handles low-level color validation and conversion operations:
+ * - Validates color format syntax (hex, RGB, HSL, etc.)
+ * - Converts between different color formats
+ * - Provides utility functions for color space transformations
+ *
+ * Note: This class focuses on individual color validation and conversion.
+ * For higher-level color palette validation, see Color_Validation class.
+ *
  * @package GL_Color_Palette_Generator
  * @subpackage Validation
  * @since 1.0.0
+ * @todo Consider merging with Color_Validation class in future versions
  */
 
 namespace GL_Color_Palette_Generator\Validation;
 
 use GL_Color_Palette_Generator\Core\Logger;
+use GL_Color_Palette_Generator\Core\Color_Constants;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -23,19 +33,6 @@ if (!defined('ABSPATH')) {
  * @since 1.0.0
  */
 class Color_Validator {
-    /**
-     * Supported color formats
-     *
-     * @var array
-     */
-    private const SUPPORTED_FORMATS = [
-        'hex' => '/^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/',
-        'rgb' => '/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/',
-        'rgba' => '/^rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*([01]\.?\d*)\s*\)$/',
-        'hsl' => '/^hsl\(\s*(\d{1,3})\s*,\s*(\d{1,3})%?\s*,\s*(\d{1,3})%?\s*\)$/',
-        'hsla' => '/^hsla\(\s*(\d{1,3})\s*,\s*(\d{1,3})%?\s*,\s*(\d{1,3})%?\s*,\s*([01]\.?\d*)\s*\)$/'
-    ];
-
     /**
      * Logger instance
      *
@@ -60,11 +57,11 @@ class Color_Validator {
      * @return bool Whether color is valid
      */
     public function is_valid(string $color, string $format = ''): bool {
-        if ($format && isset(self::SUPPORTED_FORMATS[$format])) {
-            return (bool) preg_match(self::SUPPORTED_FORMATS[$format], $color);
+        if ($format && isset(Color_Constants::COLOR_SPACE_CONVERSION['formats'][$format])) {
+            return (bool) preg_match(Color_Constants::COLOR_SPACE_CONVERSION['formats'][$format], $color);
         }
 
-        foreach (self::SUPPORTED_FORMATS as $pattern) {
+        foreach (Color_Constants::COLOR_SPACE_CONVERSION['formats'] as $pattern) {
             if (preg_match($pattern, $color)) {
                 return true;
             }
@@ -85,7 +82,7 @@ class Color_Validator {
      * @return string|null Format name or null if invalid
      */
     public function get_format(string $color): ?string {
-        foreach (self::SUPPORTED_FORMATS as $format => $pattern) {
+        foreach (Color_Constants::COLOR_SPACE_CONVERSION['formats'] as $format => $pattern) {
             if (preg_match($pattern, $color)) {
                 return $format;
             }
@@ -146,9 +143,9 @@ class Color_Validator {
      * @return string|null Hex color or null if conversion fails
      */
     private function rgb_to_hex(string $rgb): ?string {
-        preg_match(self::SUPPORTED_FORMATS['rgb'], $rgb, $matches);
+        preg_match(Color_Constants::COLOR_SPACE_CONVERSION['formats']['rgb'], $rgb, $matches);
         if (!$matches) {
-            preg_match(self::SUPPORTED_FORMATS['rgba'], $rgb, $matches);
+            preg_match(Color_Constants::COLOR_SPACE_CONVERSION['formats']['rgba'], $rgb, $matches);
         }
         
         if (!$matches) {
@@ -169,9 +166,9 @@ class Color_Validator {
      * @return string|null Hex color or null if conversion fails
      */
     private function hsl_to_hex(string $hsl): ?string {
-        preg_match(self::SUPPORTED_FORMATS['hsl'], $hsl, $matches);
+        preg_match(Color_Constants::COLOR_SPACE_CONVERSION['formats']['hsl'], $hsl, $matches);
         if (!$matches) {
-            preg_match(self::SUPPORTED_FORMATS['hsla'], $hsl, $matches);
+            preg_match(Color_Constants::COLOR_SPACE_CONVERSION['formats']['hsla'], $hsl, $matches);
         }
         
         if (!$matches) {
@@ -212,9 +209,11 @@ class Color_Validator {
     private function hue_to_rgb(float $p, float $q, float $t): float {
         if ($t < 0) $t += 1;
         if ($t > 1) $t -= 1;
+        
         if ($t < 1/6) return $p + ($q - $p) * 6 * $t;
         if ($t < 1/2) return $q;
         if ($t < 2/3) return $p + ($q - $p) * (2/3 - $t) * 6;
+        
         return $p;
     }
 }

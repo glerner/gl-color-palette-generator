@@ -10,6 +10,7 @@ namespace GL_Color_Palette_Generator\Tests\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Metrics;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
+use GL_Color_Palette_Generator\Color_Management\Color_Constants;
 use WP_Error;
 use WP_UnitTestCase;
 use Mockery;
@@ -17,7 +18,7 @@ use Mockery;
 /**
  * Class Test_Color_Metrics
  */
-class Test_Color_Metrics extends WP_UnitTestCase {
+class Test_Color_Metrics extends WP_UnitTestCase implements Color_Constants {
     /**
      * Test instance
      *

@@ -16,25 +16,6 @@ class ColorNamer {
     private $color_pizza_client;
 
     /**
-     * Basic color name mapping for local processing
-     *
-     * @var array
-     */
-    private $basic_colors = [
-        'red' => ['#FF0000', '#FF4444', '#CC0000'],
-        'blue' => ['#0000FF', '#4444FF', '#0000CC'],
-        'green' => ['#00FF00', '#44FF44', '#00CC00'],
-        'yellow' => ['#FFFF00', '#FFFF44', '#CCCC00'],
-        'purple' => ['#800080', '#FF00FF', '#CC00CC'],
-        'orange' => ['#FFA500', '#FF8C00', '#FF7F50'],
-        'brown' => ['#8B4513', '#A0522D', '#D2691E'],
-        'pink' => ['#FFC0CB', '#FFB6C1', '#FF69B4'],
-        'gray' => ['#808080', '#A9A9A9', '#D3D3D3'],
-        'black' => ['#000000', '#222222', '#333333'],
-        'white' => ['#FFFFFF', '#FAFAFA', '#F5F5F5']
-    ];
-
-    /**
      * Constructor
      *
      * @param SettingsManager|null $settings Settings manager instance
@@ -181,24 +162,27 @@ class ColorNamer {
      */
     private function get_basic_color_name($hex) {
         $rgb = $this->hex_to_rgb($hex);
-        $min_distance = PHP_FLOAT_MAX;
-        $closest_name = 'gray';
+        $hsl = $this->rgb_to_hsl($rgb);
+        
+        // Check for neutrals first
+        if ($hsl['s'] < Color_Constants::COLOR_METRICS['saturation']['neutral_threshold']) {
+            if ($hsl['l'] < Color_Constants::COLOR_METRICS['lightness']['dark_threshold']) {
+                return 'black';
+            } elseif ($hsl['l'] > Color_Constants::COLOR_METRICS['lightness']['light_threshold']) {
+                return 'white';
+            }
+            return 'gray';
+        }
 
-        foreach ($this->basic_colors as $name => $variations) {
-            foreach ($variations as $color) {
-                $distance = $this->calculate_color_distance(
-                    $rgb,
-                    $this->hex_to_rgb($color)
-                );
-
-                if ($distance < $min_distance) {
-                    $min_distance = $distance;
-                    $closest_name = $name;
-                }
+        // Find closest color name based on hue ranges
+        $hue_ranges = Color_Constants::COLOR_WHEEL_CONFIG['hue_ranges'];
+        foreach ($hue_ranges as $color_name => $range) {
+            if ($hsl['h'] >= $range['start'] && $hsl['h'] <= $range['end']) {
+                return $color_name;
             }
         }
 
-        return $closest_name;
+        return 'undefined';
     }
 
     /**

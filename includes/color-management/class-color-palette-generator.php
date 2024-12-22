@@ -17,6 +17,7 @@ use GL_Color_Palette_Generator\AI\AI_Provider_Interface;
 use GL_Color_Palette_Generator\Types\Color_Types;
 use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
 use GL_Color_Palette_Generator\Interfaces\Color_Scheme_Generator_Interface;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 
 /**
  * Class Color_Palette_Generator
@@ -152,9 +153,20 @@ class Color_Palette_Generator implements Color_Scheme_Generator_Interface {
     private function get_system_prompt(): string {
         return <<<EOT
 You are a color palette generation assistant. Generate harmonious color palettes based on user prompts.
-Return exactly 5 colors in hex format (#RRGGBB), one per line.
+Return colors for the following roles:
+- {Color_Constants::COLOR_ROLE_PRIMARY}: Main brand color
+- {Color_Constants::COLOR_ROLE_SECONDARY}: Supporting brand color
+- {Color_Constants::COLOR_ROLE_ACCENT}: Highlight or call-to-action color
+- {Color_Constants::COLOR_ROLE_BACKGROUND}: Page background color
+- {Color_Constants::COLOR_ROLE_TEXT}: Main text color
+
+Ensure colors meet these requirements:
+- Minimum contrast ratio between text and background: {Color_Constants::WCAG_CONTRAST_TARGET}
+- Maximum contrast ratio to prevent eye strain: {Color_Constants::CONTRAST_MAX}
+- Saturation range: {Color_Constants::MIN_SATURATION_RANGE} to {Color_Constants::MAX_SATURATION}
+
 Consider color theory principles like complementary colors, analogous colors, and color psychology.
-Ensure sufficient contrast between colors for accessibility.
+Return colors in hex format (#RRGGBB), one per line with role prefix.
 EOT;
     }
 
@@ -166,7 +178,7 @@ EOT;
      */
     private function format_user_prompt(string $prompt): string {
         return sprintf(
-            "Generate a color palette for: %s\nProvide exactly 5 colors in hex format (#RRGGBB), one per line.",
+            "Generate a color palette for: %s\nProvide colors for primary, secondary, accent, background, and text roles in hex format (#RRGGBB), one per line with role prefix.",
             $prompt
         );
     }
@@ -179,15 +191,29 @@ EOT;
      * @throws \Exception If response format is invalid.
      */
     private function parse_ai_response(string $response): array {
-        $colors = array_filter(
-            array_map('trim', explode("\n", $response)),
-            function($line) {
-                return !empty($line) && preg_match('/^#[0-9A-Fa-f]{6}$/', $line);
-            }
-        );
+        $required_roles = [
+            Color_Constants::COLOR_ROLE_PRIMARY,
+            Color_Constants::COLOR_ROLE_SECONDARY,
+            Color_Constants::COLOR_ROLE_ACCENT,
+            Color_Constants::COLOR_ROLE_BACKGROUND,
+            Color_Constants::COLOR_ROLE_TEXT
+        ];
 
-        if (count($colors) !== 5) {
-            throw new \Exception(__('Invalid AI response format', 'gl-color-palette-generator'));
+        $colors = [];
+        $lines = array_filter(array_map('trim', explode("\n", $response)));
+
+        foreach ($lines as $line) {
+            if (preg_match('/^([a-z_]+):\s*(#[0-9A-Fa-f]{6})$/i', $line, $matches)) {
+                $role = strtolower($matches[1]);
+                $color = $matches[2];
+                if (in_array($role, $required_roles)) {
+                    $colors[$role] = $color;
+                }
+            }
+        }
+
+        if (count($colors) !== count($required_roles)) {
+            throw new \Exception(__('Missing required color roles in AI response', 'gl-color-palette-generator'));
         }
 
         return $colors;

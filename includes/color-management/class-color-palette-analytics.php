@@ -9,6 +9,8 @@
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
+
 /**
  * Class Color_Palette_Analytics
  * Analyzes color palettes for trends, usage patterns, and statistics
@@ -150,8 +152,34 @@ class Color_Palette_Analytics implements \GL_Color_Palette_Generator\Interfaces\
      * @return array Analysis results.
      */
     public function analyze_palette_characteristics($palette) {
+        // Validate required roles are present
+        foreach (Color_Constants::REQUIRED_ROLES as $role) {
+            if (!isset($palette[$role])) {
+                throw new \InvalidArgumentException(
+                    sprintf(__('Missing required color role: %s', 'gl-color-palette-generator'), $role)
+                );
+            }
+        }
+
+        // Analyze contrast ratios between text and background
+        $text_bg_contrast = $this->color_utility->calculate_contrast_ratio(
+            $palette[Color_Constants::COLOR_ROLE_TEXT],
+            $palette[Color_Constants::COLOR_ROLE_BACKGROUND]
+        );
+
+        if ($text_bg_contrast < Color_Constants::WCAG_CONTRAST_TARGET) {
+            throw new \InvalidArgumentException(
+                sprintf(
+                    __('Insufficient contrast between text and background: %f (minimum required: %f)', 
+                    'gl-color-palette-generator'),
+                    $text_bg_contrast,
+                    Color_Constants::WCAG_CONTRAST_TARGET
+                )
+            );
+        }
+
         $analysis = [
-            'color_distribution' => $this->analyze_color_distribution($palette),
+            'color_distribution' => $this->analyze_distribution($palette),
             'harmony_metrics' => $this->analyze_harmony_metrics($palette),
             'contrast_analysis' => $this->analyze_contrast_relationships($palette),
             'temperature' => $this->analyze_temperature($palette),
@@ -198,31 +226,32 @@ class Color_Palette_Analytics implements \GL_Color_Palette_Generator\Interfaces\
     /**
      * Analyze color distribution
      *
-     * @param array $palette Color palette.
-     * @return array Distribution analysis.
+     * @param array $colors Array of hex colors
+     * @return array Distribution metrics
      */
-    private function analyze_color_distribution($palette) {
+    private function analyze_distribution(array $colors): array {
         $distribution = [
             'hue_distribution' => [],
             'saturation_distribution' => [],
             'lightness_distribution' => []
         ];
 
-        foreach ($palette as $color) {
+        foreach ($colors as $color) {
             $hsl = $this->color_utility->hex_to_hsl($color);
 
-            // Hue categories (in 30° intervals)
-            $hue_category = floor($hsl['h'] / 30) * 30;
+            // Hue categories using constant for interval size
+            $hue_category = floor($hsl['h'] / Color_Constants::COLOR_WHEEL_CONFIG['hue_category_size']) 
+                * Color_Constants::COLOR_WHEEL_CONFIG['hue_category_size'];
             $distribution['hue_distribution'][$hue_category] =
                 ($distribution['hue_distribution'][$hue_category] ?? 0) + 1;
 
-            // Saturation categories (in 20% intervals)
-            $sat_category = floor($hsl['s'] / 20) * 20;
+            // Saturation categories
+            $sat_category = floor($hsl['s'] / 10) * 10;
             $distribution['saturation_distribution'][$sat_category] =
                 ($distribution['saturation_distribution'][$sat_category] ?? 0) + 1;
 
-            // Lightness categories (in 20% intervals)
-            $light_category = floor($hsl['l'] / 20) * 20;
+            // Lightness categories
+            $light_category = floor($hsl['l'] / 10) * 10;
             $distribution['lightness_distribution'][$light_category] =
                 ($distribution['lightness_distribution'][$light_category] ?? 0) + 1;
         }
@@ -233,18 +262,19 @@ class Color_Palette_Analytics implements \GL_Color_Palette_Generator\Interfaces\
     /**
      * Analyze harmony metrics
      *
-     * @param array $palette Color palette.
-     * @return array Harmony metrics.
+     * @param array $colors Array of hex colors
+     * @return array Harmony metrics
      */
-    private function analyze_harmony_metrics($palette) {
-        $hsl_colors = array_map([$this->color_utility, 'hex_to_hsl'], $palette);
+    private function analyze_harmony_metrics(array $colors): array {
+        $hsl_colors = array_map([$this->color_utility, 'hex_to_hsl'], $colors);
+        $count = count($hsl_colors);
 
         // Calculate hue angles between adjacent colors
         $hue_angles = [];
-        for ($i = 0; $i < count($hsl_colors); $i++) {
-            $next = ($i + 1) % count($hsl_colors);
+        for ($i = 0; $i < $count; $i++) {
+            $next = ($i + 1) % $count;
             $angle = abs($hsl_colors[$next]['h'] - $hsl_colors[$i]['h']);
-            if ($angle > 180) {
+            if ($angle > Color_Constants::COLOR_WHEEL_CONFIG['max_angle_difference']) {
                 $angle = 360 - $angle;
             }
             $hue_angles[] = $angle;
@@ -253,12 +283,7 @@ class Color_Palette_Analytics implements \GL_Color_Palette_Generator\Interfaces\
         return [
             'average_hue_angle' => array_sum($hue_angles) / count($hue_angles),
             'hue_variance' => $this->calculate_variance($hue_angles),
-            'saturation_coherence' => $this->calculate_coherence(
-                array_column($hsl_colors, 's')
-            ),
-            'lightness_coherence' => $this->calculate_coherence(
-                array_column($hsl_colors, 'l')
-            )
+            'is_evenly_spaced' => $this->is_evenly_spaced($hue_angles)
         ];
     }
 
@@ -372,5 +397,20 @@ class Color_Palette_Analytics implements \GL_Color_Palette_Generator\Interfaces\
         } else {
             return 'neutral';
         }
+    }
+
+    /**
+     * Check if hue angles are evenly spaced
+     *
+     * @param array $hue_angles Array of hue angles.
+     * @return bool Whether hue angles are evenly spaced.
+     */
+    private function is_evenly_spaced($hue_angles) {
+        $avg_angle = array_sum($hue_angles) / count($hue_angles);
+        $diff_sum = array_sum(array_map(function($angle) use ($avg_angle) {
+            return abs($angle - $avg_angle);
+        }, $hue_angles));
+
+        return $diff_sum < 10;
     }
 } 

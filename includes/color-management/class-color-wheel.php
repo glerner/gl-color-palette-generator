@@ -1,3 +1,4 @@
+<?php
 /**
  * Color Wheel Class
  *
@@ -13,6 +14,7 @@
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Interfaces\Color_Wheel_Interface;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use GL_Color_Palette_Generator\Types\Color_Types;
 use GL_Color_Palette_Generator\Types\Scheme_Types;
 use GL_Color_Palette_Generator\Color_Management\Color_Calculator;
@@ -50,34 +52,6 @@ class Color_Wheel implements Color_Wheel_Interface {
     private Settings_Manager $settings;
 
     /**
-     * Color wheel configuration
-     *
-     * @var array
-     * @since 1.0.0
-     */
-    private const WHEEL_CONFIG = [
-        'segments' => 12,
-        'primary_colors' => [
-            'red' => 0,
-            'yellow' => 120,
-            'blue' => 240
-        ],
-        'secondary_colors' => [
-            'orange' => 60,
-            'green' => 180,
-            'purple' => 300
-        ],
-        'tertiary_colors' => [
-            'red-orange' => 30,
-            'yellow-orange' => 90,
-            'yellow-green' => 150,
-            'blue-green' => 210,
-            'blue-purple' => 270,
-            'red-purple' => 330
-        ]
-    ];
-
-    /**
      * Constructor
      *
      * @since 1.0.0
@@ -106,6 +80,12 @@ class Color_Wheel implements Color_Wheel_Interface {
         $hsl = $this->color_utility->hex_to_hsl($base_color);
         $harmonies = [];
 
+        // Validate harmony type
+        $valid_harmonies = array_keys(Color_Constants::COLOR_HARMONY_RULES);
+        if (!in_array($harmony_type, $valid_harmonies)) {
+            throw new \InvalidArgumentException("Invalid harmony type: {$harmony_type}");
+        }
+
         switch ($harmony_type) {
             case 'complementary':
                 $harmonies = $this->calculate_complementary($hsl, $options);
@@ -119,7 +99,7 @@ class Color_Wheel implements Color_Wheel_Interface {
             case 'tetradic':
                 $harmonies = $this->calculate_tetradic($hsl, $options);
                 break;
-            case 'compound':
+            case 'split-complementary':
                 $harmonies = $this->calculate_compound($hsl, $options);
                 break;
         }
@@ -141,7 +121,7 @@ class Color_Wheel implements Color_Wheel_Interface {
             'analogous' => $this->find_analogous($color),
             'triadic' => $this->find_triadic($color),
             'tetradic' => $this->find_tetradic($color),
-            'split_complementary' => $this->find_split_complementary($color),
+            'split-complementary' => $this->find_split_complementary($color),
             'distance_relationships' => $this->calculate_distance_relationships($color)
         ];
     }
@@ -157,7 +137,8 @@ class Color_Wheel implements Color_Wheel_Interface {
      */
     public function generate_color_wheel(int $segments = 12, array $options = []): array {
         $wheel = [];
-        $segment_angle = 360 / $segments;
+        $config = Color_Constants::COLOR_WHEEL_CONFIG;
+        $segment_angle = 360 / ($segments ?: $config['segments']);
 
         for ($i = 0; $i < $segments; $i++) {
             $hue = $i * $segment_angle;
@@ -212,24 +193,29 @@ class Color_Wheel implements Color_Wheel_Interface {
      * @return array
      * @since 1.0.0
      */
-    public function generate_scheme(string $base_color, string $scheme_type, array $options = []): array {
-        $scheme = [
-            'base' => $base_color,
-            'harmonies' => $this->calculate_harmonies($base_color, $scheme_type),
-            'variations' => $this->calculate_variations($base_color, 'monochromatic'),
-            'relationships' => $this->calculate_relationships($base_color, 'all'),
-            'combinations' => $this->generate_combinations($base_color, $scheme_type)
-        ];
+    public function generate_scheme(
+        string $base_color,
+        string $scheme_type,
+        array $options = []
+    ): array {
+        $this->validate_color($base_color);
+        $scheme_type = strtolower($scheme_type);
 
-        if (!empty($options['include_neutrals'])) {
-            $scheme['neutrals'] = $this->generate_neutral_palette($base_color);
+        // Validate scheme type using constants
+        $valid_schemes = array_keys(Color_Constants::COLOR_SCHEMES);
+        if (!in_array($scheme_type, $valid_schemes)) {
+            throw new \InvalidArgumentException("Invalid scheme type: {$scheme_type}");
         }
 
-        if (!empty($options['include_accents'])) {
-            $scheme['accents'] = $this->generate_accent_colors($base_color);
-        }
-
-        return $scheme;
+        return match($scheme_type) {
+            'complementary' => $this->generate_complementary_scheme($base_color, $options),
+            'analogous' => $this->generate_analogous_scheme($base_color, $options),
+            'triadic' => $this->generate_triadic_scheme($base_color, $options),
+            'split-complementary' => $this->generate_split_complementary_scheme($base_color, $options),
+            'tetradic' => $this->generate_tetradic_scheme($base_color, $options),
+            'monochromatic' => $this->generate_monochromatic_scheme($base_color, $options),
+            default => throw new \InvalidArgumentException("Invalid scheme type: {$scheme_type}")
+        };
     }
 
     /**
@@ -345,34 +331,6 @@ class Color_Wheel implements Color_Wheel_Interface {
             'harmony_indicators' => $this->generate_harmony_indicators($selected_color),
             'interaction_handlers' => $this->get_interaction_handlers()
         ];
-    }
-
-    /**
-     * Generate color scheme
-     *
-     * @param string $base_color
-     * @param string $scheme_type
-     * @param array  $options
-     *
-     * @return array
-     */
-    public function generate_scheme(
-        string $base_color,
-        string $scheme_type,
-        array $options = []
-    ): array {
-        $this->validate_color($base_color);
-        $scheme_type = strtolower($scheme_type);
-
-        return match($scheme_type) {
-            Scheme_Types::COMPLEMENTARY => $this->generate_complementary_scheme($base_color, $options),
-            Scheme_Types::ANALOGOUS => $this->generate_analogous_scheme($base_color, $options),
-            Scheme_Types::TRIADIC => $this->generate_triadic_scheme($base_color, $options),
-            Scheme_Types::SPLIT_COMPLEMENTARY => $this->generate_split_complementary_scheme($base_color, $options),
-            Scheme_Types::TETRADIC => $this->generate_tetradic_scheme($base_color, $options),
-            Scheme_Types::SQUARE => $this->generate_square_scheme($base_color, $options),
-            default => throw new \InvalidArgumentException("Invalid scheme type: {$scheme_type}")
-        };
     }
 
     /**

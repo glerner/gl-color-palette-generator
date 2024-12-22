@@ -11,6 +11,7 @@ namespace GL_Color_Palette_Generator\Tests\Color_Management;
 use GL_Color_Palette_Generator\Color_Management\Color_Accessibility;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Color_Management\Color_Metrics;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use WP_Error;
 use WP_UnitTestCase;
 use Mockery;
@@ -45,11 +46,11 @@ class Test_Color_Accessibility extends WP_UnitTestCase {
      */
     public function setUp(): void {
         parent::setUp();
-        
+
         // Create mocks
         $this->color_util_mock = Mockery::mock('GL_Color_Palette_Generator\Color_Management\Color_Utility');
         $this->color_metrics_mock = Mockery::mock('GL_Color_Palette_Generator\Color_Management\Color_Metrics');
-        
+
         // Create instance
         $this->instance = new Color_Accessibility();
     }
@@ -91,11 +92,11 @@ class Test_Color_Accessibility extends WP_UnitTestCase {
             // AA level, normal text
             ['#000000', '#ffffff', 'AA', 'normal', true],
             ['#777777', '#ffffff', 'AA', 'normal', false],
-            
+
             // AA level, large text
             ['#666666', '#ffffff', 'AA', 'large', true],
             ['#888888', '#ffffff', 'AA', 'large', false],
-            
+
             // AAA level
             ['#000000', '#ffffff', 'AAA', 'normal', true],
             ['#555555', '#ffffff', 'AAA', 'normal', false]
@@ -140,20 +141,19 @@ class Test_Color_Accessibility extends WP_UnitTestCase {
     public function test_get_accessible_combinations() {
         $base_color = '#000000';
         $result = $this->instance->get_accessible_combinations($base_color);
-        
+
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
-        
+
         foreach ($result as $combination) {
             $this->assertArrayHasKey('color', $combination);
             $this->assertArrayHasKey('contrast_ratio', $combination);
             $this->assertMatchesRegularExpression('/^#[0-9a-f]{6}$/i', $combination['color']);
-            $this->assertGreaterThanOrEqual(4.5, $combination['contrast_ratio']);
+            $this->assertGreaterThanOrEqual(Color_Constants::WCAG_CONTRAST_MIN, $combination['contrast_ratio']);
         }
 
         // Test invalid color
-        $result = $this->instance->get_accessible_combinations('invalid');
-        $this->assertInstanceOf(WP_Error::class, $result);
+        $this->assertInstanceOf(WP_Error::class, $this->instance->get_accessible_combinations('invalid'));
     }
 
     /**
@@ -162,12 +162,12 @@ class Test_Color_Accessibility extends WP_UnitTestCase {
     public function test_check_colorblind_friendly() {
         $colors = ['#ff0000', '#00ff00', '#0000ff'];
         $result = $this->instance->check_colorblind_friendly($colors);
-        
+
         $this->assertIsArray($result);
         $this->assertArrayHasKey('protanopia', $result);
         $this->assertArrayHasKey('deuteranopia', $result);
         $this->assertArrayHasKey('tritanopia', $result);
-        
+
         foreach ($result as $type => $is_friendly) {
             $this->assertIsBool($is_friendly);
         }
@@ -188,7 +188,7 @@ class Test_Color_Accessibility extends WP_UnitTestCase {
             $result = $this->instance->simulate_colorblind_vision($colors, $type);
             $this->assertIsArray($result);
             $this->assertCount(count($colors), $result);
-            
+
             foreach ($result as $color) {
                 $this->assertMatchesRegularExpression('/^#[0-9a-f]{6}$/i', $color);
             }
@@ -227,20 +227,19 @@ class Test_Color_Accessibility extends WP_UnitTestCase {
         $color = '#ff0000';
         $background = '#ffffff';
         $result = $this->instance->suggest_accessible_alternatives($color, $background);
-        
+
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
-        
+
         foreach ($result as $alternative) {
             $this->assertArrayHasKey('color', $alternative);
             $this->assertArrayHasKey('contrast_ratio', $alternative);
             $this->assertMatchesRegularExpression('/^#[0-9a-f]{6}$/i', $alternative['color']);
-            $this->assertGreaterThanOrEqual(4.5, $alternative['contrast_ratio']);
+            $this->assertGreaterThanOrEqual(Color_Constants::WCAG_CONTRAST_MIN, $alternative['contrast_ratio']);
         }
 
         // Test invalid color
-        $result = $this->instance->suggest_accessible_alternatives('invalid', $background);
-        $this->assertInstanceOf(WP_Error::class, $result);
+        $this->assertInstanceOf(WP_Error::class, $this->instance->suggest_accessible_alternatives('invalid', $background));
     }
 
     /**
@@ -263,5 +262,61 @@ class Test_Color_Accessibility extends WP_UnitTestCase {
         // Test invalid color
         $result = $this->instance->are_colors_distinguishable(['invalid']);
         $this->assertInstanceOf(WP_Error::class, $result);
+    }
+
+    /**
+     * Test contrast ratios meet WCAG requirements
+     */
+    public function test_contrast_ratios(): void {
+        $color1 = '#ffffff';  // White
+        $color2 = '#000000';  // Black
+
+        $this->color_metrics_mock->shouldReceive('get_relative_luminance')
+            ->with($color1)
+            ->andReturn(1.0);
+        $this->color_metrics_mock->shouldReceive('get_relative_luminance')
+            ->with($color2)
+            ->andReturn(0.0);
+
+        $contrast = $this->instance->calculate_contrast_ratio($color1, $color2);
+
+        // Verify contrast is within recommended range
+        $this->assertGreaterThanOrEqual(Color_Constants::WCAG_CONTRAST_MIN, $contrast);
+        $this->assertLessThanOrEqual(Color_Constants::CONTRAST_MAX, $contrast);
+
+        // Test WCAG compliance
+        $this->assertTrue($this->instance->meets_wcag_aa($contrast));
+        $this->assertTrue($this->instance->meets_wcag_aaa($contrast));
+    }
+
+    /**
+     * Test shade contrast relationships
+     */
+    public function test_shade_contrast_relationships(): void {
+        $base_color = '#4a90e2';  // Base blue color
+        $light_shade = '#a8c9f2';  // Light variation
+        $dark_shade = '#1a4c8f';   // Dark variation
+
+        $this->color_metrics_mock->shouldReceive('get_relative_luminance')
+            ->with($base_color)
+            ->andReturn(0.5);
+        $this->color_metrics_mock->shouldReceive('get_relative_luminance')
+            ->with($light_shade)
+            ->andReturn(Color_Constants::LIGHT_MODE_THRESHOLD);
+        $this->color_metrics_mock->shouldReceive('get_relative_luminance')
+            ->with($dark_shade)
+            ->andReturn(Color_Constants::DARK_MODE_THRESHOLD);
+
+        // Test contrast between light and dark shades
+        $contrast = $this->instance->calculate_contrast_ratio($light_shade, $dark_shade);
+
+        // Verify contrast meets WCAG requirements
+        $this->assertGreaterThanOrEqual(Color_Constants::WCAG_CONTRAST_MIN, $contrast);
+
+        // Verify luminance relationships
+        $this->assertGreaterThan(
+            $this->color_metrics_mock->get_relative_luminance($dark_shade),
+            $this->color_metrics_mock->get_relative_luminance($light_shade)
+        );
     }
 }

@@ -50,25 +50,6 @@ class Color_Calculator implements Color_Calculator_Interface {
     private $settings;
 
     /**
-     * Color space conversion matrices
-     *
-     * @var array
-     * @since 1.0.0
-     */
-    private const COLOR_MATRICES = [
-        'rgb_to_xyz' => [
-            [0.4124564, 0.3575761, 0.1804375],
-            [0.2126729, 0.7151522, 0.0721750],
-            [0.0193339, 0.1191920, 0.9503041]
-        ],
-        'xyz_to_rgb' => [
-            [3.2404542, -1.5371385, -0.4985314],
-            [-0.9692660, 1.8760108, 0.0415560],
-            [0.0556434, -0.2040259, 1.0572252]
-        ]
-    ];
-
-    /**
      * Constructor
      *
      * @since 1.0.0
@@ -216,5 +197,65 @@ class Color_Calculator implements Color_Calculator_Interface {
         
         // Placeholder for actual implementation
         return 0.0;
+    }
+
+    /**
+     * Convert RGB to XYZ color space
+     *
+     * @param array $rgb RGB color values
+     * @return array XYZ color values
+     */
+    private function rgb_to_xyz(array $rgb): array {
+        $rgb = array_map(function($value) {
+            $value = $value / 255;
+            return $value <= 0.04045 
+                ? $value / 12.92 
+                : pow(($value + 0.055) / 1.055, 2.4);
+        }, $rgb);
+
+        $matrix = Color_Constants::COLOR_SPACE_CONVERSION['rgb_to_xyz'];
+        $xyz = [];
+
+        for ($i = 0; $i < 3; $i++) {
+            $xyz[$i] = $matrix[$i][0] * $rgb['r'] + 
+                      $matrix[$i][1] * $rgb['g'] + 
+                      $matrix[$i][2] * $rgb['b'];
+        }
+
+        return [
+            'x' => $xyz[0],
+            'y' => $xyz[1],
+            'z' => $xyz[2]
+        ];
+    }
+
+    /**
+     * Convert XYZ to RGB color space
+     *
+     * @param array $xyz XYZ color values
+     * @return array RGB color values
+     */
+    private function xyz_to_rgb(array $xyz): array {
+        $matrix = Color_Constants::COLOR_SPACE_CONVERSION['xyz_to_rgb'];
+        $rgb = [];
+
+        for ($i = 0; $i < 3; $i++) {
+            $rgb[$i] = $matrix[$i][0] * $xyz['x'] + 
+                      $matrix[$i][1] * $xyz['y'] + 
+                      $matrix[$i][2] * $xyz['z'];
+        }
+
+        $rgb = array_map(function($value) {
+            $value = $value <= 0.0031308 
+                ? 12.92 * $value 
+                : 1.055 * pow($value, 1/2.4) - 0.055;
+            return round(max(0, min(255, $value * 255)));
+        }, $rgb);
+
+        return [
+            'r' => $rgb[0],
+            'g' => $rgb[1],
+            'b' => $rgb[2]
+        ];
     }
 }

@@ -10,12 +10,13 @@
 namespace GL_Color_Palette_Generator\Tests\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Class Test_Color_Utility
  */
-class Test_Color_Utility extends TestCase {
+class Test_Color_Utility extends TestCase implements Color_Constants {
     /**
      * Color utility instance
      *
@@ -175,5 +176,227 @@ class Test_Color_Utility extends TestCase {
             $diff2,
             'Color difference should be the same regardless of order'
         );
+    }
+
+    /**
+     * Test WCAG 2.1 AA contrast ratio requirements
+     * Tests both passing and failing contrast combinations
+     */
+    public function test_wcag_aa_contrast_requirements() {
+        $test_cases = [
+            // Should pass AA requirements
+            [
+                'bg' => self::COLOR_WHITE,
+                'text' => self::COLOR_NEAR_BLACK,
+                'should_pass' => true,
+                'description' => 'White background with near-black text'
+            ],
+            [
+                'bg' => self::COLOR_OFF_WHITE,
+                'text' => self::COLOR_DARK_GRAY,
+                'should_pass' => true,
+                'description' => 'Off-white background with dark gray text'
+            ],
+            // Should fail AA requirements
+            [
+                'bg' => self::COLOR_WHITE,
+                'text' => self::COLOR_LIGHT_GRAY,
+                'should_pass' => false,
+                'description' => 'White background with light gray text'
+            ],
+            [
+                'bg' => self::COLOR_OFF_WHITE,
+                'text' => self::COLOR_MID_GRAY,
+                'should_pass' => false,
+                'description' => 'Off-white background with mid gray text'
+            ]
+        ];
+
+        foreach ($test_cases as $case) {
+            $contrast = $this->color_util->get_contrast_ratio($case['bg'], $case['text']);
+
+            if ($case['should_pass']) {
+                $this->assertGreaterThanOrEqual(
+                    self::WCAG_CONTRAST_MIN,
+                    $contrast,
+                    sprintf(
+                        '%s should meet WCAG AA contrast requirements. Got ratio: %.2f:1',
+                        $case['description'],
+                        $contrast
+                    )
+                );
+            } else {
+                $this->assertLessThan(
+                    self::WCAG_CONTRAST_MIN,
+                    $contrast,
+                    sprintf(
+                        '%s should not meet WCAG AA contrast requirements. Got ratio: %.2f:1',
+                        $case['description'],
+                        $contrast
+                    )
+                );
+            }
+        }
+    }
+
+    /**
+     * Test WCAG 2.1 AAA contrast ratio requirements
+     * Tests both passing and failing contrast combinations
+     */
+    public function test_wcag_aaa_contrast_requirements() {
+        $test_cases = [
+            // Should pass AAA requirements
+            [
+                'bg' => self::COLOR_WHITE,
+                'text' => self::COLOR_NEAR_BLACK,
+                'should_pass' => true,
+                'description' => 'White background with near-black text'
+            ],
+            [
+                'bg' => self::COLOR_NEAR_BLACK,
+                'text' => self::COLOR_WHITE,
+                'should_pass' => true,
+                'description' => 'Near-black background with white text'
+            ],
+            // Should fail AAA requirements but pass AA
+            [
+                'bg' => self::COLOR_OFF_WHITE,
+                'text' => self::COLOR_DARK_GRAY,
+                'should_pass' => false,
+                'description' => 'Off-white background with dark gray text'
+            ],
+            [
+                'bg' => self::COLOR_DARK_GRAY,
+                'text' => self::COLOR_OFF_WHITE,
+                'should_pass' => false,
+                'description' => 'Dark gray background with off-white text'
+            ]
+        ];
+
+        foreach ($test_cases as $case) {
+            $contrast = $this->color_util->get_contrast_ratio($case['bg'], $case['text']);
+
+            if ($case['should_pass']) {
+                $this->assertGreaterThanOrEqual(
+                    self::WCAG_CONTRAST_TARGET,
+                    $contrast,
+                    sprintf(
+                        '%s should meet WCAG AAA contrast targets. Got ratio: %.2f:1',
+                        $case['description'],
+                        $contrast
+                    )
+                );
+                $this->assertLessThanOrEqual(
+                    self::CONTRAST_MAX,
+                    $contrast,
+                    sprintf(
+                        '%s should not exceed maximum contrast for visual comfort. Got ratio: %.2f:1',
+                        $case['description'],
+                        $contrast
+                    )
+                );
+            } else {
+                $this->assertLessThan(
+                    self::WCAG_CONTRAST_TARGET,
+                    $contrast,
+                    sprintf(
+                        '%s should not meet WCAG AAA contrast targets. Got ratio: %.2f:1',
+                        $case['description'],
+                        $contrast
+                    )
+                );
+                $this->assertGreaterThanOrEqual(
+                    self::WCAG_CONTRAST_MIN,
+                    $contrast,
+                    sprintf(
+                        '%s should still meet WCAG AA minimum requirements. Got ratio: %.2f:1',
+                        $case['description'],
+                        $contrast
+                    )
+                );
+            }
+        }
+    }
+
+    /**
+     * Test color scheme validation using COLOR_ROLES
+     */
+    public function test_color_scheme_validation_with_roles() {
+        $valid_scheme = [
+            self::COLOR_ROLES['primary'] => '#1E40AF',
+            self::COLOR_ROLES['secondary'] => '#15803D',
+            self::COLOR_ROLES['tertiary'] => '#B91C1C',
+            self::COLOR_ROLES['accent'] => '#9333EA',
+            self::COLOR_ROLES['base'] => '#FFFFFF',
+            self::COLOR_ROLES['contrast'] => '#000000',
+        ];
+
+        $this->assertTrue(
+            $this->color_util->are_colors_distinct(array_values($valid_scheme)),
+            'Colors in valid scheme should be distinct'
+        );
+
+        $score = $this->color_util->get_distinctiveness_score(array_values($valid_scheme));
+        $this->assertGreaterThan(
+            50,
+            $score,
+            'Valid color scheme should have high distinctiveness score'
+        );
+    }
+
+    /**
+     * Test color accessibility for edge cases
+     */
+    public function test_color_accessibility_edge_cases() {
+        // Test nearly identical colors
+        $color1 = '#000000';  // Black
+        $color2 = '#010101';  // Nearly black
+
+        $this->assertFalse(
+            $this->color_util->are_colors_distinct([$color1, $color2]),
+            'Nearly identical colors should not be considered distinct'
+        );
+
+        // Test colors with same luminance but different hues
+        $color3 = '#7F7F00';  // Olive
+        $color4 = '#007F7F';  // Teal
+
+        $this->assertTrue(
+            $this->color_util->are_colors_distinct([$color3, $color4]),
+            'Colors with same luminance but different hues should be distinct'
+        );
+
+        // Test colors with minimal saturation difference
+        $color5 = '#7F7F7F';  // Gray
+        $color6 = '#808080';  // Slightly different gray
+
+        $this->assertFalse(
+            $this->color_util->are_colors_distinct([$color5, $color6]),
+            'Colors with minimal saturation difference should not be distinct'
+        );
+    }
+
+    /**
+     * Test relative luminance calculation
+     */
+    public function test_relative_luminance() {
+        $colors = [
+            '#FFFFFF' => 1.0,      // White should have maximum luminance
+            '#000000' => 0.0,      // Black should have minimum luminance
+            '#808080' => 0.216,    // Mid-gray should have mid-range luminance (approximately)
+            '#FF0000' => 0.2126,   // Red should match sRGB coefficient
+            '#00FF00' => 0.7152,   // Green should match sRGB coefficient
+            '#0000FF' => 0.0722,   // Blue should match sRGB coefficient
+        ];
+
+        foreach ($colors as $color => $expected) {
+            $luminance = $this->color_util->get_relative_luminance($color);
+            $this->assertEqualsWithDelta(
+                $expected,
+                $luminance,
+                0.01,
+                sprintf('Color %s should have luminance close to %f', $color, $expected)
+            );
+        }
     }
 }

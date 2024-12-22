@@ -14,7 +14,7 @@ use GLColorPalette\ColorPalette;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorPaletteOptimizerInterface {
+interface ColorPaletteOptimizerInterface extends Color_Constants {
     /**
      * Optimizes a color palette.
      *
@@ -31,7 +31,7 @@ interface ColorPaletteOptimizerInterface {
      * @param string       $level   WCAG level ('A', 'AA', or 'AAA').
      * @return ColorPalette Optimized palette.
      */
-    public function optimizeForAccessibility(ColorPalette $palette, string $level = 'AA'): ColorPalette;
+    public function optimizeForAccessibility(ColorPalette $palette, string $level = 'AAA'): ColorPalette;
 
     /**
      * Optimizes for harmony.
@@ -46,10 +46,10 @@ interface ColorPaletteOptimizerInterface {
      * Optimizes for contrast.
      *
      * @param ColorPalette $palette Palette to optimize.
-     * @param float        $target  Target contrast ratio.
+     * @param float        $target  Target contrast ratio (defaults to WCAG AAA).
      * @return ColorPalette Optimized palette.
      */
-    public function optimizeForContrast(ColorPalette $palette, float $target = 4.5): ColorPalette;
+    public function optimizeForContrast(ColorPalette $palette, float $target = self::WCAG_CONTRAST_MIN): ColorPalette;
 
     /**
      * Gets available optimization strategies.

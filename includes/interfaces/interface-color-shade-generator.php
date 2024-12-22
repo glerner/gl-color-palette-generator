@@ -16,41 +16,40 @@ namespace GL_Color_Palette_Generator\Interfaces;
  */
 interface Color_Shade_Generator_Interface {
     /**
-     * Generate accessible tints and shades
+     * Generate tints and shades that meet accessibility requirements
      *
      * @param string $color Base color in hex format
-     * @param array  $options {
-     *     Optional. Generation options.
-     *     @type bool   $include_base     Include base color if accessible.
-     *     @type string $contrast_level   'AA' or 'AAA'.
-     *     @type bool   $small_text       Generate for small text if true.
-     *     @type array  $custom_steps     Custom brightness steps.
-     * }
-     * @return array {
-     *     Color variations.
-     *     @type string $original Original color (for reference).
-     *     @type array  $variations {
-     *         Accessible variations.
-     *         @type string $lighter Lighter tint.
-     *         @type string $light   Light tint.
-     *         @type string $base    Base color (if accessible).
-     *         @type string $dark    Dark shade.
-     *         @type string $darker  Darker shade.
-     *     }
-     * }
+     * @param array  $options Optional settings for generation
+     * @return array Array of generated tints and shades
      */
     public function generate_tints_and_shades(string $color, array $options = []): array;
 
     /**
-     * Check if a color meets contrast requirements
+     * Generate a contrast color that meets WCAG requirements
      *
-     * @param string $color Color to check
-     * @param array  $options {
-     *     Optional. Check options.
-     *     @type string $contrast_level 'AA' or 'AAA'.
-     *     @type bool   $small_text     Check for small text if true.
-     * }
-     * @return bool True if color meets requirements
+     * @param string $base_color Base color in hex format
+     * @param bool   $is_dark_mode Whether in dark mode
+     * @param array  $options Optional settings
+     * @return string Contrast color in hex format
      */
-    public function meets_contrast_requirements(string $color, array $options = []): bool;
+    public function generate_contrast_color(string $base_color, bool $is_dark_mode, array $options = []): string;
+
+    /**
+     * Analyze color accessibility and characteristics
+     *
+     * @param string $color Color in hex format
+     * @param array  $options Optional analysis settings
+     * @return array Analysis results
+     */
+    public function analyze_color(string $color, array $options = []): array;
+
+    /**
+     * Check if colors meet contrast requirements
+     *
+     * @param string $color1 First color in hex format
+     * @param string $color2 Second color in hex format
+     * @param bool   $is_decorative Whether the colors are for decorative purposes
+     * @return array Contrast analysis results
+     */
+    public function check_contrast(string $color1, string $color2, bool $is_decorative = false): array;
 }

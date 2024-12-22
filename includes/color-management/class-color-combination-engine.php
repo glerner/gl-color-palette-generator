@@ -1,5 +1,11 @@
+<?php
 /**
  * Color Combination Engine Class
+ * 
+ * Generates harmonious color combinations by applying color theory rules.
+ * Takes a base color and creates complementary, analogous, or triadic color schemes
+ * while ensuring proper contrast and accessibility standards are met.
+ * Uses predefined harmony rules from Color_Constants to maintain consistency.
  *
  * @package GL_Color_Palette_Generator
  * @author  George Lerner
@@ -35,130 +41,41 @@ class Color_Combination_Engine {
     protected $context_evaluator;
 
     /**
-     * Advanced combination configurations
+     * Get color combination rules from constants
      *
-     * @var array
+     * @return array Color combination rules
      */
-    private const COMBINATION_RULES = [
-        'harmony_algorithms' => [
-            'advanced_complementary' => [
-                'split_ratios' => [
-                    'primary' => [
-                        'angle_range' => [165, 195],
-                        'intensity' => [
-                            'dominant' => ['saturation' => '80-100%', 'brightness' => '60-80%'],
-                            'complement' => ['saturation' => '70-90%', 'brightness' => '50-70%']
-                        ],
-                        'balance_weights' => [
-                            'primary_color' => 0.6,
-                            'split_colors' => [0.2, 0.2]
-                        ]
-                    ],
-                    'secondary' => [
-                        'angle_offset' => 30,
-                        'intensity_reduction' => '15%'
-                    ]
-                ],
-                'context_adjustments' => [
-                    'digital' => ['saturation' => '+5%', 'contrast' => '+10%'],
-                    'print' => ['saturation' => '+10%', 'brightness' => '-5%']
-                ]
-            ],
+    private function get_combination_rules(): array {
+        return [
+            'harmony_patterns' => Color_Constants::COLOR_HARMONY_RULES,
+            'color_roles' => Color_Constants::COLOR_ROLES,
+            'relationships' => Color_Constants::COLOR_ROLE_RELATIONSHIPS
+        ];
+    }
 
-            'dynamic_triadic' => [
-                'angle_distribution' => [
-                    'primary' => 0,
-                    'secondary' => [120, 240],
-                    'variations' => [
-                        'compressed' => ['angles' => [0, 110, 250], 'weight' => 0.8],
-                        'expanded' => ['angles' => [0, 130, 230], 'weight' => 1.2]
-                    ]
-                ],
-                'intensity_patterns' => [
-                    'balanced' => [
-                        'saturation' => ['equal' => true, 'range' => '60-80%'],
-                        'brightness' => ['equal' => true, 'range' => '50-70%']
-                    ],
-                    'dominant' => [
-                        'primary' => ['saturation' => '80-100%', 'brightness' => '60-80%'],
-                        'secondary' => ['saturation' => '50-70%', 'brightness' => '40-60%']
-                    ]
-                ]
-            ]
-        ],
+    /**
+     * Apply color combination rules
+     *
+     * @param array $colors Input colors
+     * @param string $pattern Harmony pattern to apply
+     * @return array Modified colors
+     */
+    public function apply_combination_rules(array $colors, string $pattern): array {
+        $rules = $this->get_combination_rules();
+        $harmony_rules = $rules['harmony_patterns'][$pattern] ?? [];
+        
+        if (empty($harmony_rules)) {
+            return $colors;
+        }
 
-        'adaptive_algorithms' => [
-            'context_based' => [
-                'mood_adaptation' => [
-                    'energetic' => [
-                        'saturation_boost' => '15-25%',
-                        'contrast_enhancement' => '20-30%',
-                        'brightness_range' => ['min' => 60, 'max' => 90]
-                    ],
-                    'calming' => [
-                        'saturation_reduction' => '10-20%',
-                        'contrast_softening' => '15-25%',
-                        'brightness_range' => ['min' => 40, 'max' => 70]
-                    ]
-                ],
-                'purpose_optimization' => [
-                    'readability' => [
-                        'contrast_minimum' => 4.5,
-                        'brightness_differential' => '50%',
-                        'saturation_control' => 'moderate'
-                    ],
-                    'visual_impact' => [
-                        'contrast_target' => 7.0,
-                        'saturation_boost' => 'high',
-                        'brightness_peaks' => true
-                    ]
-                ]
-            ],
+        foreach ($colors as $role => &$color) {
+            if (isset($harmony_rules[$role])) {
+                $color = $this->harmony_calculator->apply_harmony_rule($color, $harmony_rules[$role]);
+            }
+        }
 
-            'environmental_adaptation' => [
-                'lighting_conditions' => [
-                    'bright' => [
-                        'saturation_adjustment' => '-10%',
-                        'contrast_boost' => '+15%',
-                        'brightness_control' => 'reduced'
-                    ],
-                    'dim' => [
-                        'saturation_adjustment' => '+15%',
-                        'contrast_reduction' => '-10%',
-                        'brightness_boost' => 'increased'
-                    ]
-                ],
-                'viewing_distance' => [
-                    'close' => ['contrast_reduction' => '5%', 'detail_preservation' => 'high'],
-                    'far' => ['contrast_boost' => '15%', 'simplification' => 'moderate']
-                ]
-            ]
-        ],
-
-        'combination_patterns' => [
-            'rhythm_based' => [
-                'progressive' => [
-                    'hue_shift' => ['step' => 15, 'direction' => 'clockwise'],
-                    'saturation_progression' => ['start' => 100, 'step' => -10],
-                    'brightness_pattern' => ['wave' => true, 'amplitude' => 20]
-                ],
-                'alternating' => [
-                    'primary_secondary' => ['ratio' => '60:40', 'contrast' => 'high'],
-                    'warm_cool' => ['balance' => 'dynamic', 'transition' => 'smooth']
-                ]
-            ],
-            'spatial_distribution' => [
-                'focal_point' => [
-                    'primary' => ['area' => '30%', 'intensity' => 'high'],
-                    'supporting' => ['distribution' => 'radial', 'fade' => 'gradual']
-                ],
-                'balanced_field' => [
-                    'weight_distribution' => ['uniform' => true, 'variation' => 'subtle'],
-                    'color_placement' => ['structured' => true, 'rhythm' => 'regular']
-                ]
-            ]
-        ]
-    ];
+        return $colors;
+    }
 
     /**
      * Generate optimized color combination

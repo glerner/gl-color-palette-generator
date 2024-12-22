@@ -24,6 +24,17 @@ export interface ParsedColor {
 }
 
 export class ColorUtils {
+    // WCAG Contrast Requirements
+    static readonly CONTRAST_THRESHOLD_MIN = 4.5;    // WCAG AA minimum for normal text
+    static readonly CONTRAST_THRESHOLD_LARGE = 3.0;  // WCAG AA minimum for large text
+    static readonly CONTRAST_THRESHOLD_AAA = 7.0;    // WCAG AAA for normal text
+    static readonly CONTRAST_THRESHOLD_AAA_LARGE = 4.5; // WCAG AAA for large text
+
+    // Standard Colors
+    static readonly COLOR_WHITE = '#FFFFFF';      // Pure white
+    static readonly COLOR_OFF_WHITE = '#F8F9FA';  // Light mode base
+    static readonly COLOR_NEAR_BLACK = '#1A1A1A'; // Dark mode base
+
     /**
      * Convert hex color to RGB
      * @param hex - The hexadecimal color string (e.g., "#FF0000" or "#F00")
@@ -204,15 +215,22 @@ export class ColorUtils {
      * @param color1 - First color in hex format
      * @param color2 - Second color in hex format
      * @param level - WCAG compliance level ('AA' or 'AAA')
+     * @param isLargeText - Whether the text is large (≥18pt or 14pt bold)
      * @returns boolean indicating if the combination is accessible
      */
-    static isColorAccessible(color1: string, color2: string, level: 'AA' | 'AAA' = 'AA'): boolean {
+    static isColorAccessible(
+        color1: string, 
+        color2: string, 
+        level: 'AA' | 'AAA' = 'AA',
+        isLargeText: boolean = false
+    ): boolean {
         const contrastRatio = this.getContrastRatio(color1, color2);
-        // Using exact WCAG 2.0 thresholds
-        // For normal text:
-        // - WCAG AA requires 4.5:1
-        // - WCAG AAA requires 7.0:1
-        const threshold = level === 'AAA' ? 7.0 : 4.5;
+        
+        // Select appropriate threshold based on level and text size
+        const threshold = level === 'AAA'
+            ? (isLargeText ? this.CONTRAST_THRESHOLD_AAA_LARGE : this.CONTRAST_THRESHOLD_AAA)
+            : (isLargeText ? this.CONTRAST_THRESHOLD_LARGE : this.CONTRAST_THRESHOLD_MIN);
+        
         return contrastRatio >= threshold;
     }
 

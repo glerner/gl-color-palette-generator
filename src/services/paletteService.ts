@@ -51,6 +51,8 @@ interface GenerateOptions {
         level: 'AA' | 'AAA';
         /** Whether to ensure text readability */
         ensureReadability?: boolean;
+        /** Whether the text is large (≥18pt or 14pt bold) */
+        isLargeText?: boolean;
     };
     /** Cultural context for color naming */
     culturalContext?: {
@@ -167,7 +169,7 @@ export class PaletteService {
 
             // Validate accessibility if required
             if (options.accessibility?.ensureReadability) {
-                this.validateAccessibility(response.colors, options.accessibility.level);
+                this.validateAccessibility(response.colors, options.accessibility.level, options.accessibility.isLargeText);
             }
         }
 
@@ -215,7 +217,7 @@ export class PaletteService {
 
             // Validate accessibility if required
             if (options.accessibility?.ensureReadability) {
-                this.validateAccessibility(response.colors, options.accessibility.level);
+                this.validateAccessibility(response.colors, options.accessibility.level, options.accessibility.isLargeText);
             }
         }
 
@@ -227,9 +229,17 @@ export class PaletteService {
      * @private
      * @param {Color[]} colors - Colors to validate
      * @param {('AA'|'AAA')} level - WCAG level
+     * @param {boolean} isLargeText - Whether the text is large (≥18pt or 14pt bold)
      */
-    private validateAccessibility(colors: Color[], level: 'AA' | 'AAA' = 'AA'): void {
-        const requiredRatio = level === 'AAA' ? 7 : 4.5;
+    private validateAccessibility(
+        colors: Color[], 
+        level: 'AA' | 'AAA' = 'AA',
+        isLargeText: boolean = false
+    ): void {
+        const requiredRatio = isLargeText
+            ? (level === 'AAA' ? ColorUtils.CONTRAST_THRESHOLD_AAA_LARGE : ColorUtils.CONTRAST_THRESHOLD_LARGE)
+            : (level === 'AAA' ? ColorUtils.CONTRAST_THRESHOLD_AAA : ColorUtils.CONTRAST_THRESHOLD_MIN);
+
         let validationErrors: string[] = [];
 
         for (let i = 0; i < colors.length; i++) {
