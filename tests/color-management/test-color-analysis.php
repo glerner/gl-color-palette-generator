@@ -1,6 +1,7 @@
 <?php
 namespace GL_Color_Palette_Generator\Tests;
 
+use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Color_Management\Color_Analysis;
 
 class Test_Color_Analysis extends TestCase {
@@ -46,13 +47,13 @@ class Test_Color_Analysis extends TestCase {
 
     public function test_analyze_color_harmony() {
         $palette = ['#2C3E50', '#E74C3C', '#ECF0F1', '#3498DB', '#2ECC71'];
-        
+
         $harmony = $this->analyzer->analyze_harmony($palette);
-        
+
         $this->assertArrayHasKey('contrast_scores', $harmony);
         $this->assertArrayHasKey('harmony_score', $harmony);
         $this->assertArrayHasKey('accessibility_score', $harmony);
-        
+
         // Harmony score should be between 0 and 1
         $this->assertGreaterThanOrEqual(0, $harmony['harmony_score']);
         $this->assertLessThanOrEqual(1, $harmony['harmony_score']);
@@ -60,14 +61,14 @@ class Test_Color_Analysis extends TestCase {
 
     public function test_analyze_accessibility() {
         $palette = ['#2C3E50', '#ECF0F1'];
-        
+
         $accessibility = $this->analyzer->analyze_accessibility($palette[0], $palette[1]);
-        
+
         $this->assertArrayHasKey('wcag_aa_normal', $accessibility);
         $this->assertArrayHasKey('wcag_aa_large', $accessibility);
         $this->assertArrayHasKey('wcag_aaa_normal', $accessibility);
         $this->assertArrayHasKey('wcag_aaa_large', $accessibility);
-        
+
         // Test against WCAG 2.1 criteria
         $this->assertTrue($accessibility['wcag_aa_normal']);  // Should pass AA for normal text
         $this->assertTrue($accessibility['wcag_aa_large']);   // Should pass AA for large text

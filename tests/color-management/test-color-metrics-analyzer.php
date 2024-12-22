@@ -3,9 +3,9 @@
 namespace GL_Color_Palette_Generator\Tests;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Metrics_Analyzer;
-use WP_UnitTestCase;
+use PHPUnit\Framework\TestCase;
 
-class Test_Color_Metrics_Analyzer extends WP_UnitTestCase {
+class Test_Color_Metrics_Analyzer extends TestCase {
     protected $analyzer;
 
     public function setUp(): void {

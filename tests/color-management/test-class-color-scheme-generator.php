@@ -8,17 +8,17 @@
 
 namespace GL_Color_Palette_Generator\Tests\Color_Management;
 
+use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Color_Management\Color_Scheme_Generator;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
-use GL_Color_Palette_Generator\Color_Management\Color_Constants;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use WP_Error;
-use WP_UnitTestCase;
 use Mockery;
 
 /**
  * Class Test_Color_Scheme_Generator
  */
-class Test_Color_Scheme_Generator extends WP_UnitTestCase implements Color_Constants {
+class Test_Color_Scheme_Generator extends TestCase implements Color_Constants {
     /**
      * Test instance
      *
@@ -48,12 +48,12 @@ class Test_Color_Scheme_Generator extends WP_UnitTestCase implements Color_Const
     public function test_generate_scheme() {
         $base_color = '#ff0000';
         $expected_roles = array_keys(Color_Constants::COLOR_ROLES);
-        
+
         // Test default options
         $result = $this->instance->generate_scheme($base_color);
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
-        
+
         foreach ($expected_roles as $role) {
             $this->assertArrayHasKey($role, $result);
             $this->assertMatchesRegularExpression('/^#[0-9a-f]{6}$/i', $result[$role]);
@@ -63,11 +63,11 @@ class Test_Color_Scheme_Generator extends WP_UnitTestCase implements Color_Const
         $result = $this->instance->generate_scheme($base_color, ['type' => 'complementary', 'count' => 4]);
         $this->assertIsArray($result);
         $this->assertCount(4, $result);
-        
+
         // Test invalid color
         $result = $this->instance->generate_scheme('invalid');
         $this->assertInstanceOf(WP_Error::class, $result);
-        
+
         // Test invalid scheme type
         $result = $this->instance->generate_scheme($base_color, ['type' => 'invalid']);
         $this->assertInstanceOf(WP_Error::class, $result);
@@ -78,17 +78,17 @@ class Test_Color_Scheme_Generator extends WP_UnitTestCase implements Color_Const
      */
     public function test_generate_monochromatic() {
         $base_color = '#ff0000';
-        
+
         // Test default count
         $result = $this->instance->generate_monochromatic($base_color);
         $this->assertIsArray($result);
         $this->assertCount(5, $result);
-        
+
         // Test custom count
         $result = $this->instance->generate_monochromatic($base_color, 3);
         $this->assertIsArray($result);
         $this->assertCount(3, $result);
-        
+
         // Test invalid color
         $result = $this->instance->generate_monochromatic('invalid');
         $this->assertInstanceOf(WP_Error::class, $result);
@@ -99,17 +99,17 @@ class Test_Color_Scheme_Generator extends WP_UnitTestCase implements Color_Const
      */
     public function test_generate_analogous() {
         $base_color = '#ff0000';
-        
+
         // Test default count
         $result = $this->instance->generate_analogous($base_color);
         $this->assertIsArray($result);
         $this->assertCount(5, $result);
-        
+
         // Test custom count
         $result = $this->instance->generate_analogous($base_color, 3);
         $this->assertIsArray($result);
         $this->assertCount(3, $result);
-        
+
         // Test invalid color
         $result = $this->instance->generate_analogous('invalid');
         $this->assertInstanceOf(WP_Error::class, $result);
@@ -120,17 +120,17 @@ class Test_Color_Scheme_Generator extends WP_UnitTestCase implements Color_Const
      */
     public function test_generate_complementary() {
         $base_color = '#ff0000';
-        
+
         // Test default count
         $result = $this->instance->generate_complementary($base_color);
         $this->assertIsArray($result);
         $this->assertCount(4, $result);
-        
+
         // Test custom count
         $result = $this->instance->generate_complementary($base_color, 2);
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
-        
+
         // Test invalid color
         $result = $this->instance->generate_complementary('invalid');
         $this->assertInstanceOf(WP_Error::class, $result);
@@ -141,17 +141,17 @@ class Test_Color_Scheme_Generator extends WP_UnitTestCase implements Color_Const
      */
     public function test_generate_split_complementary() {
         $base_color = '#ff0000';
-        
+
         // Test default count
         $result = $this->instance->generate_split_complementary($base_color);
         $this->assertIsArray($result);
         $this->assertCount(3, $result);
-        
+
         // Test custom count
         $result = $this->instance->generate_split_complementary($base_color, 2);
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
-        
+
         // Test invalid color
         $result = $this->instance->generate_split_complementary('invalid');
         $this->assertInstanceOf(WP_Error::class, $result);
@@ -162,17 +162,17 @@ class Test_Color_Scheme_Generator extends WP_UnitTestCase implements Color_Const
      */
     public function test_generate_triadic() {
         $base_color = '#ff0000';
-        
+
         // Test default count
         $result = $this->instance->generate_triadic($base_color);
         $this->assertIsArray($result);
         $this->assertCount(3, $result);
-        
+
         // Test custom count
         $result = $this->instance->generate_triadic($base_color, 2);
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
-        
+
         // Test invalid color
         $result = $this->instance->generate_triadic('invalid');
         $this->assertInstanceOf(WP_Error::class, $result);
@@ -183,17 +183,17 @@ class Test_Color_Scheme_Generator extends WP_UnitTestCase implements Color_Const
      */
     public function test_generate_tetradic() {
         $base_color = '#ff0000';
-        
+
         // Test default count
         $result = $this->instance->generate_tetradic($base_color);
         $this->assertIsArray($result);
         $this->assertCount(4, $result);
-        
+
         // Test custom count
         $result = $this->instance->generate_tetradic($base_color, 2);
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
-        
+
         // Test invalid color
         $result = $this->instance->generate_tetradic('invalid');
         $this->assertInstanceOf(WP_Error::class, $result);
@@ -209,16 +209,16 @@ class Test_Color_Scheme_Generator extends WP_UnitTestCase implements Color_Const
             ['type' => 'saturation_shift', 'value' => -20],
             ['type' => 'value_shift', 'value' => 10],
         ];
-        
+
         // Test valid rules
         $result = $this->instance->generate_custom_scheme($base_color, $rules);
         $this->assertIsArray($result);
         $this->assertCount(4, $result); // Base color + 3 rules
-        
+
         // Test empty rules
         $result = $this->instance->generate_custom_scheme($base_color, []);
         $this->assertInstanceOf(WP_Error::class, $result);
-        
+
         // Test invalid color
         $result = $this->instance->generate_custom_scheme('invalid', $rules);
         $this->assertInstanceOf(WP_Error::class, $result);

@@ -3,12 +3,12 @@ namespace GL_Color_Palette_Generator\Tests\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Validator;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
-use WP_UnitTestCase;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test Color_Validator class
  */
-class Test_Color_Validator extends WP_UnitTestCase {
+class Test_Color_Validator extends TestCase {
     /** @var Color_Validator */
     private $instance;
 

@@ -8,17 +8,17 @@
 
 namespace GL_Color_Palette_Generator\Tests\Color_Management;
 
+use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Color_Management\Color_Metrics;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
-use GL_Color_Palette_Generator\Color_Management\Color_Constants;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use WP_Error;
-use WP_UnitTestCase;
 use Mockery;
 
 /**
  * Class Test_Color_Metrics
  */
-class Test_Color_Metrics extends WP_UnitTestCase implements Color_Constants {
+class Test_Color_Metrics extends TestCase implements Color_Constants {
     /**
      * Test instance
      *
@@ -38,10 +38,10 @@ class Test_Color_Metrics extends WP_UnitTestCase implements Color_Constants {
      */
     public function setUp(): void {
         parent::setUp();
-        
+
         // Create mocks
         $this->color_util_mock = Mockery::mock('GL_Color_Palette_Generator\Color_Management\Color_Utility');
-        
+
         // Create instance
         $this->instance = new Color_Metrics();
     }
@@ -60,7 +60,7 @@ class Test_Color_Metrics extends WP_UnitTestCase implements Color_Constants {
     public function test_calculate_color_difference() {
         $color1 = '#ff0000';
         $color2 = '#00ff00';
-        
+
         $result = $this->instance->calculate_color_difference($color1, $color2);
         $this->assertIsFloat($result);
         $this->assertGreaterThan(0, $result);
@@ -126,7 +126,7 @@ class Test_Color_Metrics extends WP_UnitTestCase implements Color_Constants {
         foreach ($colors as $color => $type) {
             $result = $this->instance->calculate_temperature($color);
             $this->assertIsFloat($result);
-            
+
             if ($type === 'warm') {
                 $this->assertGreaterThan(5000, $result);
             } else {
@@ -172,7 +172,7 @@ class Test_Color_Metrics extends WP_UnitTestCase implements Color_Constants {
             $this->assertIsFloat($result);
             $this->assertGreaterThanOrEqual(0, $result);
             $this->assertLessThanOrEqual(1, $result);
-            
+
             if ($type === 'complex') {
                 $this->assertGreaterThan(0.5, $result);
             } else {
@@ -190,7 +190,7 @@ class Test_Color_Metrics extends WP_UnitTestCase implements Color_Constants {
      */
     public function test_calculate_dominance() {
         $palette = ['#ff0000', '#00ff00', '#0000ff'];
-        
+
         foreach ($palette as $color) {
             $result = $this->instance->calculate_dominance($color, $palette);
             $this->assertIsFloat($result);
@@ -208,7 +208,7 @@ class Test_Color_Metrics extends WP_UnitTestCase implements Color_Constants {
      */
     public function test_calculate_balance() {
         $colors = ['#ff0000', '#00ff00', '#0000ff'];
-        
+
         $result = $this->instance->calculate_balance($colors);
         $this->assertIsArray($result);
         $this->assertArrayHasKey('rgb_balance', $result);
@@ -243,7 +243,7 @@ class Test_Color_Metrics extends WP_UnitTestCase implements Color_Constants {
             $this->assertIsFloat($result);
             $this->assertGreaterThanOrEqual(0, $result);
             $this->assertLessThanOrEqual(1, $result);
-            
+
             if ($type === 'heavy') {
                 $this->assertGreaterThan(0.5, $result);
             } else {
@@ -270,7 +270,7 @@ class Test_Color_Metrics extends WP_UnitTestCase implements Color_Constants {
             $this->assertIsFloat($result);
             $this->assertGreaterThanOrEqual(0, $result);
             $this->assertLessThanOrEqual(1, $result);
-            
+
             if ($type === 'high') {
                 $this->assertGreaterThan(0.5, $result);
             } else {
