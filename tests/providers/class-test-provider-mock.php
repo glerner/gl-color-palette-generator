@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace GL_Color_Palette_Generator\Tests\Providers;
+namespace GL_Color_Palette_Generator\Tests;
 
 use PHPUnit\Framework\TestCase;
 use WP_Mock;
