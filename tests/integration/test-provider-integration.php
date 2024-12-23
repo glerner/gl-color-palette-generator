@@ -9,7 +9,7 @@
 
 namespace GL_Color_Palette_Generator\Tests\Integration;
 
-use PHPUnit\Framework\TestCase;
+use WP_UnitTestCase;
 use GL_Color_Palette_Generator\Providers\Provider;
 use WP_Error;
 
@@ -22,7 +22,7 @@ use WP_Error;
  *
  * @since 1.0.0
  */
-abstract class Test_Provider_Integration extends TestCase {
+abstract class Test_Provider_Integration extends WP_UnitTestCase {
     /**
      * The provider instance being tested
      *

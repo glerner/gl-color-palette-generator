@@ -17,11 +17,11 @@ if (!$_tests_dir) {
 // Give access to tests_add_filter() function
 require_once $_tests_dir . '/includes/functions.php';
 
-// Start up the WP testing environment
-require_once $_tests_dir . '/includes/bootstrap.php';
-
 // Load our plugin's autoloader
 require_once dirname(__DIR__) . '/includes/system/class-autoloader.php';
+
+// Start up the WP testing environment
+require_once $_tests_dir . '/includes/bootstrap.php';
 
 // Load test base classes
 require_once __DIR__ . '/test-case.php';

@@ -2,12 +2,12 @@
 
 namespace GL_Color_Palette_Generator\Tests\Integration;
 
-use GL_Color_Palette_Generator\Tests\Test_Case;
+use WP_UnitTestCase;
 
 /**
  * Basic integration test to verify plugin setup
  */
-class Test_Plugin extends Test_Case {
+class Test_Plugin extends WP_UnitTestCase {
     /**
      * Test that the plugin is loaded and functions exist
      */

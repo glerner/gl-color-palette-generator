@@ -1,13 +1,13 @@
 <?php
 namespace GL_Color_Palette_Generator\Tests\Integration;
 
-use GL_Color_Palette_Generator\Tests\Test_Case;
+use WP_UnitTestCase;
 use GL_Color_Palette_Generator\Core\Plugin;
 
 /**
  * Integration tests for WordPress-specific functionality
  */
-class Test_WordPress_Integration extends Test_Case {
+class Test_WordPress_Integration extends WP_UnitTestCase {
     private $plugin;
 
     public function set_up() {

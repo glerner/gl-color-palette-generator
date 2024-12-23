@@ -4,12 +4,12 @@ namespace GL_Color_Palette_Generator\Tests\Integration;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Metrics_Analyzer;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
-use PHPUnit\Framework\TestCase;
+use WP_UnitTestCase;
 
 /**
  * Integration tests for Color Metrics Analyzer
  */
-class Test_Color_Metrics_Analyzer_Integration extends TestCase {
+class Test_Color_Metrics_Analyzer_Integration extends WP_UnitTestCase {
     /**
      * @var Color_Metrics_Analyzer
      */
