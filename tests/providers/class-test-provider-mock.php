@@ -15,7 +15,7 @@ class Test_Provider_Mock extends TestCase {
     protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
-        
+
         if (!defined('GL_CPG_VERSION')) {
             define('GL_CPG_VERSION', '1.0.0');
         }

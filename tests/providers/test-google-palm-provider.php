@@ -9,8 +9,9 @@
 
 namespace GL_Color_Palette_Generator\Tests;
 
-use GL_Color_Palette_Generator\Providers\Provider;
+use GL_Color_Palette_Generator\Tests\Providers\Test_Provider_Mock;
 use GL_Color_Palette_Generator\Providers\Google_PaLM_Provider;
+use GL_Color_Palette_Generator\Providers\Provider;
 use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
 use WP_Mock;
 

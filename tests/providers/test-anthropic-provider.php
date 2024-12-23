@@ -9,9 +9,10 @@
 
 namespace GL_Color_Palette_Generator\Tests\Providers;
 
-use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
+use GL_Color_Palette_Generator\Tests\Providers\Test_Provider_Mock;
 use GL_Color_Palette_Generator\Providers\Anthropic_Provider;
 use GL_Color_Palette_Generator\Providers\Provider;
+use GL_Color_Palette_Generator\Types\Provider_Config;
 use WP_Mock;
 
 /**

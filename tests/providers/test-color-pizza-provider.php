@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace GL_Color_Palette_Generator\Tests\Providers;
 
-use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
+use GL_Color_Palette_Generator\Tests\Providers\Test_Provider_Mock;
 use GL_Color_Palette_Generator\Providers\Color_Pizza_Provider;
 use GL_Color_Palette_Generator\Providers\Provider;
 use GL_Color_Palette_Generator\Types\Provider_Config;
