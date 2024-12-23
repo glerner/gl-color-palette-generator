@@ -9,7 +9,7 @@
 namespace GL_Color_Palette_Generator\Tests;
 
 use GL_Color_Palette_Generator\Ajax_Handler;
-use Test_Case_Integration;
+use GL_Color_Palette_Generator\Tests\Test_Case_Integration;
 use Brain\Monkey\Functions;
 
 /**

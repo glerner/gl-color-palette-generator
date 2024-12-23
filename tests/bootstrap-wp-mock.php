@@ -14,6 +14,8 @@ $autoloader = new GL_Color_Palette_Generator\System\Autoloader();
 $autoloader->register();
 
 // Load test base classes first
+require_once __DIR__ . '/test-case.php';  // Base test case for all tests
+require_once __DIR__ . '/integration/class-test-case-integration.php';  // Base class for integration tests
 require_once __DIR__ . '/providers/class-test-provider-mock.php';
 require_once __DIR__ . '/integration/test-provider-integration.php';
 
@@ -23,13 +25,32 @@ $test_dirs = [
     __DIR__ . '/integration',
     __DIR__ . '/api',
     __DIR__ . '/admin',
-    __DIR__ . '/core'
+    __DIR__ . '/core',
+    __DIR__ . '/cache',
+    __DIR__ . '/types',
+    __DIR__ . '/system',
+    __DIR__ . '/classes',
+    __DIR__ . '/export',
+    __DIR__ . '/interfaces',
+    __DIR__ . '/education'
+];
+
+// Files that require WordPress test framework and should be excluded from WP_Mock tests
+$wp_test_files = [
+    'test-theme-json-generator.php',
+    'class-test-color-analysis.php',
+    'test-sample.php'
 ];
 
 foreach ($test_dirs as $dir) {
     if (is_dir($dir)) {
         foreach (glob("$dir/*.php") as $file) {
-            if (basename($file) !== 'class-test-provider-mock.php' && basename($file) !== 'test-provider-integration.php') {
+            $basename = basename($file);
+            // Skip base classes and WordPress test files
+            if ($basename !== 'class-test-provider-mock.php' &&
+                $basename !== 'test-provider-integration.php' &&
+                $basename !== 'class-test-case-integration.php' &&
+                !in_array($basename, $wp_test_files)) {
                 require_once $file;
             }
         }
