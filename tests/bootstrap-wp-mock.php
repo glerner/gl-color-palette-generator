@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Bootstrap file for WP_Mock tests
  *
@@ -8,13 +8,14 @@
 // Load Composer autoloader
 require_once dirname( __FILE__ ) . '/../vendor/autoload.php';
 
-// Load test base classes
-require_once __DIR__ . '/providers/class-test-provider-mock.php';
-
 // Load plugin autoloader
 require_once dirname( __FILE__ ) . '/../includes/system/class-autoloader.php';
 $autoloader = new GL_Color_Palette_Generator\System\Autoloader();
 $autoloader->register();
+
+// Load test base classes first
+require_once __DIR__ . '/providers/class-test-provider-mock.php';
+require_once __DIR__ . '/integration/test-provider-integration.php';
 
 // Load test classes
 $test_dirs = [
@@ -28,7 +29,7 @@ $test_dirs = [
 foreach ($test_dirs as $dir) {
     if (is_dir($dir)) {
         foreach (glob("$dir/*.php") as $file) {
-            if (basename($file) !== 'class-test-provider-mock.php') {
+            if (basename($file) !== 'class-test-provider-mock.php' && basename($file) !== 'test-provider-integration.php') {
                 require_once $file;
             }
         }
