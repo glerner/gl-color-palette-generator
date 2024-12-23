@@ -72,28 +72,30 @@ class ErrorReporter {
         ];
     }
 
-    / Private helper methods
+    /**
+     * Private helper methods
+     */
     private function should_notify($level) {
         return $this->error_levels[$level] >= $this->error_levels['error'];
     }
 
     private function send_notification($error) {
-        / Implementation
+        // Implementation
     }
 
     private function filter_logs_by_timeframe($timeframe) {
-        / Implementation
+        // Implementation
     }
 
     private function generate_error_summary($logs) {
-        / Implementation
+        // Implementation
     }
 
     private function analyze_error_trends($logs) {
-        / Implementation
+        // Implementation
     }
 
     private function generate_error_recommendations($logs) {
-        / Implementation
+        // Implementation
     }
 }

@@ -6,7 +6,9 @@ class ColorSecurity {
     private $encryption_handler;
     private $audit_logger;
 
-    / Comprehensive security configurations
+    /**
+     * Comprehensive security configurations
+     */
     private const SECURITY_CONFIGURATIONS = [
         'authentication' => [
             'oauth2' => [

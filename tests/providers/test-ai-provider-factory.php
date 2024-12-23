@@ -2,7 +2,7 @@
 
 namespace GL_Color_Palette_Generator\Tests\Providers;
 
-use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
+use GL_Color_Palette_Generator\Tests\Providers\Test_Provider_Mock;
 use GL_Color_Palette_Generator\Providers\AI_Provider_Factory;
 use GL_Color_Palette_Generator\Providers\Provider;
 use GL_Color_Palette_Generator\Types\Provider_Config;
@@ -17,7 +17,7 @@ use WP_Mock;
  * @package GL_Color_Palette_Generator
  * @subpackage Tests
  */
-class Test_AI_Provider_Factory extends \GL_Color_Palette_Generator\Tests\Test_Provider_Mock {
+class Test_AI_Provider_Factory extends Test_Provider_Mock {
     protected AI_Provider_Factory $factory;
 
     public function setUp(): void {

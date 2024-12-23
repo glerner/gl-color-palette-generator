@@ -28,10 +28,10 @@ class Color_Analysis {
             'recommendations' => []
         ];
 
-        / Analyze potential harmony issues
+        // Analyze potential harmony issues
         $issues = [];
 
-        / Check contrast between adjacent colors
+        // Check contrast between adjacent colors
         for ($i = 0; $i < count($hex_colors) - 1; $i++) {
             $contrast = $this->calculate_contrast_ratio($hex_colors[$i], $hex_colors[$i + 1]);
             if ($contrast < 1.5) {
@@ -43,7 +43,7 @@ class Color_Analysis {
             }
         }
 
-        / Check balance distribution
+        // Check balance distribution
         if ($harmony['balance']['lightness']['std_dev'] > 30) {
             $issues[] = [
                 'type' => 'unbalanced_lightness',
@@ -58,7 +58,7 @@ class Color_Analysis {
             ];
         }
 
-        / Generate recommendations based on issues
+        // Generate recommendations based on issues
         foreach ($issues as $issue) {
             switch ($issue['type']) {
                 case 'low_contrast':
@@ -124,7 +124,7 @@ class Color_Analysis {
         sort($hues);
         $hue_differences = [];
 
-        / Calculate differences between adjacent hues
+        // Calculate differences between adjacent hues
         for ($i = 0; $i < count($hues) - 1; $i++) {
             $diff = $hues[$i + 1] - $hues[$i];
             if ($diff < 0) {
@@ -133,7 +133,7 @@ class Color_Analysis {
             $hue_differences[] = $diff;
         }
 
-        / Analyze hue relationships
+        // Analyze hue relationships
         if (max($hue_differences) <= 30) {
             return 'monochromatic';
         } elseif (count(array_unique($hue_differences)) === 1) {
@@ -143,7 +143,7 @@ class Color_Analysis {
                 return 'triadic';
             }
         } elseif (count($hue_differences) === 3) {
-            / Check for split-complementary
+            // Check for split-complementary
             $total_diff = array_sum($hue_differences);
             if (abs($total_diff - 360) < 30) {
                 return 'split-complementary';
@@ -211,14 +211,14 @@ class Color_Analysis {
      */
     private function analyze_temperature(array $colors): array {
         $temperatures = [];
-        $warm_hues = [0, 60];  / Red to Yellow
-        $cool_hues = [180, 240];  / Cyan to Blue
+        $warm_hues = [0, 60];  // Red to Yellow
+        $cool_hues = [180, 240];  // Cyan to Blue
 
         foreach ($colors as $color) {
             $hsl = $this->hex_to_hsl($color['hex']);
             $hue = $hsl['h'];
 
-            / Determine temperature based on hue
+            // Determine temperature based on hue
             if ($hue >= $warm_hues[0] && $hue <= $warm_hues[1]) {
                 $temperatures[] = 'warm';
             } elseif ($hue >= $cool_hues[0] && $hue <= $cool_hues[1]) {

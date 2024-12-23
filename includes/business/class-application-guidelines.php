@@ -5,7 +5,9 @@ class ApplicationGuidelines {
     private $color_analyzer;
     private $accessibility_checker;
 
-    / Detailed application guidelines
+    /**
+     * Detailed application guidelines
+     */
     private const GUIDELINES = [
         'digital_interfaces' => [
             'web' => [
@@ -241,7 +243,9 @@ class ApplicationGuidelines {
             'suggestions' => []
         ];
 
-        / Validate against guidelines
+        /**
+         * Validate against guidelines
+         */
         foreach ($colors as $key => $color) {
             $result = $this->validate_color_usage($color, $guidelines, $context);
             if (!$result['is_valid']) {

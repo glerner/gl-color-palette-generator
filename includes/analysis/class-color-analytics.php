@@ -7,7 +7,12 @@ class ColorAnalytics {
     private $cache;
     private $settings;
 
-    / Analysis types
+    /**
+     * Analysis types
+     */
+    /**
+     * List of analysis types and their corresponding metrics
+     */
     private const ANALYSIS_TYPES = [
         'usage' => ['views', 'downloads', 'favorites'],
         'performance' => ['load_time', 'contrast_scores', 'accessibility_rates'],
@@ -96,7 +101,7 @@ class ColorAnalytics {
             ]
         ];
 
-        $this->cache->set($cache_key, $stats, 3600); / Cache for 1 hour
+        $this->cache->set($cache_key, $stats, 3600); // Cache for 1 hour
         return $stats;
     }
 

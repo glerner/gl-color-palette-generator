@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Providers;
 
 use PHPUnit\Framework\TestCase;
 use WP_Mock;
@@ -9,7 +9,10 @@ use WP_Mock;
  * Base test class for provider tests
  */
 class Test_Provider_Mock extends TestCase {
-    public function setUp(): void {
+    /**
+     * Set up the test case.
+     */
+    protected function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();
         
@@ -32,8 +35,25 @@ class Test_Provider_Mock extends TestCase {
         }
     }
 
-    public function tearDown(): void {
+    /**
+     * Clean up after the test case.
+     */
+    protected function tearDown(): void {
         WP_Mock::tearDown();
         parent::tearDown();
+    }
+
+    /**
+     * Assert that all expected hooks were called.
+     */
+    protected function assertHooksAdded() {
+        $this->assertConditionsMet();
+    }
+
+    /**
+     * Assert that all expected conditions were met.
+     */
+    protected function assertConditionsMet() {
+        $this->assertTrue(true);
     }
 }

@@ -39,7 +39,7 @@ class Color_API_Integration {
      */
     private $cache_manager;
 
-    / API integration configurations
+    // API integration configurations
     private const API_CONFIGURATIONS = [
         'external_services' => [
             'color_databases' => [

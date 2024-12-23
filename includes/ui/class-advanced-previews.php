@@ -5,7 +5,9 @@ class AdvancedPreviews {
     private $css_generator;
     private $settings;
 
-    / New preview categories
+    /**
+     * New preview categories
+     */
     private const PREVIEW_CATEGORIES = [
         'typography' => [
             'font_stack',

@@ -54,7 +54,7 @@ class Anthropic_Config extends Provider_Config {
             return false;
         }
 
-        / Basic format check for Anthropic API keys
+        // Basic format check for Anthropic API keys
         if (!preg_match('/^sk-ant-[a-zA-Z0-9]{32,}$/', $api_key)) {
             return false;
         }

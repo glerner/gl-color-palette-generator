@@ -8,7 +8,7 @@ class GLColorPaletteExporter {
     public static function export_all_data() {
         global $wpdb;
 
-        / Create export directory
+        // Create export directory
         $upload_dir = wp_upload_dir();
         $export_dir = $upload_dir['basedir'] . '/gl-color-exports';
         $timestamp = date('Y-m-d-H-i-s');
@@ -16,7 +16,7 @@ class GLColorPaletteExporter {
 
         wp_mkdir_p($export_path);
 
-        / Export data
+        // Export data
         $export_data = [
             'metadata' => self::get_export_metadata(),
             'tables' => self::export_tables(),
@@ -24,17 +24,17 @@ class GLColorPaletteExporter {
             'files' => self::export_files($export_path)
         ];
 
-        / Create JSON file
+        // Create JSON file
         file_put_contents(
             $export_path . '/data.json',
             json_encode($export_data, JSON_PRETTY_PRINT)
         );
 
-        / Create ZIP archive
+        // Create ZIP archive
         $zip_file = $export_dir . '/gl-color-palette-backup-' . $timestamp . '.zip';
         self::create_zip_archive($export_path, $zip_file);
 
-        / Cleanup temporary directory
+        // Cleanup temporary directory
         self::delete_directory($export_path);
 
         return $zip_file;
@@ -83,7 +83,7 @@ class GLColorPaletteExporter {
 
         $options = [];
 
-        / Get all options with our prefix
+        // Get all options with our prefix
         $results = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT option_name, option_value FROM `{$wpdb->options}`

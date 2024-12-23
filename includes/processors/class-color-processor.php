@@ -36,5 +36,5 @@ class ColorProcessor {
         }
     }
 
-    / ... other color processing methods ...
+    // ... other color processing methods ...
 }

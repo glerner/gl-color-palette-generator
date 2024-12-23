@@ -53,7 +53,7 @@ class OpenAI_Config extends Provider_Config {
             return false;
         }
 
-        / Basic format check
+        // Basic format check
         if (!preg_match('/^sk-[a-zA-Z0-9]{32,}$/', $api_key)) {
             return false;
         }

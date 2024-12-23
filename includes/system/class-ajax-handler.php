@@ -41,7 +41,7 @@ class Ajax_Handler {
             ]);
         }
 
-        / Get provider configuration
+        // Get provider configuration
         $provider_class = "\\GLColorPalette\\Providers\\" . ucfirst($provider) . '_Config';
         if (!class_exists($provider_class)) {
             wp_send_json_error([
@@ -51,7 +51,7 @@ class Ajax_Handler {
 
         $provider_config = new $provider_class();
 
-        / Test connection
+        // Test connection
         try {
             $response = wp_remote_post($provider_config->get_api_endpoint(), [
                 'headers' => [
@@ -125,4 +125,4 @@ class Ajax_Handler {
             'message' => __('Settings saved successfully', 'gl-color-palette-generator')
         ]);
     }
-} 
+}

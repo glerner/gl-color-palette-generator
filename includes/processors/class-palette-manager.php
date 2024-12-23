@@ -23,7 +23,7 @@ class GLColorPaletteManager {
         );
 
         if ($result) {
-            / Log to history
+            // Log to history
             $this->log_history($wpdb->insert_id, $data);
         }
 

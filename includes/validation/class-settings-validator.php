@@ -20,30 +20,34 @@ use GL_Color_Palette_Generator\Interfaces\Color_Constants;
  */
 class Settings_Validator implements Color_Constants {
     /** @var array Validation rules and constraints */
-    protected $rules = [
-        'naming_service' => [
-            'type' => 'string',
-            'enum' => ['local', 'openai', 'colorpizza']
-        ],
-        'accessibility_level' => [
-            'type' => 'string',
-            'enum' => ['AA', 'AAA']
-        ],
-        'color_scheme' => [
-            'type' => 'string',
-            'enum' => array_keys(self::COLOR_SCHEMES)
-        ],
-        'api_key' => [
-            'type' => 'string',
-            'required_if' => ['naming_service' => ['openai', 'colorpizza']]
-        ],
-        'cache_duration' => [
-            'type' => 'int',
-            'min' => 3600,    // 1 hour
-            'max' => 2592000, // 30 days
-            'default' => 86400
-        ]
-    ];
+    protected $rules;
+
+    public function __construct() {
+        $this->rules = [
+            'naming_service' => [
+                'type' => 'string',
+                'enum' => ['local', 'openai', 'colorpizza']
+            ],
+            'accessibility_level' => [
+                'type' => 'string',
+                'enum' => ['AA', 'AAA']
+            ],
+            'color_scheme' => [
+                'type' => 'string',
+                'enum' => array_keys(self::COLOR_SCHEMES)
+            ],
+            'api_key' => [
+                'type' => 'string',
+                'required_if' => ['naming_service' => ['openai', 'colorpizza']]
+            ],
+            'cache_duration' => [
+                'type' => 'int',
+                'min' => 3600,    // 1 hour
+                'max' => 2592000, // 30 days
+                'default' => 86400
+            ]
+        ];
+    }
 
     protected $errors = [];
     protected $warnings = [];
@@ -109,7 +113,7 @@ class Settings_Validator implements Color_Constants {
      * Validate API settings
      */
     protected function validate_api_settings($input) {
-        if (isset($input['naming_service']) && 
+        if (isset($input['naming_service']) &&
             in_array($input['naming_service'], ['openai', 'colorpizza'])) {
             if (empty($input['api_key'])) {
                 $this->errors[] = __('API key is required for the selected naming service', 'gl-color-palette-generator');
@@ -126,7 +130,7 @@ class Settings_Validator implements Color_Constants {
         }
 
         $duration = intval($input['cache_duration']);
-        if ($duration < $this->rules['cache_duration']['min'] || 
+        if ($duration < $this->rules['cache_duration']['min'] ||
             $duration > $this->rules['cache_duration']['max']) {
             $this->errors[] = __('Invalid cache duration', 'gl-color-palette-generator');
         }

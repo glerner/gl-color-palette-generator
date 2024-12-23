@@ -6,7 +6,9 @@ class ColorAnalyticsDashboard {
     private $data_aggregator;
     private $visualization_manager;
 
-    / Analytics dashboard configurations
+    /**
+     * Analytics dashboard configurations
+     */
     private const ANALYTICS_CONFIGURATIONS = [
         'usage_metrics' => [
             'color_popularity' => [
@@ -210,14 +212,16 @@ class ColorAnalyticsDashboard {
         ];
     }
 
-    / Add private helper methods here
+    /**
+     * Add private helper methods here
+     */
     private function get_usage_metrics($timeframe) {
-        / Implementation
+        // Implementation
     }
 
     private function get_palette_analytics($timeframe) {
-        / Implementation
+        // Implementation
     }
 
-    / ... other helper methods
+    // ... other helper methods
 }
