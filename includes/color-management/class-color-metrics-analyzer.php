@@ -3,6 +3,8 @@
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Interfaces\Color_Metrics_Analyzer as Color_Metrics_Analyzer_Interface;
+use GL_Color_Palette_Generator\Traits\Error_Handler;
+use GL_Color_Palette_Generator\Traits\Logger;
 use WP_Error;
 
 /**

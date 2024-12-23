@@ -5,7 +5,7 @@
 # Environment files
 .env
 .env.*
-!.env.testing
+!.env.sample.testing
 
 # IDE files
 .idea/
@@ -31,4 +31,4 @@ Thumbs.db
 # Temporary files
 *.log
 *.cache
-*.tmp 
+*.tmp
