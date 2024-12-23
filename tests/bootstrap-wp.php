@@ -26,3 +26,11 @@ require_once $_tests_dir . '/includes/bootstrap.php';
 // Load test base classes
 require_once __DIR__ . '/test-case.php';
 require_once __DIR__ . '/integration/test-provider-integration.php';
+
+// Activate our plugin
+tests_add_filter('muplugins_loaded', function() {
+    require dirname(__DIR__) . '/gl-color-palette-generator.php';
+});
+
+// Initialize the plugin
+do_action('plugins_loaded');

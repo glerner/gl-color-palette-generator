@@ -2,25 +2,13 @@
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
-use GL_Color_Palette_Generator\Interfaces\Color_Metrics_Analyzer_Interface;
-use GL_Color_Palette_Generator\Types\Color_Types;
-use GL_Color_Palette_Generator\Types\Metric_Types;
-use GL_Color_Palette_Generator\Traits\Error_Handler;
-use GL_Color_Palette_Generator\Traits\Logger;
+use GL_Color_Palette_Generator\Interfaces\Color_Metrics_Analyzer as Color_Metrics_Analyzer_Interface;
+use WP_Error;
 
 /**
  * Color Metrics Analyzer Class
  *
- * Analyzes detailed color metrics and relationships including:
- * - Basic color properties (brightness, saturation, etc.)
- * - Perceptual metrics (perceived brightness, colorfulness)
- * - Psychological aspects (temperature, weight, activity)
- * - Accessibility measurements (contrast ratios, WCAG compliance)
- * - Color space conversions and relationships
- *
- * @package GL_Color_Palette_Generator
- * @subpackage Color_Management
- * @since 1.0.0
+ * Analyzes color metrics for accessibility, harmony, and other properties
  */
 class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
     use Error_Handler, Logger;
@@ -404,7 +392,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
         $lightness = $hsl['l'];
 
         $hue_ranges = Color_Constants::COLOR_WHEEL_CONFIG['hue_ranges'];
-        
+
         // Check if it's a neutral color first
         if ($saturation < Color_Constants::COLOR_METRICS['saturation']['neutral_threshold'] ||
             $lightness < Color_Constants::COLOR_METRICS['lightness']['dark_threshold'] ||
