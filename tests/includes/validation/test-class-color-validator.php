@@ -8,16 +8,16 @@
 
 namespace GL_Color_Palette_Generator\Tests\Validation;
 
+use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Validation\Color_Validator;
 use GL_Color_Palette_Generator\Core\Logger;
-use WP_UnitTestCase;
 
 /**
  * Class Test_Color_Validator
  *
  * @coversDefaultClass \GL_Color_Palette_Generator\Validation\Color_Validator
  */
-class Test_Color_Validator extends WP_UnitTestCase {
+class Test_Color_Validator extends TestCase {
     /**
      * Validator instance
      *

@@ -69,3 +69,45 @@ tooling:
       cd /app/wp-content/plugins/gl-color-palette-generator && \
       composer dump-autoload && \
       vendor/bin/phpunit --exclude-group wp-mock
+  test:coverage:
+    service: appserver
+    description: Generate code coverage report
+    cmd: cd /app/wp-content/plugins/gl-color-palette-generator && \
+      composer dump-autoload && \
+      vendor/bin/phpunit --coverage-html ./coverage
+  test:unit:
+    service: appserver
+    description: Run unit tests
+    cmd: |
+      cd /app/wp-content/plugins/gl-color-palette-generator && \
+      vendor/bin/phpunit --testsuite unit
+  test:mock:
+    service: appserver
+    description: Run WP Mock tests
+    cmd: |
+      cd /app/wp-content/plugins/gl-color-palette-generator && \
+      vendor/bin/phpunit --testsuite wp-mock
+  test:api:
+    service: appserver
+    description: Run API tests
+    cmd: |
+      cd /app/wp-content/plugins/gl-color-palette-generator && \
+      vendor/bin/phpunit --testsuite api
+  test:core:
+    service: appserver
+    description: Run core tests
+    cmd: |
+      cd /app/wp-content/plugins/gl-color-palette-generator && \
+      vendor/bin/phpunit --testsuite core
+  test:admin:
+    service: appserver
+    description: Run admin tests
+    cmd: |
+      cd /app/wp-content/plugins/gl-color-palette-generator && \
+      vendor/bin/phpunit --testsuite admin
+  test:providers:
+    service: appserver
+    description: Run provider tests
+    cmd: |
+      cd /app/wp-content/plugins/gl-color-palette-generator && \
+      vendor/bin/phpunit --testsuite providers

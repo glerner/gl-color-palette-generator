@@ -30,6 +30,62 @@ cd ~/sites/wordpress && lando start
 cd ~/sites/wordpress && lando install:wordpress
 ```
 
+3. Configure Xdebug for Code Coverage:
+
+The Lando configuration already includes Xdebug setup. To verify it's working:
+
+```bash
+# Check if Xdebug is enabled
+lando php -m | grep xdebug
+
+# Verify Xdebug settings
+lando php -i | grep xdebug
+```
+
+If Xdebug is not showing up:
+```bash
+# Install Xdebug in the Lando container
+lando ssh -c "sudo pecl install xdebug"
+
+# Create Xdebug log file with proper permissions
+sudo touch /tmp/xdebug.log
+sudo chmod 666 /tmp/xdebug.log
+
+# Restart Lando
+lando restart
+```
+
+To verify the log file is working:
+```bash
+# Check log file permissions
+ls -l /tmp/xdebug.log
+
+# Test writing to log
+lando php -r "xdebug_info();"
+
+# View log contents
+tail -f /tmp/xdebug.log
+```
+
+To run tests with code coverage:
+```bash
+# Generate HTML coverage report
+lando test:coverage
+
+# Run specific test suites
+lando test:unit      # Run unit tests
+lando test:mock      # Run WP Mock tests
+lando test:api       # Run API tests
+lando test:core      # Run core tests
+lando test:admin     # Run admin tests
+lando test:providers # Run provider tests
+
+# Run all tests
+lando test
+```
+
+The coverage reports will help identify which parts of the code need more test coverage.
+
 3. Set up the test environment:
 
 ```bash

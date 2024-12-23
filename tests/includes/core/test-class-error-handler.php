@@ -8,16 +8,16 @@
 
 namespace GL_Color_Palette_Generator\Tests\Core;
 
+use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Core\Error_Handler;
 use GL_Color_Palette_Generator\Core\Logger;
-use WP_UnitTestCase;
 
 /**
  * Class Test_Error_Handler
  *
  * @coversDefaultClass \GL_Color_Palette_Generator\Core\Error_Handler
  */
-class Test_Error_Handler extends WP_UnitTestCase {
+class Test_Error_Handler extends TestCase {
     /**
      * Error handler instance
      *

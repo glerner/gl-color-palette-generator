@@ -312,27 +312,27 @@ class ML_Color_Engine {
 
     private function generate_color_name($properties) {
         $base_names = [
-            [0, 30] => 'Red',
-            [30, 60] => 'Orange',
-            [60, 120] => 'Yellow',
-            [120, 180] => 'Green',
-            [180, 240] => 'Blue',
-            [240, 300] => 'Purple',
-            [300, 360] => 'Pink'
+            ['min' => 0, 'max' => 30, 'name' => 'Red'],
+            ['min' => 30, 'max' => 60, 'name' => 'Orange'],
+            ['min' => 60, 'max' => 120, 'name' => 'Yellow'],
+            ['min' => 120, 'max' => 180, 'name' => 'Green'],
+            ['min' => 180, 'max' => 240, 'name' => 'Blue'],
+            ['min' => 240, 'max' => 300, 'name' => 'Purple'],
+            ['min' => 300, 'max' => 360, 'name' => 'Pink']
         ];
 
-        foreach ($base_names as $range => $name) {
-            if ($properties['hue'] >= $range[0] && $properties['hue'] < $range[1]) {
+        foreach ($base_names as $range) {
+            if ($properties['hue'] >= $range['min'] && $properties['hue'] < $range['max']) {
                 if ($properties['saturation'] < 10) {
                     return 'Gray';
                 }
                 if ($properties['lightness'] > 90) {
-                    return 'Light ' . $name;
+                    return 'Light ' . $range['name'];
                 }
                 if ($properties['lightness'] < 20) {
-                    return 'Dark ' . $name;
+                    return 'Dark ' . $range['name'];
                 }
-                return $name;
+                return $range['name'];
             }
         }
 

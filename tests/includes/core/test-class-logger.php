@@ -8,15 +8,15 @@
 
 namespace GL_Color_Palette_Generator\Tests\Core;
 
+use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Core\Logger;
-use WP_UnitTestCase;
 
 /**
  * Class Test_Logger
  *
  * @coversDefaultClass \GL_Color_Palette_Generator\Core\Logger
  */
-class Test_Logger extends WP_UnitTestCase {
+class Test_Logger extends TestCase {
     /**
      * Test log file path
      *

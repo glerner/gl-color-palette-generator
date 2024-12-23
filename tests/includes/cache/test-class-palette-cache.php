@@ -8,16 +8,16 @@
 
 namespace GL_Color_Palette_Generator\Tests\Cache;
 
+use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Cache\Palette_Cache;
 use GL_Color_Palette_Generator\Core\Logger;
-use WP_UnitTestCase;
 
 /**
  * Class Test_Palette_Cache
  *
  * @coversDefaultClass \GL_Color_Palette_Generator\Cache\Palette_Cache
  */
-class Test_Palette_Cache extends WP_UnitTestCase {
+class Test_Palette_Cache extends TestCase {
     /**
      * Cache instance
      *
@@ -44,16 +44,16 @@ class Test_Palette_Cache extends WP_UnitTestCase {
      */
     public function setUp(): void {
         parent::setUp();
-        
+
         $logger = $this->createMock(Logger::class);
         $this->cache = new Palette_Cache($logger);
-        
+
         $this->sample_params = [
             'base_color' => '#FF0000',
             'scheme' => 'complementary',
             'variation' => 'light'
         ];
-        
+
         $this->sample_palette = [
             ['#FF0000', 'Red'],
             ['#00FF00', 'Green'],
@@ -89,7 +89,7 @@ class Test_Palette_Cache extends WP_UnitTestCase {
             'base_color' => '#FFFFFF',
             'scheme' => 'unknown'
         ];
-        
+
         $result = $this->cache->get($non_existent_params);
         $this->assertFalse($result);
     }
@@ -104,11 +104,11 @@ class Test_Palette_Cache extends WP_UnitTestCase {
     public function test_delete() {
         // Set up cache
         $this->cache->set($this->sample_params, $this->sample_palette);
-        
+
         // Test deletion
         $delete_result = $this->cache->delete($this->sample_params);
         $this->assertTrue($delete_result);
-        
+
         // Verify deletion
         $cached_palette = $this->cache->get($this->sample_params);
         $this->assertFalse($cached_palette);
@@ -124,11 +124,11 @@ class Test_Palette_Cache extends WP_UnitTestCase {
         // Set up multiple cache entries
         $this->cache->set($this->sample_params, $this->sample_palette);
         $this->cache->set(['different' => 'params'], ['different' => 'palette']);
-        
+
         // Clear all cache
         $clear_result = $this->cache->clear_all();
         $this->assertTrue($clear_result);
-        
+
         // Verify all cache is cleared
         $this->assertFalse($this->cache->get($this->sample_params));
         $this->assertFalse($this->cache->get(['different' => 'params']));
@@ -143,11 +143,11 @@ class Test_Palette_Cache extends WP_UnitTestCase {
     public function test_exists() {
         // Test non-existent cache
         $this->assertFalse($this->cache->exists($this->sample_params));
-        
+
         // Set cache and test existence
         $this->cache->set($this->sample_params, $this->sample_palette);
         $this->assertTrue($this->cache->exists($this->sample_params));
-        
+
         // Delete cache and verify non-existence
         $this->cache->delete($this->sample_params);
         $this->assertFalse($this->cache->exists($this->sample_params));
@@ -162,13 +162,13 @@ class Test_Palette_Cache extends WP_UnitTestCase {
     public function test_cache_expiration() {
         // Set cache with 1 second expiration
         $this->cache->set($this->sample_params, $this->sample_palette, 1);
-        
+
         // Verify cache exists
         $this->assertTrue($this->cache->exists($this->sample_params));
-        
+
         // Wait for cache to expire
         sleep(2);
-        
+
         // Verify cache has expired
         $this->assertFalse($this->cache->exists($this->sample_params));
     }

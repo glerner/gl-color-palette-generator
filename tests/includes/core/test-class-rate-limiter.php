@@ -8,17 +8,17 @@
 
 namespace GL_Color_Palette_Generator\Tests\Core;
 
+use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Core\Rate_Limiter;
 use GL_Color_Palette_Generator\Core\Logger;
 use GL_Color_Palette_Generator\Core\Error_Handler;
-use WP_UnitTestCase;
 
 /**
  * Class Test_Rate_Limiter
  *
  * @coversDefaultClass \GL_Color_Palette_Generator\Core\Rate_Limiter
  */
-class Test_Rate_Limiter extends WP_UnitTestCase {
+class Test_Rate_Limiter extends TestCase {
     /**
      * Rate limiter instance
      *
