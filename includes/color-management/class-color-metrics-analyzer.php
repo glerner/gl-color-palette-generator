@@ -3,6 +3,7 @@
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Interfaces\Color_Metrics_Analyzer as Color_Metrics_Analyzer_Interface;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use GL_Color_Palette_Generator\Traits\Error_Handler;
 use GL_Color_Palette_Generator\Traits\Logger;
 use WP_Error;
@@ -109,7 +110,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
                 ],
                 'display_properties' => [
                     'gamma' => $this->calculate_gamma($color),
-                    'luminance' => $this->calculate_luminance($color)
+                    'luminance' => $this->utility->calculate_relative_luminance($color)
                 ]
             ];
         } catch (\Exception $e) {
@@ -156,7 +157,7 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
 
         return [
             'brightness' => $this->calculate_brightness($rgb),
-            'relative_luminance' => $this->calculator->calculate_relative_luminance($rgb),
+            'relative_luminance' => $this->utility->calculate_relative_luminance($color),
             'saturation' => $hsl['s'],
             'lightness' => $hsl['l'],
             'intensity' => ($rgb['r'] + $rgb['g'] + $rgb['b']) / (3 * 255),
@@ -459,5 +460,115 @@ class Color_Metrics_Analyzer implements Color_Metrics_Analyzer_Interface {
         $max = max($rgb['r'], $rgb['g'], $rgb['b']);
         $min = min($rgb['r'], $rgb['g'], $rgb['b']);
         return ($max - $min) / 255;
+    }
+
+    /**
+     * Calculate contrast ratio between two colors
+     *
+     * @param string $color1 First color in hex format
+     * @param string $color2 Second color in hex format
+     * @return float|WP_Error Contrast ratio or error
+     */
+    public function calculate_contrast(string $color1, string $color2) {
+        // Get relative luminance for both colors
+        $l1 = $this->utility->calculate_relative_luminance($color1);
+        $l2 = $this->utility->calculate_relative_luminance($color2);
+
+        // Calculate contrast ratio according to WCAG 2.0 formula
+        $lighter = max($l1, $l2);
+        $darker = min($l1, $l2);
+
+        return ($lighter + 0.05) / ($darker + 0.05);
+    }
+
+    /**
+     * Check accessibility compliance for color combinations
+     *
+     * @param array $colors Array of colors to check
+     * @return array|WP_Error Array containing 'overall_score' and 'combinations' or error
+     */
+    public function check_accessibility(array $colors) {
+        $combinations = [];
+        $total_score = 0;
+        $count = 0;
+
+        // Check each color combination
+        for ($i = 0; $i < count($colors); $i++) {
+            for ($j = $i + 1; $j < count($colors); $j++) {
+                $contrast = $this->calculate_contrast($colors[$i], $colors[$j]);
+                $score = $this->get_accessibility_score($contrast);
+                
+                $combinations[] = [
+                    'color1' => $colors[$i],
+                    'color2' => $colors[$j],
+                    'contrast' => $contrast,
+                    'score' => $score,
+                    'passes_aa' => $contrast >= Color_Constants::WCAG_CONTRAST_AA,
+                    'passes_aaa' => $contrast >= Color_Constants::WCAG_CONTRAST_AAA
+                ];
+
+                $total_score += $score;
+                $count++;
+            }
+        }
+
+        return [
+            'overall_score' => $count > 0 ? $total_score / $count : 0,
+            'combinations' => $combinations
+        ];
+    }
+
+    /**
+     * Analyze color harmony relationships
+     *
+     * @param array $colors Array of colors to analyze
+     * @return array|WP_Error Array containing harmony analysis including 'complementary' or error
+     */
+    public function analyze_harmony(array $colors) {
+        $harmony = [
+            'complementary' => [],
+            'analogous' => [],
+            'triadic' => []
+        ];
+
+        foreach ($colors as $color) {
+            // Get complementary colors
+            $harmony['complementary'][] = [
+                'base' => $color,
+                'complement' => $this->calculator->calculate_harmony($color, 'complementary')[0]
+            ];
+
+            // Get analogous colors
+            $analogous = $this->calculator->calculate_harmony($color, 'analogous');
+            $harmony['analogous'][] = [
+                'base' => $color,
+                'colors' => $analogous
+            ];
+
+            // Get triadic colors
+            $triadic = $this->calculator->calculate_harmony($color, 'triadic');
+            $harmony['triadic'][] = [
+                'base' => $color,
+                'colors' => $triadic
+            ];
+        }
+
+        return $harmony;
+    }
+
+    /**
+     * Get accessibility score based on contrast ratio
+     *
+     * @param float $contrast Contrast ratio
+     * @return float Score from 0-100
+     */
+    private function get_accessibility_score(float $contrast): float {
+        // Score based on WCAG 2.0 guidelines
+        if ($contrast >= Color_Constants::WCAG_CONTRAST_AAA) return 100.0;  // AAA
+        if ($contrast >= Color_Constants::WCAG_CONTRAST_AA) return 80.0;    // AA
+        if ($contrast >= Color_Constants::WCAG_CONTRAST_AA_LARGE) return 60.0; // AA Large
+        
+        // Linear score for lower contrasts
+        return max(0, min(50, ($contrast / Color_Constants::WCAG_CONTRAST_AA_LARGE) * 50));
     }
 }

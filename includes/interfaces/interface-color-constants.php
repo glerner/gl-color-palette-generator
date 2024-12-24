@@ -4,8 +4,13 @@
  *
  * Core constants for color management and theme generation.
  *
+ * @todo This is not actually an interface, but a constants container.
+ * Should be refactored to class-color-constants.php in includes/types/.
+ * See .github/issues/refactor-color-constants.md
+ *
  * @package GL_Color_Palette_Generator
  * @subpackage Interfaces
+ * @bootstrap wp-mock
  */
 
 namespace GL_Color_Palette_Generator\Interfaces;

@@ -8,6 +8,7 @@
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Color_Management
+ * @bootstrap wp-mock
  * @since 1.0.0
  */
 
@@ -182,12 +183,12 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
      */
     public function calculate_relative_luminance(string $color): float {
         $rgb = $this->hex_to_rgb($color);
-        
+
         // Convert to sRGB
         $rgb = array_map(function($val) {
             $val = $val / 255;
-            return $val <= 0.03928 
-                ? $val / 12.92 
+            return $val <= 0.03928
+                ? $val / 12.92
                 : pow(($val + 0.055) / 1.055, 2.4);
         }, $rgb);
 
@@ -289,6 +290,30 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
             'a' => 500 * ($xyz['x'] - $xyz['y']),
             'b' => 200 * ($xyz['y'] - $xyz['z'])
         ];
+    }
+
+    /**
+     * Convert hex color to HSL array
+     *
+     * @param string $hex Hex color code
+     * @return array HSL values [h, s, l]
+     * @since 1.0.0
+     */
+    public function hex_to_hsl(string $hex): array {
+        $rgb = $this->hex_to_rgb($hex);
+        return $this->rgb_to_hsl($rgb);
+    }
+
+    /**
+     * Convert HSL color to hex
+     *
+     * @param array $hsl HSL color array with h, s, l keys
+     * @return string Hex color code
+     * @since 1.0.0
+     */
+    public function hsl_to_hex(array $hsl): string {
+        $rgb = $this->hsl_to_rgb($hsl);
+        return $this->rgb_to_hex($rgb);
     }
 
     /**

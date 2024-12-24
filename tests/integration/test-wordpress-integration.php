@@ -4,6 +4,7 @@
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Tests\Integration
+ * @bootstrap wp
  */
 
 namespace GL_Color_Palette_Generator\Tests\Integration;
@@ -26,11 +27,12 @@ class Test_WordPress_Integration extends Test_Case_Integration {
      * Set up test environment
      */
     public function setUp(): void {
-        // Remove all actions that might send headers
-        remove_all_actions('admin_notices');
-        remove_all_actions('all_admin_notices');
-        remove_all_actions('wp_headers');
-        remove_all_actions('send_headers');
+        // Start output buffering before any potential output
+        ob_start();
+
+        // Prevent header modifications in test environment
+        add_filter('wp_headers', '__return_empty_array');
+        add_filter('nocache_headers', '__return_empty_array');
 
         parent::setUp();
 
@@ -48,26 +50,48 @@ class Test_WordPress_Integration extends Test_Case_Integration {
      * Clean up test environment
      */
     public function tearDown(): void {
+        // Clean output buffer
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        parent::tearDown();
+
         // Reset menu globals
         global $menu, $submenu;
         $menu = null;
         $submenu = null;
-
-        parent::tearDown();
     }
 
     /**
-     * Test WordPress integration functionality
+     * Test WordPress integration
      */
     public function test_wordpress_integration() {
+        // Verify WordPress core is loaded
         $this->assertTrue(defined('ABSPATH'), 'WordPress not loaded');
+
+        // Check plugin initialization
+        $this->assertInstanceOf(Plugin::class, $this->plugin);
+
+        // Verify essential WordPress functions are available
+        $this->assertTrue(function_exists('add_action'));
+        $this->assertTrue(function_exists('add_filter'));
+        $this->assertTrue(function_exists('do_action'));
     }
 
     /**
      * Test plugin activation
      */
     public function test_plugin_activation() {
+        // Test plugin instance
         $this->assertInstanceOf(Plugin::class, $this->plugin);
+
+        // Verify activation hooks are registered
+        $this->assertTrue(has_action('activate_gl-color-palette-generator/gl-color-palette-generator.php'));
+
+        // Check if essential plugin components are initialized
+        $this->assertTrue(class_exists('GL_Color_Palette_Generator\Core\Plugin'));
+        $this->assertTrue(class_exists('GL_Color_Palette_Generator\Color_Management\Color_Calculator'));
     }
 
     /**
@@ -75,8 +99,12 @@ class Test_WordPress_Integration extends Test_Case_Integration {
      */
     public function test_shortcode_registration() {
         $this->plugin->register_shortcodes();
+
         global $shortcode_tags;
         $this->assertArrayHasKey('gl_color_palette', $shortcode_tags);
+
+        // Test shortcode callback exists and is callable
+        $this->assertTrue(is_callable($shortcode_tags['gl_color_palette']));
     }
 
     /**
@@ -84,7 +112,6 @@ class Test_WordPress_Integration extends Test_Case_Integration {
      */
     public function test_admin_menu_registration() {
         global $menu;
-
         if (!is_array($menu)) {
             $menu = [];
         }
@@ -113,6 +140,10 @@ class Test_WordPress_Integration extends Test_Case_Integration {
         global $wp_settings_sections;
         $this->assertIsArray($wp_settings_sections);
         $this->assertArrayHasKey('gl-color-palette-generator', $wp_settings_sections);
+
+        // Check if specific settings are registered
+        $registered_settings = get_registered_settings();
+        $this->assertArrayHasKey('gl_color_palette_generator_options', $registered_settings);
     }
 
     /**
@@ -120,8 +151,24 @@ class Test_WordPress_Integration extends Test_Case_Integration {
      */
     public function test_ajax_handlers() {
         $this->plugin->register_ajax_handlers();
-        $this->assertTrue(has_action('wp_ajax_gl_cpg_generate_palette'));
-        $this->assertTrue(has_action('wp_ajax_gl_cpg_save_palette'));
+
+        // Test palette generation handler
+        $this->assertTrue(
+            has_action('wp_ajax_gl_cpg_generate_palette'),
+            'Palette generation AJAX handler not registered'
+        );
+
+        // Test palette saving handler
+        $this->assertTrue(
+            has_action('wp_ajax_gl_cpg_save_palette'),
+            'Palette saving AJAX handler not registered'
+        );
+
+        // Test palette export handler
+        $this->assertTrue(
+            has_action('wp_ajax_gl_cpg_export_palette'),
+            'Palette export AJAX handler not registered'
+        );
     }
 
     /**
@@ -129,7 +176,22 @@ class Test_WordPress_Integration extends Test_Case_Integration {
      */
     public function test_block_registration() {
         $this->plugin->register_blocks();
-        global $wp_registered_blocks;
-        $this->assertArrayHasKey('gl-color-palette-generator/palette', $wp_registered_blocks);
+
+        // Check block registration
+        $registry = WP_Block_Type_Registry::get_instance();
+        $this->assertTrue(
+            $registry->is_registered('gl-color-palette/generator'),
+            'Color palette generator block not registered'
+        );
+
+        // Verify block assets are enqueued
+        $this->assertTrue(
+            wp_script_is('gl-color-palette-generator-block', 'registered'),
+            'Block script not registered'
+        );
+        $this->assertTrue(
+            wp_style_is('gl-color-palette-generator-block', 'registered'),
+            'Block style not registered'
+        );
     }
 }

@@ -28,5 +28,5 @@ Need to implement a Settings Manager class to handle plugin configuration and us
   - Plugin admin interface
 
 ## Related
-- Removed from Color Calculator temporarily in [commit SHA]
+- Removed from Color Calculator temporarily in [commit ac4cda91985f9ae644842528e7e3b21d697001e3 "loading right classes"]
 - Will need to be injected into classes that need settings, rather than created internally
