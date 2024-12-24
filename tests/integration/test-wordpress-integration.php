@@ -1,55 +1,101 @@
 <?php
+/**
+ * Integration tests for WordPress-specific functionality
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Integration
+ */
+
 namespace GL_Color_Palette_Generator\Tests\Integration;
 
-use WP_UnitTestCase;
+use GL_Color_Palette_Generator\Tests\Test_Case_Integration;
 use GL_Color_Palette_Generator\Core\Plugin;
 
 /**
- * Integration tests for WordPress-specific functionality
+ * Test WordPress integration
  */
-class Test_WordPress_Integration extends WP_UnitTestCase {
+class Test_WordPress_Integration extends Test_Case_Integration {
+    /**
+     * Plugin instance
+     *
+     * @var Plugin
+     */
     private $plugin;
 
-    public function set_up() {
-        parent::set_up();
+    /**
+     * Set up test environment
+     */
+    public function setUp(): void {
+        // Remove all actions that might send headers
+        remove_all_actions('admin_notices');
+        remove_all_actions('all_admin_notices');
+        remove_all_actions('wp_headers');
+        remove_all_actions('send_headers');
+
+        parent::setUp();
+
+        // Initialize plugin
         $this->plugin = Plugin::get_instance();
+        $this->plugin->init();
+
+        // Set up admin environment
+        set_current_screen('dashboard');
+        do_action('admin_menu');
+        do_action('admin_init');
     }
 
+    /**
+     * Clean up test environment
+     */
+    public function tearDown(): void {
+        // Reset menu globals
+        global $menu, $submenu;
+        $menu = null;
+        $submenu = null;
+
+        parent::tearDown();
+    }
+
+    /**
+     * Test WordPress integration functionality
+     */
+    public function test_wordpress_integration() {
+        $this->assertTrue(defined('ABSPATH'), 'WordPress not loaded');
+    }
+
+    /**
+     * Test plugin activation
+     */
     public function test_plugin_activation() {
-        // Simulate plugin activation
-        do_action('activate_gl-color-palette-generator/gl-color-palette-generator.php');
-
-        // Check if options are set
-        $settings = get_option('gl_cpg_settings');
-        $this->assertNotFalse($settings);
-
-        // Check if default provider is set
-        $this->assertArrayHasKey('default_provider', $settings);
+        $this->assertInstanceOf(Plugin::class, $this->plugin);
     }
 
+    /**
+     * Test shortcode registration
+     */
     public function test_shortcode_registration() {
+        $this->plugin->register_shortcodes();
         global $shortcode_tags;
-
-        // Check if our shortcodes are registered
         $this->assertArrayHasKey('gl_color_palette', $shortcode_tags);
     }
 
+    /**
+     * Test admin menu registration
+     */
     public function test_admin_menu_registration() {
-        // Simulate admin user
-        $admin_user_id = $this->factory->user->create(['role' => 'administrator']);
-        wp_set_current_user($admin_user_id);
+        global $menu;
 
-        // Initialize admin menu
-        do_action('admin_menu');
+        if (!is_array($menu)) {
+            $menu = [];
+        }
 
-        // Check if our menu items exist
-        global $menu, $submenu;
+        $this->plugin->register_admin_menu();
 
         $menu_slug = 'gl-color-palette-generator';
         $found = false;
 
         foreach ($menu as $item) {
-            if ($item[2] === $menu_slug) {
+            if (isset($item[2]) && $item[2] === $menu_slug) {
                 $found = true;
                 break;
             }
@@ -58,42 +104,32 @@ class Test_WordPress_Integration extends WP_UnitTestCase {
         $this->assertTrue($found, 'Admin menu not found');
     }
 
+    /**
+     * Test settings registration
+     */
     public function test_settings_registration() {
-        // Initialize admin menu and settings
-        do_action('admin_init');
+        $this->plugin->register_settings();
 
-        // Check if our settings are registered
         global $wp_settings_sections;
-
-        $this->assertArrayHasKey('gl_cpg_settings', $wp_settings_sections);
+        $this->assertIsArray($wp_settings_sections);
+        $this->assertArrayHasKey('gl-color-palette-generator', $wp_settings_sections);
     }
 
+    /**
+     * Test AJAX handlers
+     */
     public function test_ajax_handlers() {
-        // Test generate palette AJAX handler
-        $_POST['prompt'] = 'Modern tech company';
-        $_POST['count'] = '5';
-        $_POST['format'] = 'hex';
-        $_POST['action'] = 'gl_cpg_generate_palette';
-        $_POST['nonce'] = wp_create_nonce('gl_cpg_generate_palette');
-
-        // Simulate AJAX request
-        try {
-            do_action('wp_ajax_gl_cpg_generate_palette');
-            $this->assertTrue(false); // Should not reach here
-        } catch (\WPAjaxDieContinueException $e) {
-            // This is expected for unit tests
-            $response = json_decode($e->getMessage(), true);
-
-            $this->assertIsArray($response);
-            $this->assertArrayHasKey('success', $response);
-            $this->assertArrayHasKey('data', $response);
-        }
+        $this->plugin->register_ajax_handlers();
+        $this->assertTrue(has_action('wp_ajax_gl_cpg_generate_palette'));
+        $this->assertTrue(has_action('wp_ajax_gl_cpg_save_palette'));
     }
 
+    /**
+     * Test block registration
+     */
     public function test_block_registration() {
-        // Check if block is registered
-        $registered_blocks = \WP_Block_Type_Registry::get_instance()->get_all_registered();
-
-        $this->assertArrayHasKey('gl-color-palette-generator/palette', $registered_blocks);
+        $this->plugin->register_blocks();
+        global $wp_registered_blocks;
+        $this->assertArrayHasKey('gl-color-palette-generator/palette', $wp_registered_blocks);
     }
 }

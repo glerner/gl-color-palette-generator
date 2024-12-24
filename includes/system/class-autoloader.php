@@ -44,6 +44,8 @@ class Autoloader {
         $file_path = $this->get_file_path($class_name);
         if (file_exists($file_path)) {
             require_once $file_path;
+        } else {
+            error_log("Failed to load class: $class_name at path: $file_path");
         }
     }
 
@@ -54,24 +56,38 @@ class Autoloader {
      * @return string File path
      */
     private function get_file_path($class_name) {
+        // Remove namespace prefix
         $class_name = str_replace('GL_Color_Palette_Generator\\', '', $class_name);
-        $class_path = strtolower($class_name);
-        $class_path = str_replace('_', '-', $class_path);
-        $class_path = str_replace('\\', '/', $class_path);
 
-        // Add appropriate prefix based on type
-        $class_parts = explode('/', $class_path);
-        $class_file = end($class_parts);
+        // Split into parts
+        $parts = explode('\\', $class_name);
 
-        if (strpos($class_path, 'traits/') !== false) {
-            $class_path = str_replace($class_file, 'trait-' . $class_file, $class_path);
-        } elseif (strpos($class_path, 'interfaces/') !== false) {
-            $class_path = str_replace($class_file, 'interface-' . $class_file, $class_path);
-        } else {
-            $class_path = str_replace($class_file, 'class-' . $class_file, $class_path);
+        // Get the actual class name (last part)
+        $class_name = array_pop($parts);
+
+        // Convert directory names to lowercase and hyphenated
+        $parts = array_map(function($part) {
+            return strtolower(str_replace('_', '-', $part));
+        }, $parts);
+
+        // Build path
+        $path = $this->base_dir . 'includes/';
+        if (!empty($parts)) {
+            $path .= implode('/', $parts) . '/';
         }
 
-        return $this->base_dir . 'includes/' . $class_path . '.php';
+        // Determine file prefix based on type
+        $prefix = 'class-';
+        if (strpos($path, 'interfaces/') !== false) {
+            $prefix = 'interface-';
+        } elseif (strpos($path, 'traits/') !== false) {
+            $prefix = 'trait-';
+        }
+
+        // Convert class name to file name format
+        $file_name = $prefix . strtolower(str_replace('_', '-', $class_name)) . '.php';
+
+        return $path . $file_name;
     }
 }
 

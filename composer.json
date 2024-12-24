@@ -30,10 +30,13 @@
     "autoload-dev": {
         "psr-4": {
             "GL_Color_Palette_Generator\\Tests\\": "tests/",
-            "GL_Color_Palette_Generator\\Tests\\Providers\\": "tests/providers/",
+            "GL_Color_Palette_Generator\\Tests\\Bootstrap\\": "tests/bootstrap/",
+            "GL_Color_Palette_Generator\\Tests\\Unit\\": "tests/unit/",
             "GL_Color_Palette_Generator\\Tests\\Integration\\": "tests/integration/",
+            "GL_Color_Palette_Generator\\Tests\\Providers\\": "tests/providers/",
             "GL_Color_Palette_Generator\\Tests\\API\\": "tests/api/",
-            "GL_Color_Palette_Generator\\Tests\\Admin\\": "tests/admin/"
+            "GL_Color_Palette_Generator\\Tests\\Admin\\": "tests/admin/",
+            "GL_Color_Palette_Generator\\Tests\\Color_Management\\": "tests/color-management/"
         }
     },
     "scripts": {
@@ -41,8 +44,8 @@
             "@test:unit",
             "@test:integration"
         ],
-        "test:unit": "phpunit --bootstrap=tests/bootstrap-wp-mock.php --testsuite unit",
-        "test:integration": "phpunit --bootstrap=tests/bootstrap-wp.php --testsuite integration",
+        "test:unit": "phpunit --bootstrap=tests/bootstrap.php --testsuite unit",
+        "test:integration": "phpunit --bootstrap=tests/bootstrap.php --testsuite integration",
         "coverage": "phpunit --coverage-html=coverage",
         "coverage:text": "phpunit --coverage-text",
         "prepare-test": "bash bin/install-wp-tests.sh wordpress_test root root localhost latest",

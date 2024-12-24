@@ -3,15 +3,18 @@
 namespace GL_Color_Palette_Generator\Tests;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Metrics_Analyzer;
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Test_Case;
 
-class Test_Color_Metrics_Analyzer extends TestCase {
+class Test_Color_Metrics_Analyzer extends Test_Case {
     protected $analyzer;
 
     public function setUp(): void {
         parent::setUp();
-        WP_Mock::setUp();
         $this->analyzer = new Color_Metrics_Analyzer();
+    }
+
+    public function tearDown(): void {
+        parent::tearDown();
     }
 
     public function test_analyze_readability() {

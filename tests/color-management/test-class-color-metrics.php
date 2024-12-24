@@ -8,17 +8,17 @@
 
 namespace GL_Color_Palette_Generator\Tests\Color_Management;
 
-use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Color_Management\Color_Metrics;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
+use GL_Color_Palette_Generator\Tests\Test_Case;
 use WP_Error;
 use Mockery;
 
 /**
  * Class Test_Color_Metrics
  */
-class Test_Color_Metrics extends TestCase implements Color_Constants {
+class Test_Color_Metrics extends Test_Case implements Color_Constants {
     /**
      * Test instance
      *
@@ -29,27 +29,24 @@ class Test_Color_Metrics extends TestCase implements Color_Constants {
     /**
      * Mock color utility
      *
-     * @var Color_Utility|Mockery\MockInterface
+     * @var Color_Utility
      */
-    private $color_util_mock;
+    private $color_utility;
 
     /**
      * Set up test environment
      */
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
 
-        // Create mocks
-        $this->color_util_mock = Mockery::mock('GL_Color_Palette_Generator\Color_Management\Color_Utility');
-
-        // Create instance
-        $this->instance = new Color_Metrics();
+        $this->color_utility = Mockery::mock(Color_Utility::class);
+        $this->instance = new Color_Metrics($this->color_utility);
     }
 
     /**
-     * Tear down test environment
+     * Clean up test environment
      */
-    public function tearDown(): void {
+    protected function tearDown(): void {
         Mockery::close();
         parent::tearDown();
     }

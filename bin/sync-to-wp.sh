@@ -76,5 +76,5 @@ else
 fi
 
 # Return to plugin destination directory
-echo "Plugin files synced to: $PLUGIN_DEST. Done (if all went well).\n\n"
+echo -e "Plugin files synced to: $PLUGIN_DEST. \nDone (if all went well).\n"
 cd "$PLUGIN_DEST"

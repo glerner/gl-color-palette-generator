@@ -3,18 +3,18 @@
  * Accessibility Checker Class
  *
  * @package GL_Color_Palette_Generator
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
+ * @subpackage Color_Management
  */
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
+use GL_Color_Palette_Generator\Interfaces\Accessibility_Checker as Accessibility_Checker_Interface;
 
 /**
  * Class Accessibility_Checker
  */
-class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Accessibility_Checker {
+class Accessibility_Checker implements Accessibility_Checker_Interface, Color_Constants {
 
     /**
      * Check color combination accessibility
@@ -23,16 +23,16 @@ class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Ac
      * @param string $background Background color hex.
      * @return array Accessibility results.
      */
-    public function check_combination($foreground, $background) {
+    public function check_combination(string $foreground, string $background): array {
         $contrast_ratio = $this->calculate_contrast_ratio($foreground, $background);
 
         return [
             'contrast_ratio' => round($contrast_ratio, 2),
-            'aa_large' => $this->meets_aa_large($foreground, $background),
-            'aa_small' => $this->meets_aa_small($foreground, $background),
-            'aaa_large' => $this->meets_aaa_large($foreground, $background),
-            'aaa_small' => $this->meets_aaa_small($foreground, $background),
-            'readable' => $this->meets_aa_large($foreground, $background),
+            'aa_large' => $contrast_ratio >= self::WCAG_CONTRAST_AA_LARGE,
+            'aa_small' => $contrast_ratio >= self::WCAG_CONTRAST_AA,
+            'aaa_large' => $contrast_ratio >= self::WCAG_CONTRAST_AA,
+            'aaa_small' => $contrast_ratio >= self::WCAG_CONTRAST_AAA,
+            'readable' => $contrast_ratio >= self::WCAG_CONTRAST_AA_LARGE,
             'recommendations' => $this->get_recommendations($contrast_ratio)
         ];
     }
@@ -43,11 +43,11 @@ class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Ac
      * @param array $colors Array of hex colors.
      * @return array Accessibility results for all combinations.
      */
-    public function check_palette($colors) {
+    public function check_palette(array $palette): array {
         $results = [];
 
-        foreach ($colors as $i => $color1) {
-            foreach ($colors as $j => $color2) {
+        foreach ($palette as $i => $color1) {
+            foreach ($palette as $j => $color2) {
                 if ($i >= $j) continue;
 
                 $results[] = [
@@ -59,9 +59,44 @@ class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Ac
 
         return [
             'combinations' => $results,
-            'overall_score' => $this->calculate_overall_score($results),
+            'overall_score' => $this->calculate_score($palette),
             'recommendations' => $this->get_palette_recommendations($results)
         ];
+    }
+
+    /**
+     * Calculate accessibility score for a color palette
+     *
+     * @param array $palette Array of hex color values
+     * @return float Score between 0 and 1
+     */
+    public function calculate_score(array $palette): float {
+        $combinations = [];
+        foreach ($palette as $i => $color1) {
+            foreach ($palette as $j => $color2) {
+                if ($i >= $j) continue;
+                $combinations[] = $this->check_combination($color1, $color2);
+            }
+        }
+
+        if (empty($combinations)) {
+            return 1.0;
+        }
+
+        $total_score = array_reduce($combinations, function($score, $combo) {
+            $ratio = $combo['contrast_ratio'];
+            $weight = 1.0;
+            
+            // Weight based on WCAG criteria
+            if ($ratio >= self::WCAG_CONTRAST_AAA) $weight = 1.0;     // Perfect - AAA
+            elseif ($ratio >= self::WCAG_CONTRAST_AA) $weight = 0.8;  // Good - AA
+            elseif ($ratio >= self::WCAG_CONTRAST_AA_LARGE) $weight = 0.5; // Fair - AA Large
+            else $weight = 0.2;                                        // Poor
+            
+            return $score + $weight;
+        }, 0.0);
+
+        return $total_score / count($combinations);
     }
 
     /**
@@ -101,257 +136,69 @@ class Accessibility_Checker implements \GL_Color_Palette_Generator\Interfaces\Ac
     }
 
     /**
-     * Convert hex to RGB
+     * Convert hex color to RGB array
      *
      * @param string $hex_color Hex color code.
      * @return array RGB values.
      */
     private function hex_to_rgb($hex_color) {
         $hex = ltrim($hex_color, '#');
-        return [
-            hexdec(substr($hex, 0, 2)),
-            hexdec(substr($hex, 2, 2)),
-            hexdec(substr($hex, 4, 2))
-        ];
-    }
-
-    /**
-     * Check if a color combination meets WCAG AAA requirements for large text
-     *
-     * @param string $color1 First color in hex format
-     * @param string $color2 Second color in hex format
-     * @return bool True if meets requirements, false otherwise
-     */
-    public function meets_aaa_large($color1, $color2) {
-        $ratio = $this->calculate_contrast_ratio($color1, $color2);
-        return $ratio >= Color_Constants::WCAG_CONTRAST_AA;
-    }
-
-    /**
-     * Check if a color combination meets WCAG AAA requirements for small text
-     *
-     * @param string $color1 First color in hex format
-     * @param string $color2 Second color in hex format
-     * @return bool True if meets requirements, false otherwise
-     */
-    public function meets_aaa_small($color1, $color2) {
-        $ratio = $this->calculate_contrast_ratio($color1, $color2);
-        return $ratio >= Color_Constants::WCAG_CONTRAST_AAA;
-    }
-
-    /**
-     * Check if a color combination meets WCAG AA requirements for large text
-     *
-     * @param string $color1 First color in hex format
-     * @param string $color2 Second color in hex format
-     * @return bool True if meets requirements, false otherwise
-     */
-    public function meets_aa_large($color1, $color2) {
-        $ratio = $this->calculate_contrast_ratio($color1, $color2);
-        return $ratio >= Color_Constants::WCAG_CONTRAST_AA_LARGE;
-    }
-
-    /**
-     * Check if a color combination meets WCAG AA requirements for small text
-     *
-     * @param string $color1 First color in hex format
-     * @param string $color2 Second color in hex format
-     * @return bool True if meets requirements, false otherwise
-     */
-    public function meets_aa_small($color1, $color2) {
-        $ratio = $this->calculate_contrast_ratio($color1, $color2);
-        return $ratio >= Color_Constants::WCAG_CONTRAST_AA;
-    }
-
-    /**
-     * Get recommendations based on contrast ratio
-     *
-     * @param float $ratio Contrast ratio.
-     * @return array Recommendations.
-     */
-    private function get_recommendations($ratio) {
-        $recommendations = [];
-
-        if ($ratio < Color_Constants::WCAG_CONTRAST_AA) {
-            $recommendations[] = __('Increase contrast for better readability', 'gl-color-palette-generator');
-        }
-
-        if ($ratio < Color_Constants::WCAG_CONTRAST_AA) {
-            $recommendations[] = __('Not suitable for body text', 'gl-color-palette-generator');
-        }
-
-        if ($ratio < Color_Constants::WCAG_CONTRAST_AAA) {
-            $recommendations[] = __('Consider using larger text sizes', 'gl-color-palette-generator');
-        }
-
-        return $recommendations;
-    }
-
-    /**
-     * Calculate overall accessibility score for palette
-     *
-     * @param array $results Accessibility results.
-     * @return int Score from 0-100.
-     */
-    private function calculate_overall_score($results) {
-        if (empty($results)) return 0;
-
-        $total_score = 0;
-        foreach ($results as $result) {
-            $ratio = $result['results']['contrast_ratio'];
-            $score = 0;
-
-            if ($ratio >= Color_Constants::WCAG_CONTRAST_AAA) $score = 100;
-            elseif ($ratio >= Color_Constants::WCAG_CONTRAST_AA) $score = 90;
-            elseif ($ratio >= Color_Constants::WCAG_CONTRAST_AA) $score = 80;
-            elseif ($ratio >= Color_Constants::WCAG_CONTRAST_AA_LARGE) $score = 70;
-            else $score = min(60, max(0, round($ratio * 10)));
-
-            $total_score += $score;
-        }
-
-        return round($total_score / count($results));
-    }
-
-    /**
-     * Get recommendations for entire palette
-     *
-     * @param array $results Accessibility results.
-     * @return array Recommendations.
-     */
-    private function get_palette_recommendations($results) {
-        $recommendations = [];
-        $failing_pairs = [];
-
-        foreach ($results as $result) {
-            if ($result['results']['contrast_ratio'] < Color_Constants::WCAG_CONTRAST_AA) {
-                $failing_pairs[] = sprintf(
-                    __('Colors %s and %s have insufficient contrast', 'gl-color-palette-generator'),
-                    $result['colors'][0],
-                    $result['colors'][1]
-                );
-            }
-        }
-
-        if (!empty($failing_pairs)) {
-            $recommendations[] = __('Consider adjusting these color pairs:', 'gl-color-palette-generator');
-            $recommendations = array_merge($recommendations, $failing_pairs);
-        }
-
-        return $recommendations;
-    }
-
-    /**
-     * Check if a color meets optimal contrast requirements
-     *
-     * @param string $color1 First color hex.
-     * @param string $color2 Second color hex.
-     * @param bool   $is_decorative Whether the color is for decorative purposes.
-     * @return array Analysis results.
-     */
-    public function analyze_contrast($color1, $color2, $is_decorative = false) {
-        $contrast_ratio = $this->calculate_contrast_ratio($color1, $color2);
-        $min_required = $is_decorative ? Color_Constants::DECORATIVE_CONTRAST_MIN : Color_Constants::WCAG_CONTRAST_AA;
-
-        return [
-            'contrast_ratio' => round($contrast_ratio, 2),
-            'meets_minimum' => $contrast_ratio >= $min_required,
-            'meets_optimal' => $contrast_ratio >= Color_Constants::WCAG_CONTRAST_TARGET,
-            'is_too_harsh' => $contrast_ratio > Color_Constants::CONTRAST_MAX,
-            'needs_adjustment' => $contrast_ratio < $min_required || $contrast_ratio > Color_Constants::CONTRAST_MAX,
-            'target_contrast' => $this->calculate_target_contrast($contrast_ratio, $is_decorative)
-        ];
-    }
-
-    /**
-     * Calculate ideal target contrast based on current ratio
-     *
-     * @param float $current_ratio Current contrast ratio.
-     * @param bool  $is_decorative Whether the color is decorative.
-     * @return float Target contrast ratio.
-     */
-    private function calculate_target_contrast($current_ratio, $is_decorative) {
-        if ($is_decorative) {
-            return max(Color_Constants::DECORATIVE_CONTRAST_MIN, min($current_ratio, Color_Constants::WCAG_CONTRAST_AA_LARGE));
-        }
-
-        if ($current_ratio < Color_Constants::WCAG_CONTRAST_AA) {
-            return Color_Constants::WCAG_CONTRAST_AA;
-        } elseif ($current_ratio > Color_Constants::CONTRAST_MAX) {
-            return Color_Constants::CONTRAST_MAX;
-        } elseif ($current_ratio < Color_Constants::WCAG_CONTRAST_TARGET) {
-            return Color_Constants::WCAG_CONTRAST_TARGET;
-        }
-
-        return $current_ratio;
-    }
-
-    /**
-     * Analyze color luminance characteristics
-     *
-     * @param string $color Hex color code.
-     * @return array Color analysis results.
-     */
-    public function analyze_color($color) {
-        $luminance = $this->get_relative_luminance($color);
-        $rgb = $this->hex_to_rgb($color);
-
-        return [
-            'luminance' => round($luminance, 3),
-            'is_light' => $luminance > 0.5,
-            'is_very_light' => $luminance >= Color_Constants::LIGHT_LUMINANCE_THRESHOLD,
-            'is_very_dark' => $luminance <= Color_Constants::DARK_LUMINANCE_THRESHOLD,
-            'rgb' => $rgb,
-            'perceived_brightness' => $this->calculate_perceived_brightness($rgb)
-        ];
-    }
-
-    /**
-     * Calculate perceived brightness using HSP color model
-     *
-     * @param array $rgb RGB color values.
-     * @return float Perceived brightness value (0-1).
-     */
-    private function calculate_perceived_brightness($rgb) {
-        // HSP (Highly Sensitive Perceived brightness) color model coefficients
-        $sqrt_r = 0.299;
-        $sqrt_g = 0.587;
-        $sqrt_b = 0.114;
-
-        return sqrt(
-            $sqrt_r * ($rgb[0] / 255) ** 2 +
-            $sqrt_g * ($rgb[1] / 255) ** 2 +
-            $sqrt_b * ($rgb[2] / 255) ** 2
-        );
+        return array_map('hexdec', [
+            substr($hex, 0, 2),
+            substr($hex, 2, 2),
+            substr($hex, 4, 2)
+        ]);
     }
 
     /**
      * Get recommendations for improving contrast
      *
-     * @param float $contrast_ratio Current contrast ratio.
-     * @return array Recommendations for improvement.
+     * @param float $ratio Current contrast ratio.
+     * @return array Recommendations.
      */
-    private function get_recommendations_for_improvement($contrast_ratio) {
+    private function get_recommendations($ratio) {
         $recommendations = [];
 
-        if ($contrast_ratio < Color_Constants::WCAG_CONTRAST_AA) {
-            $recommendations[] = [
-                'priority' => 'high',
-                'message' => 'Increase contrast to meet WCAG AA minimum (4.5:1)',
-                'target' => Color_Constants::WCAG_CONTRAST_AA
-            ];
-        } elseif ($contrast_ratio < Color_Constants::WCAG_CONTRAST_TARGET) {
-            $recommendations[] = [
-                'priority' => 'medium',
-                'message' => 'Consider increasing contrast to meet WCAG AAA (7:1)',
-                'target' => Color_Constants::WCAG_CONTRAST_TARGET
-            ];
-        } elseif ($contrast_ratio > Color_Constants::CONTRAST_MAX) {
-            $recommendations[] = [
-                'priority' => 'low',
-                'message' => 'Consider reducing contrast to prevent visual strain',
-                'target' => Color_Constants::CONTRAST_MAX
-            ];
+        if ($ratio < self::WCAG_CONTRAST_AA_LARGE) {
+            $recommendations[] = 'Colors do not meet minimum contrast requirements. Consider using darker/lighter variants.';
+        } elseif ($ratio < self::WCAG_CONTRAST_AA) {
+            $recommendations[] = 'Colors meet only large text requirements. Consider increasing contrast for better readability.';
+        } elseif ($ratio < self::WCAG_CONTRAST_AAA) {
+            $recommendations[] = 'Colors meet AA requirements but could be improved for AAA compliance.';
+        } elseif ($ratio > self::CONTRAST_MAX) {
+            $recommendations[] = 'Contrast may be too high for visual comfort. Consider reducing for better readability.';
+        }
+
+        return $recommendations;
+    }
+
+    /**
+     * Get recommendations for improving palette accessibility
+     *
+     * @param array $results Palette check results.
+     * @return array Recommendations.
+     */
+    private function get_palette_recommendations($results) {
+        $recommendations = [];
+        $low_contrast_pairs = [];
+
+        foreach ($results as $result) {
+            if (!$result['results']['aa_small']) {
+                $low_contrast_pairs[] = sprintf(
+                    '%s and %s (ratio: %.2f, target: %.1f)',
+                    $result['colors'][0],
+                    $result['colors'][1],
+                    $result['results']['contrast_ratio'],
+                    self::WCAG_CONTRAST_AA
+                );
+            }
+        }
+
+        if (!empty($low_contrast_pairs)) {
+            $recommendations[] = sprintf(
+                'The following color pairs need higher contrast: %s',
+                implode(', ', $low_contrast_pairs)
+            );
         }
 
         return $recommendations;

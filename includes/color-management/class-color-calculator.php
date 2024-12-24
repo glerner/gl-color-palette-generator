@@ -13,7 +13,7 @@
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
-use GL_Color_Palette_Generator\Interfaces\Color_Calculator_Interface;
+use GL_Color_Palette_Generator\Interfaces;
 use GL_Color_Palette_Generator\Types\Color_Types;
 use GL_Color_Palette_Generator\Types\Calculator_Types;
 use GL_Color_Palette_Generator\Traits\Error_Handler;
@@ -30,7 +30,7 @@ use GL_Color_Palette_Generator\Traits\Logger;
  *
  * @since 1.0.0
  */
-class Color_Calculator implements Color_Calculator_Interface {
+class Color_Calculator implements Interfaces\Color_Calculator {
     use Error_Handler, Logger;
 
     /**
@@ -42,21 +42,12 @@ class Color_Calculator implements Color_Calculator_Interface {
     private $color_utility;
 
     /**
-     * Settings manager instance
-     *
-     * @var Settings_Manager
-     * @since 1.0.0
-     */
-    private $settings;
-
-    /**
      * Constructor
      *
      * @since 1.0.0
      */
     public function __construct() {
         $this->color_utility = new Color_Utility();
-        $this->settings = new Settings_Manager();
     }
 
     /**

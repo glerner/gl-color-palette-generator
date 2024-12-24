@@ -3,15 +3,15 @@
  * Provider Integration Test Base Class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Integration
+ * @subpackage Tests
  * @since 1.0.0
+ * @bootstrap wp
  */
 
-namespace GL_Color_Palette_Generator\Tests\Integration;
+namespace GL_Color_Palette_Generator\Tests;
 
-use WP_UnitTestCase;
-use GL_Color_Palette_Generator\Providers\Provider;
 use WP_Error;
+use GL_Color_Palette_Generator\Providers\Provider;
 
 /**
  * Base class for provider integration tests
@@ -22,7 +22,7 @@ use WP_Error;
  *
  * @since 1.0.0
  */
-abstract class Test_Provider_Integration extends WP_UnitTestCase {
+abstract class Test_Provider_Integration extends Test_Case_Integration {
     /**
      * The provider instance being tested
      *
@@ -53,8 +53,8 @@ abstract class Test_Provider_Integration extends WP_UnitTestCase {
      * Tear down the test environment after each test
      */
     public function tearDown(): void {
-        parent::tearDown();
         $this->provider = null;
+        parent::tearDown();
     }
 
     /**
@@ -66,9 +66,11 @@ abstract class Test_Provider_Integration extends WP_UnitTestCase {
      * @return void
      */
     protected function maybe_skip_test(): void {
-        $creds = $this->get_test_credentials();
-        if (empty($creds['api_key'])) {
-            $this->markTestSkipped('API credentials not available');
+        $credentials = $this->get_test_credentials();
+        foreach ($credentials as $key => $value) {
+            if (empty($value)) {
+                $this->markTestSkipped("Missing required credential: $key");
+            }
         }
     }
 
@@ -85,13 +87,47 @@ abstract class Test_Provider_Integration extends WP_UnitTestCase {
     /**
      * Asserts that the given value is not a WP_Error instance
      *
-     * @param mixed $actual The value to check
+     * @param mixed  $actual  The value to check
      * @param string $message Optional error message
      */
     public function assertNotWPError($actual, $message = '') {
-        $this->assertFalse(
-            is_wp_error($actual),
-            $message ?: ($actual instanceof WP_Error ? $actual->get_error_message() : '')
+        $this->assertNotInstanceOf(
+            WP_Error::class,
+            $actual,
+            $message ?: 'Value is an instance of WP_Error'
+        );
+    }
+
+    /**
+     * Assert that a palette has valid colors
+     *
+     * @param array $palette The palette to check
+     */
+    protected function assertValidPalette($palette) {
+        $this->assertIsArray($palette, 'Palette should be an array');
+        $this->assertNotEmpty($palette, 'Palette should not be empty');
+        
+        foreach ($palette as $color) {
+            $this->assertMatchesRegularExpression(
+                '/^#[0-9A-F]{6}$/i',
+                $color,
+                "Color '$color' is not a valid hex color"
+            );
+        }
+    }
+
+    /**
+     * Assert that colors in a palette meet WCAG contrast requirements
+     *
+     * @param array $palette The palette to check
+     */
+    protected function assertPaletteAccessible($palette) {
+        $analyzer = new \GL_Color_Palette_Generator\Core\Color_Metrics_Analyzer();
+        $results = $analyzer->check_accessibility($palette);
+        
+        $this->assertTrue(
+            $results['WCAG_AA'],
+            'Palette colors should meet WCAG AA contrast requirements'
         );
     }
 }

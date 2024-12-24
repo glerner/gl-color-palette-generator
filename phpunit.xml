@@ -6,7 +6,6 @@
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
-         bootstrap="tests/bootstrap.php"
          >
     <coverage processUncoveredFiles="true">
         <include>
@@ -30,21 +29,16 @@
     </php>
     <testsuites>
         <testsuite name="unit">
-            <directory prefix="test-" suffix=".php">tests/providers</directory>
-            <directory prefix="test-" suffix=".php">tests/api</directory>
-            <directory prefix="test-" suffix=".php">tests/admin</directory>
-            <directory prefix="test-" suffix=".php">tests/core</directory>
-            <directory prefix="test-" suffix=".php">tests/color-management</directory>
-            <directory prefix="test-" suffix=".php">tests/generators</directory>
-            <directory prefix="test-" suffix=".php">tests/includes</directory>
-            <directory prefix="test-" suffix=".php">tests/security</directory>
-            <directory prefix="test-" suffix=".php">tests/settings</directory>
-            <directory prefix="test-" suffix=".php">tests/utils</directory>
-            <exclude>tests/integration</exclude>
+            <directory suffix=".php">./tests/color-management</directory>
+            <directory suffix=".php">./tests/core</directory>
+            <directory suffix=".php">./tests/generators</directory>
+            <directory suffix=".php">./tests/providers</directory>
+            <directory suffix=".php">./tests/settings</directory>
+            <directory suffix=".php">./tests/security</directory>
+            <exclude>./tests/integration</exclude>
         </testsuite>
         <testsuite name="integration">
-            <directory prefix="test-" suffix=".php">tests/integration</directory>
-            <file phpVersion="8.1" phpVersionOperator=">=">tests/bootstrap-wp.php</file>
+            <directory suffix=".php">./tests/integration</directory>
         </testsuite>
     </testsuites>
 </phpunit>

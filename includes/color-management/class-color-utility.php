@@ -13,8 +13,8 @@
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
-use GL_Color_Palette_Generator\Interfaces\Color_Utility_Interface;
 use GL_Color_Palette_Generator\Types\Color_Types;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use GL_Color_Palette_Generator\Traits\Error_Handler;
 use GL_Color_Palette_Generator\Traits\Logger;
 
@@ -29,7 +29,7 @@ use GL_Color_Palette_Generator\Traits\Logger;
  *
  * @since 1.0.0
  */
-class Color_Utility implements Color_Utility_Interface {
+class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Utility {
     use Error_Handler, Logger;
 
     /**
@@ -125,6 +125,77 @@ class Color_Utility implements Color_Utility_Interface {
     }
 
     /**
+     * Convert HSL to RGB color space
+     *
+     * @param array $hsl HSL values [h, s, l]
+     * @return array RGB values [r, g, b]
+     * @since 1.0.0
+     */
+    public function hsl_to_rgb(array $hsl): array {
+        $h = $hsl['h'] / 360;
+        $s = $hsl['s'] / 100;
+        $l = $hsl['l'] / 100;
+
+        if ($s == 0) {
+            $r = $g = $b = $l;
+        } else {
+            $q = $l < 0.5 ? $l * (1 + $s) : $l + $s - $l * $s;
+            $p = 2 * $l - $q;
+
+            $r = $this->hue_to_rgb($p, $q, $h + 1/3);
+            $g = $this->hue_to_rgb($p, $q, $h);
+            $b = $this->hue_to_rgb($p, $q, $h - 1/3);
+        }
+
+        return [
+            'r' => round($r * 255),
+            'g' => round($g * 255),
+            'b' => round($b * 255)
+        ];
+    }
+
+    /**
+     * Helper function to convert hue to RGB
+     * Used by hsl_to_rgb()
+     *
+     * @param float $p
+     * @param float $q
+     * @param float $t
+     * @return float
+     */
+    private function hue_to_rgb(float $p, float $q, float $t): float {
+        if ($t < 0) $t += 1;
+        if ($t > 1) $t -= 1;
+        if ($t < 1/6) return $p + ($q - $p) * 6 * $t;
+        if ($t < 1/2) return $q;
+        if ($t < 2/3) return $p + ($q - $p) * (2/3 - $t) * 6;
+        return $p;
+    }
+
+    /**
+     * Calculate relative luminance of a color
+     * According to WCAG 2.0 definition
+     *
+     * @param string $color Color in hex format
+     * @return float Relative luminance value
+     * @since 1.0.0
+     */
+    public function calculate_relative_luminance(string $color): float {
+        $rgb = $this->hex_to_rgb($color);
+        
+        // Convert to sRGB
+        $rgb = array_map(function($val) {
+            $val = $val / 255;
+            return $val <= 0.03928 
+                ? $val / 12.92 
+                : pow(($val + 0.055) / 1.055, 2.4);
+        }, $rgb);
+
+        // Calculate luminance using WCAG coefficients
+        return 0.2126 * $rgb['r'] + 0.7152 * $rgb['g'] + 0.0722 * $rgb['b'];
+    }
+
+    /**
      * Convert hex color to Lab color space
      *
      * @param string $hex_color Hex color code.
@@ -151,13 +222,13 @@ class Color_Utility implements Color_Utility_Interface {
     private function rgb_to_xyz(array $rgb): array {
         $rgb = array_map(function($value) {
             $value = $value / 255;
-            return $value <= 0.04045 
-                ? $value / 12.92 
+            return $value <= 0.04045
+                ? $value / 12.92
                 : pow(($value + 0.055) / 1.055, 2.4);
         }, $rgb);
 
         $matrix = Color_Constants::COLOR_SPACE_CONVERSION['rgb_to_xyz'];
-        
+
         return [
             'x' => $matrix[0][0] * $rgb['r'] + $matrix[0][1] * $rgb['g'] + $matrix[0][2] * $rgb['b'],
             'y' => $matrix[1][0] * $rgb['r'] + $matrix[1][1] * $rgb['g'] + $matrix[1][2] * $rgb['b'],
@@ -173,7 +244,7 @@ class Color_Utility implements Color_Utility_Interface {
      */
     private function xyz_to_rgb(array $xyz): array {
         $matrix = Color_Constants::COLOR_SPACE_CONVERSION['xyz_to_rgb'];
-        
+
         $rgb = [
             'r' => $matrix[0][0] * $xyz['x'] + $matrix[0][1] * $xyz['y'] + $matrix[0][2] * $xyz['z'],
             'g' => $matrix[1][0] * $xyz['x'] + $matrix[1][1] * $xyz['y'] + $matrix[1][2] * $xyz['z'],
@@ -181,8 +252,8 @@ class Color_Utility implements Color_Utility_Interface {
         ];
 
         return array_map(function($value) {
-            $value = $value <= 0.0031308 
-                ? 12.92 * $value 
+            $value = $value <= 0.0031308
+                ? 12.92 * $value
                 : 1.055 * pow($value, 1/2.4) - 0.055;
             return round(max(0, min(255, $value * 255)));
         }, $rgb);
@@ -201,20 +272,22 @@ class Color_Utility implements Color_Utility_Interface {
         $ref_y = 1.00000;
         $ref_z = 1.08883;
 
+        // Scale XYZ values
         $xyz['x'] /= $ref_x;
         $xyz['y'] /= $ref_y;
         $xyz['z'] /= $ref_z;
 
-        foreach ($xyz as &$val) {
-            $val = ($val > 0.008856)
-                ? pow($val, 1/3)
-                : (7.787 * $val) + (16/116);
-        }
+        // Convert scaled values
+        $xyz = array_map(function($value) {
+            return $value > 0.008856
+                ? pow($value, 1/3)
+                : (7.787 * $value) + (16/116);
+        }, $xyz);
 
         return [
             'l' => (116 * $xyz['y']) - 16,
             'a' => 500 * ($xyz['x'] - $xyz['y']),
-            'b' => 200 * ($xyz['y'] - $xyz['z']),
+            'b' => 200 * ($xyz['y'] - $xyz['z'])
         ];
     }
 

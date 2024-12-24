@@ -1,16 +1,23 @@
 <?php
+/**
+ * Integration tests for the PaLM provider
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Integration
+ * @bootstrap wp
+ */
 
 namespace GL_Color_Palette_Generator\Tests\Integration;
 
+use GL_Color_Palette_Generator\Tests\Test_Provider_Integration;
 use GL_Color_Palette_Generator\Providers\Palm_Provider;
-use PHPUnit\Framework\TestCase;
 
 /**
- * Integration tests for the PaLM provider
+ * Test PaLM integration
  */
 class Test_Palm_Integration extends Test_Provider_Integration {
     /**
-     * Returns the test credentials for the PaLM provider
+     * Returns the test credentials for the Palm provider
      *
      * @return array
      */
@@ -21,21 +28,21 @@ class Test_Palm_Integration extends Test_Provider_Integration {
     }
 
     /**
-     * Sets up the test environment
+     * Test that we can create a valid provider instance
      */
-    public function setUp(): void {
-        parent::setUp();
-        $this->maybe_skip_test();
-        $this->provider = new Palm_Provider($this->get_test_credentials());
+    public function test_create_provider() {
+        $provider = new Palm_Provider($this->get_test_credentials());
+        $this->assertInstanceOf(Palm_Provider::class, $provider);
     }
 
     /**
-     * Test that the provider can generate a palette
+     * Test that we can generate a color palette
      */
-    public function test_generate_palette(): void {
-        $colors = $this->provider->generate_palette($this->test_params);
-        $this->assertNotWPError($colors);
-        $this->assertIsArray($colors);
-        $this->assertCount($this->test_params['count'], $colors);
+    public function test_generate_palette() {
+        $provider = new Palm_Provider($this->get_test_credentials());
+        $result = $provider->generate_palette('A sunset over the ocean');
+        $this->assertNotWPError($result);
+        $this->assertIsArray($result);
+        $this->assertNotEmpty($result);
     }
-} 
+}

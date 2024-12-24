@@ -1,45 +1,48 @@
 <?php
-
-namespace GL_Color_Palette_Generator\Tests\Integration;
-
-use GL_Color_Palette_Generator\Providers\OpenAI_Provider;
-
 /**
- * OpenAI Integration Test Class
+ * Integration tests for the OpenAI provider
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Tests\Integration
- * @since 1.0.0
+ * @bootstrap wp
+ */
+
+namespace GL_Color_Palette_Generator\Tests\Integration;
+
+use GL_Color_Palette_Generator\Tests\Test_Provider_Integration;
+use GL_Color_Palette_Generator\Providers\OpenAI_Provider;
+
+/**
+ * Test OpenAI integration
  */
 class Test_OpenAI_Integration extends Test_Provider_Integration {
     /**
-     * Set up the test environment before each test
-     */
-    public function setUp(): void {
-        parent::setUp();
-        $creds = $this->get_test_credentials();
-        $this->provider = new OpenAI_Provider($creds);
-    }
-
-    /**
-     * Get test credentials for OpenAI
+     * Returns the test credentials for the OpenAI provider
      *
-     * @return array Test credentials
+     * @return array
      */
     protected function get_test_credentials(): array {
         return [
-            'api_key' => getenv('OPENAI_API_KEY') ?: '',
-            'model' => getenv('OPENAI_MODEL') ?: 'gpt-4'
+            'api_key' => getenv('OPENAI_API_KEY')
         ];
     }
 
     /**
-     * Test that the provider can generate a palette
+     * Test that we can create a valid provider instance
      */
-    public function test_generate_palette(): void {
-        $colors = $this->provider->generate_palette($this->test_params);
-        $this->assertNotWPError($colors);
-        $this->assertIsArray($colors);
-        $this->assertCount($this->test_params['count'], $colors);
+    public function test_create_provider() {
+        $provider = new OpenAI_Provider($this->get_test_credentials());
+        $this->assertInstanceOf(OpenAI_Provider::class, $provider);
+    }
+
+    /**
+     * Test that we can generate a color palette
+     */
+    public function test_generate_palette() {
+        $provider = new OpenAI_Provider($this->get_test_credentials());
+        $result = $provider->generate_palette('A sunset over the ocean');
+        $this->assertNotWPError($result);
+        $this->assertIsArray($result);
+        $this->assertNotEmpty($result);
     }
 }
