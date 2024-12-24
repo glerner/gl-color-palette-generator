@@ -26,9 +26,21 @@
         <env name="WP_TESTS_DB_USER" value="wordpress"/>
         <env name="WP_TESTS_DB_PASSWORD" value="wordpress"/>
         <env name="WP_TESTS_DB_HOST" value="database"/>
+        <env name="WP_TESTS_DIR" value="/app/wp-content/plugins/wordpress-develop/tests/phpunit"/>
+        <env name="WP_CORE_DIR" value="/app"/>
+        <env name="WP_TESTS_DOMAIN" value="example.org"/>
+        <env name="WP_TESTS_EMAIL" value="admin@example.org"/>
+        <env name="WP_TESTS_TITLE" value="Test Blog"/>
+        <env name="WP_PHP_BINARY" value="php"/>
+        <env name="WP_TESTS_MULTISITE" value="0"/>
+        <env name="DOING_AJAX" value="0"/>
     </php>
     <testsuites>
+        <testsuite name="integration">
+            <directory suffix=".php">./tests/integration/</directory>
+        </testsuite>
         <testsuite name="unit">
+            <directory suffix=".php">./tests/unit/</directory>
             <directory suffix=".php">./tests/color-management</directory>
             <directory suffix=".php">./tests/core</directory>
             <directory suffix=".php">./tests/generators</directory>
@@ -37,8 +49,13 @@
             <directory suffix=".php">./tests/security</directory>
             <exclude>./tests/integration</exclude>
         </testsuite>
-        <testsuite name="integration">
-            <directory suffix=".php">./tests/integration</directory>
-        </testsuite>
     </testsuites>
+    <listeners>
+        <listener class="GL_Color_Palette_Generator\Tests\TestPrinter"/>
+    </listeners>
+    <coverage>
+        <include>
+            <directory suffix=".php">./includes</directory>
+        </include>
+    </coverage>
 </phpunit>

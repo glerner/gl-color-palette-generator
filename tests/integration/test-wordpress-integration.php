@@ -27,13 +27,6 @@ class Test_WordPress_Integration extends Test_Case_Integration {
      * Set up test environment
      */
     public function setUp(): void {
-        // Start output buffering before any potential output
-        ob_start();
-
-        // Prevent header modifications in test environment
-        add_filter('wp_headers', '__return_empty_array');
-        add_filter('nocache_headers', '__return_empty_array');
-
         parent::setUp();
 
         // Initialize plugin
@@ -50,11 +43,6 @@ class Test_WordPress_Integration extends Test_Case_Integration {
      * Clean up test environment
      */
     public function tearDown(): void {
-        // Clean output buffer
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
-
         parent::tearDown();
 
         // Reset menu globals

@@ -50,9 +50,10 @@ echo "\n=== Phase 4: Bootstrap File Loading ===\n";
 $bootstrap_file = __DIR__ . '/bootstrap/' . $bootstrap_type . '.php';
 echo "Loading bootstrap file: $bootstrap_file\n";
 
-if (!file_exists($bootstrap_file)) {
-    echo "ERROR: Bootstrap file not found: $bootstrap_file\n";
-    throw new RuntimeException("Invalid bootstrap type: $bootstrap_type");
+if ( file_exists( $bootstrap_file ) ) {
+    require_once $bootstrap_file;
+    echo "Bootstrap complete.\n";
+} else {
+    echo "Error: Bootstrap file not found: $bootstrap_file\n";
+    exit(1);
 }
-
-require_once $bootstrap_file;
