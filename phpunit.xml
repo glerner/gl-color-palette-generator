@@ -7,27 +7,13 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          >
-    <coverage processUncoveredFiles="true">
-        <include>
-            <directory suffix=".php">includes</directory>
-        </include>
-        <exclude>
-            <directory suffix=".php">vendor</directory>
-            <directory suffix=".php">tests</directory>
-        </exclude>
-        <report>
-            <clover outputFile="build/logs/clover.xml"/>
-            <html outputDirectory="build/coverage"/>
-        </report>
-    </coverage>
     <php>
-        <env name="WP_TESTS_DIR" value="${WP_ROOT}/wordpress-phpunit"/>
+        <env name="WP_TESTS_DIR" value="/app/wp-content/plugins/wordpress-develop/tests/phpunit"/>
+        <env name="WP_CORE_DIR" value="/app"/>
         <env name="WP_TESTS_DB_NAME" value="wordpress_test"/>
         <env name="WP_TESTS_DB_USER" value="wordpress"/>
         <env name="WP_TESTS_DB_PASSWORD" value="wordpress"/>
         <env name="WP_TESTS_DB_HOST" value="database"/>
-        <env name="WP_TESTS_DIR" value="/app/wp-content/plugins/wordpress-develop/tests/phpunit"/>
-        <env name="WP_CORE_DIR" value="/app"/>
         <env name="WP_TESTS_DOMAIN" value="example.org"/>
         <env name="WP_TESTS_EMAIL" value="admin@example.org"/>
         <env name="WP_TESTS_TITLE" value="Test Blog"/>
@@ -53,9 +39,4 @@
     <listeners>
         <listener class="GL_Color_Palette_Generator\Tests\TestPrinter"/>
     </listeners>
-    <coverage>
-        <include>
-            <directory suffix=".php">./includes</directory>
-        </include>
-    </coverage>
 </phpunit>
