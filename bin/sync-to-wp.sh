@@ -1,8 +1,14 @@
 #!/bin/bash
 
+# Load environment variables from .env.testing if it exists
+if [ -f "${PLUGIN_SOURCE}/.env.testing" ]; then
+    # Export all variables from .env.testing
+    export $(cat "${PLUGIN_SOURCE}/.env.testing" | grep -v '^#' | xargs)
+fi
+
 # Define paths (use environment variables if set, otherwise use defaults)
 PLUGIN_SOURCE=${PLUGIN_SOURCE:-"$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"}
-FILESYSTEM_WP_ROOT="/home/george/sites/wordpress"
+FILESYSTEM_WP_ROOT=${FILESYSTEM_WP_ROOT:-"/home/george/sites/wordpress"}
 PLUGIN_DEST="${FILESYSTEM_WP_ROOT}/wp-content/plugins/gl-color-palette-generator"
 WP_TESTS_DIR="${FILESYSTEM_WP_ROOT}/wordpress-phpunit"
 
@@ -33,6 +39,7 @@ rsync -av --delete \
     --exclude=.git/ \
     --exclude=.gitignore \
     --exclude=.env \
+    --exclude=.env.testing \
     --exclude=node_modules/ \
     --exclude=vendor/ \
     --exclude=.lando/ \

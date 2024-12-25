@@ -60,6 +60,18 @@ class Color_AI_Generator implements Color_Generator_Interface {
     private $settings;
 
     /**
+     * Base color for generation
+     * @var string|null
+     */
+    private $base_color = null;
+
+    /**
+     * Generation constraints
+     * @var array
+     */
+    private $constraints = [];
+
+    /**
      * Constructor
      *
      * @param string $api_key OpenAI API key
@@ -500,5 +512,111 @@ class Color_AI_Generator implements Color_Generator_Interface {
     public function generate_system_colors(array $base_colors): array {
         // Implementation coming soon
         return [];
+    }
+
+    /**
+     * Generate a single color based on given parameters.
+     *
+     * @param array $params Optional parameters to influence color generation.
+     * @return string Generated color in hexadecimal format.
+     */
+    public function generate_color(array $params = []): string {
+        // Merge with existing context and constraints
+        $generation_params = array_merge($this->context, $params);
+        
+        try {
+            // Use AI to generate a contextually appropriate color
+            $color = $this->ai_client->generateColor($generation_params);
+            return $this->validate_and_format_color($color);
+        } catch (\Exception $e) {
+            error_log('Color generation failed: ' . $e->getMessage());
+            // Return a fallback color if AI generation fails
+            return '#000000';
+        }
+    }
+
+    /**
+     * Generate multiple colors based on given parameters.
+     *
+     * @param int   $count  Number of colors to generate.
+     * @param array $params Optional parameters to influence color generation.
+     * @return array Array of generated colors in hexadecimal format.
+     */
+    public function generate_colors(int $count, array $params = []): array {
+        $colors = [];
+        $generation_params = array_merge($this->context, $params);
+        
+        try {
+            if ($this->base_color) {
+                $generation_params['base_color'] = $this->base_color;
+            }
+            
+            // Generate palette using AI
+            $colors = $this->ai_client->generatePalette($count, $generation_params);
+            
+            // Validate and format each color
+            return array_map([$this, 'validate_and_format_color'], $colors);
+        } catch (\Exception $e) {
+            error_log('Palette generation failed: ' . $e->getMessage());
+            // Return fallback colors if AI generation fails
+            return array_fill(0, $count, '#000000');
+        }
+    }
+
+    /**
+     * Set the base color for generation.
+     *
+     * @param string $color Base color in hexadecimal format.
+     * @return void
+     */
+    public function set_base_color(string $color): void {
+        $this->base_color = $this->validate_and_format_color($color);
+    }
+
+    /**
+     * Get the current base color.
+     *
+     * @return string|null Current base color in hexadecimal format or null if not set.
+     */
+    public function get_base_color(): ?string {
+        return $this->base_color;
+    }
+
+    /**
+     * Set generation constraints.
+     *
+     * @param array $constraints Array of constraints for color generation.
+     * @return void
+     */
+    public function set_constraints(array $constraints): void {
+        $this->constraints = $constraints;
+    }
+
+    /**
+     * Get current generation constraints.
+     *
+     * @return array Current constraints.
+     */
+    public function get_constraints(): array {
+        return $this->constraints;
+    }
+
+    /**
+     * Validate and format a color to ensure proper hexadecimal format.
+     *
+     * @param string $color Color to validate and format.
+     * @return string Validated and formatted color in hexadecimal format.
+     */
+    private function validate_and_format_color(string $color): string {
+        // Remove any spaces and '#' if present
+        $color = str_replace(['#', ' '], '', $color);
+        
+        // Validate hex format
+        if (!preg_match('/^[0-9A-F]{6}$/i', $color)) {
+            error_log('Invalid color format: ' . $color);
+            return '#000000';
+        }
+        
+        return '#' . strtoupper($color);
     }
 }

@@ -3,6 +3,7 @@
     "description": "AI-powered color palette generator for WordPress",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
+    "prefer-stable": true,
     "authors": [
         {
             "name": "George Lerner",
@@ -23,14 +24,25 @@
         "brain/monkey": "^2.0"
     },
     "autoload": {
-        "psr-4": {
-            "GL_Color_Palette_Generator\\": "includes/"
-        }
+        "classmap": [
+            "includes/"
+        ]
     },
     "autoload-dev": {
-        "psr-4": {
-            "GL_Color_Palette_Generator\\Tests\\": "tests/"
-        }
+        "classmap": [
+            "tests/"
+        ],
+        "exclude-from-classmap": [
+            "tests/wp-tests-config.php",
+            "tests/bootstrap*.php"
+        ]
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        },
+        "optimize-autoloader": true,
+        "sort-packages": true
     },
     "scripts": {
         "test": [
@@ -41,13 +53,13 @@
         "test:integration": "phpunit --bootstrap=tests/bootstrap.php --testsuite integration",
         "coverage": "phpunit --coverage-html=coverage",
         "coverage:text": "phpunit --coverage-text",
-        "prepare-test": "bash bin/install-wp-tests.sh wordpress_test root root localhost latest",
+        "prepare-test": [
+            "@setup-tests",
+            "@regenerate-autoload"
+        ],
+        "setup-tests": "bash bin/install-wp-tests.sh wordpress_test root root localhost latest",
+        "regenerate-autoload": "composer dump-autoload -o",
         "phpcs": "phpcs --standard=WordPress",
         "phpcbf": "phpcbf --standard=WordPress"
-    },
-    "config": {
-        "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        }
     }
 }

@@ -29,13 +29,10 @@ class Ajax_Handler {
         check_ajax_referer('gl_color_palette_generator_nonce', 'nonce');
 
         // Get request parameters
-        $prompt = sanitize_text_field($_POST['prompt'] ?? '');
-        $count = intval($_POST['count'] ?? 5);
-        $format = sanitize_text_field($_POST['format'] ?? 'hex');
+        $image_url = sanitize_text_field($_POST['image_url'] ?? '');
+        $num_colors = intval($_POST['num_colors'] ?? 5);
 
-        // Generate palette
-        $result = ['success' => true, 'data' => []];
-
-        wp_send_json($result);
+        // TODO: Add actual palette generation logic
+        wp_send_json_success(['colors' => []]);
     }
 }

@@ -27,11 +27,8 @@ define('GL_CPG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 // Plugin URL
 define('GL_CPG_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-// Autoloader
-require_once GL_CPG_PLUGIN_DIR . 'includes/system/class-autoloader.php';
-
-// Register autoloader
-\GL_Color_Palette_Generator\System\Autoloader::register();
+// Load Composer's autoloader
+require_once GL_CPG_PLUGIN_DIR . 'vendor/autoload.php';
 
 /**
  * Plugin compatibility check

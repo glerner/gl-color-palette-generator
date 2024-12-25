@@ -27,13 +27,7 @@ echo "\n=== Phase 3: WP_Mock Setup ===\n";
 echo "Initializing WP_Mock\n";
 WP_Mock::bootstrap();
 
-echo "\n=== Phase 4: Plugin Autoloader Setup ===\n";
-echo "Loading plugin autoloader\n";
-require_once dirname(__FILE__) . '/../includes/system/class-autoloader.php';
-$autoloader = new GL_Color_Palette_Generator\System\Autoloader();
-$autoloader->register();
-
-echo "\n=== Phase 5: Test Base Classes Setup ===\n";
+echo "\n=== Phase 4: Test Base Classes Setup ===\n";
 echo "Loading test base classes:\n";
 
 $test_classes = [
@@ -58,7 +52,7 @@ foreach ($test_classes as $file => $class) {
     }
 }
 
-echo "\n=== Phase 6: Mock Classes Setup ===\n";
+echo "\n=== Phase 5: Mock Classes Setup ===\n";
 echo "Loading mock classes:\n";
 $mock_classes = [
     'class-wp-error.php' => 'WP_Error',
@@ -82,7 +76,7 @@ foreach ($mock_classes as $file => $class) {
     }
 }
 
-echo "\n=== Phase 7: WordPress Functions Setup ===\n";
+echo "\n=== Phase 6: WordPress Functions Setup ===\n";
 echo "Defining WordPress functions:\n";
 
 if (!function_exists('esc_html')) {
@@ -152,7 +146,7 @@ if (!function_exists('wp_parse_args')) {
     }
 }
 
-echo "\n=== Phase 8: Constants Setup ===\n";
+echo "\n=== Phase 7: Constants Setup ===\n";
 echo "Defining constants:\n";
 
 if (!defined('ABSPATH')) {

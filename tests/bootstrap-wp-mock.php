@@ -27,13 +27,7 @@ echo "\n=== Phase 3: WP_Mock Setup ===\n";
 echo "Initializing WP_Mock\n";
 WP_Mock::bootstrap();
 
-echo "\n=== Phase 4: Plugin Autoloader Setup ===\n";
-echo "Loading plugin autoloader\n";
-require_once dirname(__DIR__) . '/includes/system/class-autoloader.php';
-$autoloader = new GL_Color_Palette_Generator\System\Autoloader();
-$autoloader->register();
-
-echo "\n=== Phase 5: Test Base Classes Setup ===\n";
+echo "\n=== Phase 4: Test Base Classes Setup ===\n";
 echo "Loading test base classes:\n";
 
 $test_classes = [
@@ -57,7 +51,7 @@ foreach ($test_classes as $file => $class) {
     }
 }
 
-echo "\n=== Phase 6: Mock Classes Setup ===\n";
+echo "\n=== Phase 5: Mock Classes Setup ===\n";
 echo "Loading mock classes:\n";
 $mock_classes = [
     'class-wp-error.php' => 'WP_Error',
@@ -80,7 +74,7 @@ foreach ($mock_classes as $file => $class) {
     }
 }
 
-echo "\n=== Phase 7: Test Autoloader Setup ===\n";
+echo "\n=== Phase 6: Test Autoloader Setup ===\n";
 // Register test autoloader
 spl_autoload_register(function ($class) {
     // Only handle our test namespace
@@ -108,7 +102,7 @@ spl_autoload_register(function ($class) {
     }
 });
 
-echo "\n=== Phase 8: WordPress Functions Setup ===\n";
+echo "\n=== Phase 7: WordPress Functions Setup ===\n";
 if (!function_exists('esc_html')) {
     function esc_html($text) {
         return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
@@ -168,7 +162,7 @@ if (!function_exists('wp_parse_args')) {
     }
 }
 
-echo "\n=== Phase 9: Constants Setup ===\n";
+echo "\n=== Phase 8: Constants Setup ===\n";
 if (!defined('ABSPATH')) {
     define('ABSPATH', dirname(__DIR__) . '/../');
 }
@@ -181,7 +175,7 @@ if (!defined('WP_PLUGIN_DIR')) {
     define('WP_PLUGIN_DIR', WP_CONTENT_DIR . '/plugins');
 }
 
-echo "\n=== Phase 10: Test Classes Setup ===\n";
+echo "\n=== Phase 9: Test Classes Setup ===\n";
 $test_dirs = [
     __DIR__ . '/providers',
     __DIR__ . '/api',

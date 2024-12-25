@@ -9,12 +9,13 @@
 namespace GL_Color_Palette_Generator\Tests\Bootstrap;
 
 // Load Composer autoloader.
-require_once dirname( __DIR__, 2 ) . '/vendor/autoload.php';
+$autoloader = require dirname( __DIR__, 2 ) . '/vendor/autoload.php';
 
-// Load plugin autoloader.
-require_once dirname( __DIR__, 2 ) . '/includes/system/class-autoloader.php';
-$autoloader = new \GL_Color_Palette_Generator\System\Autoloader();
-$autoloader->register();
+// Register additional PSR-4 prefixes if needed
+if ($autoloader instanceof \Composer\Autoload\ClassLoader) {
+    $autoloader->addPsr4('GL_Color_Palette_Generator\\Tests\\', dirname(__DIR__));
+    $autoloader->register();
+}
 
 /**
  * Determine bootstrap type based on test file location or annotation
@@ -65,9 +66,17 @@ function determine_bootstrap_type( $test_file ) {
     return 'wp-mock';
 }
 
-// Load mock classes.
-require_once __DIR__ . '/../mocks/class-wp-error.php';
-require_once __DIR__ . '/../mocks/class-wp-rest-request.php';
+// Load mock classes only if they exist
+$mock_files = [
+    __DIR__ . '/../mocks/class-wp-error.php',
+    __DIR__ . '/../mocks/class-wp-rest-request.php'
+];
+
+foreach ($mock_files as $file) {
+    if (file_exists($file)) {
+        require_once $file;
+    }
+}
 
 // Load test base classes.
 require_once __DIR__ . '/../class-test-case.php';

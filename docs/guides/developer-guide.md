@@ -10,6 +10,29 @@
 - Git
 - Local WordPress development environment (e.g., Local by Flywheel, Lando, MAMP, etc.)
 
+### Environment Configuration
+
+1. Copy the sample testing environment file:
+   ```bash
+   cp .env.sample.testing .env.testing
+   ```
+
+2. Edit `.env.testing` with your local WordPress path:
+   ```bash
+   # Only WordPress path needs to be configured here
+   FILESYSTEM_WP_ROOT=/path/to/your/wordpress
+
+   # Add any AI service API keys if needed
+   OPENAI_API_KEY=your_key_here
+   ```
+
+   Alternatively, you can set the WordPress path as an environment variable:
+   ```bash
+   export FILESYSTEM_WP_ROOT=/path/to/your/wordpress
+   ```
+
+   Note: Other WordPress configuration (database, test settings, etc.) is handled automatically by `bin/setup-plugin-tests.sh`, which gets settings from your Lando environment or wp-config.php.
+
 ### Local Development Setup
 
 1. Clone the repository:
@@ -27,32 +50,137 @@
 ### Testing Environment Setup
 
 The plugin tests run in your WordPress development environment. The source code lives in a separate directory and is synced to your WordPress plugins directory for testing.
+The plugin uses PHPUnit for testing, with separate suites for unit and integration tests. The testing environment is configured through Composer and phpunit.xml.
 
-1. Set up WordPress test suite in your development environment:
+
+
+1. Clean and reinstall dependencies:
    ```bash
-   # Inside Lando environment
-   ./bin/install-wp-tests.sh wordpress_test db user pass db latest
+   # Clean existing files and cache
+   cd ~/sites/gl-color-palette-generator
+   rm -rf vendor/ composer.lock .phpunit.result.cache
+   composer clear-cache --no-interaction
 
-   # For other environments, adjust credentials:
-   ./bin/install-wp-tests.sh wordpress_test <db-user> <db-pass> <db-host> latest
+   # Install dependencies and optimize autoloader
+   composer update --no-interaction
+   composer check-platform-reqs
+   composer dump-autoload -o
    ```
 
 2. Sync plugin to WordPress plugins directory:
+   (still from within `gl-color-palette-generator` source directory)
    ```bash
-   # The sync script copies files to your WordPress plugins directory
    ./bin/sync-to-wp.sh
    ```
 
-3. Run PHPUnit tests:
+3. Set up WordPress test environment:
    ```bash
-   # Inside Lando environment
-   cd /app/wordpress/wp-content/plugins/gl-color-palette-generator
-   phpunit
-
-   # For other environments
-   cd /path/to/wordpress/wp-content/plugins/gl-color-palette-generator
-   phpunit
+   cd ~/sites/wordpress
+   lando ssh -c "cd wp-content/plugins/gl-color-palette-generator && bash ./bin/setup-plugin-tests.sh"
    ```
+
+### Running Tests
+
+The plugin has several test suites configured:
+
+1. Unit tests
+2. Integration tests
+3. Code coverage reports (HTML and text)
+
+#### Unit and integration tests
+
+composer test
+
+Full example:
+```bash
+# Run all tests (unit and integration)
+cd ~/sites/gl-color-palette-generator/ && \
+bash ./bin/sync-to-wp.sh && \
+cd ~/sites/wordpress && \
+composer test
+```
+
+#### Unit tests
+
+composer test:unit
+
+Full example:
+```bash
+# Run only unit tests
+cd ~/sites/gl-color-palette-generator/ && \
+bash ./bin/sync-to-wp.sh && \
+cd ~/sites/wordpress && \
+composer test:unit
+```
+
+#### Integration tests:
+
+composer test:integration
+
+Full example:
+```bash
+# Run only integration tests
+cd ~/sites/gl-color-palette-generator/ && \
+bash ./bin/sync-to-wp.sh && \
+cd ~/sites/wordpress && \
+composer test:integration
+```
+
+#### HTML code coverage report:
+
+composer coverage
+
+Full example:
+```bash
+# Generate code coverage report
+cd ~/sites/gl-color-palette-generator/ && \
+bash ./bin/sync-to-wp.sh && \
+cd ~/sites/wordpress && \
+composer coverage
+```
+
+#### Text-based code coverage report:
+
+composer coverage:text
+
+Full example:
+```bash
+# Generate text-based coverage report
+cd ~/sites/gl-color-palette-generator/ && \
+bash ./bin/sync-to-wp.sh && \
+cd ~/sites/wordpress && \
+composer coverage:text
+```
+
+### Test Organization
+
+The tests are organized into several directories under `tests/`:
+- `unit/` - Basic unit tests
+- `integration/` - WordPress integration tests
+- `color-management/` - Color-related functionality tests
+- `core/` - Core plugin functionality tests
+- `generators/` - Palette generation tests
+- `providers/` - Data provider tests
+- `settings/` - Plugin settings tests
+- `security/` - Security-related tests
+
+### Test Configuration
+
+The plugin uses a comprehensive PHPUnit configuration (`phpunit.xml`) that includes:
+
+1. Code Coverage Settings:
+   - Includes all PHP files in the `includes/` directory
+   - Excludes `vendor/` and `tests/` directories
+   - Generates both HTML and Clover coverage reports
+
+2. WordPress Test Environment Variables:
+   - Database configuration
+   - WordPress installation paths
+   - Test site settings
+
+3. Test Suites:
+   - Integration tests in `./tests/integration/`
+   - Unit tests across multiple feature-specific directories
 
 ### Environment-Specific Setup
 
@@ -87,7 +215,7 @@ cd ~/Local Sites/your-site/app/public
 
 ### Debugging with Xdebug
 
-The plugin is configured to support Xdebug debugging in your development environment. 
+The plugin is configured to support Xdebug debugging in your development environment.
 
 #### VSCode Setup
 

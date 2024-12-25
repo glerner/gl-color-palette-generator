@@ -147,7 +147,9 @@ generate_wp_tests_config() {
     cat > "$WP_TESTS_DIR/wp-tests-config.php" << EOF
 <?php
 /* Path to the WordPress codebase you'd like to test. Add a forward slash in the end. */
-define( 'ABSPATH', '$WP_ROOT/' );
+if (!defined('ABSPATH')) {
+    define( 'ABSPATH', '$WP_ROOT/' );
+}
 
 /* Test with WordPress debug mode on */
 define( 'WP_DEBUG', true );

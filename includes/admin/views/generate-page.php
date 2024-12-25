@@ -10,7 +10,11 @@
  * @since 1.0.0
  */
 
-defined('ABSPATH') || exit; ?>
+defined('ABSPATH') || exit;
+
+// Ensure $palette is defined
+$palette = isset($palette) ? $palette : null;
+?>
 
 <div class="wrap gl-color-palette-generate">
     <h1>
