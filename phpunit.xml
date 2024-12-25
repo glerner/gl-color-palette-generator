@@ -7,8 +7,21 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          >
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">includes</directory>
+        </include>
+        <exclude>
+            <directory suffix=".php">vendor</directory>
+            <directory suffix=".php">tests</directory>
+        </exclude>
+        <report>
+            <clover outputFile="build/logs/clover.xml"/>
+            <html outputDirectory="build/coverage"/>
+        </report>
+    </coverage>
     <php>
-        <env name="WP_TESTS_DIR" value="/app/wp-content/plugins/wordpress-develop/tests/phpunit"/>
+        <env name="WP_TESTS_DIR" value="/app/wordpress-phpunit"/>
         <env name="WP_CORE_DIR" value="/app"/>
         <env name="WP_TESTS_DB_NAME" value="wordpress_test"/>
         <env name="WP_TESTS_DB_USER" value="wordpress"/>

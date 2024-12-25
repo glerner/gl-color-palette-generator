@@ -13,13 +13,22 @@ if ( ! $_tests_dir ) {
 // Give access to tests_add_filter() function.
 require_once $_tests_dir . '/includes/functions.php';
 
-// Prevent wp_die from printing or logging
-tests_add_filter( 'wp_die_handler', function() {
-	return function() {};
-} );
-
 // Start up the WP testing environment.
 require_once $_tests_dir . '/includes/bootstrap.php';
 
-// Load plugin files
-require_once dirname( __DIR__ ) . '/gl-color-palette-generator.php';
+/**
+ * Manually load the plugin being tested.
+ */
+function manually_load_plugin() {
+    require dirname( __DIR__ ) . '/gl-color-palette-generator.php';
+}
+
+tests_add_filter( 'muplugins_loaded', 'manually_load_plugin' );
+
+// Now load our test case classes after WP_UnitTestCase is available
+require_once dirname( __FILE__ ) . '/class-test-case.php';
+require_once dirname( __FILE__ ) . '/class-test-case-integration.php';
+require_once dirname( __FILE__ ) . '/class-test-provider-integration.php';
+
+// Load Composer's autoloader last
+require_once dirname( __DIR__ ) . '/vendor/autoload.php';

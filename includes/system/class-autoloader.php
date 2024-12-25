@@ -71,7 +71,7 @@ class Autoloader {
         }, $parts);
 
         // Build path
-        $path = $this->base_dir . 'includes/';
+        $path = $this->base_dir;
         if (!empty($parts)) {
             $path .= implode('/', $parts) . '/';
         }

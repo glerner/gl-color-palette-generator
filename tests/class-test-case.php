@@ -8,7 +8,7 @@
 
 namespace GL_Color_Palette_Generator\Tests;
 
-use WP_UnitTestCase;
+use \WP_UnitTestCase;
 
 /**
  * Base test case class for all tests

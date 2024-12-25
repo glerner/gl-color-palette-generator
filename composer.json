@@ -29,14 +29,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "GL_Color_Palette_Generator\\Tests\\": "tests/",
-            "GL_Color_Palette_Generator\\Tests\\Bootstrap\\": "tests/bootstrap/",
-            "GL_Color_Palette_Generator\\Tests\\Unit\\": "tests/unit/",
-            "GL_Color_Palette_Generator\\Tests\\Integration\\": "tests/integration/",
-            "GL_Color_Palette_Generator\\Tests\\Providers\\": "tests/providers/",
-            "GL_Color_Palette_Generator\\Tests\\API\\": "tests/api/",
-            "GL_Color_Palette_Generator\\Tests\\Admin\\": "tests/admin/",
-            "GL_Color_Palette_Generator\\Tests\\Color_Management\\": "tests/color-management/"
+            "GL_Color_Palette_Generator\\Tests\\": "tests/"
         }
     },
     "scripts": {
