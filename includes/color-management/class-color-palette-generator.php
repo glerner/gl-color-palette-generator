@@ -184,6 +184,215 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
     }
 
     /**
+     * Generate a color palette from user-given context
+     *
+     * @param string $prompt JSON string containing user context
+     * @return Color_Palette|WP_Error Generated palette or error
+     */
+    public function generate_from_prompt(string $prompt): Color_Palette|WP_Error {
+        try {
+            // Parse context from JSON
+            $context = json_decode($prompt, true);
+            if (!$context) {
+                return new WP_Error('invalid_context', __('Invalid context data provided', 'gl-color-palette-generator'));
+            }
+
+            // Check if we have enough context for AI generation
+            if (empty($context['business_type']) && empty($context['target_audience']) && empty($context['desired_mood'])) {
+                // Fallback to default generation if no meaningful context
+                return $this->generate_palette([
+                    'algorithm' => 'complementary',
+                    'num_colors' => 5
+                ]);
+            }
+
+            // Build AI prompt for color generation
+            $ai_prompt = $this->build_ai_prompt($context);
+
+            // Get colors from AI service
+            $colors = $this->get_ai_generated_colors($ai_prompt);
+            if (is_wp_error($colors)) {
+                // Fallback to default generation if AI fails
+                return $this->generate_palette([
+                    'algorithm' => 'complementary',
+                    'num_colors' => 5
+                ]);
+            }
+
+            // Create and validate the palette
+            $palette = new Color_Palette($colors);
+
+            // Ensure WCAG compliance
+            if (!$this->verify_wcag_compliance($palette)) {
+                // Adjust colors to meet WCAG requirements
+                $palette = $this->adjust_for_wcag_compliance($palette);
+            }
+
+            return $palette;
+        } catch (\Exception $e) {
+            return new WP_Error('prompt_generation_failed', $e->getMessage());
+        }
+    }
+
+    /**
+     * Build AI prompt from user context
+     *
+     * @param array $context User input context
+     * @return string Formatted prompt for AI service
+     */
+    private function build_ai_prompt(array $context): string {
+        $prompt_parts = [
+            "You are a color palette expert for websites, with full knowledge of color mood, color contrast, and Accessibility Guidelines for color contrast. You are also a WordPress theme.json developer.",
+            "",
+            "Generate a website color palette with the following requirements:",
+            "",
+            "Business Description:",
+            $context['business_type'] ?? 'Not specified',
+            "",
+            "Target Audience:",
+            $context['target_audience'] ?? 'Not specified',
+            "",
+            "Desired Mood:",
+            $context['desired_mood'] ?? 'Not specified',
+            "",
+            "Requirements:",
+            "- Generate exactly 4 colors: primary, secondary, tertiary, and accent",
+            "- For each color, generate an \"artistic\" name and a description of the emotion or reaction it evokes",
+            "- Use medium luminance values that allow for both lighter and darker variations",
+            "- Colors should reflect the desired mood and appeal to the target audience",
+            "- Consider cultural implications and color psychology",
+            "",
+            "Return the colors and descriptions in JSON format like this:",
+            json_encode(Color_Constants::AI_RESPONSE_FORMAT, JSON_PRETTY_PRINT),
+            "",
+            "For each color, explain:",
+            "1. How it reflects the business values",
+            "2. Why it appeals to the target audience",
+            "3. What emotions or reactions it may evoke",
+            "4. How it complements the other colors"
+        ];
+
+        return implode("\n", $prompt_parts);
+    }
+
+    /**
+     * Get colors from AI service
+     *
+     * @param string $prompt Formatted prompt for AI
+     * @return array|WP_Error Array of colors or error
+     */
+    private function get_ai_generated_colors(string $prompt): array|WP_Error {
+        try {
+            // Get the configured AI provider
+            $provider_factory = new \GL_Color_Palette_Generator\Providers\AI_Provider_Factory();
+            $provider_config = new \GL_Color_Palette_Generator\Types\Provider_Config([
+                'api_key' => get_option('gl_cpg_ai_api_key'),
+                'provider' => get_option('gl_cpg_ai_provider', 'openai')
+            ]);
+
+            $provider = $provider_factory->get_provider($provider_config->provider, $provider_config);
+            if (is_wp_error($provider)) {
+                throw new \Exception($provider->get_error_message());
+            }
+
+            // Generate the palette
+            $result = $provider->generate_palette([
+                'prompt' => $prompt,
+                'num_colors' => 4,
+                'options' => Color_Constants::AI_CONFIG
+            ]);
+
+            if (is_wp_error($result)) {
+                throw new \Exception($result->get_error_message());
+            }
+
+            // Extract hex codes and save description
+            $colors = [];
+            if (!empty($result['colors'])) {
+                foreach ($result['colors'] as $role => $color_data) {
+                    $colors[$role] = $color_data['hex'] ?? $color_data;  // Fallback for old format
+                }
+            }
+
+            // Save palette description
+            $description = [
+                'colors' => $result['colors'],
+                'palette_story' => $result['palette_story'] ?? ''
+            ];
+            update_option('gl_cpg_last_palette_description', $description);
+
+            return $colors;
+
+        } catch (\Exception $e) {
+            return new WP_Error('ai_service_error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Verify WCAG compliance of a color palette
+     *
+     * @param Color_Palette $palette Palette to verify
+     * @return bool True if compliant
+     */
+    private function verify_wcag_compliance(Color_Palette $palette): bool {
+        $colors = $palette->get_colors();
+        foreach ($colors as $color) {
+            $contrast_with_light = $this->color_utility->get_contrast_ratio(
+                $color,
+                Color_Constants::COLOR_OFF_WHITE
+            );
+            $contrast_with_dark = $this->color_utility->get_contrast_ratio(
+                $color,
+                Color_Constants::COLOR_NEAR_BLACK
+            );
+
+            if ($contrast_with_light < Color_Constants::WCAG_CONTRAST_MIN &&
+                $contrast_with_dark < Color_Constants::WCAG_CONTRAST_MIN) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Adjust colors to meet WCAG compliance
+     *
+     * @param Color_Palette $palette Palette to adjust
+     * @return Color_Palette Adjusted palette
+     */
+    private function adjust_for_wcag_compliance(Color_Palette $palette): Color_Palette {
+        $colors = $palette->get_colors();
+        $adjusted_colors = [];
+
+        foreach ($colors as $role => $color) {
+            $contrast_with_light = $this->color_utility->get_contrast_ratio(
+                $color,
+                Color_Constants::COLOR_OFF_WHITE
+            );
+            $contrast_with_dark = $this->color_utility->get_contrast_ratio(
+                $color,
+                Color_Constants::COLOR_NEAR_BLACK
+            );
+
+            if ($contrast_with_light < Color_Constants::WCAG_CONTRAST_MIN &&
+                $contrast_with_dark < Color_Constants::WCAG_CONTRAST_MIN) {
+                // Adjust color lightness until it meets contrast requirements
+                $hsl = $this->color_utility->hex_to_hsl($color);
+                if ($hsl['l'] > 0.5) {
+                    $hsl['l'] = max(0, $hsl['l'] - 0.1);
+                } else {
+                    $hsl['l'] = min(1, $hsl['l'] + 0.1);
+                }
+                $adjusted_colors[$role] = $this->color_utility->hsl_to_hex($hsl);
+            } else {
+                $adjusted_colors[$role] = $color;
+            }
+        }
+
+        return new Color_Palette($adjusted_colors);
+    }
+
+    /**
      * Get available generation algorithms
      *
      * @return array List of available algorithms.

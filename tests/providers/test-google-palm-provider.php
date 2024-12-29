@@ -44,30 +44,46 @@ class Test_Google_PaLM_Provider extends Test_Provider_Mock {
     }
 
     public function test_generate_palette() {
-        $this->mock_http_request([
-            'candidates' => [
-                [
-                    'output' => json_encode([
-                        'colors' => [
-                            '#FF0000',
-                            '#00FF00',
-                            '#0000FF'
-                        ]
-                    ])
-                ]
+        $params = [
+            'prompt' => 'Modern tech company',
+            'num_colors' => 4,
+            'options' => [
+                'temperature' => 0.7,
+                'max_tokens' => 500
             ]
-        ]);
+        ];
 
-        $palette = $this->provider->generate_palette('Create a vibrant color palette');
-        $this->assertCount(3, $palette);
-        $this->assertEquals('#FF0000', $palette[0]);
-        $this->assertEquals('#00FF00', $palette[1]);
-        $this->assertEquals('#0000FF', $palette[2]);
+        // Mock the API response
+        $mock_response = $this->get_mock_palette_response();
+        $this->mock_http_response(json_encode($mock_response));
+
+        $result = $this->provider->generate_palette($params);
+        $this->assert_palette_structure($result);
     }
 
-    public function test_generate_palette_error() {
-        $this->mock_http_request(null, true);
-        $this->expectException(PaletteGenerationException::class);
-        $this->provider->generate_palette('Create a vibrant color palette');
+    public function test_handle_invalid_response() {
+        $params = [
+            'prompt' => 'Test prompt',
+            'num_colors' => 4
+        ];
+
+        // Mock an invalid response
+        $this->mock_http_response('{"invalid": "response"}');
+
+        $result = $this->provider->generate_palette($params);
+        $this->assertInstanceOf(\WP_Error::class, $result);
+    }
+
+    public function test_handle_api_error() {
+        $params = [
+            'prompt' => 'Test prompt',
+            'num_colors' => 4
+        ];
+
+        // Mock an error response
+        $this->mock_http_error('API Error');
+
+        $result = $this->provider->generate_palette($params);
+        $this->assertInstanceOf(\WP_Error::class, $result);
     }
 }

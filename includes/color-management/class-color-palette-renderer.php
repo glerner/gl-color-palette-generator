@@ -158,35 +158,6 @@ class Color_Palette_Renderer {
     }
 
     /**
-     * Render palette information
-     *
-     * @param Color_Palette $palette Palette to render info for
-     * @return string HTML output
-     */
-    private function render_palette_info(Color_Palette $palette): string {
-        $metadata = $palette->get_metadata();
-
-        $html = '<div class="gl-color-palette__info">';
-
-        if (!empty($metadata['name'])) {
-            $html .= sprintf(
-                '<h3 class="gl-color-palette__name">%s</h3>',
-                esc_html($metadata['name'])
-            );
-        }
-
-        if (!empty($metadata['description'])) {
-            $html .= sprintf(
-                '<p class="gl-color-palette__description">%s</p>',
-                esc_html($metadata['description'])
-            );
-        }
-
-        $html .= '</div>';
-        return $html;
-    }
-
-    /**
      * Render color information
      *
      * @param string        $color   Color hex value
@@ -196,20 +167,64 @@ class Color_Palette_Renderer {
      * @return string HTML output
      */
     private function render_color_info(string $color, int $index, Color_Palette $palette, array $options): string {
-        $html = '<div class="gl-color-palette__color-info">';
+        $html = '<div class="gl-color-palette__info">';
 
         if ($options['show_names']) {
+            $role = array_keys($palette->get_colors())[$index] ?? '';
             $html .= sprintf(
-                '<span class="gl-color-palette__color-name">%s</span>',
-                esc_html($this->generate_color_name($color, $index, $palette))
+                '<div class="gl-color-palette__role">%s</div>',
+                esc_html(ucfirst($role))
             );
         }
 
         if ($options['show_values']) {
             $html .= sprintf(
-                '<span class="gl-color-palette__color-value">%s</span>',
+                '<div class="gl-color-palette__value">%s</div>',
                 esc_html($color)
             );
+        }
+
+        // Add AI-generated descriptions if available
+        $palette_description = get_option('gl_cpg_last_palette_description');
+        if ($palette_description && isset($palette_description['colors'][$role])) {
+            $color_data = $palette_description['colors'][$role];
+            if (!empty($color_data['name'])) {
+                $html .= sprintf(
+                    '<div class="gl-color-palette__artistic-name">%s</div>',
+                    esc_html($color_data['name'])
+                );
+            }
+            if (!empty($color_data['emotion'])) {
+                $html .= sprintf(
+                    '<div class="gl-color-palette__emotion">%s</div>',
+                    esc_html($color_data['emotion'])
+                );
+            }
+        }
+
+        $html .= '</div>';
+        return $html;
+    }
+
+    /**
+     * Render palette information
+     *
+     * @param Color_Palette $palette Palette to render info for
+     * @return string HTML output
+     */
+    public function render_palette_info(Color_Palette $palette): string {
+        $html = '<div class="gl-color-palette__palette-info">';
+
+        // Add AI-generated palette story if available
+        $palette_description = get_option('gl_cpg_last_palette_description');
+        if ($palette_description && !empty($palette_description['palette_story'])) {
+            $html .= '<div class="gl-color-palette__story">';
+            $html .= '<h3>' . esc_html__('Palette Story', 'gl-color-palette-generator') . '</h3>';
+            $html .= sprintf(
+                '<p>%s</p>',
+                esc_html($palette_description['palette_story'])
+            );
+            $html .= '</div>';
         }
 
         $html .= '</div>';

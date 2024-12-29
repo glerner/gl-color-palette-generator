@@ -158,7 +158,8 @@ class Color_Palette_Admin {
         }
 
         try {
-            $generator = new \GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator();
+            $color_utility = new \GL_Color_Palette_Generator\Color_Management\Color_Utility();
+            $generator = new \GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator($color_utility);
             $palette = $generator->generate_from_prompt($prompt);
             wp_send_json_success([
                 'palette' => $palette,

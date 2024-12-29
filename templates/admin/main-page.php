@@ -33,7 +33,36 @@ if (!defined('ABSPATH')) {
 
         <div id="gl-cpg-preview" class="gl-cpg-preview hidden">
             <h3><?php esc_html_e('Generated Palette', 'gl-color-palette-generator'); ?></h3>
-            <div class="gl-cpg-colors"></div>
+            
+            <?php 
+            $palette_description = get_option('gl_cpg_last_palette_description');
+            if ($palette_description): 
+            ?>
+            <div class="gl-cpg-palette-story">
+                <h4><?php esc_html_e('Palette Story', 'gl-color-palette-generator'); ?></h4>
+                <p><?php echo esc_html($palette_description['palette_story'] ?? ''); ?></p>
+            </div>
+            <?php endif; ?>
+
+            <div class="gl-cpg-colors">
+                <?php foreach (['primary', 'secondary', 'tertiary', 'accent'] as $role): ?>
+                <div class="gl-cpg-color <?php echo esc_attr($role); ?>">
+                    <div class="gl-cpg-color-preview"></div>
+                    <div class="gl-cpg-color-info">
+                        <span class="gl-cpg-color-hex"></span>
+                        <?php if ($palette_description && isset($palette_description['colors'][$role])): ?>
+                        <span class="gl-cpg-color-name">
+                            <?php echo esc_html($palette_description['colors'][$role]['name'] ?? ''); ?>
+                        </span>
+                        <p class="gl-cpg-color-emotion">
+                            <?php echo esc_html($palette_description['colors'][$role]['emotion'] ?? ''); ?>
+                        </p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+
             <form id="gl-cpg-save-form">
                 <input
                     type="text"

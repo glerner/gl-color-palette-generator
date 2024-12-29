@@ -1,4 +1,0 @@
-Errors parsing ./includes/settings/class-settings-page.php
-Errors parsing ./includes/system/class-ajax-handler.php
-Errors parsing ./includes/services/class-color-api-integration.php
-Errors parsing ./includes/validation/class-settings-validator.php

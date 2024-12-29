@@ -333,4 +333,30 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
         $rgb = $this->hex_to_rgb($hex);
         return $this->rgb_to_hsl($rgb);
     }
+
+    /**
+     * Darken a color by a percentage
+     *
+     * @param string $color Hex color code
+     * @param int    $percentage Percentage to darken (0-100)
+     * @return string Darkened color in hex format
+     */
+    public function darken_color(string $color, int $percentage): string {
+        $hsl = $this->hex_to_hsl($color);
+        $hsl['l'] = max(0, $hsl['l'] - ($percentage / 100));
+        return $this->hsl_to_hex($hsl);
+    }
+
+    /**
+     * Lighten a color by a percentage
+     *
+     * @param string $color Hex color code
+     * @param int    $percentage Percentage to lighten (0-100)
+     * @return string Lightened color in hex format
+     */
+    public function lighten_color(string $color, int $percentage): string {
+        $hsl = $this->hex_to_hsl($color);
+        $hsl['l'] = min(100, $hsl['l'] + ($percentage / 100));
+        return $this->hsl_to_hex($hsl);
+    }
 }

@@ -24,21 +24,28 @@
 
     <!-- Color Scheme Preview -->
     <div class="scheme-preview">
-        <div class="scheme-color" style="background-color: #2C3E50;">
-            <div class="scheme-color-info">Primary</div>
-        </div>
-        <div class="scheme-color" style="background-color: #E74C3C;">
-            <div class="scheme-color-info">Secondary</div>
-        </div>
-        <div class="scheme-color" style="background-color: #3498DB;">
-            <div class="scheme-color-info">Accent</div>
-        </div>
-        <div class="scheme-color" style="background-color: #2ECC71;">
-            <div class="scheme-color-info">Success</div>
-        </div>
-        <div class="scheme-color" style="background-color: #F1C40F;">
-            <div class="scheme-color-info">Warning</div>
-        </div>
+        <?php
+        // Get current palette and renderer
+        $palette = new Color_Palette([
+            'primary' => '#2C3E50',
+            'secondary' => '#E74C3C',
+            'tertiary' => '#3498DB',
+            'accent' => '#2ECC71'
+        ]);
+        $renderer = new Color_Palette_Renderer();
+
+        // Render palette info (includes AI story)
+        echo $renderer->render_palette_info($palette);
+
+        // Render color swatches with enhanced info
+        echo $renderer->render($palette, [
+            'layout' => 'cards',
+            'show_info' => true,
+            'show_names' => true,
+            'show_values' => true,
+            'size' => 'large'
+        ]);
+        ?>
     </div>
 
     <!-- Analysis Card -->

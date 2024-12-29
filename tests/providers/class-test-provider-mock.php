@@ -56,4 +56,79 @@ class Test_Provider_Mock extends TestCase {
     protected function assertConditionsMet() {
         $this->assertTrue(true);
     }
+
+    /**
+     * Mock a successful HTTP response
+     *
+     * @param string $response_body Response body to mock
+     */
+    protected function mock_http_response(string $response_body): void {
+        WP_Mock::userFunction('wp_remote_post')
+            ->andReturn([
+                'response' => ['code' => 200],
+                'body' => $response_body
+            ]);
+    }
+
+    /**
+     * Mock an HTTP error
+     *
+     * @param string $error_message Error message
+     */
+    protected function mock_http_error(string $error_message): void {
+        WP_Mock::userFunction('wp_remote_post')
+            ->andReturn(new \WP_Error('http_error', $error_message));
+    }
+
+    /**
+     * Get a mock palette response
+     *
+     * @return array Mock palette data
+     */
+    protected function get_mock_palette_response(): array {
+        return [
+            'colors' => [
+                'primary' => [
+                    'hex' => '#2C3E50',
+                    'name' => 'Midnight Ocean',
+                    'emotion' => 'Deep trust and stability'
+                ],
+                'secondary' => [
+                    'hex' => '#E74C3C',
+                    'name' => 'Energetic Coral',
+                    'emotion' => 'Dynamic and engaging'
+                ],
+                'tertiary' => [
+                    'hex' => '#3498DB',
+                    'name' => 'Clear Sky',
+                    'emotion' => 'Innovation and clarity'
+                ],
+                'accent' => [
+                    'hex' => '#2ECC71',
+                    'name' => 'Growth Green',
+                    'emotion' => 'Progress and success'
+                ]
+            ],
+            'palette_story' => 'A modern and professional palette that combines trust and innovation'
+        ];
+    }
+
+    /**
+     * Assert palette response structure
+     *
+     * @param array $palette Palette to check
+     */
+    protected function assert_palette_structure(array $palette): void {
+        $this->assertIsArray($palette);
+        $this->assertArrayHasKey('colors', $palette);
+        $this->assertArrayHasKey('palette_story', $palette);
+        
+        foreach (['primary', 'secondary', 'tertiary', 'accent'] as $role) {
+            $this->assertArrayHasKey($role, $palette['colors']);
+            $this->assertArrayHasKey('hex', $palette['colors'][$role]);
+            $this->assertArrayHasKey('name', $palette['colors'][$role]);
+            $this->assertArrayHasKey('emotion', $palette['colors'][$role]);
+            $this->assertMatchesRegularExpression('/^#[A-Fa-f0-9]{6}$/', $palette['colors'][$role]['hex']);
+        }
+    }
 }

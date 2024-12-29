@@ -45,30 +45,48 @@ class Test_Anthropic_Provider extends Test_Provider_Mock {
     public function test_generate_palette(): void {
         $params = [
             'prompt' => 'Modern tech company',
-            'count' => 5,
-            'format' => 'hex'
+            'num_colors' => 4,
+            'options' => [
+                'temperature' => 0.7,
+                'max_tokens' => 500
+            ]
         ];
 
         // Mock the API response
-        WP_Mock::userFunction('wp_remote_post')->andReturn([
-            'response' => ['code' => 200],
-            'body' => json_encode([
-                'content' => [
-                    [
-                        'text' => json_encode([
-                            '#2C3E50',
-                            '#E74C3C',
-                            '#ECF0F1',
-                            '#3498DB',
-                            '#2ECC71'
-                        ])
-                    ]
-                ]
-            ])
-        ]);
+        $mock_response = $this->get_mock_palette_response();
+        $this->mock_http_response(json_encode([
+            'content' => [
+                'text' => json_encode($mock_response)
+            ]
+        ]));
 
-        $colors = $this->provider->generate_palette($params);
-        $this->assertIsArray($colors);
-        $this->assertCount(5, $colors);
+        $result = $this->provider->generate_palette($params);
+        $this->assert_palette_structure($result);
+    }
+
+    public function test_handle_invalid_response(): void {
+        $params = [
+            'prompt' => 'Test prompt',
+            'num_colors' => 4
+        ];
+
+        // Mock an invalid response
+        $this->mock_http_response('{"content": {"text": "invalid"}}');
+
+        $result = $this->provider->generate_palette($params);
+        $this->assertInstanceOf(\WP_Error::class, $result);
+    }
+
+    public function test_handle_api_error(): void {
+        $params = [
+            'prompt' => 'Test prompt',
+            'num_colors' => 4
+        ];
+
+        // Mock an error response
+        $this->mock_http_error('API Error');
+
+        $result = $this->provider->generate_palette($params);
+        $this->assertInstanceOf(\WP_Error::class, $result);
     }
 }

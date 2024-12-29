@@ -2,7 +2,6 @@
 /**
  * Color Constants Interface
  *
-
  * Defines constants for color roles and schemes used throughout the plugin.
  *
  * @todo This is not actually an interface, but a constants container.
@@ -677,5 +676,46 @@ interface Color_Constants {
                 'business_contexts' => ['beauty', 'fashion', 'romance']
             ]
         ]
+    ];
+
+    /**
+     * AI Service Configuration
+     * Default settings for AI color generation
+     */
+    const AI_CONFIG = [
+        'temperature' => 0.7,      // Controls randomness (0.0-1.0)
+        'max_tokens' => 500,       // Increased to accommodate color descriptions
+        'top_p' => 0.9,           // Nucleus sampling threshold
+        'frequency_penalty' => 0.0 // Repetition penalty
+    ];
+
+    /**
+     * AI Response Format
+     * Template for AI service responses
+     */
+    const AI_RESPONSE_FORMAT = [
+        'colors' => [
+            'primary' => [
+                'hex' => '#HEXCODE',
+                'name' => 'Artistic color name',
+                'emotion' => 'Emotional impact description'
+            ],
+            'secondary' => [
+                'hex' => '#HEXCODE',
+                'name' => 'Artistic color name',
+                'emotion' => 'Emotional impact description'
+            ],
+            'tertiary' => [
+                'hex' => '#HEXCODE',
+                'name' => 'Artistic color name',
+                'emotion' => 'Emotional impact description'
+            ],
+            'accent' => [
+                'hex' => '#HEXCODE',
+                'name' => 'Artistic color name',
+                'emotion' => 'Emotional impact description'
+            ]
+        ],
+        'palette_story' => 'Overall description of how the palette works together to achieve the business goals and appeal to the target audience'
     ];
 }

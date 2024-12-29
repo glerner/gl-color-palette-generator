@@ -46,32 +46,87 @@ class Test_OpenAI_Provider extends Test_Provider_Mock {
     public function test_generate_palette() {
         $params = [
             'prompt' => 'Modern tech company',
-            'count' => 5,
-            'format' => 'hex'
+            'num_colors' => 4,
+            'options' => [
+                'temperature' => 0.7,
+                'max_tokens' => 500
+            ]
+        ];
+
+        $expected_response = [
+            'colors' => [
+                'primary' => [
+                    'hex' => '#2C3E50',
+                    'name' => 'Midnight Ocean',
+                    'emotion' => 'Deep trust and stability'
+                ],
+                'secondary' => [
+                    'hex' => '#E74C3C',
+                    'name' => 'Energetic Coral',
+                    'emotion' => 'Dynamic and engaging'
+                ],
+                'tertiary' => [
+                    'hex' => '#3498DB',
+                    'name' => 'Clear Sky',
+                    'emotion' => 'Innovation and clarity'
+                ],
+                'accent' => [
+                    'hex' => '#2ECC71',
+                    'name' => 'Growth Green',
+                    'emotion' => 'Progress and success'
+                ]
+            ],
+            'palette_story' => 'A modern and professional palette that combines trust and innovation'
         ];
 
         // Mock the API response
-        WP_Mock::userFunction('wp_remote_post')->andReturn([
-            'response' => ['code' => 200],
-            'body' => json_encode([
-                'choices' => [
-                    [
-                        'message' => [
-                            'content' => json_encode([
-                                '#2C3E50',
-                                '#E74C3C',
-                                '#ECF0F1',
-                                '#3498DB',
-                                '#2ECC71'
-                            ])
-                        ]
-                    ]
-                ]
-            ])
-        ]);
+        $this->mock_http_response(json_encode($expected_response));
 
-        $colors = $this->provider->generate_palette($params);
-        $this->assertIsArray($colors);
-        $this->assertCount(5, $colors);
+        $result = $this->provider->generate_palette($params);
+        
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('colors', $result);
+        $this->assertArrayHasKey('palette_story', $result);
+        
+        // Check color structure
+        foreach (['primary', 'secondary', 'tertiary', 'accent'] as $role) {
+            $this->assertArrayHasKey($role, $result['colors']);
+            $this->assertArrayHasKey('hex', $result['colors'][$role]);
+            $this->assertArrayHasKey('name', $result['colors'][$role]);
+            $this->assertArrayHasKey('emotion', $result['colors'][$role]);
+            $this->assertMatchesRegularExpression('/^#[A-Fa-f0-9]{6}$/', $result['colors'][$role]['hex']);
+        }
+    }
+
+    /**
+     * Test handling invalid API response
+     */
+    public function test_handle_invalid_response() {
+        $params = [
+            'prompt' => 'Test prompt',
+            'num_colors' => 4
+        ];
+
+        // Mock an invalid response
+        $this->mock_http_response('{"invalid": "response"}');
+
+        $result = $this->provider->generate_palette($params);
+        $this->assertInstanceOf(\WP_Error::class, $result);
+    }
+
+    /**
+     * Test handling API error
+     */
+    public function test_handle_api_error() {
+        $params = [
+            'prompt' => 'Test prompt',
+            'num_colors' => 4
+        ];
+
+        // Mock an error response
+        $this->mock_http_error('API Error');
+
+        $result = $this->provider->generate_palette($params);
+        $this->assertInstanceOf(\WP_Error::class, $result);
     }
 }

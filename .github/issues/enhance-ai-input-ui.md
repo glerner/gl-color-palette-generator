@@ -18,7 +18,21 @@ Missing many important context factors needed for optimal AI generation.
 
 **Required UI Elements**
 
-1. Business Context Section
+**Core Features**
+
+1. User Questions (Highest Priority)
+   - Open-ended business description
+   - Target audience insights
+   - Desired mood/emotional impact
+
+These questions form the foundation of our AI-driven color generation:
+- Business context helps understand brand values and positioning
+- Target audience insights inform color psychology choices
+- Mood/emotional impact guides overall palette direction
+
+Note: the plugin will ensure that the AI-generated palette meets WCAG color contrast compliance
+
+2. Business Context Section
    - Industry (existing)
    - Business size/stage
    - Target market location
@@ -26,7 +40,7 @@ Missing many important context factors needed for optimal AI generation.
    - Brand values (multiple selection)
    - Business goals
 
-2. Target Audience Section
+3. Target Audience Section
    - Age range
    - Gender distribution
    - Income level
@@ -34,25 +48,25 @@ Missing many important context factors needed for optimal AI generation.
    - Cultural background
    - Tech-savviness
 
-3. Brand Personality Section
+4. Brand Personality Section
    - Brand voice (formal to casual slider)
    - Key personality traits
    - Emotional associations
    - Brand archetype selection
 
-4. Visual Preferences
+5. Visual Preferences
    - Preferred color families
    - Style preferences (modern, traditional, etc.)
    - Inspiration sources
    - Existing brand colors (if any)
 
-5. Technical Requirements
+6. Technical Requirements
    - Accessibility level (WCAG AA/AAA)
    - Platform/medium (web, print, both)
    - Dark mode support
    - Color count preference
 
-6. Cultural Considerations
+7. Cultural Considerations
    - Target markets/regions
    - Cultural color meanings
    - Religious considerations
@@ -63,6 +77,16 @@ Missing many important context factors needed for optimal AI generation.
 1. Form Structure:
 ```html
 <form id="gl-color-palette-form">
+    <!-- User Questions -->
+    <section class="gl-section user-questions">
+        <!-- Open-ended business description -->
+        <div class="gl-field business-description">...</div>
+        <!-- Target audience insights -->
+        <div class="gl-field target-audience">...</div>
+        <!-- Desired mood/emotional impact -->
+        <div class="gl-field mood-impact">...</div>
+    </section>
+
     <!-- Business Context -->
     <section class="gl-section business-context">
         <!-- Existing industry field -->

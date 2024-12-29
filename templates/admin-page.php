@@ -21,39 +21,38 @@ defined('ABSPATH') || exit;
                     <h2><?php esc_html_e('Business Context', 'gl-color-palette-generator'); ?></h2>
 
                     <div class="gl-field">
-                        <label for="industry_type">
-                            <?php esc_html_e('Industry', 'gl-color-palette-generator'); ?>
+                        <label for="business_type">
+                            <?php esc_html_e('Tell us about your business', 'gl-color-palette-generator'); ?>
+                            <span class="description"><?php esc_html_e('What makes your business unique? What do you offer?', 'gl-color-palette-generator'); ?></span>
                         </label>
-                        <select name="context[industry_type]" id="industry_type" required>
-                            <option value=""><?php esc_html_e('Select industry...', 'gl-color-palette-generator'); ?></option>
-                            <option value="technology"><?php esc_html_e('Technology', 'gl-color-palette-generator'); ?></option>
-                            <option value="healthcare"><?php esc_html_e('Healthcare', 'gl-color-palette-generator'); ?></option>
-                            <option value="education"><?php esc_html_e('Education', 'gl-color-palette-generator'); ?></option>
-                            <option value="finance"><?php esc_html_e('Finance', 'gl-color-palette-generator'); ?></option>
-                            <option value="retail"><?php esc_html_e('Retail', 'gl-color-palette-generator'); ?></option>
-                            <option value="creative"><?php esc_html_e('Creative', 'gl-color-palette-generator'); ?></option>
-                        </select>
+                        <textarea name="context[business_type]" id="business_type" rows="3" required></textarea>
                     </div>
-
-                    <!-- Additional fields here -->
                 </div>
 
-                <!-- Psychological Impact -->
+                <!-- Target Audience -->
                 <div class="gl-section">
-                    <h2><?php esc_html_e('Psychological Impact', 'gl-color-palette-generator'); ?></h2>
+                    <h2><?php esc_html_e('Target Audience', 'gl-color-palette-generator'); ?></h2>
 
                     <div class="gl-field">
-                        <label for="first_impression">
-                            <?php esc_html_e('Desired First Impression', 'gl-color-palette-generator'); ?>
+                        <label for="target_audience">
+                            <?php esc_html_e('Describe your ideal customer', 'gl-color-palette-generator'); ?>
+                            <span class="description"><?php esc_html_e('Who are they? What do they value? What attracts them to your business?', 'gl-color-palette-generator'); ?></span>
                         </label>
-                        <input type="text"
-                               name="context[first_impression]"
-                               id="first_impression"
-                               required
-                               placeholder="<?php esc_attr_e('e.g., trustworthy, innovative', 'gl-color-palette-generator'); ?>">
+                        <textarea name="context[target_audience]" id="target_audience" rows="3" required></textarea>
                     </div>
+                </div>
 
-                    <!-- Additional fields here -->
+                <!-- Desired Mood -->
+                <div class="gl-section">
+                    <h2><?php esc_html_e('Website Mood', 'gl-color-palette-generator'); ?></h2>
+
+                    <div class="gl-field">
+                        <label for="desired_mood">
+                            <?php esc_html_e('What mood should your website evoke?', 'gl-color-palette-generator'); ?>
+                            <span class="description"><?php esc_html_e('How should visitors feel when they visit your site? What emotions do you want to inspire?', 'gl-color-palette-generator'); ?></span>
+                        </label>
+                        <textarea name="context[desired_mood]" id="desired_mood" rows="3" required></textarea>
+                    </div>
                 </div>
 
                 <div class="gl-actions">

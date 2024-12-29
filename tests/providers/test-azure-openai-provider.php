@@ -63,23 +63,76 @@ class Test_Azure_OpenAI_Provider extends Test_Provider_Mock {
     }
 
     public function test_generate_palette() {
-        // Mock the API response
-        WP_Mock::userFunction('wp_remote_post')->once()->andReturn([
-            'response' => ['code' => 200],
-            'body' => json_encode([
-                'choices' => [
-                    [
-                        'message' => [
-                            'content' => json_encode(['colors' => ['#FF0000', '#00FF00', '#0000FF']])
-                        ]
-                    ]
-                ]
-            ])
-        ]);
+        $params = [
+            'prompt' => 'Modern tech company',
+            'num_colors' => 4,
+            'options' => [
+                'temperature' => 0.7,
+                'max_tokens' => 500
+            ]
+        ];
 
-        $colors = $this->provider->generate_palette($this->test_params);
-        $this->assertIsArray($colors);
-        $this->assertCount(3, $colors);
+        // Mock the API response
+        $mock_response = $this->get_mock_palette_response();
+        $this->mock_http_response(json_encode($mock_response));
+
+        $result = $this->provider->generate_palette($params);
+        $this->assert_palette_structure($result);
+    }
+
+    public function test_handle_invalid_response() {
+        $params = [
+            'prompt' => 'Test prompt',
+            'num_colors' => 4
+        ];
+
+        // Mock an invalid response
+        $this->mock_http_response('{"invalid": "response"}');
+
+        $result = $this->provider->generate_palette($params);
+        $this->assertInstanceOf(\WP_Error::class, $result);
+    }
+
+    public function test_handle_api_error() {
+        $params = [
+            'prompt' => 'Test prompt',
+            'num_colors' => 4
+        ];
+
+        // Mock an error response
+        $this->mock_http_error('API Error');
+
+        $result = $this->provider->generate_palette($params);
+        $this->assertInstanceOf(\WP_Error::class, $result);
+    }
+
+    public function test_custom_endpoint() {
+        $config = new Provider_Config([
+            'api_key' => 'test_key_123',
+            'model' => 'gpt-4',
+            'endpoint' => 'https://custom-azure-endpoint.com'
+        ]);
+        
+        $provider = new Azure_OpenAI_Provider($config);
+        
+        // Mock successful response with custom endpoint
+        $mock_response = $this->get_mock_palette_response();
+        WP_Mock::userFunction('wp_remote_post')
+            ->with(
+                'https://custom-azure-endpoint.com',
+                \Mockery::any()
+            )
+            ->andReturn([
+                'response' => ['code' => 200],
+                'body' => json_encode($mock_response)
+            ]);
+
+        $result = $provider->generate_palette([
+            'prompt' => 'Test prompt',
+            'num_colors' => 4
+        ]);
+        
+        $this->assert_palette_structure($result);
     }
 
     public function test_get_requirements() {
