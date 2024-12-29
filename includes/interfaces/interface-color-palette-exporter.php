@@ -1,70 +1,55 @@
 <?php
 
-namespace GLColorPalette\Interfaces;
-
-use GLColorPalette\ColorPalette;
-
 /**
  * Color Palette Exporter Interface
  *
- * Defines the contract for exporting color palettes to various formats.
- *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
+ * @subpackage Interfaces
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorPaletteExporterInterface {
+
+namespace GL_Color_Palette_Generator\Interfaces;
+
+/**
+ * Interface Color_Palette_Exporter_Interface
+ * Defines the contract for exporting color palettes
+ */
+interface Color_Palette_Exporter_Interface extends Color_Palette_Formatter_Interface {
     /**
-     * Exports a color palette.
+     * Export color palette to specified format
      *
-     * @param ColorPalette $palette Palette to export.
-     * @param string       $format  Export format.
-     * @param array        $options Export options.
-     * @return string Exported data.
+     * @param array  $palette Color palette data
+     * @param string $format  Export format (css, scss, json, etc.)
+     * @param array  $options Export options
+     * @return string|array Exported palette in specified format
+     * @throws \InvalidArgumentException If format is not supported
      */
-    public function exportPalette(ColorPalette $palette, string $format, array $options = []): string;
+    public function export_palette(array $palette, string $format, array $options = []): string|array;
 
     /**
-     * Exports to file.
+     * Export palettes to JSON
      *
-     * @param ColorPalette $palette  Palette to export.
-     * @param string       $filename Target filename.
-     * @param string       $format   Export format.
-     * @param array        $options  Export options.
-     * @return bool True on success.
+     * @param array $palettes Array of palettes to export.
+     * @return string JSON string.
      */
-    public function exportToFile(ColorPalette $palette, string $filename, string $format, array $options = []): bool;
+    public function export_to_json($palettes): string;
 
     /**
-     * Gets supported export formats.
+     * Export palettes to CSV
      *
-     * @return array List of supported formats.
+     * @param array $palettes Array of palettes to export.
+     * @return string CSV string.
      */
-    public function getSupportedFormats(): array;
+    public function export_to_csv($palettes): string;
 
     /**
-     * Gets format-specific options.
+     * Import palettes from JSON
      *
-     * @param string $format Format to get options for.
-     * @return array Format options.
+     * @param string $json JSON string to import.
+     * @return array Imported palettes.
+     * @throws \Exception If import fails.
      */
-    public function getFormatOptions(string $format): array;
-
-    /**
-     * Gets file extension for format.
-     *
-     * @param string $format Format to get extension for.
-     * @return string File extension.
-     */
-    public function getFileExtension(string $format): string;
-
-    /**
-     * Validates export options.
-     *
-     * @param array  $options Options to validate.
-     * @param string $format  Format to validate against.
-     * @return bool True if valid.
-     */
-    public function validateOptions(array $options, string $format): bool;
+    public function import_from_json($json): array;
 }

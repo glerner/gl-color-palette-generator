@@ -50,10 +50,11 @@ interface Color_Utility {
     public function rgb_to_hex(array $rgb): string;
 
     /**
-     * Calculate relative luminance of a color
+     * Get relative luminance of a color
+     * Based on WCAG 2.0 relative luminance calculation
      *
      * @param string $color Color in hex format.
-     * @return float Relative luminance value.
+     * @return float Relative luminance (0-1).
      */
-    public function calculate_relative_luminance(string $color): float;
+    public function get_relative_luminance(string $color): float;
 }

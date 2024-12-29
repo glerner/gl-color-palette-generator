@@ -166,9 +166,10 @@ class Color_Palette_Analyzer {
             }
         }
 
-        if (empty($analysis['wcag_aa_pairs']) && empty($analysis['wcag_aaa_pairs'])) {
+        // Check overall compliance level
+        if (count($analysis['wcag_aa_pairs']) === 0 && count($analysis['wcag_aaa_pairs']) === 0) {
             $analysis['overall_compliance'] = 'fail';
-        } elseif (!empty($analysis['wcag_aaa_pairs'])) {
+        } elseif (count($analysis['wcag_aaa_pairs']) > 0) {
             $analysis['overall_compliance'] = 'AAA';
         }
 

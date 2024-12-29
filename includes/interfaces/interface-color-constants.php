@@ -2,7 +2,8 @@
 /**
  * Color Constants Interface
  *
- * Core constants for color management and theme generation.
+
+ * Defines constants for color roles and schemes used throughout the plugin.
  *
  * @todo This is not actually an interface, but a constants container.
  * Should be refactored to class-color-constants.php in includes/types/.
@@ -11,6 +12,9 @@
  * @package GL_Color_Palette_Generator
  * @subpackage Interfaces
  * @bootstrap wp-mock
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ * @since   1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Interfaces;
@@ -25,6 +29,28 @@ namespace GL_Color_Palette_Generator\Interfaces;
  * - Design constraints for visual comfort
  */
 interface Color_Constants {
+    /**
+     * Color roles
+     */
+    public const COLOR_ROLE_PRIMARY = 'primary';
+    public const COLOR_ROLE_SECONDARY = 'secondary';
+    public const COLOR_ROLE_ACCENT = 'accent';
+    public const COLOR_ROLE_BACKGROUND = 'background';
+    public const COLOR_ROLE_TEXT = 'text';
+
+    /**
+     * Color scheme types
+     */
+    public const SCHEME_MONOCHROMATIC = 'monochromatic';
+    public const SCHEME_ANALOGOUS = 'analogous';
+    public const SCHEME_COMPLEMENTARY = 'complementary';
+    public const SCHEME_SPLIT_COMPLEMENTARY = 'split-complementary';
+    public const SCHEME_TRIADIC = 'triadic';
+    public const SCHEME_TETRADIC = 'tetradic';
+    public const SCHEME_CUSTOM = 'custom';
+    public const SCHEME_FROM_IMAGE = 'from-image';
+    public const SCHEME_THEMED = 'themed';
+
     /**
      * Color Wheel Relationships
      * Defines standard color theory relationships

@@ -12,7 +12,7 @@ namespace GLColorPalette\Interfaces;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorPaletteConverter {
+interface Color_Palette_Converter_Interface {
     /**
      * Converts between color spaces.
      *
@@ -101,4 +101,4 @@ interface ColorPaletteConverter {
      * }
      */
     public function convert_system(array $palette, string $system, array $options = []): array;
-} 
+}

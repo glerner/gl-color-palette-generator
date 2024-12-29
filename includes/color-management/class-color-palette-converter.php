@@ -13,7 +13,7 @@ namespace GL_Color_Palette_Generator\Color_Management;
  * Class Color_Palette_Converter
  * Converts color palettes between different formats and color spaces
  */
-class Color_Palette_Converter implements \GL_Color_Palette_Generator\Interfaces\Color_Palette_Converter {
+class Color_Palette_Converter implements Color_Palette_Converter_Interface {
     /**
      * Convert palette to different color space
      *

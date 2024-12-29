@@ -1,48 +1,44 @@
 <?php
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 /**
  * Color Palette Formatter Interface
  *
- * Defines the contract for formatting color palettes and their values.
- *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
+ * @subpackage Interfaces
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorPaletteFormatterInterface {
+
+/**
+ * Interface Color_Palette_Formatter_Interface
+ * Defines the contract for formatting color palettes
+ */
+interface Color_Palette_Formatter_Interface {
     /**
-     * Formats a color to the specified format.
+     * Format palette for output
      *
-     * @param string $color  Color value to format.
-     * @param string $format Target format (hex, rgb, hsl, etc.).
-     * @return string Formatted color value.
+     * @param array  $palette Array of colors.
+     * @param string $format  Output format (css, scss, less, tailwind, json).
+     * @param array  $options Optional formatting options.
+     * @return string Formatted palette.
+     * @throws \Exception If format is invalid.
      */
-    public function formatColor(string $color, string $format): string;
+    public function format_palette(array $palette, string $format, array $options = []): string;
 
     /**
-     * Validates a color format.
+     * Get supported formats
      *
-     * @param string $color  Color to validate.
-     * @param string $format Format to validate against.
-     * @return bool True if valid.
+     * @return array List of supported formats
      */
-    public function isValidFormat(string $color, string $format): bool;
+    public function get_supported_formats(): array;
 
     /**
-     * Gets supported color formats.
+     * Get default formatting options
      *
-     * @return array List of supported formats.
+     * @return array Default options
      */
-    public function getSupportedFormats(): array;
-
-    /**
-     * Normalizes a color value.
-     *
-     * @param string $color Color to normalize.
-     * @return string Normalized color value.
-     */
-    public function normalizeColor(string $color): string;
+    public function get_default_options(): array;
 }

@@ -2,6 +2,14 @@
 /**
  * Color Palette Formatter Class
  *
+ * Handles basic formatting of color palettes into various code formats.
+ * Supported formats:
+ * - css: CSS custom properties (variables)
+ * - scss: SCSS variables and color map
+ * - less: LESS variables
+ * - tailwind: Tailwind CSS configuration
+ * - json: JSON color object
+ *
  * @package GL_Color_Palette_Generator
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
@@ -9,50 +17,80 @@
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Formatter_Interface;
+
 /**
  * Class Color_Palette_Formatter
  * Formats color palettes for different output formats and use cases
  */
-class Color_Palette_Formatter implements \GL_Color_Palette_Generator\Interfaces\Color_Palette_Formatter {
+class Color_Palette_Formatter implements Color_Palette_Formatter_Interface {
+    /**
+     * List of supported formatting formats
+     * 
+     * These formats focus on code-level color definitions and can be
+     * extended by child classes to support additional formats.
+     */
+    protected const SUPPORTED_FORMATS = [
+        'css',    // CSS custom properties
+        'scss',   // SCSS variables and maps
+        'less',   // LESS variables
+        'tailwind', // Tailwind config
+        'json'    // JSON object
+    ];
+
+    /**
+     * Default formatting options
+     */
+    protected const DEFAULT_OPTIONS = [
+        'variable_prefix' => '--color',
+        'class_prefix' => 'color',
+        'include_comments' => true,
+        'indent' => '  ',
+        'line_ending' => "\n",
+        'generate_classes' => false
+    ];
+
     /**
      * Format palette for output
      *
      * @param array  $palette Array of colors.
-     * @param string $format Output format (css, scss, less, tailwind, json).
+     * @param string $format  Output format (css, scss, less, tailwind, json).
      * @param array  $options Optional formatting options.
      * @return string Formatted palette.
      * @throws \Exception If format is invalid.
      */
-    public function format_palette($palette, $format, $options = []) {
-        $default_options = [
-            'variable_prefix' => '--color',
-            'class_prefix' => 'color',
-            'include_comments' => true,
-            'indent' => '  ',
-            'line_ending' => "\n"
-        ];
-
-        $options = array_merge($default_options, $options);
-
-        switch (strtolower($format)) {
-            case 'css':
-                return $this->format_css($palette, $options);
-            case 'scss':
-                return $this->format_scss($palette, $options);
-            case 'less':
-                return $this->format_less($palette, $options);
-            case 'tailwind':
-                return $this->format_tailwind($palette, $options);
-            case 'json':
-                return $this->format_json($palette, $options);
-            default:
-                throw new \Exception(
-                    sprintf(
-                        __('Invalid format: %s', 'gl-color-palette-generator'),
-                        $format
-                    )
-                );
+    public function format_palette(array $palette, string $format, array $options = []): string {
+        if (!in_array($format, self::SUPPORTED_FORMATS, true)) {
+            throw new \Exception(
+                sprintf(
+                    __('Invalid format: %s', 'gl-color-palette-generator'),
+                    $format
+                )
+            );
         }
+
+        $options = array_merge($this->get_default_options(), $options);
+        $method = 'format_' . $format;
+
+        return $this->$method($palette, $options);
+    }
+
+    /**
+     * Get supported formats
+     *
+     * @return array List of supported formats
+     */
+    public function get_supported_formats(): array {
+        return self::SUPPORTED_FORMATS;
+    }
+
+    /**
+     * Get default formatting options
+     *
+     * @return array Default options
+     */
+    public function get_default_options(): array {
+        return self::DEFAULT_OPTIONS;
     }
 
     /**
@@ -62,16 +100,17 @@ class Color_Palette_Formatter implements \GL_Color_Palette_Generator\Interfaces\
      * @param array $options Formatting options.
      * @return string CSS variables.
      */
-    private function format_css($palette, $options) {
+    protected function format_css(array $palette, array $options): string {
         $output = ":root {" . $options['line_ending'];
 
-        foreach ($palette as $index => $color) {
+        foreach ($palette as $name => $color) {
             if ($options['include_comments']) {
-                $output .= $options['indent'] . "/* Color " . ($index + 1) . " */" . $options['line_ending'];
+                $output .= $options['indent'] . "/* {$name} */" . $options['line_ending'];
             }
 
+            $varName = sanitize_title($name);
             $output .= $options['indent'] .
-                      $options['variable_prefix'] . "-" . ($index + 1) . ": " .
+                      $options['variable_prefix'] . "-" . $varName . ": " .
                       $color . ";" . $options['line_ending'];
         }
 
@@ -92,22 +131,24 @@ class Color_Palette_Formatter implements \GL_Color_Palette_Generator\Interfaces\
      * @param array $options Formatting options.
      * @return string SCSS variables.
      */
-    private function format_scss($palette, $options) {
+    protected function format_scss(array $palette, array $options): string {
         $output = "";
 
-        foreach ($palette as $index => $color) {
+        foreach ($palette as $name => $color) {
             if ($options['include_comments']) {
-                $output .= "// Color " . ($index + 1) . $options['line_ending'];
+                $output .= "// {$name}" . $options['line_ending'];
             }
 
-            $output .= "$" . $options['variable_prefix'] . "-" . ($index + 1) . ": " .
+            $varName = sanitize_title($name);
+            $output .= "$" . $options['variable_prefix'] . "-" . $varName . ": " .
                       $color . ";" . $options['line_ending'];
         }
 
         // Add color map
         $output .= $options['line_ending'] . "$colors: (" . $options['line_ending'];
-        foreach ($palette as $index => $color) {
-            $output .= $options['indent'] . "'color-" . ($index + 1) . "': " .
+        foreach ($palette as $name => $color) {
+            $varName = sanitize_title($name);
+            $output .= $options['indent'] . "'" . $varName . "': " .
                       $color . "," . $options['line_ending'];
         }
         $output .= ");" . $options['line_ending'];
@@ -122,15 +163,16 @@ class Color_Palette_Formatter implements \GL_Color_Palette_Generator\Interfaces\
      * @param array $options Formatting options.
      * @return string LESS variables.
      */
-    private function format_less($palette, $options) {
+    protected function format_less(array $palette, array $options): string {
         $output = "";
 
-        foreach ($palette as $index => $color) {
+        foreach ($palette as $name => $color) {
             if ($options['include_comments']) {
-                $output .= "// Color " . ($index + 1) . $options['line_ending'];
+                $output .= "// {$name}" . $options['line_ending'];
             }
 
-            $output .= "@" . $options['variable_prefix'] . "-" . ($index + 1) . ": " .
+            $varName = sanitize_title($name);
+            $output .= "@" . $options['variable_prefix'] . "-" . $varName . ": " .
                       $color . ";" . $options['line_ending'];
         }
 
@@ -144,20 +186,20 @@ class Color_Palette_Formatter implements \GL_Color_Palette_Generator\Interfaces\
      * @param array $options Formatting options.
      * @return string Tailwind config object.
      */
-    private function format_tailwind($palette, $options) {
+    protected function format_tailwind(array $palette, array $options): string {
         $output = "module.exports = {" . $options['line_ending'];
         $output .= $options['indent'] . "theme: {" . $options['line_ending'];
         $output .= $options['indent'] . $options['indent'] . "colors: {" . $options['line_ending'];
 
-        foreach ($palette as $index => $color) {
+        foreach ($palette as $name => $color) {
             if ($options['include_comments']) {
                 $output .= $options['indent'] . $options['indent'] . $options['indent'] .
-                          "// Color " . ($index + 1) . $options['line_ending'];
+                          "// {$name}" . $options['line_ending'];
             }
 
+            $varName = sanitize_title($name);
             $output .= $options['indent'] . $options['indent'] . $options['indent'] .
-                      "'" . $options['class_prefix'] . "-" . ($index + 1) . "': '" .
-                      $color . "'," . $options['line_ending'];
+                      "'" . $varName . "': '" . $color . "'," . $options['line_ending'];
         }
 
         $output .= $options['indent'] . $options['indent'] . "}," . $options['line_ending'];
@@ -174,10 +216,11 @@ class Color_Palette_Formatter implements \GL_Color_Palette_Generator\Interfaces\
      * @param array $options Formatting options.
      * @return string JSON string.
      */
-    private function format_json($palette, $options) {
+    protected function format_json(array $palette, array $options): string {
         $colors = [];
-        foreach ($palette as $index => $color) {
-            $colors[$options['class_prefix'] . '-' . ($index + 1)] = $color;
+        foreach ($palette as $name => $color) {
+            $varName = sanitize_title($name);
+            $colors[$varName] = $color;
         }
 
         return wp_json_encode(
@@ -193,28 +236,25 @@ class Color_Palette_Formatter implements \GL_Color_Palette_Generator\Interfaces\
      * @param array $options Formatting options.
      * @return string CSS classes.
      */
-    private function generate_css_classes($palette, $options) {
+    protected function generate_css_classes(array $palette, array $options): string {
         $output = "";
 
-        foreach ($palette as $index => $color) {
-            $class_name = "." . $options['class_prefix'] . "-" . ($index + 1);
-
-            if ($options['include_comments']) {
-                $output .= "/* Color " . ($index + 1) . " Utility Classes */" . $options['line_ending'];
-            }
+        foreach ($palette as $name => $color) {
+            $varName = sanitize_title($name);
+            $className = "." . $options['class_prefix'] . "-" . $varName;
 
             // Background color class
-            $output .= $class_name . "-bg {" . $options['line_ending'];
+            $output .= "{$className}-bg {" . $options['line_ending'];
             $output .= $options['indent'] . "background-color: " . $color . ";" . $options['line_ending'];
             $output .= "}" . $options['line_ending'];
 
             // Text color class
-            $output .= $class_name . "-text {" . $options['line_ending'];
+            $output .= "{$className}-text {" . $options['line_ending'];
             $output .= $options['indent'] . "color: " . $color . ";" . $options['line_ending'];
             $output .= "}" . $options['line_ending'];
 
             // Border color class
-            $output .= $class_name . "-border {" . $options['line_ending'];
+            $output .= "{$className}-border {" . $options['line_ending'];
             $output .= $options['indent'] . "border-color: " . $color . ";" . $options['line_ending'];
             $output .= "}" . $options['line_ending'];
         }

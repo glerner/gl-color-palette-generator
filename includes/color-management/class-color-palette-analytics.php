@@ -256,15 +256,32 @@ class Color_Palette_Analytics implements ColorPaletteAnalytics {
      * @return array Distribution metrics
      */
     private function analyze_distribution(array $palette): array {
-        $distribution = [];
+        $distribution = [
+            'hue_distribution' => [],
+            'saturation_distribution' => [],
+            'lightness_distribution' => []
+        ];
+
         foreach ($palette as $color) {
-            $rgb = $this->color_utility->hex_to_rgb($color);
-            $distribution[] = [
-                'color' => $color,
-                'rgb' => $rgb,
-                'luminance' => $this->color_utility->get_relative_luminance($color)
-            ];
+            $hsl = $this->color_utility->hex_to_hsl($color);
+
+            // Hue categories using constant for interval size
+            $hue_category = floor($hsl['h'] / Color_Constants::COLOR_WHEEL_CONFIG['hue_category_size'])
+                * Color_Constants::COLOR_WHEEL_CONFIG['hue_category_size'];
+            $distribution['hue_distribution'][$hue_category] =
+                ($distribution['hue_distribution'][$hue_category] ?? 0) + 1;
+
+            // Saturation categories
+            $sat_category = floor($hsl['s'] / 10) * 10;
+            $distribution['saturation_distribution'][$sat_category] =
+                ($distribution['saturation_distribution'][$sat_category] ?? 0) + 1;
+
+            // Lightness categories
+            $light_category = floor($hsl['l'] / 10) * 10;
+            $distribution['lightness_distribution'][$light_category] =
+                ($distribution['lightness_distribution'][$light_category] ?? 0) + 1;
         }
+
         return $distribution;
     }
 
