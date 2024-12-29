@@ -60,6 +60,20 @@ abstract class Color_Processor {
      * @return float Normalized color value.
      */
     protected function normalize_color_value($value, string $type): float {
-        // Implementation
+        // Convert string values to float
+        $value = (float) $value;
+        
+        // Normalize based on color type
+        switch ($type) {
+            case 'rgb':
+                return max(0, min(255, $value)) / 255;
+            case 'hsl':
+            case 'hsv':
+                return max(0, min(360, $value)) / 360;
+            case 'cmyk':
+                return max(0, min(100, $value)) / 100;
+            default:
+                return max(0, min(1, $value));
+        }
     }
 }

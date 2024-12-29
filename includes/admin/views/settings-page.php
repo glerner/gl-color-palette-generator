@@ -60,17 +60,17 @@ defined('ABSPATH') || exit; ?>
                 <td>
                     <label>
                         <input type="checkbox" name="gl_color_palette_settings[analysis_features][]"
-                               value="contrast" <?php checked(in_array('contrast', $settings['analysis_features'] ?? [])); ?>>
+                               value="contrast" <?php checked(in_array('contrast', $settings['analysis_features'] ?? [], true)); ?>>
                         <?php esc_html_e('Contrast Analysis', 'gl-color-palette-generator'); ?>
                     </label><br>
                     <label>
                         <input type="checkbox" name="gl_color_palette_settings[analysis_features][]"
-                               value="harmony" <?php checked(in_array('harmony', $settings['analysis_features'] ?? [])); ?>>
+                               value="harmony" <?php checked(in_array('harmony', $settings['analysis_features'] ?? [], true)); ?>>
                         <?php esc_html_e('Color Harmony', 'gl-color-palette-generator'); ?>
                     </label><br>
                     <label>
                         <input type="checkbox" name="gl_color_palette_settings[analysis_features][]"
-                               value="accessibility" <?php checked(in_array('accessibility', $settings['analysis_features'] ?? [])); ?>>
+                               value="accessibility" <?php checked(in_array('accessibility', $settings['analysis_features'] ?? [], true)); ?>>
                         <?php esc_html_e('Accessibility Checks', 'gl-color-palette-generator'); ?>
                     </label>
                 </td>

@@ -11,13 +11,23 @@ Several WCAG-related code patterns need refactoring to improve maintainability a
      - `meets_aa_large()`, `meets_aa_small()`, `meets_aaa_large()`, and `meets_aaa_small()` in `class-accessibility-checker.php`
    - Consider creating a shared trait or base class for these common WCAG compliance checks
 
-2. **Similar WCAG Requirement Arrays**
+2. **Duplicate Contrast Ratio Calculations**
+   - Multiple implementations of contrast ratio calculations exist:
+     - `get_contrast_ratio()` in `class-rest-controller-accessibility.php`
+     - `get_contrast_ratio()` in `class-contrast-checker.php`
+     - `get_contrast_ratio()` in `class-color-utility.php`
+   - Related luminance calculations are also duplicated:
+     - `get_relative_luminance()`
+     - `get_luminance_value()`
+   - Consider making `Color_Utility` the single source of truth for these calculations
+
+3. **Similar WCAG Requirement Arrays**
    - `WCAG_REQUIREMENTS` arrays exist in multiple files:
      - `class-compliance-checker.php`
      - `class-wcag-compliance.php`
    - While these are private and don't cause conflicts, consider consolidating into a single source of truth (use includes/interfaces/interface-color-constants.php)
 
-3. **WCAG Level Constants**
+4. **WCAG Level Constants**
    - `WCAG_LEVEL_*` constants in `class-compliance-types.php` are separate from other WCAG-related constants
    - Consider organizing all WCAG-related constants into a more cohesive structure (use includes/interfaces/interface-color-constants.php)
 

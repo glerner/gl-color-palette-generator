@@ -21,7 +21,7 @@ defined('ABSPATH') || exit; ?>
         <?php esc_html_e('Add New', 'gl-color-palette-generator'); ?>
     </a>
 
-    <?php if (empty($palettes)): ?>
+    <?php if (!(isset($palettes) && count($palettes) > 0)): ?>
         <div class="gl-color-palette-empty">
             <p><?php esc_html_e('No palettes found. Create your first color palette!', 'gl-color-palette-generator'); ?></p>
         </div>

@@ -5,6 +5,7 @@ class PerformanceOptimizer {
     private $cache;
     private $settings;
     private $metrics;
+    private $color_utility;
 
     /**
      * Cache configuration
@@ -25,10 +26,11 @@ class PerformanceOptimizer {
         'validations' => 25
     ];
 
-    public function __construct() {
+    public function __construct(Color_Utility $color_utility) {
         $this->cache = new ColorCache();
         $this->settings = new SettingsManager();
         $this->metrics = new PerformanceMetrics();
+        $this->color_utility = $color_utility;
     }
 
     /**
@@ -181,36 +183,25 @@ class PerformanceOptimizer {
     private function optimize_contrast_calculations($operations) {
         $results = [];
         $color_pairs = [];
-        $luminance_cache = [];
 
         /**
-         * Group by color pairs and cache luminance
+         * Group by color pairs
          */
         foreach ($operations as $operation) {
-            $color1 = $operation['color1'];
-            $color2 = $operation['color2'];
-
-            if (!isset($luminance_cache[$color1])) {
-                $luminance_cache[$color1] = $this->calculate_relative_luminance($color1);
-            }
-            if (!isset($luminance_cache[$color2])) {
-                $luminance_cache[$color2] = $this->calculate_relative_luminance($color2);
-            }
-
             $color_pairs[] = [
                 'id' => $operation['id'],
-                'color1' => $color1,
-                'color2' => $color2
+                'color1' => $operation['color1'],
+                'color2' => $operation['color2']
             ];
         }
 
         /**
-         * Calculate contrasts using cached luminance
+         * Calculate contrasts
          */
         foreach ($color_pairs as $pair) {
-            $results[$pair['id']] = $this->calculate_contrast_ratio(
-                $luminance_cache[$pair['color1']],
-                $luminance_cache[$pair['color2']]
+            $results[$pair['id']] = $this->color_utility->get_contrast_ratio(
+                $pair['color1'],
+                $pair['color2']
             );
         }
 

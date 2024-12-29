@@ -22,11 +22,6 @@ class Color_Variation_Generator implements Color_Shade_Generator_Interface, Colo
     use Color_Shade_Generator_Trait;
 
     /**
-     * @var AccessibilityChecker
-     */
-    private $accessibility_checker;
-
-    /**
      * @var Color_Utility
      */
     private $color_utility;
@@ -34,11 +29,9 @@ class Color_Variation_Generator implements Color_Shade_Generator_Interface, Colo
     /**
      * Constructor
      *
-     * @param AccessibilityChecker $accessibility_checker Accessibility checker instance
      * @param Color_Utility $color_utility Color utility instance
      */
-    public function __construct(AccessibilityChecker $accessibility_checker, Color_Utility $color_utility) {
-        $this->accessibility_checker = $accessibility_checker;
+    public function __construct(Color_Utility $color_utility) {
         $this->color_utility = $color_utility;
     }
 
@@ -105,7 +98,7 @@ class Color_Variation_Generator implements Color_Shade_Generator_Interface, Colo
 
         // Start with optimal contrast target
         $color = $this->adjust_color_to_target_luminance($base_color, $target_min, $target_max);
-        $contrast = $this->calculate_contrast_ratio($this->color_utility->rgb_to_hex($base_color), $this->color_utility->rgb_to_hex($color));
+        $contrast = $this->get_contrast_ratio($this->color_utility->rgb_to_hex($base_color), $this->color_utility->rgb_to_hex($color));
 
         // If contrast is too harsh, gradually reduce it while maintaining AAA standard
         if ($contrast > self::CONTRAST_THRESHOLD_MAX) {
@@ -134,7 +127,7 @@ class Color_Variation_Generator implements Color_Shade_Generator_Interface, Colo
         // Determine if we need to increase or decrease luminance
         $should_increase = $contrast_luminance < $base_luminance;
 
-        while ($this->calculate_contrast_ratio(
+        while ($this->get_contrast_ratio(
             $this->color_utility->rgb_to_hex($base_color),
             $this->color_utility->rgb_to_hex($contrast_color)
         ) > $target_contrast) {
@@ -163,7 +156,7 @@ class Color_Variation_Generator implements Color_Shade_Generator_Interface, Colo
         // Determine if we need to increase or decrease luminance
         $should_increase = $contrast_luminance > $base_luminance;
 
-        while ($this->calculate_contrast_ratio(
+        while ($this->color_utility->get_contrast_ratio(
             $this->color_utility->rgb_to_hex($base_color),
             $this->color_utility->rgb_to_hex($contrast_color)
         ) < $min_contrast) {
@@ -229,7 +222,7 @@ class Color_Variation_Generator implements Color_Shade_Generator_Interface, Colo
      */
     private function meets_contrast_requirements(string $color, bool $is_dark_mode): bool {
         // Check contrast against base background
-        $base_contrast = $this->accessibility_checker->calculate_contrast_ratio(
+        $base_contrast = $this->color_utility->get_contrast_ratio(
             $color,
             $is_dark_mode ? self::COLOR_NEAR_BLACK : self::COLOR_OFF_WHITE
         );
@@ -239,7 +232,7 @@ class Color_Variation_Generator implements Color_Shade_Generator_Interface, Colo
         }
 
         // Check contrast against text colors
-        $text_contrast = $this->accessibility_checker->calculate_contrast_ratio(
+        $text_contrast = $this->color_utility->get_contrast_ratio(
             $color,
             $is_dark_mode ? self::COLOR_OFF_WHITE : self::COLOR_NEAR_BLACK
         );
@@ -390,12 +383,12 @@ class Color_Variation_Generator implements Color_Shade_Generator_Interface, Colo
      * @return string Text color hex
      */
     private function get_text_color(float $bg_luminance, bool $is_dark_mode = false): string {
-        $threshold = $is_dark_mode 
+        $threshold = $is_dark_mode
             ? Color_Constants::COLOR_METRICS['luminance']['dark_mode_threshold']
             : Color_Constants::COLOR_METRICS['luminance']['threshold'];
-            
+
         return $bg_luminance > $threshold
-            ? Color_Constants::COLOR_METRICS['colors']['dark'] 
+            ? Color_Constants::COLOR_METRICS['colors']['dark']
             : Color_Constants::COLOR_METRICS['colors']['light'];
     }
 
@@ -414,7 +407,7 @@ class Color_Variation_Generator implements Color_Shade_Generator_Interface, Colo
         $text_color = $this->get_text_color($bg_luminance, $is_dark_mode);
 
         // Calculate contrast
-        $contrast = $this->accessibility_checker->calculate_contrast_ratio(
+        $contrast = $this->color_utility->get_contrast_ratio(
             $text_color,
             $background_color
         );

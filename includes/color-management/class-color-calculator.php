@@ -16,6 +16,7 @@ namespace GL_Color_Palette_Generator\Color_Management;
 use GL_Color_Palette_Generator\Interfaces;
 use GL_Color_Palette_Generator\Types\Color_Types;
 use GL_Color_Palette_Generator\Types\Calculator_Types;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use GL_Color_Palette_Generator\Traits\Error_Handler;
 use GL_Color_Palette_Generator\Traits\Logger;
 
@@ -61,7 +62,7 @@ class Color_Calculator implements Interfaces\Color_Calculator {
     public function calculate_color_difference(string $color1, string $color2): float {
         $lab1 = $this->color_utility->hex_to_lab($color1);
         $lab2 = $this->color_utility->hex_to_lab($color2);
-        
+
         return $this->calculate_ciede2000($lab1, $lab2);
     }
 
@@ -77,13 +78,13 @@ class Color_Calculator implements Interfaces\Color_Calculator {
     public function mix_colors(string $color1, string $color2, float $weight = 0.5): string {
         $rgb1 = $this->color_utility->hex_to_rgb($color1);
         $rgb2 = $this->color_utility->hex_to_rgb($color2);
-        
+
         $mixed = [
             'r' => round($rgb1['r'] * (1 - $weight) + $rgb2['r'] * $weight),
             'g' => round($rgb1['g'] * (1 - $weight) + $rgb2['g'] * $weight),
             'b' => round($rgb1['b'] * (1 - $weight) + $rgb2['b'] * $weight)
         ];
-        
+
         return $this->color_utility->rgb_to_hex($mixed);
     }
 
@@ -142,7 +143,7 @@ class Color_Calculator implements Interfaces\Color_Calculator {
         foreach ($colors as $i => $color) {
             $rgb = $this->color_utility->hex_to_rgb($color);
             $weight = $weights[$i] / $total_weight;
-            
+
             $rgb_sum['r'] += $rgb['r'] * $weight;
             $rgb_sum['g'] += $rgb['g'] * $weight;
             $rgb_sum['b'] += $rgb['b'] * $weight;
@@ -185,68 +186,8 @@ class Color_Calculator implements Interfaces\Color_Calculator {
         // Implementation of CIEDE2000 formula
         // This is a complex calculation that considers human perception
         // Reference: http://www.ece.rochester.edu/~gsharma/ciede2000/
-        
+
         // Placeholder for actual implementation
         return 0.0;
-    }
-
-    /**
-     * Convert RGB to XYZ color space
-     *
-     * @param array $rgb RGB color values
-     * @return array XYZ color values
-     */
-    private function rgb_to_xyz(array $rgb): array {
-        $rgb = array_map(function($value) {
-            $value = $value / 255;
-            return $value <= 0.04045 
-                ? $value / 12.92 
-                : pow(($value + 0.055) / 1.055, 2.4);
-        }, $rgb);
-
-        $matrix = Color_Constants::COLOR_SPACE_CONVERSION['rgb_to_xyz'];
-        $xyz = [];
-
-        for ($i = 0; $i < 3; $i++) {
-            $xyz[$i] = $matrix[$i][0] * $rgb['r'] + 
-                      $matrix[$i][1] * $rgb['g'] + 
-                      $matrix[$i][2] * $rgb['b'];
-        }
-
-        return [
-            'x' => $xyz[0],
-            'y' => $xyz[1],
-            'z' => $xyz[2]
-        ];
-    }
-
-    /**
-     * Convert XYZ to RGB color space
-     *
-     * @param array $xyz XYZ color values
-     * @return array RGB color values
-     */
-    private function xyz_to_rgb(array $xyz): array {
-        $matrix = Color_Constants::COLOR_SPACE_CONVERSION['xyz_to_rgb'];
-        $rgb = [];
-
-        for ($i = 0; $i < 3; $i++) {
-            $rgb[$i] = $matrix[$i][0] * $xyz['x'] + 
-                      $matrix[$i][1] * $xyz['y'] + 
-                      $matrix[$i][2] * $xyz['z'];
-        }
-
-        $rgb = array_map(function($value) {
-            $value = $value <= 0.0031308 
-                ? 12.92 * $value 
-                : 1.055 * pow($value, 1/2.4) - 0.055;
-            return round(max(0, min(255, $value * 255)));
-        }, $rgb);
-
-        return [
-            'r' => $rgb[0],
-            'g' => $rgb[1],
-            'b' => $rgb[2]
-        ];
     }
 }

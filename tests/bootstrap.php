@@ -10,6 +10,12 @@ namespace GL_Color_Palette_Generator\Tests\Bootstrap;
 
 echo "\n=== Phase 1: Environment Setup ===\n";
 
+// Add clear separator to error log
+$timestamp = date('Y-m-d H:i:s');
+error_log("\n" . str_repeat('=', 80) . "\n");
+error_log("Test Run Started: {$timestamp}");
+error_log(str_repeat('=', 80) . "\n");
+
 // Load common functionality first.
 require_once __DIR__ . '/bootstrap/common.php';
 

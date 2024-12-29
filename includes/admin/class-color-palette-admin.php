@@ -40,7 +40,7 @@ class Color_Palette_Admin {
      *
      * @since 1.0.0
      */
-    public function init() {
+    public function init(): void {
         $this->settings = new Settings_Manager();
 
         add_action('admin_menu', [$this, 'add_admin_menu']);
@@ -55,7 +55,7 @@ class Color_Palette_Admin {
      *
      * @since 1.0.0
      */
-    public function add_admin_menu() {
+    public function add_admin_menu(): void {
         add_menu_page(
             __('Color Palette Generator', 'gl-color-palette-generator'),
             __('Color Palettes', 'gl-color-palette-generator'),
@@ -84,7 +84,7 @@ class Color_Palette_Admin {
      * @param string $hook Current admin page.
      * @since 1.0.0
      */
-    public function enqueue_admin_assets($hook) {
+    public function enqueue_admin_assets($hook): void {
         if (!strpos($hook, 'gl-color-palette')) {
             return;
         }
@@ -122,7 +122,7 @@ class Color_Palette_Admin {
      *
      * @since 1.0.0
      */
-    public function render_main_page() {
+    public function render_main_page(): void {
         $palettes = $this->get_saved_palettes();
         include GL_CPG_PLUGIN_DIR . 'templates/admin/main-page.php';
     }
@@ -134,7 +134,7 @@ class Color_Palette_Admin {
      *
      * @since 1.0.0
      */
-    public function render_settings_page() {
+    public function render_settings_page(): void {
         include GL_CPG_PLUGIN_DIR . 'templates/admin/settings-page.php';
     }
 
@@ -145,7 +145,7 @@ class Color_Palette_Admin {
      *
      * @since 1.0.0
      */
-    public function handle_generate_palette() {
+    public function handle_generate_palette(): void {
         check_ajax_referer('gl_cpg_admin', 'nonce');
 
         if (!current_user_can('manage_options')) {
@@ -153,7 +153,7 @@ class Color_Palette_Admin {
         }
 
         $prompt = sanitize_text_field($_POST['prompt'] ?? '');
-        if (empty($prompt)) {
+        if ($prompt === '') {
             wp_send_json_error(__('Prompt is required.', 'gl-color-palette-generator'));
         }
 
@@ -177,7 +177,7 @@ class Color_Palette_Admin {
      * @return array
      * @since 1.0.0
      */
-    private function get_saved_palettes() {
+    private function get_saved_palettes(): array {
         global $wpdb;
         $table_name = $wpdb->prefix . 'gl_color_palettes';
 
@@ -189,7 +189,7 @@ class Color_Palette_Admin {
         return array_map(function($palette) {
             $palette['colors'] = json_decode($palette['colors'], true);
             return $palette;
-        }, $palettes ?: []);
+        }, $palettes ?? []);
     }
 
     /**
@@ -202,7 +202,7 @@ class Color_Palette_Admin {
      * @return int|false The number of rows inserted, or false on error.
      * @since 1.0.0
      */
-    public function save_palette($name, $colors) {
+    public function save_palette(string $name, array $colors): int|false {
         global $wpdb;
         $table_name = $wpdb->prefix . 'gl_color_palettes';
 
@@ -227,7 +227,7 @@ class Color_Palette_Admin {
      * @return int|false The number of rows deleted, or false on error.
      * @since 1.0.0
      */
-    public function delete_palette($id) {
+    public function delete_palette(int $id): int|false {
         global $wpdb;
         $table_name = $wpdb->prefix . 'gl_color_palettes';
 

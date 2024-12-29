@@ -15,7 +15,8 @@ use WP_REST_Response;
 use WP_Error;
 use GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator;
 use GL_Color_Palette_Generator\Color_Management\Color_Palette_Exporter;
-use GL_Color_Palette_Generator\Color_Management\Accessibility_Checker;
+use GL_Color_Palette_Generator\Accessibility\Accessibility_Checker;
+use GL_Color_Palette_Generator\Interfaces\Accessibility_Checker as Accessibility_Checker_Interface;
 
 /**
  * Class Rest_Controller
@@ -28,6 +29,19 @@ class Rest_Controller {
      */
     private $namespace = 'gl-cpg/v1';
 
+    /**
+     * Accessibility checker instance
+     *
+     * @var Accessibility_Checker_Interface
+     */
+    private $accessibility_checker;
+
+    /**
+     * Constructor
+     */
+    public function __construct() {
+        $this->accessibility_checker = new Accessibility_Checker();
+    }
     /**
      * Register REST API routes
      */
@@ -306,7 +320,7 @@ class Rest_Controller {
                 );
             }
 
-            $exporter = new Color_Palette_Exporter();
+            $exporter = new Color_Palette_Exporter($this->accessibility_checker);
             $format = $request->get_param('format');
 
             if ($format === 'csv') {
@@ -357,7 +371,7 @@ class Rest_Controller {
             }
 
             $content = file_get_contents($file['tmp_name']);
-            $exporter = new Color_Palette_Exporter();
+            $exporter = new Color_Palette_Exporter($this->accessibility_checker);
 
             // Determine format from file extension
             $format = pathinfo($file['name'], PATHINFO_EXTENSION);
@@ -437,4 +451,4 @@ class Rest_Controller {
             );
         }
     }
-} 
+}

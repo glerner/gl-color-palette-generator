@@ -2,12 +2,12 @@
 
 namespace GL_Color_Palette_Generator\Interfaces;
 
-use WP_Error;
-
 /**
  * Color Metrics Analyzer Interface
  *
- * Defines the contract for analyzing and measuring color metrics and relationships.
+ * Defines the contract for analyzing and measuring web color metrics and relationships.
+ * Focused on web-essential features like contrast ratios, accessibility,
+ * and basic color analysis.
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Interfaces
@@ -15,59 +15,34 @@ use WP_Error;
  */
 interface Color_Metrics_Analyzer {
     /**
-     * Analyzes a single color's metrics.
+     * Get comprehensive color analysis
      *
-     * @param string $color Color to analyze (hex format)
-     * @return array|WP_Error Analysis results or error
+     * @param string $color Hex color code
+     * @return array Color analysis data including RGB, HSL, and metrics
      */
-    public function analyze_color(string $color);
+    public function get_color_analysis(string $color): array;
 
     /**
-     * Analyzes print output characteristics.
+     * Calculate perceived brightness
      *
-     * @param string $color Color to analyze
-     * @return array|WP_Error Print analysis results or error
+     * @param array $rgb RGB values
+     * @return float Perceived brightness (0-255)
      */
-    public function analyze_print_output(string $color);
+    public function calculate_perceived_brightness(array $rgb): float;
 
     /**
-     * Analyzes screen display characteristics.
+     * Analyze contrast between colors
      *
-     * @param string $color Color to analyze
-     * @return array|WP_Error Screen analysis results or error
+     * @param array $colors Array of hex color codes
+     * @return array Contrast analysis results with accessibility scores
      */
-    public function analyze_screen_display(string $color);
+    public function analyze_contrast(array $colors): array;
 
     /**
-     * Analyzes color display across different devices.
+     * Check if colors are visually distinct
      *
-     * @param string $color Color to analyze
-     * @return array|WP_Error Device analysis results or error
+     * @param array $colors Array of hex color codes
+     * @return bool True if colors are visually distinct
      */
-    public function analyze_device_display(string $color);
-
-    /**
-     * Calculate contrast ratio between two colors
-     *
-     * @param string $color1 First color in hex format
-     * @param string $color2 Second color in hex format
-     * @return float|WP_Error Contrast ratio or error
-     */
-    public function calculate_contrast(string $color1, string $color2);
-
-    /**
-     * Check accessibility compliance for color combinations
-     *
-     * @param array $colors Array of colors to check
-     * @return array|WP_Error Array containing 'overall_score' and 'combinations' or error
-     */
-    public function check_accessibility(array $colors);
-
-    /**
-     * Analyze color harmony relationships
-     *
-     * @param array $colors Array of colors to analyze
-     * @return array|WP_Error Array containing harmony analysis including 'complementary' or error
-     */
-    public function analyze_harmony(array $colors);
+    public function are_colors_distinct(array $colors): bool;
 }

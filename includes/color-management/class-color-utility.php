@@ -164,7 +164,7 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
      * @param float $t
      * @return float
      */
-    private function hue_to_rgb(float $p, float $q, float $t): float {
+    public function hue_to_rgb(float $p, float $q, float $t): float {
         if ($t < 0) $t += 1;
         if ($t > 1) $t -= 1;
         if ($t < 1/6) return $p + ($q - $p) * 6 * $t;
@@ -203,7 +203,7 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
      * @return array Lab values.
      * @since 1.0.0
      */
-    private function hex_to_lab(string $hex_color): array {
+    public function hex_to_lab(string $hex_color): array {
         // First convert hex to RGB
         $rgb = $this->hex_to_rgb($hex_color);
 
@@ -220,7 +220,7 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
      * @param array $rgb RGB color values
      * @return array XYZ color values
      */
-    private function rgb_to_xyz(array $rgb): array {
+    public function rgb_to_xyz(array $rgb): array {
         $rgb = array_map(function($value) {
             $value = $value / 255;
             return $value <= 0.04045
@@ -243,7 +243,7 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
      * @param array $xyz XYZ color values
      * @return array RGB color values
      */
-    private function xyz_to_rgb(array $xyz): array {
+    public function xyz_to_rgb(array $xyz): array {
         $matrix = Color_Constants::COLOR_SPACE_CONVERSION['xyz_to_rgb'];
 
         $rgb = [
@@ -267,7 +267,7 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
      * @return array Lab values.
      * @since 1.0.0
      */
-    private function xyz_to_lab(array $xyz): array {
+    public function xyz_to_lab(array $xyz): array {
         // D65 reference white
         $ref_x = 0.95047;
         $ref_y = 1.00000;
@@ -364,5 +364,88 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
 
         // Return average difference, normalized to 0-100
         return min(100, array_sum($differences) / count($differences));
+    }
+
+    /**
+     * Get contrast ratio between two colors
+     *
+     * @param string $color1 First color in hex format
+     * @param string $color2 Second color in hex format
+     * @return float Contrast ratio
+     */
+    public function get_contrast_ratio(string $color1, string $color2): float {
+        $l1 = $this->get_relative_luminance($color1);
+        $l2 = $this->get_relative_luminance($color2);
+
+        $lighter = max($l1, $l2);
+        $darker = min($l1, $l2);
+
+        return ($lighter + 0.05) / ($darker + 0.05);
+    }
+
+    /**
+     * Get relative luminance of a color
+     * Based on WCAG 2.0 relative luminance calculation
+     * See: https://www.w3.org/TR/WCAG20/#relativeluminancedef
+     *
+     * @param string $color Color in hex format
+     * @return float Relative luminance
+     */
+    public function get_relative_luminance(string $color): float {
+        $rgb = $this->hex_to_rgb($color);
+        $r = $this->get_luminance_value($rgb['r'] / 255);
+        $g = $this->get_luminance_value($rgb['g'] / 255);
+        $b = $this->get_luminance_value($rgb['b'] / 255);
+
+        return 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
+    }
+
+    /**
+     * Get luminance value for a single RGB channel
+     * Based on WCAG 2.0 relative luminance calculation
+     *
+     * @param float $value RGB value (0-1)
+     * @return float Luminance value
+     */
+    public function get_luminance_value(float $value): float {
+        return $value <= 0.03928
+            ? $value / 12.92
+            : pow(($value + 0.055) / 1.055, 2.4);
+    }
+
+    /**
+     * Darken a color by a percentage
+     *
+     * @param string $color Hex color code
+     * @param int $amount Percentage to darken (0-100)
+     * @return string Darkened color hex code
+     */
+    public function darken_color(string $color, int $amount): string {
+        $rgb = $this->hex_to_rgb($color);
+        $hsl = $this->rgb_to_hsl($rgb);
+
+        // Decrease lightness
+        $hsl['l'] = max(0, $hsl['l'] - ($amount / 100));
+
+        $rgb = $this->hsl_to_rgb($hsl);
+        return $this->rgb_to_hex($rgb);
+    }
+
+    /**
+     * Lighten a color by a percentage
+     *
+     * @param string $color Hex color code
+     * @param int $amount Percentage to lighten (0-100)
+     * @return string Lightened color hex code
+     */
+    public function lighten_color(string $color, int $amount): string {
+        $rgb = $this->hex_to_rgb($color);
+        $hsl = $this->rgb_to_hsl($rgb);
+
+        // Increase lightness
+        $hsl['l'] = min(1, $hsl['l'] + ($amount / 100));
+
+        $rgb = $this->hsl_to_rgb($hsl);
+        return $this->rgb_to_hex($rgb);
     }
 }

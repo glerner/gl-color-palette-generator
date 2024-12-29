@@ -10,6 +10,7 @@
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Shade_Generator;
+use GL_Color_Palette_Generator\Interfaces\Accessibility_Checker;
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Exporter_Interface;
 use GL_Color_Palette_Generator\Traits\Color_Shade_Generator_Trait;
 
@@ -25,9 +26,9 @@ class Color_Palette_Exporter implements Color_Palette_Exporter_Interface {
     /**
      * Constructor
      *
-     * @param AccessibilityChecker $accessibility_checker Accessibility checker instance
+     * @param Accessibility_Checker $accessibility_checker Accessibility checker instance
      */
-    public function __construct(AccessibilityChecker $accessibility_checker) {
+    public function __construct(Accessibility_Checker $accessibility_checker) {
         $this->color_exporter = new ColorExporter($accessibility_checker);
         $this->shade_generator = new Color_Shade_Generator($accessibility_checker);
     }

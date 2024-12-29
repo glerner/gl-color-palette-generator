@@ -5,15 +5,17 @@ namespace GL_Color_Palette_Generator\Interfaces;
 /**
  * Accessibility Checker Interface
  *
- * Defines the contract for WCAG compliance and accessibility checking.
- *
  * @package GL_Color_Palette_Generator
  * @subpackage Interfaces
  * @since 1.0.0
  */
 
 /**
- * Interface for accessibility checking functionality
+ * Interface Accessibility_Checker
+ *
+ * Defines the contract for accessibility checking implementations.
+ *
+ * @since 1.0.0
  */
 interface Accessibility_Checker {
     /**

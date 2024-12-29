@@ -43,7 +43,7 @@ defined('ABSPATH') || exit; ?>
         <div class="gl-analysis-section">
             <h3><?php esc_html_e('Color Harmony', 'gl-color-palette-generator'); ?></h3>
 
-            <?php if (!empty($analysis['harmony']['harmony_type']['patterns'])): ?>
+            <?php if (isset($analysis['harmony']['harmony_type']['patterns']) && count($analysis['harmony']['harmony_type']['patterns']) > 0): ?>
                 <div class="gl-harmony-patterns">
                     <?php foreach ($analysis['harmony']['harmony_type']['patterns'] as $pattern): ?>
                         <span class="gl-harmony-pattern">
@@ -56,7 +56,7 @@ defined('ABSPATH') || exit; ?>
             <div class="gl-harmony-strength">
                 <label><?php esc_html_e('Harmony Strength', 'gl-color-palette-generator'); ?></label>
                 <div class="gl-strength-meter">
-                    <div class="gl-strength-bar" style="width: <?php echo esc_attr($analysis['harmony']['harmony_type']['strength'] * 100); ?>%"></div>
+                    <div class="gl-strength-bar" style="width: <?php echo esc_attr(number_format($analysis['harmony']['harmony_type']['strength'] * 100, 2)); ?>%"></div>
                 </div>
             </div>
         </div>
@@ -66,7 +66,7 @@ defined('ABSPATH') || exit; ?>
         <div class="gl-analysis-section">
             <h3><?php esc_html_e('Accessibility', 'gl-color-palette-generator'); ?></h3>
 
-            <?php if (!empty($analysis['accessibility']['recommendations'])): ?>
+            <?php if (isset($analysis['accessibility']['recommendations']) && count($analysis['accessibility']['recommendations']) > 0): ?>
                 <div class="gl-recommendations">
                     <?php foreach ($analysis['accessibility']['recommendations'] as $rec): ?>
                         <div class="gl-recommendation <?php echo esc_attr($rec['severity']); ?>">
@@ -95,4 +95,4 @@ defined('ABSPATH') || exit; ?>
             </div>
         </div>
     <?php endif; ?>
-</div> 
+</div>

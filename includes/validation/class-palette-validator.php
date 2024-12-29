@@ -1,7 +1,8 @@
 <?php
 namespace GLColorPalette\Validation;
 
-use GLColorPalette\Interfaces\Color_Constants;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
+use GL_Color_Palette_Generator\Utility\Color_Utility;
 
 /**
  * Palette Validator
@@ -53,6 +54,11 @@ class Palette_Validator implements Color_Constants {
     protected $errors = [];
     protected $warnings = [];
     protected $suggestions = [];
+    protected $color_utility;
+
+    public function __construct(Color_Utility $color_utility) {
+        $this->color_utility = $color_utility;
+    }
 
     /**
      * Validate a color palette
@@ -197,7 +203,7 @@ class Palette_Validator implements Color_Constants {
             foreach ($colors as $j => $color2) {
                 if ($i === $j) continue;
 
-                $contrast = $this->calculate_contrast_ratio($color1, $color2);
+                $contrast = $this->color_utility->get_contrast_ratio($color1, $color2);
                 $rules = $this->get_validation_rules();
                 if ($contrast < $rules['contrast']['min']) {
                     $this->warnings[] = sprintf(
@@ -317,45 +323,6 @@ class Palette_Validator implements Color_Constants {
             pow($sat_diff / 100, 2) +
             pow($val_diff / 100, 2)
         ) * 100;
-    }
-
-    /**
-     * Calculate contrast ratio between two colors
-     *
-     * @param string $color1 First color hex code
-     * @param string $color2 Second color hex code
-     * @return float Contrast ratio
-     */
-    private function calculate_contrast_ratio($color1, $color2) {
-        $l1 = $this->get_relative_luminance($color1);
-        $l2 = $this->get_relative_luminance($color2);
-
-        $lighter = max($l1, $l2);
-        $darker = min($l1, $l2);
-
-        return ($lighter + 0.05) / ($darker + 0.05);
-    }
-
-    /**
-     * Get relative luminance of a color
-     *
-     * @param string $hex Color hex code
-     * @return float Relative luminance
-     */
-    private function get_relative_luminance($hex) {
-        $hex = ltrim($hex, '#');
-        $r = hexdec(substr($hex, 0, 2)) / 255;
-        $g = hexdec(substr($hex, 2, 2)) / 255;
-        $b = hexdec(substr($hex, 4, 2)) / 255;
-
-        $coefficients = Color_Constants::COLOR_METRICS['luminance'];
-        $threshold = Color_Constants::COLOR_METRICS['luminance']['threshold'];
-        
-        $r = ($r <= $threshold) ? $r / 12.92 : pow(($r + 0.055) / 1.055, 2.4);
-        $g = ($g <= $threshold) ? $g / 12.92 : pow(($g + 0.055) / 1.055, 2.4);
-        $b = ($b <= $threshold) ? $b / 12.92 : pow(($b + 0.055) / 1.055, 2.4);
-
-        return $coefficients['r'] * $r + $coefficients['g'] * $g + $coefficients['b'] * $b;
     }
 
     /**

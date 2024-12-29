@@ -182,7 +182,7 @@ class Color_Palette_Validator implements \GL_Color_Palette_Generator\Interfaces\
 
         for ($i = 0; $i < count($palette); $i++) {
             for ($j = $i + 1; $j < count($palette); $j++) {
-                $contrast = $this->color_utility->calculate_contrast_ratio(
+                $contrast = $this->color_utility->get_contrast_ratio(
                     $palette[array_keys($palette)[$i]],
                     $palette[array_keys($palette)[$j]]
                 );

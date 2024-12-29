@@ -487,11 +487,11 @@ class Test_Theme_JSON_Generator extends WP_UnitTestCase implements Color_Constan
         $this->assertArrayHasKey('contrast', $variations['variations']);
 
         // Base color should be very light in light mode
-        $base_luminance = $this->calculate_luminance($variations['variations']['base']);
+        $base_luminance = $this->get_contrast_checker()->calculate_relative_luminance($variations['variations']['base']);
         $this->assertGreaterThan(self::LIGHT_LUMINANCE_THRESHOLD, $base_luminance);
 
         // Contrast color should be very dark in light mode
-        $contrast_luminance = $this->calculate_luminance($variations['variations']['contrast']);
+        $contrast_luminance = $this->get_contrast_checker()->calculate_relative_luminance($variations['variations']['contrast']);
         $this->assertLessThan(self::DARK_LUMINANCE_THRESHOLD, $contrast_luminance);
     }
 
@@ -508,11 +508,11 @@ class Test_Theme_JSON_Generator extends WP_UnitTestCase implements Color_Constan
         $this->assertArrayHasKey('contrast', $variations['variations']);
 
         // Base color should be very dark in dark mode
-        $base_luminance = $this->calculate_luminance($variations['variations']['base']);
+        $base_luminance = $this->get_contrast_checker()->calculate_relative_luminance($variations['variations']['base']);
         $this->assertLessThan(self::DARK_LUMINANCE_THRESHOLD, $base_luminance);
 
         // Contrast color should be very light in dark mode
-        $contrast_luminance = $this->calculate_luminance($variations['variations']['contrast']);
+        $contrast_luminance = $this->get_contrast_checker()->calculate_relative_luminance($variations['variations']['contrast']);
         $this->assertGreaterThan(self::LIGHT_LUMINANCE_THRESHOLD, $contrast_luminance);
     }
 
@@ -527,7 +527,7 @@ class Test_Theme_JSON_Generator extends WP_UnitTestCase implements Color_Constan
 
         foreach ($variations['variations'] as $key => $color) {
             if ($key !== 'base') {
-                $contrast_ratio = $this->calculate_contrast_ratio(
+                $contrast_ratio = $this->get_contrast_ratio(
                     $variations['variations']['base'],
                     $color
                 );
@@ -557,7 +557,7 @@ class Test_Theme_JSON_Generator extends WP_UnitTestCase implements Color_Constan
     /**
      * Helper function to calculate contrast ratio
      */
-    private function calculate_contrast_ratio(string $color1, string $color2): float {
+    private function get_contrast_ratio(string $color1, string $color2): float {
         $l1 = $this->calculate_luminance($color1);
         $l2 = $this->calculate_luminance($color2);
 
@@ -1031,7 +1031,7 @@ class Test_Theme_JSON_Generator extends WP_UnitTestCase implements Color_Constan
 
             foreach ($variations['variations'] as $key => $color) {
                 if ($key === 'contrast') {
-                    $contrast_ratio = $this->calculate_contrast_ratio(
+                    $contrast_ratio = $this->get_contrast_ratio(
                         $variations['variations']['base'],
                         $color
                     );
@@ -1079,11 +1079,10 @@ class Test_Theme_JSON_Generator extends WP_UnitTestCase implements Color_Constan
         // Test that darker shades maintain increasing contrast
         foreach (['darker20', 'darker10'] as $shade) {
             if (isset($variations['variations'][$shade])) {
-                $current_contrast = $this->calculate_contrast_ratio(
-                    $base_color,
+                $current_contrast = $this->get_contrast_ratio(
+                    $variations['variations']['base'],
                     $variations['variations'][$shade]
                 );
-
                 $this->assertGreaterThan(
                     $previous_contrast,
                     $current_contrast,
@@ -1100,11 +1099,10 @@ class Test_Theme_JSON_Generator extends WP_UnitTestCase implements Color_Constan
         // Test that lighter shades maintain increasing contrast
         foreach (['lighter10', 'lighter20'] as $shade) {
             if (isset($variations['variations'][$shade])) {
-                $current_contrast = $this->calculate_contrast_ratio(
-                    $base_color,
+                $current_contrast = $this->get_contrast_ratio(
+                    $variations['variations']['base'],
                     $variations['variations'][$shade]
                 );
-
                 $this->assertGreaterThan(
                     $previous_contrast,
                     $current_contrast,
@@ -1218,11 +1216,11 @@ class Test_Theme_JSON_Generator extends WP_UnitTestCase implements Color_Constan
         ];
 
         $variations = $this->instance->generate_theme_json_variations($colors, 'complementary');
-        
+
         // Test light mode
         $light_theme = reset($variations);
         $palette = $light_theme['settings']['color']['palette'];
-        
+
         // Find base and contrast colors
         $base_color = null;
         $contrast_color = null;
@@ -1234,12 +1232,12 @@ class Test_Theme_JSON_Generator extends WP_UnitTestCase implements Color_Constan
                 $contrast_color = $color['color'];
             }
         }
-        
+
         $this->assertNotNull($base_color, 'Base color should be generated');
         $this->assertNotNull($contrast_color, 'Contrast color should be generated');
-        
+
         // Test contrast ratio meets WCAG requirements
-        $contrast_ratio = $this->calculate_contrast_ratio($base_color, $contrast_color);
+        $contrast_ratio = $this->get_contrast_ratio($base_color, $contrast_color);
         $this->assertGreaterThanOrEqual(
             self::WCAG_CONTRAST_MIN,
             $contrast_ratio,
@@ -1257,11 +1255,11 @@ class Test_Theme_JSON_Generator extends WP_UnitTestCase implements Color_Constan
         ];
 
         $variations = $this->instance->generate_theme_json_variations($colors, 'complementary');
-        
+
         // Test light mode
         $light_theme = reset($variations);
         $palette = $light_theme['settings']['color']['palette'];
-        
+
         // Find neutral colors
         $neutral_colors = [];
         foreach ($palette as $color) {
@@ -1269,19 +1267,19 @@ class Test_Theme_JSON_Generator extends WP_UnitTestCase implements Color_Constan
                 $neutral_colors[] = $color['color'];
             }
         }
-        
+
         $this->assertNotEmpty($neutral_colors, 'Neutral colors should be generated');
-        
+
         // Test that neutral colors form a gradient between base and contrast
         $this->assertGreaterThan(
             2,
             count($neutral_colors),
             'Should generate multiple neutral colors'
         );
-        
+
         // Test contrast ratios between adjacent neutral colors
         for ($i = 0; $i < count($neutral_colors) - 1; $i++) {
-            $contrast = $this->calculate_contrast_ratio(
+            $contrast = $this->get_contrast_ratio(
                 $neutral_colors[$i],
                 $neutral_colors[$i + 1]
             );

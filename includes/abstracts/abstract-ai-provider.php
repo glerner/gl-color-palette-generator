@@ -13,6 +13,7 @@
 namespace GL_Color_Palette_Generator\Abstracts;
 
 use GL_Color_Palette_Generator\Interfaces\AI_Provider_Interface;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 
 /**
  * Abstract AI Provider Base Class
@@ -41,18 +42,19 @@ abstract class AI_Provider_Base implements AI_Provider_Interface {
      * Validate input parameters.
      *
      * @param array $params Parameters to validate.
-     * @return bool|WP_Error True if valid, WP_Error on failure.
+     * @return bool|\WP_Error True if valid, WP_Error on failure.
      */
     protected function validate_params(array $params) {
-        if (empty($params['base_color']) || !preg_match('/^#[a-fA-F0-9]{6}$/', $params['base_color'])) {
+        if (!isset($params['base_color']) || !preg_match('/^#[a-fA-F0-9]{6}$/', $params['base_color'])) {
             return new \WP_Error('invalid_base_color', 'Invalid base color format');
         }
 
-        if (empty($params['mode']) || !in_array($params['mode'], ['analogous', 'complementary', 'triadic', 'monochromatic'])) {
+        $valid_modes = ['analogous', 'complementary', 'triadic', 'monochromatic'];
+        if (!isset($params['mode']) || !in_array($params['mode'], $valid_modes, true)) {
             return new \WP_Error('invalid_mode', 'Invalid palette mode');
         }
 
-        if (empty($params['count']) || $params['count'] < 2 || $params['count'] > 10) {
+        if (!isset($params['count']) || !is_numeric($params['count']) || $params['count'] < 2 || $params['count'] > 10) {
             return new \WP_Error('invalid_count', 'Color count must be between 2 and 10');
         }
 
@@ -64,7 +66,7 @@ abstract class AI_Provider_Base implements AI_Provider_Interface {
      *
      * @param string $endpoint API endpoint.
      * @param array  $data Request data.
-     * @return array|WP_Error Response data or WP_Error on failure.
+     * @return array|\WP_Error Response data or WP_Error on failure.
      */
     protected function make_request(string $endpoint, array $data) {
         $response = wp_remote_post($this->api_url . $endpoint, [

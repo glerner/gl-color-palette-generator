@@ -176,17 +176,17 @@ class Color_Validation {
         $luminance = $this->color_utility->calculate_relative_luminance($rgb);
 
         // Check contrast with white and black
-        $white_contrast = $this->accessibility_checker->calculate_contrast_ratio(
-            $color, 
+        $white_contrast = $this->accessibility_checker->get_contrast_ratio(
+            $color,
             Color_Constants::COLOR_METRICS['colors']['light']
         );
-        $black_contrast = $this->accessibility_checker->calculate_contrast_ratio(
-            $color, 
+        $black_contrast = $this->accessibility_checker->get_contrast_ratio(
+            $color,
             Color_Constants::COLOR_METRICS['colors']['dark']
         );
 
         $min_contrast = Color_Constants::ACCESSIBILITY_CONFIG['contrast']['min_ratio'];
-        
+
         $results['passes_light_contrast'] = $white_contrast >= $min_contrast;
         $results['passes_dark_contrast'] = $black_contrast >= $min_contrast;
         $results['light_contrast_ratio'] = $white_contrast;

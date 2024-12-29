@@ -1,8 +1,8 @@
 <?php
 /**
  * Color Combination Engine Class
- * 
- * Generates harmonious color combinations by applying color theory rules.
+ *
+ * Generates and analyzes color combinations based on color theory principles.
  * Takes a base color and creates complementary, analogous, or triadic color schemes
  * while ensuring proper contrast and accessibility standards are met.
  * Uses predefined harmony rules from Color_Constants to maintain consistency.
@@ -14,104 +14,116 @@
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
+use GL_Color_Palette_Generator\Color_Management\Color_Utility;
+use GL_Color_Palette_Generator\Color_Management\Color_Palette_Analyzer;
+use GL_Color_Palette_Generator\Color_Management\Color_Wheel;
+
 /**
  * Class Color_Combination_Engine
- * Handles advanced color combination algorithms and rules
+ * 
+ * Generates and analyzes color combinations based on color theory principles
  */
 class Color_Combination_Engine {
     /**
      * Color analyzer instance
      *
-     * @var Color_Analyzer
+     * @var Color_Palette_Analyzer
      */
     protected $color_analyzer;
 
     /**
-     * Harmony calculator instance
+     * Color wheel instance for harmony calculations
      *
-     * @var Harmony_Calculator
+     * @var Color_Wheel
      */
-    protected $harmony_calculator;
+    protected $color_wheel;
 
     /**
-     * Context evaluator instance
+     * Color utility instance
      *
-     * @var Context_Evaluator
+     * @var Color_Utility
      */
-    protected $context_evaluator;
+    protected $color_utility;
 
     /**
-     * Get color combination rules from constants
+     * Constructor
      *
-     * @return array Color combination rules
+     * @param Color_Palette_Analyzer $analyzer Color analyzer instance
+     * @param Color_Wheel $color_wheel Color wheel instance
+     * @param Color_Utility $color_utility Color utility instance
      */
-    private function get_combination_rules(): array {
-        return [
-            'harmony_patterns' => Color_Constants::COLOR_HARMONY_RULES,
-            'color_roles' => Color_Constants::COLOR_ROLES,
-            'relationships' => Color_Constants::COLOR_ROLE_RELATIONSHIPS
-        ];
+    public function __construct(
+        Color_Palette_Analyzer $analyzer,
+        Color_Wheel $color_wheel,
+        Color_Utility $color_utility
+    ) {
+        $this->color_analyzer = $analyzer;
+        $this->color_wheel = $color_wheel;
+        $this->color_utility = $color_utility;
     }
 
     /**
-     * Apply color combination rules
+     * Generate color combinations based on input parameters
      *
-     * @param array $colors Input colors
-     * @param string $pattern Harmony pattern to apply
-     * @return array Modified colors
+     * @param array $params Generation parameters
+     * @return array Generated color combinations
      */
-    public function apply_combination_rules(array $colors, string $pattern): array {
-        $rules = $this->get_combination_rules();
-        $harmony_rules = $rules['harmony_patterns'][$pattern] ?? [];
-        
-        if (empty($harmony_rules)) {
-            return $colors;
+    public function generate_combinations(array $params): array {
+        if (!isset($params['base_color'])) {
+            return [];
         }
 
-        foreach ($colors as $role => &$color) {
-            if (isset($harmony_rules[$role])) {
-                $color = $this->harmony_calculator->apply_harmony_rule($color, $harmony_rules[$role]);
+        $base_color = $params['base_color'];
+        $harmony_type = $params['harmony_type'] ?? 'complementary';
+        $options = $params['options'] ?? [];
+
+        // Generate harmonious colors using Color_Wheel
+        $harmonies = $this->color_wheel->calculate_harmonies($base_color, $harmony_type, $options);
+
+        // Process the harmonies into our combination format
+        $combinations = [];
+        foreach ($harmonies as $harmony) {
+            $combinations[] = [
+                'colors' => $harmony,
+                'metrics' => $this->analyze_combination($harmony)
+            ];
+        }
+
+        return $combinations;
+    }
+
+    /**
+     * Analyze color combination
+     *
+     * @param array $colors Array of colors to analyze
+     * @return array Analysis results
+     */
+    public function analyze_combination(array $colors): array {
+        $analysis = [];
+
+        // Calculate harmony score
+        $analysis['harmony_score'] = $this->color_wheel->calculate_harmony_score($colors);
+
+        // Calculate contrast ratios between all color pairs
+        $analysis['contrast_ratios'] = [];
+        for ($i = 0; $i < count($colors); $i++) {
+            for ($j = $i + 1; $j < count($colors); $j++) {
+                $ratio = $this->color_wheel->calculate_contrast_ratio($colors[$i], $colors[$j]);
+                $analysis['contrast_ratios'][] = [
+                    'colors' => [$colors[$i], $colors[$j]],
+                    'ratio' => $ratio,
+                    'passes_wcag' => $ratio >= 4.5 // WCAG AA standard for normal text
+                ];
             }
         }
 
-        return $colors;
-    }
+        // Calculate overall color balance
+        $analysis['color_balance'] = $this->color_wheel->calculate_color_balance($colors);
 
-    /**
-     * Generate optimized color combination
-     *
-     * @param string $base_color
-     * @param array  $parameters
-     * @param array  $context
-     *
-     * @return array
-     */
-    public function generate_combination($base_color, $parameters = [], $context = []) {
-        $combination = [
-            'primary_colors' => $this->calculate_primary_colors($base_color, $parameters),
-            'accent_colors' => $this->determine_accent_colors($base_color, $parameters),
-            'harmony_metrics' => $this->calculate_harmony_metrics($base_color, $parameters),
-            'context_adaptations' => $this->apply_context_adaptations($context),
-            'application_guidelines' => $this->generate_guidelines($context)
-        ];
+        // Calculate vibrance score
+        $analysis['vibrance'] = $this->color_wheel->calculate_vibrance_score($colors);
 
-        return $this->optimize_combination($combination, $context);
-    }
-
-    /**
-     * Validate and optimize color combination
-     *
-     * @param array $colors
-     * @param array $context
-     *
-     * @return array
-     */
-    public function validate_combination($colors, $context = []) {
-        return [
-            'harmony_score' => $this->calculate_harmony_score($colors),
-            'contrast_metrics' => $this->analyze_contrast_relationships($colors),
-            'context_suitability' => $this->evaluate_context_fit($colors, $context),
-            'optimization_suggestions' => $this->generate_optimization_suggestions($colors, $context)
-        ];
+        return $analysis;
     }
 }

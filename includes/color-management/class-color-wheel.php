@@ -17,64 +17,41 @@ use GL_Color_Palette_Generator\Interfaces\Color_Wheel_Interface;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use GL_Color_Palette_Generator\Types\Color_Types;
 use GL_Color_Palette_Generator\Types\Scheme_Types;
-use GL_Color_Palette_Generator\Color_Management\Color_Calculator;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
-use GL_Color_Palette_Generator\Settings\Settings_Manager;
 
 /**
  * Color Wheel Class
  *
+ * Handles color wheel operations and harmony calculations
+ *
+ * @package GL_Color_Palette_Generator
  * @since 1.0.0
  */
 class Color_Wheel implements Color_Wheel_Interface {
     /**
-     * Color calculator instance
-     *
-     * @var Color_Calculator
-     * @since 1.0.0
-     */
-    private Color_Calculator $color_calculator;
-
-    /**
      * Color utility instance
      *
      * @var Color_Utility
-     * @since 1.0.0
      */
     private Color_Utility $color_utility;
 
     /**
-     * Settings manager instance
-     *
-     * @var Settings_Manager
-     * @since 1.0.0
-     */
-    private Settings_Manager $settings;
-
-    /**
      * Constructor
      *
-     * @since 1.0.0
+     * @param Color_Utility $color_utility Color utility instance
      */
-    public function __construct(
-        Color_Calculator $color_calculator,
-        Color_Utility $color_utility,
-        Settings_Manager $settings
-    ) {
-        $this->color_calculator = $color_calculator;
+    public function __construct(Color_Utility $color_utility) {
         $this->color_utility = $color_utility;
-        $this->settings = $settings;
     }
 
     /**
      * Calculate color harmonies
      *
-     * @param string $base_color
-     * @param string $harmony_type
-     * @param array  $options
-     *
-     * @return array
-     * @since 1.0.0
+     * @param string $base_color Base color in hex format
+     * @param string $harmony_type Type of harmony to calculate
+     * @param array  $options Additional options for harmony calculation
+     * @return array Array of harmonious colors
+     * @throws \InvalidArgumentException If harmony type is invalid
      */
     public function calculate_harmonies(string $base_color, string $harmony_type, array $options = []): array {
         $hsl = $this->color_utility->hex_to_hsl($base_color);
@@ -82,7 +59,7 @@ class Color_Wheel implements Color_Wheel_Interface {
 
         // Validate harmony type
         $valid_harmonies = array_keys(Color_Constants::COLOR_HARMONY_RULES);
-        if (!in_array($harmony_type, $valid_harmonies)) {
+        if (!in_array($harmony_type, $valid_harmonies, true)) {
             throw new \InvalidArgumentException("Invalid harmony type: {$harmony_type}");
         }
 
@@ -100,7 +77,7 @@ class Color_Wheel implements Color_Wheel_Interface {
                 $harmonies = $this->calculate_tetradic($hsl, $options);
                 break;
             case 'split-complementary':
-                $harmonies = $this->calculate_compound($hsl, $options);
+                $harmonies = $this->calculate_split_complementary($hsl, $options);
                 break;
         }
 
@@ -108,242 +85,261 @@ class Color_Wheel implements Color_Wheel_Interface {
     }
 
     /**
-     * Calculate color relationships
+     * Calculate harmony score for a set of colors
      *
-     * @param string $color
-     *
-     * @return array
-     * @since 1.0.0
+     * @param array $colors Array of colors to analyze
+     * @return float Score between 0 and 1
      */
-    public function calculate_relationships(string $color): array {
+    public function calculate_harmony_score(array $colors): float {
+        $score = 0.0;
+        $total_colors = count($colors);
+        
+        if ($total_colors < 2) {
+            return $score;
+        }
+
+        // Convert all colors to HSL for easier analysis
+        $hsl_colors = array_map(
+            function($color) {
+                return $this->color_utility->hex_to_hsl($color);
+            },
+            $colors
+        );
+
+        // Analyze hue relationships
+        for ($i = 0; $i < $total_colors; $i++) {
+            for ($j = $i + 1; $j < $total_colors; $j++) {
+                $hue_diff = abs($hsl_colors[$i]['h'] - $hsl_colors[$j]['h']);
+                $hue_diff = min($hue_diff, 360 - $hue_diff);
+                
+                // Score based on common harmony angles (60°, 120°, 180°)
+                $angle_scores = [
+                    60 => 0.8,  // Analogous
+                    120 => 0.9, // Triadic
+                    180 => 1.0  // Complementary
+                ];
+                
+                foreach ($angle_scores as $angle => $max_score) {
+                    $diff_from_ideal = abs($hue_diff - $angle);
+                    if ($diff_from_ideal <= 15) {
+                        $score += $max_score * (1 - ($diff_from_ideal / 15));
+                    }
+                }
+            }
+        }
+
+        // Normalize score
+        $total_comparisons = ($total_colors * ($total_colors - 1)) / 2;
+        return $score / $total_comparisons;
+    }
+
+    /**
+     * Calculate contrast ratio between two colors
+     *
+     * @param string $color1 First color in hex format
+     * @param string $color2 Second color in hex format
+     * @return float Contrast ratio between 1 and 21
+     */
+    public function calculate_contrast_ratio(string $color1, string $color2): float {
+        return $this->color_utility->get_contrast_ratio($color1, $color2);
+    }
+
+    /**
+     * Calculate color balance score
+     *
+     * @param array $colors Array of colors to analyze
+     * @return float Score between 0 and 1
+     */
+    public function calculate_color_balance(array $colors): float {
+        if (count($colors) < 2) {
+            return 0.0;
+        }
+
+        $hsl_colors = array_map(
+            function($color) {
+                return $this->color_utility->hex_to_hsl($color);
+            },
+            $colors
+        );
+
+        // Calculate average and variance of hue distribution
+        $hues = array_column($hsl_colors, 'h');
+        $avg_hue = array_sum($hues) / count($hues);
+        
+        $variance = array_reduce(
+            $hues,
+            function($carry, $hue) use ($avg_hue) {
+                $diff = min(abs($hue - $avg_hue), 360 - abs($hue - $avg_hue));
+                return $carry + pow($diff, 2);
+            },
+            0.0
+        ) / count($hues);
+
+        // Lower variance indicates better balance
+        return 1.0 - min($variance / 180.0, 1.0);
+    }
+
+    /**
+     * Calculate vibrance score based on saturation and lightness
+     *
+     * @param array $colors Array of colors to analyze
+     * @return float Score between 0 and 1
+     */
+    public function calculate_vibrance_score(array $colors): float {
+        if (count($colors) === 0) {
+            return 0.0;
+        }
+
+        $hsl_colors = array_map(
+            function($color) {
+                return $this->color_utility->hex_to_hsl($color);
+            },
+            $colors
+        );
+
+        $total_score = array_reduce(
+            $hsl_colors,
+            function($carry, $hsl) {
+                // Saturation contributes 60% to vibrance
+                $saturation_score = $hsl['s'] * 0.6;
+                
+                // Lightness contributes 40% to vibrance (optimal around 50%)
+                $lightness_score = (1 - abs(0.5 - $hsl['l'])) * 0.4;
+                
+                return $carry + $saturation_score + $lightness_score;
+            },
+            0.0
+        );
+
+        return $total_score / count($colors);
+    }
+
+    /**
+     * Calculate complementary colors
+     *
+     * @param array $hsl HSL values of base color
+     * @param array $options Additional options
+     * @return array Array of complementary colors
+     */
+    public function calculate_complementary(array $hsl, array $options = []): array {
+        $complementary = $hsl;
+        $complementary['h'] = ($hsl['h'] + 180) % 360;
+        
         return [
-            'complementary' => $this->find_complementary($color),
-            'analogous' => $this->find_analogous($color),
-            'triadic' => $this->find_triadic($color),
-            'tetradic' => $this->find_tetradic($color),
-            'split-complementary' => $this->find_split_complementary($color),
-            'distance_relationships' => $this->calculate_distance_relationships($color)
+            $this->color_utility->hsl_to_hex($hsl),
+            $this->color_utility->hsl_to_hex($complementary)
         ];
     }
 
     /**
-     * Generate dynamic color wheel
+     * Calculate analogous colors
      *
-     * @param int   $segments
-     * @param array $options
-     *
-     * @return array
-     * @since 1.0.0
+     * @param array $hsl HSL values of base color
+     * @param array $options Additional options
+     * @return array Array of analogous colors
      */
-    public function generate_color_wheel(int $segments = 12, array $options = []): array {
-        $wheel = [];
-        $config = Color_Constants::COLOR_WHEEL_CONFIG;
-        $segment_angle = 360 / ($segments ?: $config['segments']);
-
-        for ($i = 0; $i < $segments; $i++) {
-            $hue = $i * $segment_angle;
-            $wheel[] = [
-                'hue' => $hue,
-                'hex' => $this->hue_to_hex($hue),
-                'relationships' => $this->calculate_segment_relationships($hue, $segment_angle)
-            ];
+    public function calculate_analogous(array $hsl, array $options = []): array {
+        $angle = $options['angle'] ?? Color_Constants::COLOR_HARMONY_RULES['analogous']['angle'];
+        $colors = [$this->color_utility->hsl_to_hex($hsl)];
+        
+        // Add colors on both sides
+        for ($i = -1; $i <= 1; $i += 2) {
+            $new_hsl = $hsl;
+            $new_hsl['h'] = ($hsl['h'] + ($angle * $i) + 360) % 360;
+            $colors[] = $this->color_utility->hsl_to_hex($new_hsl);
         }
-
-        return $wheel;
-    }
-
-    /**
-     * Calculate advanced color variations
-     *
-     * @param string $base_color
-     * @param string $variation_type
-     *
-     * @return array
-     * @since 1.0.0
-     */
-    private function calculate_variations(string $base_color, string $variation_type): array {
-        $hsl = $this->color_utility->hex_to_hsl($base_color);
-        $variations = [];
-
-        switch ($variation_type) {
-            case 'monochromatic':
-                $variations = $this->generate_monochromatic_scale($hsl);
-                break;
-            case 'brightness':
-                $variations = $this->generate_brightness_scale($hsl);
-                break;
-            case 'saturation':
-                $variations = $this->generate_saturation_scale($hsl);
-                break;
-            case 'temperature':
-                $variations = $this->generate_temperature_scale($hsl);
-                break;
-        }
-
-        return $variations;
-    }
-
-    /**
-     * Generate color schemes
-     *
-     * @param string $base_color
-     * @param string $scheme_type
-     * @param array  $options
-     *
-     * @return array
-     * @since 1.0.0
-     */
-    public function generate_scheme(
-        string $base_color,
-        string $scheme_type,
-        array $options = []
-    ): array {
-        $this->validate_color($base_color);
-        $scheme_type = strtolower($scheme_type);
-
-        // Validate scheme type using constants
-        $valid_schemes = array_keys(Color_Constants::COLOR_SCHEMES);
-        if (!in_array($scheme_type, $valid_schemes)) {
-            throw new \InvalidArgumentException("Invalid scheme type: {$scheme_type}");
-        }
-
-        return match($scheme_type) {
-            'complementary' => $this->generate_complementary_scheme($base_color, $options),
-            'analogous' => $this->generate_analogous_scheme($base_color, $options),
-            'triadic' => $this->generate_triadic_scheme($base_color, $options),
-            'split-complementary' => $this->generate_split_complementary_scheme($base_color, $options),
-            'tetradic' => $this->generate_tetradic_scheme($base_color, $options),
-            'monochromatic' => $this->generate_monochromatic_scheme($base_color, $options),
-            default => throw new \InvalidArgumentException("Invalid scheme type: {$scheme_type}")
-        };
-    }
-
-    /**
-     * Calculate color wheel position
-     *
-     * @param float $hue
-     * @param array $options
-     *
-     * @return array
-     * @since 1.0.0
-     */
-    private function calculate_wheel_position(float $hue, array $options = []): array {
-        $position = [
-            'angle' => $hue,
-            'radius' => $options['radius'] ?? 1.0,
-            'x' => cos(deg2rad($hue)) * ($options['radius'] ?? 1.0),
-            'y' => sin(deg2rad($hue)) * ($options['radius'] ?? 1.0)
-        ];
-
-        if (!empty($options['include_coordinates'])) {
-            $position['coordinates'] = $this->calculate_coordinates($position);
-        }
-
-        return $position;
-    }
-
-    /**
-     * Generate interpolated colors
-     *
-     * @param string $start_color
-     * @param string $end_color
-     * @param int    $steps
-     *
-     * @return array
-     * @since 1.0.0
-     */
-    private function generate_interpolated_colors(string $start_color, string $end_color, int $steps): array {
-        $colors = [];
-        $start_hsl = $this->color_utility->hex_to_hsl($start_color);
-        $end_hsl = $this->color_utility->hex_to_hsl($end_color);
-
-        for ($i = 0; $i <= $steps; $i++) {
-            $ratio = $i / $steps;
-            $hsl = [
-                'h' => $this->interpolate_hue($start_hsl['h'], $end_hsl['h'], $ratio),
-                's' => $start_hsl['s'] + ($end_hsl['s'] - $start_hsl['s']) * $ratio,
-                'l' => $start_hsl['l'] + ($end_hsl['l'] - $start_hsl['l']) * $ratio
-            ];
-            $colors[] = $this->color_utility->hsl_to_hex($hsl);
-        }
-
+        
         return $colors;
     }
 
     /**
-     * Calculate color harmony strength
+     * Calculate triadic colors
      *
-     * @param array $colors
-     *
-     * @return array
-     * @since 1.0.0
+     * @param array $hsl HSL values of base color
+     * @param array $options Additional options
+     * @return array Array of triadic colors
      */
-    private function calculate_harmony_strength(array $colors): array {
-        $strength = [
-            'contrast' => $this->calculate_contrast_ratio($colors),
-            'balance' => $this->calculate_color_balance($colors),
-            'harmony' => $this->calculate_harmony_score($colors),
-            'vibrance' => $this->calculate_vibrance_score($colors)
-        ];
-
-        return $strength;
-    }
-
-    /**
-     * Generate color wheel data
-     *
-     * @param int $resolution
-     *
-     * @return array
-     * @since 1.0.0
-     */
-    public function generate_wheel_data(int $resolution = 360): array {
-        $wheel_data = [
-            'primary_colors' => $this->get_primary_colors(),
-            'secondary_colors' => $this->get_secondary_colors(),
-            'tertiary_colors' => $this->get_tertiary_colors(),
-            'color_points' => $this->generate_color_points($resolution)
-        ];
-
-        return [
-            'wheel_data' => $wheel_data,
-            'segments' => $this->generate_wheel_segments($wheel_data),
-            'relationships' => $this->analyze_color_relationships($wheel_data),
-            'metadata' => $this->generate_wheel_metadata($wheel_data)
-        ];
-    }
-
-    /**
-     * Generate interactive wheel data
-     *
-     * @param string $selected_color
-     *
-     * @return array
-     * @since 1.0.0
-     */
-    public function generate_interactive_data(string $selected_color = null): array {
-        $wheel_data = $this->generate_wheel_data();
-
-        return [
-            'base_wheel' => $wheel_data,
-            'interactive_points' => $this->generate_interactive_points(),
-            'selection_guides' => $this->generate_selection_guides($selected_color),
-            'harmony_indicators' => $this->generate_harmony_indicators($selected_color),
-            'interaction_handlers' => $this->get_interaction_handlers()
-        ];
-    }
-
-    /**
-     * Validate color value
-     *
-     * @param string $color Color to validate
-     * @throws \InvalidArgumentException If color is invalid
-     */
-    private function validate_color(string $color): void {
-        if (!preg_match('/^#[a-f0-9]{6}$/i', $color)) {
-            throw new \InvalidArgumentException(
-                'Invalid color format. Must be a 6-digit hex color (e.g., #FF0000)'
-            );
+    public function calculate_triadic(array $hsl, array $options = []): array {
+        $colors = [$this->color_utility->hsl_to_hex($hsl)];
+        $angle = Color_Constants::COLOR_HARMONY_RULES['triadic']['angle'];
+        
+        for ($i = 1; $i <= 2; $i++) {
+            $new_hsl = $hsl;
+            $new_hsl['h'] = ($hsl['h'] + ($angle * $i)) % 360;
+            $colors[] = $this->color_utility->hsl_to_hex($new_hsl);
         }
+        
+        return $colors;
+    }
+
+    /**
+     * Calculate tetradic colors
+     *
+     * @param array $hsl HSL values of base color
+     * @param array $options Additional options
+     * @return array Array of tetradic colors
+     */
+    public function calculate_tetradic(array $hsl, array $options = []): array {
+        $colors = [$this->color_utility->hsl_to_hex($hsl)];
+        $angle = Color_Constants::COLOR_HARMONY_RULES['tetradic']['angle'];
+        
+        for ($i = 1; $i <= 3; $i++) {
+            $new_hsl = $hsl;
+            $new_hsl['h'] = ($hsl['h'] + ($angle * $i)) % 360;
+            $colors[] = $this->color_utility->hsl_to_hex($new_hsl);
+        }
+        
+        return $colors;
+    }
+
+    /**
+     * Calculate split-complementary colors
+     *
+     * @param array $hsl HSL values of base color
+     * @param array $options Additional options
+     * @return array Array of split-complementary colors
+     */
+    public function calculate_split_complementary(array $hsl, array $options = []): array {
+        $colors = [$this->color_utility->hsl_to_hex($hsl)];
+        $angle = Color_Constants::COLOR_HARMONY_RULES['split-complementary']['angle'];
+        
+        // Add complementary color
+        $comp_hsl = $hsl;
+        $comp_hsl['h'] = ($hsl['h'] + 180) % 360;
+        
+        // Add split colors
+        for ($i = -1; $i <= 1; $i += 2) {
+            $new_hsl = $comp_hsl;
+            $new_hsl['h'] = ($comp_hsl['h'] + ($angle * $i) + 360) % 360;
+            $colors[] = $this->color_utility->hsl_to_hex($new_hsl);
+        }
+        
+        return $colors;
+    }
+
+    /**
+     * Apply variations to harmony colors
+     *
+     * @param array $colors Array of colors
+     * @param array $options Variation options
+     * @return array Colors with variations applied
+     */
+    public function apply_harmony_variations(array $colors, array $options = []): array {
+        if (!isset($options['variations'])) {
+            return $colors;
+        }
+
+        $result = [];
+        foreach ($colors as $color) {
+            $result[] = $color;
+            if (isset($options['variations']['lighter'])) {
+                $result[] = $this->color_utility->lighten_color($color, $options['variations']['lighter']);
+            }
+            if (isset($options['variations']['darker'])) {
+                $result[] = $this->color_utility->darken_color($color, $options['variations']['darker']);
+            }
+        }
+        
+        return $result;
     }
 }

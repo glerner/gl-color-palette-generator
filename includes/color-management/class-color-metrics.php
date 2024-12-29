@@ -16,419 +16,144 @@ use WP_Error;
  * Class Color_Metrics
  */
 class Color_Metrics implements Color_Metrics_Interface {
-    /**
-     * Color utility instance
-     *
-     * @var Color_Utility
-     */
     private Color_Utility $color_util;
 
     /**
      * Constructor
      */
-    public function __construct() {
-        $this->color_util = new Color_Utility();
-    }
-
-    /**
-     * Calculate color difference using CIEDE2000
-     *
-     * @param string $color1 First color in hex format
-     * @param string $color2 Second color in hex format
-     * @return float|WP_Error Difference value or error
-     */
-    public function calculate_color_difference($color1, $color2) {
-        try {
-            // Convert hex to Lab color space
-            $lab1 = $this->color_util->hex_to_lab($color1);
-            $lab2 = $this->color_util->hex_to_lab($color2);
-
-            // Calculate CIEDE2000 difference
-            return $this->calculate_ciede2000($lab1, $lab2);
-        } catch (\Exception $e) {
-            return new WP_Error(
-                'color_difference_calculation_failed',
-                $e->getMessage()
-            );
-        }
+    public function __construct(Color_Utility $color_util) {
+        $this->color_util = $color_util;
     }
 
     /**
      * Calculate perceived brightness
      *
      * @param string $color Color in hex format
-     * @return float|WP_Error Brightness value (0-1) or error
+     * @return float Brightness value (0-1)
      */
-    public function calculate_brightness($color) {
-        try {
-            $rgb = $this->color_util->hex_to_rgb($color);
-            $coefficients = Color_Constants::COLOR_SPACE_CONVERSION['perceived_brightness'];
-            
-            // Using perceived brightness formula (ITU-R BT.709)
-            $brightness = ($coefficients['r'] * $rgb['r'] + 
-                         $coefficients['g'] * $rgb['g'] + 
-                         $coefficients['b'] * $rgb['b']) / 255;
-            
-            // Check if color is considered light or dark based on thresholds
-            if ($brightness >= Color_Constants::COLOR_METRICS['brightness']['light_threshold']) {
-                return Color_Constants::COLOR_ROLE_LIGHT;
-            } elseif ($brightness <= Color_Constants::COLOR_METRICS['brightness']['dark_threshold']) {
-                return Color_Constants::COLOR_ROLE_DARK;
-            }
-            
-            return $brightness;
-        } catch (\Exception $e) {
-            return new WP_Error(
-                'brightness_calculation_failed',
-                $e->getMessage()
-            );
-        }
+    public function calculate_brightness(string $color): float {
+        $rgb = $this->color_util->hex_to_rgb($color);
+        return ($rgb['r'] * 0.299 + $rgb['g'] * 0.587 + $rgb['b'] * 0.114) / 255;
     }
 
     /**
      * Calculate color saturation
      *
      * @param string $color Color in hex format
-     * @return float|WP_Error Saturation value (0-1) or error
+     * @return float Saturation value (0-1)
      */
-    public function calculate_saturation($color) {
-        try {
-            $hsl = $this->color_util->hex_to_hsl($color);
-            $saturation = $hsl['s'];
-            
-            // Validate saturation is within acceptable range
-            if ($saturation < Color_Constants::COLOR_METRICS['saturation']['min'] || 
-                $saturation > Color_Constants::COLOR_METRICS['saturation']['max']) {
-                throw new \Exception(__('Saturation out of valid range', 'gl-color-palette-generator'));
-            }
-            
-            return $saturation;
-        } catch (\Exception $e) {
-            return new WP_Error(
-                'saturation_calculation_failed',
-                $e->getMessage()
-            );
-        }
-    }
-
-    /**
-     * Calculate color temperature
-     *
-     * @param string $color Color in hex format
-     * @return float|WP_Error Temperature in Kelvin or error
-     */
-    public function calculate_temperature($color) {
-        try {
-            $rgb = $this->color_util->hex_to_rgb($color);
-            
-            // Using McCamy's formula
-            $x = ($rgb['r'] * 0.3320 + $rgb['g'] * 0.1858) / ($rgb['r'] * 0.1735 + $rgb['g'] * 0.0180);
-            $y = ($rgb['r'] * 0.3320 + $rgb['g'] * 0.1858) / ($rgb['r'] * 0.0241 + $rgb['g'] * 0.0738);
-            
-            return 449 * pow($x + 0.3320, 3) * pow($y + 0.1858, 2);
-        } catch (\Exception $e) {
-            return new WP_Error(
-                'temperature_calculation_failed',
-                $e->getMessage()
-            );
-        }
-    }
-
-    /**
-     * Calculate color harmony score
-     *
-     * @param array $colors Array of colors in hex format
-     * @return float|WP_Error Harmony score (0-1) or error
-     */
-    public function calculate_harmony_score($colors) {
-        try {
-            if (count($colors) < 2) {
-                throw new \Exception(__('Need at least 2 colors to calculate harmony', 'gl-color-palette-generator'));
-            }
-
-            $total_score = 0;
-            $comparisons = 0;
-
-            // Calculate average color difference and hue spacing
-            for ($i = 0; $i < count($colors); $i++) {
-                for ($j = $i + 1; $j < count($colors); $j++) {
-                    $diff = $this->calculate_color_difference($colors[$i], $colors[$j]);
-                    if (is_wp_error($diff)) {
-                        throw new \Exception($diff->get_error_message());
-                    }
-                    
-                    $hsl1 = $this->color_util->hex_to_hsl($colors[$i]);
-                    $hsl2 = $this->color_util->hex_to_hsl($colors[$j]);
-                    $hue_diff = abs($hsl1['h'] - $hsl2['h']);
-                    
-                    // Normalize difference and hue spacing
-                    $norm_diff = max(0, min(1, $diff / 100));
-                    $norm_hue = max(0, min(1, $hue_diff / 180));
-                    
-                    $total_score += ($norm_diff + $norm_hue) / 2;
-                    $comparisons++;
-                }
-            }
-
-            return $total_score / $comparisons;
-        } catch (\Exception $e) {
-            return new WP_Error(
-                'harmony_calculation_failed',
-                $e->getMessage()
-            );
-        }
-    }
-
-    /**
-     * Calculate color complexity
-     *
-     * @param string $color Color in hex format
-     * @return float|WP_Error Complexity score (0-1) or error
-     */
-    public function calculate_complexity($color) {
-        try {
-            $rgb = $this->color_util->hex_to_rgb($color);
-            $hsl = $this->color_util->hex_to_hsl($color);
-            
-            // Consider saturation, brightness variations, and RGB channel differences
-            $rgb_diff = max($rgb['r'], $rgb['g'], $rgb['b']) - min($rgb['r'], $rgb['g'], $rgb['b']);
-            $sat_impact = $hsl['s'];
-            $light_impact = abs(0.5 - $hsl['l']);
-            
-            return ($rgb_diff / 255 + $sat_impact + $light_impact) / 3;
-        } catch (\Exception $e) {
-            return new WP_Error(
-                'complexity_calculation_failed',
-                $e->getMessage()
-            );
-        }
-    }
-
-    /**
-     * Calculate color dominance in a palette
-     *
-     * @param string $color Color in hex format
-     * @param array  $palette Array of palette colors
-     * @return float|WP_Error Dominance score (0-1) or error
-     */
-    public function calculate_dominance($color, $palette) {
-        try {
-            if (!in_array($color, $palette)) {
-                throw new \Exception(__('Color not found in palette', 'gl-color-palette-generator'));
-            }
-
-            $total_difference = 0;
-            foreach ($palette as $other_color) {
-                if ($color !== $other_color) {
-                    $diff = $this->calculate_color_difference($color, $other_color);
-                    if (is_wp_error($diff)) {
-                        throw new \Exception($diff->get_error_message());
-                    }
-                    $total_difference += $diff;
-                }
-            }
-
-            // Normalize the dominance score
-            return $total_difference / (count($palette) - 1) / 100;
-        } catch (\Exception $e) {
-            return new WP_Error(
-                'dominance_calculation_failed',
-                $e->getMessage()
-            );
-        }
+    public function calculate_saturation(string $color): float {
+        $rgb = $this->color_util->hex_to_rgb($color);
+        $hsl = $this->color_util->rgb_to_hsl($rgb);
+        return $hsl['s'];
     }
 
     /**
      * Calculate color balance in a palette
      *
      * @param array $colors Array of colors in hex format
-     * @return array|WP_Error Balance metrics or error
+     * @return array Balance metrics
      */
-    public function calculate_balance($colors) {
-        try {
-            $total_r = 0;
-            $total_g = 0;
-            $total_b = 0;
-            $total_h = 0;
-            $total_s = 0;
-            $total_l = 0;
+    public function calculate_balance(array $colors): array {
+        $total_brightness = 0;
+        $total_saturation = 0;
+        $light_colors = 0;
+        $dark_colors = 0;
 
-            foreach ($colors as $color) {
-                $rgb = $this->color_util->hex_to_rgb($color);
-                $hsl = $this->color_util->hex_to_hsl($color);
+        foreach ($colors as $color) {
+            $brightness = $this->calculate_brightness($color);
+            $saturation = $this->calculate_saturation($color);
 
-                $total_r += $rgb['r'];
-                $total_g += $rgb['g'];
-                $total_b += $rgb['b'];
-                $total_h += $hsl['h'];
-                $total_s += $hsl['s'];
-                $total_l += $hsl['l'];
+            $total_brightness += $brightness;
+            $total_saturation += $saturation;
+
+            if ($brightness > 0.6) {
+                $light_colors++;
+            } elseif ($brightness < 0.4) {
+                $dark_colors++;
             }
-
-            $count = count($colors);
-            return [
-                'rgb_balance' => [
-                    'r' => $total_r / ($count * 255),
-                    'g' => $total_g / ($count * 255),
-                    'b' => $total_b / ($count * 255)
-                ],
-                'hsl_balance' => [
-                    'h' => $total_h / ($count * 360),
-                    's' => $total_s / $count,
-                    'l' => $total_l / $count
-                ]
-            ];
-        } catch (\Exception $e) {
-            return new WP_Error(
-                'balance_calculation_failed',
-                $e->getMessage()
-            );
         }
+
+        $count = count($colors);
+        return [
+            'average_brightness' => $total_brightness / $count,
+            'average_saturation' => $total_saturation / $count,
+            'light_dark_ratio' => $count > 0 ? $light_colors / $dark_colors : 0,
+            'balance_score' => $this->calculate_balance_score($colors)
+        ];
     }
 
     /**
      * Calculate color weight
      *
      * @param string $color Color in hex format
-     * @return float|WP_Error Weight value (0-1) or error
+     * @return float Weight value (0-1)
      */
-    public function calculate_weight($color) {
-        try {
-            $rgb = $this->color_util->hex_to_rgb($color);
-            $hsl = $this->color_util->hex_to_hsl($color);
-            
-            // Consider both luminance and saturation
-            $luminance = $this->calculate_brightness($color);
-            if (is_wp_error($luminance)) {
-                throw new \Exception($luminance->get_error_message());
-            }
-            
-            return (1 - $luminance) * (1 + $hsl['s']) / 2;
-        } catch (\Exception $e) {
-            return new WP_Error(
-                'weight_calculation_failed',
-                $e->getMessage()
-            );
-        }
-    }
+    public function calculate_weight(string $color): float {
+        $brightness = $this->calculate_brightness($color);
+        $saturation = $this->calculate_saturation($color);
 
-    /**
-     * Calculate color energy
-     *
-     * @param string $color Color in hex format
-     * @return float|WP_Error Energy value (0-1) or error
-     */
-    public function calculate_energy($color) {
-        try {
-            $hsl = $this->color_util->hex_to_hsl($color);
-            $complexity = $this->calculate_complexity($color);
-            if (is_wp_error($complexity)) {
-                throw new \Exception($complexity->get_error_message());
-            }
-            
-            // Consider saturation, lightness, and complexity
-            return ($hsl['s'] + abs(0.5 - $hsl['l']) + $complexity) / 3;
-        } catch (\Exception $e) {
-            return new WP_Error(
-                'energy_calculation_failed',
-                $e->getMessage()
-            );
-        }
+        // Weight is influenced by both darkness and saturation
+        return (1 - $brightness) * (1 + $saturation) / 2;
     }
 
     /**
      * Calculate color contrast ratio
      *
+     * @deprecated 2.0.0 Use Color_Utility::get_contrast_ratio() instead
+     * @see Color_Utility::get_contrast_ratio()
+     *
      * @param string $color1 First color in hex format
      * @param string $color2 Second color in hex format
-     * @return float|WP_Error Contrast ratio or error
+     * @return float Contrast ratio between 1 and 21
      */
-    public function calculate_contrast_ratio($color1, $color2) {
-        try {
-            $l1 = $this->calculate_relative_luminance($color1);
-            $l2 = $this->calculate_relative_luminance($color2);
-            
-            if (is_wp_error($l1) || is_wp_error($l2)) {
-                throw new \Exception(__('Failed to calculate luminance', 'gl-color-palette-generator'));
-            }
-            
-            $lighter = max($l1, $l2);
-            $darker = min($l1, $l2);
-            
-            return ($lighter + 0.05) / ($darker + 0.05);
-        } catch (\Exception $e) {
-            return new WP_Error(
-                'contrast_ratio_calculation_failed',
-                $e->getMessage()
-            );
-        }
-    }
-
-    /**
-     * Calculate relative luminance
-     *
-     * @param string $color Color in hex format
-     * @return float|WP_Error Relative luminance value or error
-     */
-    public function calculate_relative_luminance($color) {
-        try {
-            $rgb = $this->color_util->hex_to_rgb($color);
-            $coefficients = Color_Constants::COLOR_SPACE_CONVERSION['rgb_to_xyz'][1]; // Use Y row
-            
-            // Convert to linear RGB values
-            $r = $this->linearize_rgb($rgb['r'] / 255);
-            $g = $this->linearize_rgb($rgb['g'] / 255);
-            $b = $this->linearize_rgb($rgb['b'] / 255);
-            
-            // Calculate luminance using coefficients from sRGB to XYZ conversion
-            return $coefficients[0] * $r + $coefficients[1] * $g + $coefficients[2] * $b;
-        } catch (\Exception $e) {
-            return new WP_Error(
-                'luminance_calculation_failed',
-                $e->getMessage()
-            );
-        }
-    }
-
-    /**
-     * Linearize RGB value
-     *
-     * @param float $value RGB value
-     * @return float Linearized RGB value
-     */
-    private function linearize_rgb($value) {
-        if ($value <= 0.04045) {
-            return $value / 12.92;
-        } else {
-            return pow(($value + 0.055) / 1.055, 2.4);
-        }
-    }
-
-    /**
-     * Calculate CIEDE2000 color difference
-     *
-     * @param array $lab1 First color in Lab format
-     * @param array $lab2 Second color in Lab format
-     * @return float CIEDE2000 difference value
-     */
-    private function calculate_ciede2000($lab1, $lab2) {
-        // Implementation of CIEDE2000 formula
-        // This is a simplified version, the full implementation would be quite long
-        $delta_l = $lab2['l'] - $lab1['l'];
-        $delta_a = $lab2['a'] - $lab1['a'];
-        $delta_b = $lab2['b'] - $lab1['b'];
-        
-        $c1 = sqrt(pow($lab1['a'], 2) + pow($lab1['b'], 2));
-        $c2 = sqrt(pow($lab2['a'], 2) + pow($lab2['b'], 2));
-        
-        $delta_c = $c2 - $c1;
-        
-        // Simplified CIEDE2000 calculation
-        return sqrt(
-            pow($delta_l, 2) +
-            pow($delta_c, 2) +
-            pow($delta_a, 2) +
-            pow($delta_b, 2)
+    public function calculate_contrast_ratio(string $color1, string $color2): float {
+        trigger_error(
+            'Method ' . __METHOD__ . ' is deprecated. Use Color_Utility::get_contrast_ratio() instead.',
+            E_USER_DEPRECATED
         );
+        return $this->color_util->get_contrast_ratio($color1, $color2);
+    }
+
+    /**
+     * Calculate balance score for a color palette
+     *
+     * @param array $colors Array of colors
+     * @return float Balance score between 0 and 1
+     */
+    private function calculate_balance_score(array $colors): float {
+        if (count($colors) < 2) {
+            return 1.0;
+        }
+
+        $brightness_variance = 0;
+        $saturation_variance = 0;
+        $total_brightness = 0;
+        $total_saturation = 0;
+
+        // Calculate means
+        foreach ($colors as $color) {
+            $brightness = $this->calculate_brightness($color);
+            $saturation = $this->calculate_saturation($color);
+            $total_brightness += $brightness;
+            $total_saturation += $saturation;
+        }
+
+        $mean_brightness = $total_brightness / count($colors);
+        $mean_saturation = $total_saturation / count($colors);
+
+        // Calculate variances
+        foreach ($colors as $color) {
+            $brightness = $this->calculate_brightness($color);
+            $saturation = $this->calculate_saturation($color);
+            $brightness_variance += pow($brightness - $mean_brightness, 2);
+            $saturation_variance += pow($saturation - $mean_saturation, 2);
+        }
+
+        $brightness_variance /= count($colors);
+        $saturation_variance /= count($colors);
+
+        // Lower variance means better balance
+        return 1 - (($brightness_variance + $saturation_variance) / 2);
     }
 }

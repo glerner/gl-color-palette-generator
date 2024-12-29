@@ -4,10 +4,17 @@ Thank you for your interest in contributing to the GL Color Palette Generator! T
 
 ## Documentation
 
-The following documentation is available to help you:
+Key documentation to review before contributing:
 
 1. [API Documentation](docs/API.md) - REST API endpoints and usage
-2. [Database Setup](docs/database-setup.md) - MySQL setup for running tests
+2. [Theme Color Guide](docs/THEME-COLOR-GUIDE.md) - Essential guide for theme developers implementing color variations
+3. [Database Setup](docs/database-setup.md) - MySQL setup for running tests
+4. [Color Harmonies](docs/color-harmonies.md) - Adding new color harmony types
+
+Additional documentation can be found in the `docs/` directory, including:
+- Developer guides in `docs/guides/`
+- API details in `docs/API/`
+- Example implementations in `docs/examples/`
 
 ## Development Setup
 
@@ -102,6 +109,76 @@ This script will:
 For detailed information about the test database setup, see [docs/database-setup.md](docs/database-setup.md).
 
 ## Testing
+
+### PHPUnit Tests
+
+Run the complete test suite:
+```bash
+composer test
+```
+
+### PHPStan Static Analysis
+
+The project uses [PHPStan](https://phpstan.org/) for static analysis to catch coding errors early. It helps identify issues like:
+- Undefined classes and types
+- Invalid property types
+- Undefined constants
+- Invalid parameter types
+- Unsafe comparisons
+- And more
+
+The base configuration in `phpstan.neon` sets:
+- Default level 1
+- Analysis of `includes/` directory
+- Exclusion of `tests/` and `vendor/` directories
+- Custom bootstrap file
+
+```bash
+# Run analysis with default level (1)
+cd ~/sites/gl-color-palette-generator
+vendor/bin/phpstan analyse --error-format=table --no-progress
+
+# or specify file(s) to analyze
+vendor/bin/phpstan analyse --error-format=table --no-progress includes/color-management/class-color-wheel.php includes/color-management/class-color-combination-engine.php
+
+# Run with specific level (e.g., level 5)
+vendor/bin/phpstan analyse --error-format=table --no-progress --level=5
+```
+
+PHPStan groups errors by file for easier fixing. Example output:
+```
+------ ----------------------------------------------------------
+  Line   color-management/class-color-harmonization.php
+------ ----------------------------------------------------------
+  40     Property has unknown class Color_Analyzer as its type
+  84     Access to undefined constant Color_Constants::SATURATION_STEP
+  288    Construct empty() is not allowed. Use more strict comparison
+------ ----------------------------------------------------------
+```
+
+PHPStan Level Guidelines:
+- Level 1 (Default): Basic checks for initial development
+  - Undefined classes, properties, and methods
+  - Basic type checks
+
+- Level 5: Recommended for feature development and public APIs
+  - Stricter type checking
+  - Dead code detection
+  - Logical contradictions
+
+- Level 9: For critical components (use with caution)
+  - Most strict rules
+  - Complex type checking
+  - Early runtime error detection
+
+See [PHPStan documentation](https://phpstan.org/user-guide/rule-levels) for details about each level.
+
+### Code Coverage
+
+Generate code coverage report:
+```bash
+composer test-coverage
+```
 
 ### Test Environment Setup
 

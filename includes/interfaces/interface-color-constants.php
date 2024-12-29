@@ -337,7 +337,7 @@ interface Color_Constants {
     const WCAG_CONTRAST_AAA = 7.0;      // Level AAA - Enhanced
     const WCAG_CONTRAST_AA = 4.5;       // Level AA - Minimum
     const WCAG_CONTRAST_AA_LARGE = 3.0; // Level AA for large text
-    const WCAG_CONTRAST_MIN = 4.5;      // Our minimum requirement (AA)
+    const WCAG_CONTRAST_MIN = 4.7;      // Our minimum requirement (AA)
     const WCAG_CONTRAST_TARGET = 7.0;   // Our target (AAA)
     const CONTRAST_MAX = 12.0;          // Maximum for visual comfort
 

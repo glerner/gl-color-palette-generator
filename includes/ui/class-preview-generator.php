@@ -1,9 +1,40 @@
 <?php
 namespace GLColorPalette;
 
+use GLColorPalette\WCAGCompliance;
+use GLColorPalette\Color_Analysis;
+use GLColorPalette\AccessibilityChecker;
+use GL_Color_Palette_Generator\Color_Management\Color_Utility;
+
+/**
+ * Class PreviewGenerator
+ *
+ * Generates HTML previews of color palettes and WordPress theme elements
+ * with the selected color scheme applied.
+ *
+ * @package GLColorPalette
+ * @since 1.0.0
+ */
 class PreviewGenerator {
     /**
+     * Color utility instance
+     *
+     * @var Color_Utility
+     */
+    private $color_utility;
+
+    /**
+     * Constructor
+     */
+    public function __construct() {
+        $this->color_utility = new Color_Utility();
+    }
+
+    /**
      * Generate HTML preview for a color set
+     *
+     * @param array $colors Array of color sets with their variations
+     * @return string HTML preview of the color palette
      */
     public function generate_palette_preview($colors) {
         ob_start();
@@ -34,6 +65,9 @@ class PreviewGenerator {
 
     /**
      * Generate comprehensive preview of WordPress elements
+     *
+     * @param array $variation Color variation to preview
+     * @return string HTML preview of WordPress elements with applied colors
      */
     public function generate_variation_preview($variation) {
         ob_start();
@@ -250,7 +284,7 @@ class PreviewGenerator {
                 </div>
                 <div class="footer-bottom"
                      style="border-top-color: var(--preview-primary-light);">
-                    <p>© 2024 Your Website. All rights reserved.</p>
+                    <p>&copy; 2024 <a href="https://website-tech.glerner.com/">Lerner Consulting</a>. All rights reserved.</p>
                 </div>
             </footer>
         </div>
@@ -260,6 +294,9 @@ class PreviewGenerator {
 
     /**
      * Get contrasting text color (black or white)
+     *
+     * @param string $hex Hex color code
+     * @return string Either black or white hex color
      */
     private function get_contrast_color($hex) {
         $hex = ltrim($hex, '#');
@@ -274,6 +311,9 @@ class PreviewGenerator {
 
     /**
      * Generate preview HTML
+     *
+     * @param array $palette Color palette to preview
+     * @return string HTML preview
      */
     public function generate_preview($palette) {
         $visualization = new VisualizationEngine();
@@ -289,6 +329,9 @@ class PreviewGenerator {
 
     /**
      * Prepare preview data
+     *
+     * @param array $palette Color palette to process
+     * @return array Processed color data with hex, RGB, HSL, and contrast values
      */
     private function prepare_preview_data($palette) {
         $data = [];
@@ -308,15 +351,14 @@ class PreviewGenerator {
      * Check accessibility
      */
     private function check_accessibility($palette) {
-        $checker = new AccessibilityChecker();
-        $wcag = new WCAGCompliance();
-
         $results = [];
         foreach ($palette as $color) {
-            $results[$color['hex']] = [
-                'wcag_aa' => $wcag->check_aa_compliance($color['hex']),
-                'wcag_aaa' => $wcag->check_aaa_compliance($color['hex']),
-                'color_blindness' => $checker->check_color_blindness_safety($color['hex'])
+            $contrast = $this->color_utility->get_contrast_ratio($color['hex'], '#FFFFFF');
+            $results[] = [
+                'color' => $color['hex'],
+                'contrast_ratio' => $contrast,
+                'passes_aa' => $contrast >= 4.5,
+                'passes_aaa' => $contrast >= 7.0
             ];
         }
         return $results;

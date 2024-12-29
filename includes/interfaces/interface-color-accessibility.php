@@ -28,11 +28,10 @@ interface Color_Accessibility_Interface {
      *
      * @param string $foreground Foreground color (hex format)
      * @param string $background Background color (hex format)
-     * @param string $level WCAG level ('AA' or 'AAA')
-     * @param string $size Text size ('normal' or 'large')
+     * @param array  $options Optional parameters for contrast check
      * @return bool|WP_Error True if meets requirements, error if not
      */
-    public function meets_wcag_contrast($foreground, $background, $level = 'AA', $size = 'normal');
+    public function meets_wcag_contrast($foreground, $background, $options = []): bool|WP_Error;
 
     /**
      * Check if color is readable on background
@@ -99,20 +98,21 @@ interface Color_Accessibility_Interface {
     public function are_colors_distinguishable($colors, $options = []);
 
     /**
-     * Get accessibility report for a palette
+     * Get accessibility report for colors
      *
-     * @param array $colors Array of colors (hex format)
+     * @param array $colors Array of colors to check
      * @param array $options Report options
      * @return array|WP_Error Detailed accessibility report or error
      */
-    public function get_accessibility_report($colors, $options = []);
+    public function get_accessibility_report($colors, $options = []): array|WP_Error;
 
     /**
-     * Check if color meets minimum brightness requirements
+     * Check if colors meet brightness requirements
      *
-     * @param string $color Color to check (hex format)
-     * @param float  $min_brightness Minimum brightness value (0-1)
-     * @return bool|WP_Error True if meets requirements, error if not
+     * @param string $color1 First color in hex format
+     * @param string $color2 Second color in hex format
+     * @param array  $options Optional parameters
+     * @return bool|WP_Error Whether the colors meet brightness requirements
      */
-    public function meets_brightness_requirements($color, $min_brightness = 0.5);
+    public function meets_brightness_requirements(string $color1, string $color2, array $options = []): bool|WP_Error;
 }

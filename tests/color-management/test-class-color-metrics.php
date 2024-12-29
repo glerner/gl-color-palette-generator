@@ -281,22 +281,22 @@ class Test_Color_Metrics extends Test_Case implements Color_Constants {
     }
 
     /**
-     * Test calculate_contrast_ratio method
+     * Test get_contrast_ratio method
      */
-    public function test_calculate_contrast_ratio() {
+    public function test_get_contrast_ratio() {
         $pairs = [
             ['#000000', '#ffffff', 21],
             ['#000000', '#000000', 1]
         ];
 
         foreach ($pairs as [$color1, $color2, $expected]) {
-            $result = $this->instance->calculate_contrast_ratio($color1, $color2);
+            $result = $this->instance->get_contrast_ratio($color1, $color2);
             $this->assertIsFloat($result);
             $this->assertEqualsWithDelta($expected, $result, 0.1);
         }
 
         // Test invalid color
-        $result = $this->instance->calculate_contrast_ratio('invalid', '#000000');
+        $result = $this->instance->get_contrast_ratio('invalid', '#000000');
         $this->assertInstanceOf(WP_Error::class, $result);
     }
 }

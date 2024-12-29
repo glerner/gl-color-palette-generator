@@ -4,6 +4,7 @@ use GL_Color_Palette_Generator\Color_Management\Color_Analyzer;
 use GL_Color_Palette_Generator\Accessibility\Accessibility_Checker;
 use GL_Color_Palette_Generator\Settings\Settings_Manager;
 use GL_Color_Palette_Generator\Cache\Color_Cache;
+use GL_Color_Palette_Generator\Color_Utility;
 
 /**
  * Class Palette_Generator
@@ -19,6 +20,7 @@ class Palette_Generator {
     private $accessibility_checker;
     private $settings;
     private $cache;
+    private $color_utility;
 
     /** Color harmony types */
     private const HARMONY_TYPES = [
@@ -45,6 +47,7 @@ class Palette_Generator {
         $this->accessibility_checker = new Accessibility_Checker();
         $this->settings = new Settings_Manager();
         $this->cache = new Color_Cache();
+        $this->color_utility = new Color_Utility();
     }
 
     /**
@@ -186,7 +189,7 @@ class Palette_Generator {
         $background = $context['background'] ?? self::COLOR_OFF_WHITE;
 
         foreach ($colors as $color) {
-            $contrast_ratio = $this->accessibility_checker->calculate_contrast_ratio(
+            $contrast_ratio = $this->color_utility->get_contrast_ratio(
                 $color,
                 $background
             );

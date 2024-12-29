@@ -54,7 +54,7 @@ class Rest_Controller_Accessibility extends WP_REST_Controller {
         $color2 = $request->get_param('color2');
 
         // Calculate contrast ratio
-        $ratio = $this->calculate_contrast_ratio($color1, $color2);
+        $ratio = $this->get_contrast_ratio($color1, $color2);
 
         return rest_ensure_response([
             'ratio' => $ratio,
@@ -80,7 +80,7 @@ class Rest_Controller_Accessibility extends WP_REST_Controller {
      * @param string $color2 Second color in hex format
      * @return float Contrast ratio
      */
-    private function calculate_contrast_ratio($color1, $color2) {
+    private function get_contrast_ratio($color1, $color2) {
         $l1 = $this->get_relative_luminance($color1);
         $l2 = $this->get_relative_luminance($color2);
 
