@@ -12,7 +12,7 @@
 
 namespace GL_Color_Palette_Generator\Abstracts;
 
-use GL_Color_Palette_Generator\Interfaces\AI_Provider_Interface;
+use GL_Color_Palette_Generator\Providers\AI_Provider;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 
 /**
@@ -23,7 +23,7 @@ use GL_Color_Palette_Generator\Interfaces\Color_Constants;
  *
  * @since 1.0.0
  */
-abstract class AI_Provider_Base implements AI_Provider_Interface {
+abstract class AI_Provider_Base implements AI_Provider {
     /**
      * API endpoint URL.
      *

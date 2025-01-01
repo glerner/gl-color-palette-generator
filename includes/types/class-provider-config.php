@@ -15,13 +15,17 @@ class Provider_Config {
     /** @var array */
     private array $config;
 
+    /** @var string */
+    private string $provider_type;
+
     /**
      * Constructor
      *
      * @param array $config Configuration array
      */
-    public function __construct(array $config = []) {
+    public function __construct(array $config) {
         $this->config = $config;
+        $this->provider_type = $config['provider_type'] ?? 'openai';
     }
 
     /**
@@ -94,6 +98,15 @@ class Provider_Config {
      */
     public function get_max_retries(): ?int {
         return $this->config['max_retries'] ?? null;
+    }
+
+    /**
+     * Get provider type
+     *
+     * @return string
+     */
+    public function get_provider_type(): string {
+        return $this->provider_type;
     }
 
     /**

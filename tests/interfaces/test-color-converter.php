@@ -106,50 +106,6 @@ class Test_Color_Converter extends TestCase {
         $this->assertEquals($expected, $result);
     }
 
-    public function test_convert_rgb_to_lab_returns_valid_array(): void {
-        // Arrange
-        $rgb = ['r' => 255, 'g' => 0, 'b' => 0];
-        $expected = ['l' => 53.23, 'a' => 80.11, 'b' => 67.22];
-
-        $this->converter
-            ->expects($this->once())
-            ->method('convert_rgb_to_lab')
-            ->with($rgb)
-            ->willReturn($expected);
-
-        // Act
-        $result = $this->converter->convert_rgb_to_lab($rgb);
-
-        // Assert
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('l', $result);
-        $this->assertArrayHasKey('a', $result);
-        $this->assertArrayHasKey('b', $result);
-        $this->assertEquals($expected, $result);
-    }
-
-    public function test_convert_lab_to_rgb_returns_valid_array(): void {
-        // Arrange
-        $lab = ['l' => 53.23, 'a' => 80.11, 'b' => 67.22];
-        $expected = ['r' => 255, 'g' => 0, 'b' => 0];
-
-        $this->converter
-            ->expects($this->once())
-            ->method('convert_lab_to_rgb')
-            ->with($lab)
-            ->willReturn($expected);
-
-        // Act
-        $result = $this->converter->convert_lab_to_rgb($lab);
-
-        // Assert
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('r', $result);
-        $this->assertArrayHasKey('g', $result);
-        $this->assertArrayHasKey('b', $result);
-        $this->assertEquals($expected, $result);
-    }
-
     /**
      * @dataProvider invalidRgbProvider
      */

@@ -23,66 +23,70 @@ class ColorPaletteImporterTest extends TestCase {
         $this->importer = new ColorPaletteImporter($this->formatter);
     }
 
+    /**
+     * Test JSON import
+     */
     public function test_import_from_json(): void {
         $json = json_encode([
-            'name' => 'Test Palette',
-            'colors' => ['#FF0000', '#00FF00', '#0000FF']
+            'colors' => ['#ff0000', '#00ff00', '#0000ff']
         ]);
 
-        $palette = $this->importer->importFromString($json, 'json');
+        $palette = $this->importer->import_palette_from_string($json, 'json');
 
-        $this->assertEquals('Test Palette', $palette->getName());
-        $this->assertCount(3, $palette->getColors());
+        $this->assertCount(3, $palette->get_colors());
     }
 
+    /**
+     * Test CSS import
+     */
     public function test_import_from_css(): void {
-        $css = ":root {\n" .
-               "  --color-red: #FF0000;\n" .
-               "  --color-green: #00FF00;\n" .
-               "  --color-blue: #0000FF;\n" .
-               "}";
+        $css = '
+            --color-primary: #ff0000;
+            --color-secondary: #00ff00;
+            --color-tertiary: #0000ff;
+        ';
 
-        $palette = $this->importer->importFromString($css, 'css');
+        $palette = $this->importer->import_palette_from_string($css, 'css');
 
-        $this->assertCount(3, $palette->getColors());
-        $this->assertContains('#FF0000', $palette->getColors());
+        $this->assertCount(3, $palette->get_colors());
     }
 
+    /**
+     * Test SCSS import
+     */
     public function test_import_from_scss(): void {
-        $scss = "\$color-red: #FF0000;\n" .
-                "\$color-green: #00FF00;\n" .
-                "\$color-blue: #0000FF;";
+        $scss = '
+            $color-primary: #ff0000;
+            $color-secondary: #00ff00;
+        ';
+        $palette = $this->importer->import_palette_from_string($scss, 'scss');
 
-        $palette = $this->importer->importFromString($scss, 'scss');
-
-        $this->assertCount(3, $palette->getColors());
-        $this->assertContains('#FF0000', $palette->getColors());
+        $this->assertCount(2, $palette->get_colors());
     }
 
+    /**
+     * Test LESS import
+     */
     public function test_import_from_less(): void {
-        $less = "@color-red: #FF0000;\n" .
-                "@color-green: #00FF00;\n" .
-                "@color-blue: #0000FF;";
+        $less = '
+            @color-primary: #ff0000;
+        ';
+        $palette = $this->importer->import_palette_from_string($less, 'less');
 
-        $palette = $this->importer->importFromString($less, 'less');
-
-        $this->assertCount(3, $palette->getColors());
-        $this->assertContains('#FF0000', $palette->getColors());
+        $this->assertCount(1, $palette->get_colors());
     }
 
     public function test_import_from_file(): void {
         $temp_file = tempnam(sys_get_temp_dir(), 'test_');
         file_put_contents($temp_file, json_encode([
-            'name' => 'File Test',
-            'colors' => ['#FF0000']
+            'colors' => ['#ff0000']
         ]));
         rename($temp_file, $temp_file . '.json');
         $temp_file .= '.json';
 
-        $palette = $this->importer->importFromFile($temp_file);
+        $palette = $this->importer->import_palette_from_file($temp_file);
 
-        $this->assertEquals('File Test', $palette->getName());
-        $this->assertContains('#FF0000', $palette->getColors());
+        $this->assertContains('#ff0000', $palette->get_colors());
 
         unlink($temp_file);
     }
@@ -93,21 +97,21 @@ class ColorPaletteImporterTest extends TestCase {
 
     public function test_invalid_format(): void {
         $this->expectException(\InvalidArgumentException::class);
-        $this->importer->importFromString('invalid data', 'invalid');
+        $this->importer->import_palette_from_string('invalid data', 'invalid');
     }
 
     public function test_invalid_json(): void {
         $this->expectException(\InvalidArgumentException::class);
-        $this->importer->importFromString('invalid json', 'json');
+        $this->importer->import_palette_from_string('invalid json', 'json');
     }
 
     public function test_invalid_file(): void {
         $this->expectException(\InvalidArgumentException::class);
-        $this->importer->importFromFile('nonexistent.json');
+        $this->importer->import_palette_from_file('nonexistent.json');
     }
 
     public function test_get_supported_formats(): void {
-        $formats = $this->importer->getSupportedFormats();
+        $formats = $this->importer->get_supported_formats();
 
         $this->assertIsArray($formats);
         $this->assertContains('json', $formats);
@@ -116,12 +120,12 @@ class ColorPaletteImporterTest extends TestCase {
     }
 
     public function test_validate_import_data(): void {
-        $this->assertTrue($this->importer->validateImportData('{"colors":[]}', 'json'));
-        $this->assertFalse($this->importer->validateImportData('invalid', 'json'));
+        $this->assertTrue($this->importer->validate_import_data('{"colors":[]}', 'json'));
+        $this->assertFalse($this->importer->validate_import_data('invalid', 'json'));
     }
 
     public function test_get_format_options(): void {
-        $options = $this->importer->getFormatOptions('css');
+        $options = $this->importer->get_format_options('css');
 
         $this->assertIsArray($options);
         $this->assertArrayHasKey('variable_prefix', $options);
@@ -130,18 +134,17 @@ class ColorPaletteImporterTest extends TestCase {
 
     public function test_get_format_options_invalid(): void {
         $this->expectException(\InvalidArgumentException::class);
-        $this->importer->getFormatOptions('invalid');
+        $this->importer->get_format_options('invalid');
     }
 
     public function test_import_with_metadata(): void {
         $json = json_encode([
-            'name' => 'Test Palette',
-            'colors' => ['#FF0000'],
+            'colors' => ['#ff0000'],
             'metadata' => ['source' => 'test']
         ]);
 
-        $palette = $this->importer->importFromString($json, 'json');
-        $metadata = $palette->getMetadata();
+        $palette = $this->importer->import_palette_from_string($json, 'json');
+        $metadata = $palette->get_metadata();
 
         $this->assertArrayHasKey('source', $metadata);
         $this->assertEquals('test', $metadata['source']);

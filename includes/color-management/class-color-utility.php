@@ -23,7 +23,7 @@ use GL_Color_Palette_Generator\Traits\Logger;
  * Class Color_Utility
  *
  * Core utility class for color operations including:
- * - Color space conversions (RGB, HSL, Lab, CMYK)
+ * - Color space conversions (RGB, HSL)
  * - Color difference calculations
  * - Color manipulation (lighten, darken, saturate)
  * - Format validation and normalization
@@ -35,24 +35,24 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
 
     /**
      * Get perceptual color difference between two colors
-     * Uses Delta E (CIE76) formula for simplicity and performance
+     * Uses RGB Euclidean distance for simplicity
      *
      * @param string $color1 First hex color
      * @param string $color2 Second hex color
-     * @return float Delta E value (0-100)
+     * @return float Color difference value (0-442)
      * @since 1.0.0
      */
     public function get_color_difference(string $color1, string $color2): float {
-        // Convert colors to Lab color space
-        $lab1 = $this->hex_to_lab($color1);
-        $lab2 = $this->hex_to_lab($color2);
+        // Convert colors to RGB
+        $rgb1 = $this->hex_to_rgb($color1);
+        $rgb2 = $this->hex_to_rgb($color2);
 
-        // Calculate Delta E
-        $delta_l = $lab1['l'] - $lab2['l'];
-        $delta_a = $lab1['a'] - $lab2['a'];
-        $delta_b = $lab1['b'] - $lab2['b'];
+        // Calculate Euclidean distance in RGB space
+        $r_diff = $rgb1['r'] - $rgb2['r'];
+        $g_diff = $rgb1['g'] - $rgb2['g'];
+        $b_diff = $rgb1['b'] - $rgb2['b'];
 
-        return sqrt($delta_l * $delta_l + $delta_a * $delta_a + $delta_b * $delta_b);
+        return sqrt($r_diff * $r_diff + $g_diff * $g_diff + $b_diff * $b_diff);
     }
 
     /**
@@ -250,66 +250,14 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
     }
 
     /**
-     * Convert hex color to Lab color space
+     * Convert hex color to HSL
      *
-     * @param string $hex_color Hex color code
-     * @return array Lab values [l, a, b]
+     * @param string $hex Color in hex format.
+     * @return array HSL values with 'h', 's', and 'l' keys.
      */
-    public function hex_to_lab(string $hex_color): array {
-        $rgb = $this->hex_to_rgb($hex_color);
-        $xyz = $this->rgb_to_xyz($rgb);
-        return $this->xyz_to_lab($xyz);
-    }
-
-    /**
-     * Convert RGB to XYZ color space
-     *
-     * @param array $rgb RGB values [r, g, b]
-     * @return array XYZ values [x, y, z]
-     */
-    private function rgb_to_xyz(array $rgb): array {
-        $r = $rgb['r'] / 255;
-        $g = $rgb['g'] / 255;
-        $b = $rgb['b'] / 255;
-
-        // Convert to sRGB
-        $r = $r > 0.04045 ? pow(($r + 0.055) / 1.055, 2.4) : $r / 12.92;
-        $g = $g > 0.04045 ? pow(($g + 0.055) / 1.055, 2.4) : $g / 12.92;
-        $b = $b > 0.04045 ? pow(($b + 0.055) / 1.055, 2.4) : $b / 12.92;
-
-        // Convert to XYZ
-        return [
-            'x' => ($r * 0.4124 + $g * 0.3576 + $b * 0.1805) * 100,
-            'y' => ($r * 0.2126 + $g * 0.7152 + $b * 0.0722) * 100,
-            'z' => ($r * 0.0193 + $g * 0.1192 + $b * 0.9505) * 100
-        ];
-    }
-
-    /**
-     * Convert XYZ to Lab color space
-     *
-     * @param array $xyz XYZ values [x, y, z]
-     * @return array Lab values [l, a, b]
-     */
-    private function xyz_to_lab(array $xyz): array {
-        // D65 illuminant reference values
-        $ref_x = 95.047;
-        $ref_y = 100.000;
-        $ref_z = 108.883;
-
-        $x = $xyz['x'] / $ref_x;
-        $y = $xyz['y'] / $ref_y;
-        $z = $xyz['z'] / $ref_z;
-
-        $x = $x > 0.008856 ? pow($x, 1/3) : (7.787 * $x) + 16/116;
-        $y = $y > 0.008856 ? pow($y, 1/3) : (7.787 * $y) + 16/116;
-        $z = $z > 0.008856 ? pow($z, 1/3) : (7.787 * $z) + 16/116;
-
-        return [
-            'l' => (116 * $y) - 16,
-            'a' => 500 * ($x - $y),
-            'b' => 200 * ($y - $z)
-        ];
+    public function hex_to_hsl(string $hex): array {
+        $rgb = $this->hex_to_rgb($hex);
+        return $this->rgb_to_hsl($rgb);
     }
 
     /**
@@ -321,17 +269,6 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
     public function hsl_to_hex(array $hsl): string {
         $rgb = $this->hsl_to_rgb($hsl);
         return $this->rgb_to_hex($rgb);
-    }
-
-    /**
-     * Convert hex color to HSL
-     *
-     * @param string $hex Color in hex format.
-     * @return array HSL values with 'h', 's', and 'l' keys.
-     */
-    public function hex_to_hsl(string $hex): array {
-        $rgb = $this->hex_to_rgb($hex);
-        return $this->rgb_to_hsl($rgb);
     }
 
     /**
@@ -358,5 +295,125 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
         $hsl = $this->hex_to_hsl($color);
         $hsl['l'] = min(100, $hsl['l'] + ($percentage / 100));
         return $this->hsl_to_hex($hsl);
+    }
+
+    /**
+     * Convert multiple colors to a different color space
+     *
+     * @param array  $colors Array of colors to convert
+     * @param string $from   Source color space (hex, rgb, hsl)
+     * @param string $to     Target color space (rgb, hsl)
+     * @param array  $options {
+     *     Optional. Conversion options.
+     *     @type int    $precision     Number of decimal places
+     *     @type string $gamut         Gamut mapping strategy
+     * }
+     * @return array {
+     *     Conversion results
+     *     @type array $converted Converted colors
+     *     @type array $original  Original colors
+     *     @type array $mapping   Color space mapping details
+     * }
+     */
+    public function convert_colors(array $colors, string $from, string $to, array $options = []): array {
+        $converted = [];
+        $precision = $options['precision'] ?? 2;
+
+        foreach ($colors as $key => $color) {
+            // Convert to RGB as intermediate format if needed
+            $rgb = match($from) {
+                'hex' => $this->hex_to_rgb($color),
+                'hsl' => $this->hsl_to_rgb($color),
+                'rgb' => $color,
+                default => throw new \InvalidArgumentException("Unsupported source color space: $from")
+            };
+
+            // Convert from RGB to target format
+            $converted[$key] = match($to) {
+                'rgb' => $rgb,
+                'hsl' => $this->rgb_to_hsl($rgb),
+                default => throw new \InvalidArgumentException("Unsupported target color space: $to")
+            };
+
+            // Round values if precision is specified
+            if (is_array($converted[$key])) {
+                array_walk_recursive($converted[$key], function(&$n) use ($precision) {
+                    $n = round($n, $precision);
+                });
+            }
+        }
+
+        return [
+            'converted' => $converted,
+            'original' => $colors,
+            'mapping' => [
+                'from' => $from,
+                'to' => $to,
+                'options' => $options
+            ]
+        ];
+    }
+
+    /**
+     * Convert colors to different format (css, scss, json)
+     *
+     * @param array  $colors  Colors to convert
+     * @param string $format  Target format
+     * @param array  $options Format options
+     * @return array Formatted colors with metadata
+     */
+    public function format_colors(array $colors, string $format, array $options = []): array {
+        $formatted = [];
+        
+        foreach ($colors as $name => $color) {
+            switch ($format) {
+                case 'css':
+                    $formatted[$name] = is_array($color) ? 
+                        $this->array_to_css_color($color) : 
+                        $color;
+                    break;
+                    
+                case 'scss':
+                    $formatted[$name] = sprintf(
+                        '$%s: %s;',
+                        str_replace(' ', '-', strtolower($name)),
+                        is_array($color) ? $this->array_to_css_color($color) : $color
+                    );
+                    break;
+                    
+                case 'json':
+                    $formatted[$name] = is_array($color) ? 
+                        $color : 
+                        $this->hex_to_rgb($color);
+                    break;
+                    
+                default:
+                    throw new \InvalidArgumentException("Unsupported format: $format");
+            }
+        }
+
+        return [
+            'converted' => $formatted,
+            'original' => $colors,
+            'format' => [
+                'name' => $format,
+                'options' => $options
+            ]
+        ];
+    }
+
+    /**
+     * Convert color array to CSS color string
+     *
+     * @param array $color Color values
+     * @return string CSS color string
+     */
+    private function array_to_css_color(array $color): string {
+        if (isset($color['r'])) {
+            return sprintf('rgb(%d, %d, %d)', $color['r'], $color['g'], $color['b']);
+        } elseif (isset($color['h'])) {
+            return sprintf('hsl(%d, %d%%, %d%%)', $color['h'], $color['s'] * 100, $color['l'] * 100);
+        }
+        throw new \InvalidArgumentException('Unsupported color format');
     }
 }

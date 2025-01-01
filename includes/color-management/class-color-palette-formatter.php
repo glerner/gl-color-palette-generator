@@ -18,6 +18,7 @@
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Formatter_Interface;
+use GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator;
 
 /**
  * Class Color_Palette_Formatter
@@ -26,7 +27,7 @@ use GL_Color_Palette_Generator\Interfaces\Color_Palette_Formatter_Interface;
 class Color_Palette_Formatter implements Color_Palette_Formatter_Interface {
     /**
      * List of supported formatting formats
-     * 
+     *
      * These formats focus on code-level color definitions and can be
      * extended by child classes to support additional formats.
      */
@@ -70,9 +71,26 @@ class Color_Palette_Formatter implements Color_Palette_Formatter_Interface {
         }
 
         $options = array_merge($this->get_default_options(), $options);
-        $method = 'format_' . $format;
 
-        return $this->$method($palette, $options);
+        switch ($format) {
+            case 'css':
+                return $this->format_css($palette, $options);
+            case 'scss':
+                return $this->format_scss($palette, $options);
+            case 'less':
+                return $this->format_less($palette, $options);
+            case 'tailwind':
+                return $this->format_tailwind($palette, $options);
+            case 'json':
+                return $this->format_json($palette, $options);
+            default:
+                throw new \Exception(
+                    sprintf(
+                        __('Format not implemented: %s', 'gl-color-palette-generator'),
+                        $format
+                    )
+                );
+        }
     }
 
     /**
@@ -117,7 +135,7 @@ class Color_Palette_Formatter implements Color_Palette_Formatter_Interface {
         $output .= "}" . $options['line_ending'];
 
         // Add utility classes if requested
-        if (!empty($options['generate_classes'])) {
+        if (count($options['generate_classes']) > 0) {
             $output .= $this->generate_css_classes($palette, $options);
         }
 
@@ -145,7 +163,8 @@ class Color_Palette_Formatter implements Color_Palette_Formatter_Interface {
         }
 
         // Add color map
-        $output .= $options['line_ending'] . "$colors: (" . $options['line_ending'];
+        $output .= $options['line_ending'] . '$'. 'color-palette: (' . $options['line_ending'];
+
         foreach ($palette as $name => $color) {
             $varName = sanitize_title($name);
             $output .= $options['indent'] . "'" . $varName . "': " .
@@ -217,14 +236,14 @@ class Color_Palette_Formatter implements Color_Palette_Formatter_Interface {
      * @return string JSON string.
      */
     protected function format_json(array $palette, array $options): string {
-        $colors = [];
+        $formatted_colors = [];
         foreach ($palette as $name => $color) {
             $varName = sanitize_title($name);
-            $colors[$varName] = $color;
+            $formatted_colors[$varName] = $color;
         }
 
         return wp_json_encode(
-            $colors,
+            $formatted_colors,
             $options['include_comments'] ? JSON_PRETTY_PRINT : 0
         );
     }

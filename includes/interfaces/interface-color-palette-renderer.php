@@ -1,8 +1,8 @@
 <?php
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Color_Management\Interfaces;
 
-use GLColorPalette\ColorPalette;
+use GL_Color_Palette_Generator\Models\Color_Palette;
 
 /**
  * Color Palette Renderer Interface
@@ -18,12 +18,12 @@ interface ColorPaletteRendererInterface {
     /**
      * Renders a color palette.
      *
-     * @param ColorPalette $palette Palette to render.
+     * @param Color_Palette $palette Palette to render.
      * @param string       $format  Output format (html, svg, etc.).
      * @param array        $options Rendering options.
      * @return string Rendered output.
      */
-    public function renderPalette(ColorPalette $palette, string $format = 'html', array $options = []): string;
+    public function render_palette(Color_Palette $palette, string $format = 'html', array $options = []): string;
 
     /**
      * Renders a color swatch.
@@ -33,7 +33,7 @@ interface ColorPaletteRendererInterface {
      * @param array  $options Rendering options.
      * @return string Rendered swatch.
      */
-    public function renderSwatch(string $color, string $format = 'html', array $options = []): string;
+    public function render_swatch(string $color, string $format = 'html', array $options = []): string;
 
     /**
      * Renders color information.
@@ -42,22 +42,22 @@ interface ColorPaletteRendererInterface {
      * @param array  $options Rendering options.
      * @return string Rendered color information.
      */
-    public function renderColorInfo(string $color, array $options = []): string;
+    public function render_color_info(string $color, array $options = []): string;
 
     /**
-     * Gets supported rendering formats.
+     * Gets supported render formats.
      *
      * @return array List of supported formats.
      */
-    public function getSupportedFormats(): array;
+    public function get_supported_formats(): array;
 
     /**
-     * Gets format-specific options.
+     * Gets format-specific render options.
      *
      * @param string $format Format to get options for.
      * @return array Format options.
      */
-    public function getFormatOptions(string $format): array;
+    public function get_format_options(string $format): array;
 
     /**
      * Validates rendering options.
@@ -66,5 +66,5 @@ interface ColorPaletteRendererInterface {
      * @param string $format  Format to validate against.
      * @return bool True if valid.
      */
-    public function validateOptions(array $options, string $format): bool;
+    public function validate_options(array $options, string $format): bool;
 }

@@ -11,9 +11,13 @@
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
+use GL_Color_Palette_Generator\Providers\AI_Provider_Factory;
+use GL_Color_Palette_Generator\Providers\Provider_Interface;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Generator_Interface;
 use GL_Color_Palette_Generator\Models\Color_Palette;
-use GL_Color_Palette_Generator\Interfaces\Color_Constants;
+use GL_Color_Palette_Generator\Types\Provider_Config;
+use GL_Color_Palette_Generator\Types\Color_Types;
 use WP_Error;
 
 /**
@@ -49,7 +53,7 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
             $base_color = $options['base_color'] ?? $this->generate_random_color();
             $algorithm = $options['algorithm'] ?? 'monochromatic';
 
-            if (!$this->is_valid_hex_color($base_color)) {
+            if ($base_color === '' || !Color_Types::is_valid_hex_color($base_color)) {
                 return new WP_Error('invalid_color', __('Invalid base color provided', 'gl-color-palette-generator'));
             }
 
@@ -193,42 +197,29 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
         try {
             // Parse context from JSON
             $context = json_decode($prompt, true);
-            if (!$context) {
+            if ($context === null || !is_array($context)) {
                 return new WP_Error('invalid_context', __('Invalid context data provided', 'gl-color-palette-generator'));
             }
 
             // Check if we have enough context for AI generation
-            if (empty($context['business_type']) && empty($context['target_audience']) && empty($context['desired_mood'])) {
-                // Fallback to default generation if no meaningful context
-                return $this->generate_palette([
-                    'algorithm' => 'complementary',
-                    'num_colors' => 5
-                ]);
+            if (
+                (!isset($context['business_type']) || $context['business_type'] === '') &&
+                (!isset($context['target_audience']) || $context['target_audience'] === '') &&
+                (!isset($context['desired_mood']) || $context['desired_mood'] === '')
+            ) {
+                return new WP_Error(
+                    'insufficient_context',
+                    __('Please provide more context about your business, audience, or desired mood', 'gl-color-palette-generator')
+                );
             }
 
-            // Build AI prompt for color generation
-            $ai_prompt = $this->build_ai_prompt($context);
-
-            // Get colors from AI service
-            $colors = $this->get_ai_generated_colors($ai_prompt);
+            // Get AI-generated colors
+            $colors = $this->get_ai_generated_colors($this->build_ai_prompt($context));
             if (is_wp_error($colors)) {
-                // Fallback to default generation if AI fails
-                return $this->generate_palette([
-                    'algorithm' => 'complementary',
-                    'num_colors' => 5
-                ]);
+                return $colors;
             }
 
-            // Create and validate the palette
-            $palette = new Color_Palette($colors);
-
-            // Ensure WCAG compliance
-            if (!$this->verify_wcag_compliance($palette)) {
-                // Adjust colors to meet WCAG requirements
-                $palette = $this->adjust_for_wcag_compliance($palette);
-            }
-
-            return $palette;
+            return new Color_Palette($colors);
         } catch (\Exception $e) {
             return new WP_Error('prompt_generation_failed', $e->getMessage());
         }
@@ -240,7 +231,7 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
      * @param array $context User input context
      * @return string Formatted prompt for AI service
      */
-    private function build_ai_prompt(array $context): string {
+    protected function build_ai_prompt(array $context): string {
         $prompt_parts = [
             "You are a color palette expert for websites, with full knowledge of color mood, color contrast, and Accessibility Guidelines for color contrast. You are also a WordPress theme.json developer.",
             "",
@@ -281,16 +272,16 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
      * @param string $prompt Formatted prompt for AI
      * @return array|WP_Error Array of colors or error
      */
-    private function get_ai_generated_colors(string $prompt): array|WP_Error {
+    protected function get_ai_generated_colors(string $prompt): array|WP_Error {
         try {
             // Get the configured AI provider
-            $provider_factory = new \GL_Color_Palette_Generator\Providers\AI_Provider_Factory();
-            $provider_config = new \GL_Color_Palette_Generator\Types\Provider_Config([
+            $provider_factory = new AI_Provider_Factory();
+            $provider_config = new Provider_Config([
                 'api_key' => get_option('gl_cpg_ai_api_key'),
-                'provider' => get_option('gl_cpg_ai_provider', 'openai')
+                'provider_type' => get_option('gl_cpg_ai_provider', 'openai')
             ]);
 
-            $provider = $provider_factory->get_provider($provider_config->provider, $provider_config);
+            $provider = $provider_factory->get_provider($provider_config->get_provider_type(), $provider_config);
             if (is_wp_error($provider)) {
                 throw new \Exception($provider->get_error_message());
             }
@@ -308,23 +299,20 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
 
             // Extract hex codes and save description
             $colors = [];
-            if (!empty($result['colors'])) {
+            if (isset($result['colors']) && is_array($result['colors'])) {
                 foreach ($result['colors'] as $role => $color_data) {
                     $colors[$role] = $color_data['hex'] ?? $color_data;  // Fallback for old format
                 }
             }
 
-            // Save palette description
-            $description = [
-                'colors' => $result['colors'],
-                'palette_story' => $result['palette_story'] ?? ''
-            ];
-            update_option('gl_cpg_last_palette_description', $description);
+            // Save palette description if available
+            if (isset($result['palette_story'])) {
+                update_option('gl_cpg_last_palette_story', $result['palette_story']);
+            }
 
             return $colors;
-
         } catch (\Exception $e) {
-            return new WP_Error('ai_service_error', $e->getMessage());
+            return new WP_Error('ai_generation_failed', $e->getMessage());
         }
     }
 
@@ -333,8 +321,9 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
      *
      * @param Color_Palette $palette Palette to verify
      * @return bool True if compliant
+     * @internal
      */
-    private function verify_wcag_compliance(Color_Palette $palette): bool {
+    protected function verify_wcag_compliance(Color_Palette $palette): bool {
         $colors = $palette->get_colors();
         foreach ($colors as $color) {
             $contrast_with_light = $this->color_utility->get_contrast_ratio(
@@ -359,8 +348,9 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
      *
      * @param Color_Palette $palette Palette to adjust
      * @return Color_Palette Adjusted palette
+     * @internal
      */
-    private function adjust_for_wcag_compliance(Color_Palette $palette): Color_Palette {
+    protected function adjust_for_wcag_compliance(Color_Palette $palette): Color_Palette {
         $colors = $palette->get_colors();
         $adjusted_colors = [];
 
@@ -425,17 +415,7 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
      *
      * @return string Random color in hex format
      */
-    private function generate_random_color(): string {
+    protected function generate_random_color(): string {
         return sprintf('#%06X', mt_rand(0, 0xFFFFFF));
-    }
-
-    /**
-     * Check if a color is in valid hex format
-     *
-     * @param string $color Color to check
-     * @return bool True if valid hex color
-     */
-    private function is_valid_hex_color(string $color): bool {
-        return (bool) preg_match('/^#[a-f0-9]{6}$/i', $color);
     }
 }

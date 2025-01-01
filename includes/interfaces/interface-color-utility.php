@@ -57,4 +57,25 @@ interface Color_Utility {
      * @return float Relative luminance (0-1).
      */
     public function get_relative_luminance(string $color): float;
+
+    /**
+     * Convert multiple colors to a different color space
+     *
+     * @param array  $colors Array of colors to convert
+     * @param string $from   Source color space (hex, rgb, hsl, lab)
+     * @param string $to     Target color space (rgb, hsl, lab, cmyk)
+     * @param array  $options Optional. Conversion options.
+     * @return array Conversion results with metadata
+     */
+    public function convert_colors(array $colors, string $from, string $to, array $options = []): array;
+
+    /**
+     * Convert colors to different format
+     *
+     * @param array  $colors  Colors to convert
+     * @param string $format  Target format (css, scss, json)
+     * @param array  $options Format options
+     * @return array Formatted colors with metadata
+     */
+    public function format_colors(array $colors, string $format, array $options = []): array;
 }

@@ -9,12 +9,12 @@
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
-use GL_Color_Palette_Generator\Color_Palette;
+use GL_Color_Palette_Generator\Color_Palette_Generator;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 
 /**
  * Class Color_Palette_Cache
- * 
+ *
  * Handles caching of color palettes
  */
 class Color_Palette_Cache {
@@ -50,7 +50,7 @@ class Color_Palette_Cache {
             $key,
             $palette->to_array(),
             self::CACHE_GROUP,
-            (int) self::CACHE_EXPIRATION
+            self::CACHE_EXPIRATION
         );
     }
 
@@ -114,7 +114,7 @@ class Color_Palette_Cache {
      * @return int Cache expiration time in seconds
      */
     public function get_expiration(): int {
-        return (int) self::CACHE_EXPIRATION;
+        return self::CACHE_EXPIRATION;
     }
 
     /**

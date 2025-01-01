@@ -16,13 +16,13 @@
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Shade_Generator;
-use GL_Color_Palette_Generator\Interfaces\Accessibility_Checker;
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Exporter_Interface;
 use GL_Color_Palette_Generator\Traits\Color_Shade_Generator_Trait;
+use WP_Error;
 
 /**
  * Class Color_Palette_Exporter
- * 
+ *
  * Exports color palettes to various file formats. Inherits basic formatting capabilities
  * from Color_Palette_Formatter and adds support for additional export-specific formats.
  */
@@ -40,17 +40,13 @@ class Color_Palette_Exporter extends Color_Palette_Formatter implements Color_Pa
         'bootstrap' // Bootstrap SCSS
     ];
 
-    private $accessibility_checker;
     private $shade_generator;
     private $color_utility;
 
     /**
      * Constructor
-     *
-     * @param Accessibility_Checker $accessibility_checker Accessibility checker instance
      */
-    public function __construct(Accessibility_Checker $accessibility_checker) {
-        $this->accessibility_checker = $accessibility_checker;
+    public function __construct() {
         $this->shade_generator = new Color_Shade_Generator();
         $this->color_utility = new Color_Utility();
     }
@@ -74,22 +70,24 @@ class Color_Palette_Exporter extends Color_Palette_Formatter implements Color_Pa
      * @throws \InvalidArgumentException If format is not supported
      */
     public function export_palette(array $palette, string $format, array $options = []): string|array {
+        // Use shade generator for extended color variations
+        $extended_palette = $this->shade_generator->generate_shades($palette);
+
         // First try parent formatter
         try {
-            return $this->format_palette($palette, $format, $options);
+            return $this->format_palette($extended_palette, $format, $options);
         } catch (\Exception $e) {
-            // If not a basic format, try export-specific formats
-            if (!in_array($format, self::EXPORT_FORMATS, true)) {
-                throw new \InvalidArgumentException(
+            return match($format) {
+                'svg' => $this->to_svg($extended_palette, $options),
+                'ase' => $this->to_ase($extended_palette, $options),
+                'bootstrap' => $this->to_bootstrap($extended_palette, $options),
+                default => throw new \InvalidArgumentException(
                     sprintf(
                         __('Unsupported export format: %s', 'gl-color-palette-generator'),
                         $format
                     )
-                );
-            }
-
-            $method = 'to_' . $format;
-            return $this->$method($palette, $options);
+                ),
+            };
         }
     }
 
@@ -212,27 +210,14 @@ class Color_Palette_Exporter extends Color_Palette_Formatter implements Color_Pa
      * @return string CSV string.
      */
     public function export_to_csv($palettes): string {
-        if (!function_exists('esc_csv')) {
-            /**
-             * Escape CSV field
-             *
-             * @param string $field Field to escape
-             * @return string Escaped field
-             */
-            function esc_csv($field) {
-                $field = str_replace('"', '""', $field);
-                return '"' . $field . '"';
-            }
-        }
-
         $csv = "Name,Colors,Created At\n";
 
         foreach ($palettes as $palette) {
             $csv .= sprintf(
                 '%s,%s,%s' . "\n",
-                esc_csv($palette['name']),
-                esc_csv(implode(', ', $palette['colors'])),
-                esc_csv($palette['created_at'])
+                $this->esc_csv($palette['name']),
+                $this->esc_csv(implode(', ', $palette['colors'])),
+                $this->esc_csv($palette['created_at'])
             );
         }
 
@@ -258,5 +243,49 @@ class Color_Palette_Exporter extends Color_Palette_Formatter implements Color_Pa
         }
 
         return $data['palettes'];
+    }
+
+    /**
+     * Import palette from CSV file
+     *
+     * @param string $file_path Path to CSV file.
+     * @return array|WP_Error Imported palette or error.
+     */
+    public function import_from_csv(string $file_path): array|WP_Error {
+        if (!file_exists($file_path)) {
+            return new WP_Error('file_not_found', __('CSV file not found', 'gl-color-palette-generator'));
+        }
+
+        $palette = [];
+        if (($handle = fopen($file_path, 'r')) !== false) {
+            while (($data = fgetcsv($handle)) !== false) {
+                if (count($data) >= 2) {
+                    $color = $data[1];
+                    if ($this->color_utility->is_valid_hex_color($color)) {
+                        $palette[$data[0]] = $color;
+                    }
+                }
+            }
+            fclose($handle);
+        }
+
+        if ($palette === [] || count($palette) === 0) {
+            return new WP_Error('invalid_csv', __('No valid colors found in CSV', 'gl-color-palette-generator'));
+        }
+
+        return $palette;
+    }
+
+    /**
+     * Escape CSV value
+     *
+     * @param string $value Value to escape
+     * @return string Escaped value
+     */
+    private function esc_csv(string $value): string {
+        if (strpos($value, ',') !== false || strpos($value, '"') !== false || strpos($value, "\n") !== false) {
+            return '"' . str_replace('"', '""', $value) . '"';
+        }
+        return $value;
     }
 }

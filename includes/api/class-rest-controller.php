@@ -9,14 +9,15 @@
 
 namespace GL_Color_Palette_Generator\API;
 
+use GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator;
+use GL_Color_Palette_Generator\Color_Management\Color_Palette_Exporter;
+use GL_Color_Palette_Generator\Color_Management\Color_Utility;
+use GL_Color_Palette_Generator\Accessibility\Accessibility_Checker;
+use GL_Color_Palette_Generator\Interfaces\Accessibility_Checker as Accessibility_Checker_Interface;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
-use GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator;
-use GL_Color_Palette_Generator\Color_Management\Color_Palette_Exporter;
-use GL_Color_Palette_Generator\Accessibility\Accessibility_Checker;
-use GL_Color_Palette_Generator\Interfaces\Accessibility_Checker as Accessibility_Checker_Interface;
 
 /**
  * Class Rest_Controller
@@ -30,22 +31,54 @@ class Rest_Controller {
     private $namespace = 'gl-cpg/v1';
 
     /**
+     * Color utility instance
+     *
+     * @var Color_Utility
+     */
+    private $color_utility;
+
+    /**
      * Accessibility checker instance
      *
      * @var Accessibility_Checker_Interface
      */
     private $accessibility_checker;
+    private $palette_generator;
 
     /**
      * Constructor
      */
     public function __construct() {
+        $this->color_utility = new Color_Utility();
         $this->accessibility_checker = new Accessibility_Checker();
+        $this->palette_generator = new Color_Palette_Generator($this->color_utility);
     }
     /**
      * Register REST API routes
      */
     public function register_routes() {
+        register_rest_route(
+            $this->namespace,
+            '/contrast',
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'check_contrast'],
+                'permission_callback' => [$this, 'check_permission'],
+                'args' => [
+                    'color1' => [
+                        'required' => true,
+                        'type' => 'string',
+                        'pattern' => '/^#[0-9a-f]{6}$/i',
+                    ],
+                    'color2' => [
+                        'required' => true,
+                        'type' => 'string',
+                        'pattern' => '/^#[0-9a-f]{6}$/i',
+                    ],
+                ],
+            ]
+        );
+
         register_rest_route(
             $this->namespace,
             '/generate',
@@ -184,10 +217,11 @@ class Rest_Controller {
      * @param WP_REST_Request $request Request object.
      * @return WP_REST_Response|WP_Error
      */
-    public function generate_palette($request) {
+    public function generate_palette(WP_REST_Request $request) {
+        $params = $request->get_params();
+        $generator = $this->palette_generator;
         try {
-            $generator = new Color_Palette_Generator();
-            $palette = $generator->generate_from_prompt($request['prompt']);
+            $palette = $generator->generate_from_prompt($params['prompt']);
 
             return new WP_REST_Response([
                 'palette' => $palette,
@@ -320,7 +354,7 @@ class Rest_Controller {
                 );
             }
 
-            $exporter = new Color_Palette_Exporter($this->accessibility_checker);
+            $exporter = new Color_Palette_Exporter();
             $format = $request->get_param('format');
 
             if ($format === 'csv') {
@@ -371,7 +405,7 @@ class Rest_Controller {
             }
 
             $content = file_get_contents($file['tmp_name']);
-            $exporter = new Color_Palette_Exporter($this->accessibility_checker);
+            $exporter = new Color_Palette_Exporter();
 
             // Determine format from file extension
             $format = pathinfo($file['name'], PATHINFO_EXTENSION);
@@ -427,19 +461,26 @@ class Rest_Controller {
      */
     public function check_contrast($request) {
         try {
-            $text_color = $request->get_param('text_color');
-            $bg_color = $request->get_param('bg_color');
+            $text_color = $request->get_param('color1');
+            $bg_color = $request->get_param('color2');
 
             if (!$text_color || !$bg_color) {
                 return new WP_Error(
                     'missing_colors',
-                    __('Both text and background colors are required.', 'gl-color-palette-generator'),
+                    __('Both colors are required.', 'gl-color-palette-generator'),
                     ['status' => 400]
                 );
             }
 
-            $checker = new Accessibility_Checker();
-            $results = $checker->check_combination($text_color, $bg_color);
+            $results = $this->accessibility_checker->check_combination($text_color, $bg_color);
+
+            if ($results === false) {
+                return new WP_Error(
+                    'contrast_check_error',
+                    __('Error checking contrast.', 'gl-color-palette-generator'),
+                    ['status' => 500]
+                );
+            }
 
             return new WP_REST_Response($results, 200);
 

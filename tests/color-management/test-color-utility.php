@@ -399,4 +399,90 @@ class Test_Color_Utility extends TestCase implements Color_Constants {
             );
         }
     }
+
+    /**
+     * Test batch color space conversion
+     */
+    public function test_convert_colors() {
+        $colors = [
+            'red' => '#ff0000',
+            'green' => '#00ff00',
+            'blue' => '#0000ff'
+        ];
+
+        // Test hex to RGB conversion
+        $result = $this->color_util->convert_colors($colors, 'hex', 'rgb');
+        $this->assertArrayHasKey('converted', $result);
+        $this->assertArrayHasKey('red', $result['converted']);
+        $this->assertEquals(
+            ['r' => 255, 'g' => 0, 'b' => 0],
+            $result['converted']['red']
+        );
+
+        // Test hex to HSL conversion
+        $result = $this->color_util->convert_colors($colors, 'hex', 'hsl');
+        $this->assertArrayHasKey('converted', $result);
+        $this->assertArrayHasKey('red', $result['converted']);
+        $this->assertEquals(
+            0, // Red hue
+            $result['converted']['red']['h']
+        );
+
+        // Test precision option
+        $result = $this->color_util->convert_colors($colors, 'hex', 'hsl', ['precision' => 0]);
+        $this->assertEquals(
+            1, // 100% saturation rounded to 1
+            $result['converted']['red']['s']
+        );
+    }
+
+    /**
+     * Test color format conversion
+     */
+    public function test_format_colors() {
+        $colors = [
+            'primary' => '#ff0000',
+            'secondary' => '#00ff00'
+        ];
+
+        // Test CSS format
+        $result = $this->color_util->format_colors($colors, 'css');
+        $this->assertArrayHasKey('converted', $result);
+        $this->assertEquals(
+            '#ff0000',
+            $result['converted']['primary']
+        );
+
+        // Test SCSS format
+        $result = $this->color_util->format_colors($colors, 'scss');
+        $this->assertArrayHasKey('converted', $result);
+        $this->assertEquals(
+            '$primary: #ff0000;',
+            $result['converted']['primary']
+        );
+
+        // Test JSON format
+        $result = $this->color_util->format_colors($colors, 'json');
+        $this->assertArrayHasKey('converted', $result);
+        $this->assertEquals(
+            ['r' => 255, 'g' => 0, 'b' => 0],
+            $result['converted']['primary']
+        );
+    }
+
+    /**
+     * Test invalid color space conversion
+     */
+    public function test_convert_colors_invalid_space() {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->color_util->convert_colors(['test' => '#ff0000'], 'invalid', 'rgb');
+    }
+
+    /**
+     * Test invalid format conversion
+     */
+    public function test_format_colors_invalid_format() {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->color_util->format_colors(['test' => '#ff0000'], 'invalid');
+    }
 }

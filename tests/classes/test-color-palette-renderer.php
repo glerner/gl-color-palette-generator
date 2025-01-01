@@ -93,7 +93,7 @@ class ColorPaletteRendererTest extends TestCase {
     }
 
     public function test_get_supported_formats(): void {
-        $formats = $this->renderer->getSupportedFormats();
+        $formats = $this->renderer->get_supported_formats();
 
         $this->assertIsArray($formats);
         $this->assertContains('html', $formats);
@@ -103,7 +103,7 @@ class ColorPaletteRendererTest extends TestCase {
     }
 
     public function test_get_format_options(): void {
-        $options = $this->renderer->getFormatOptions('html');
+        $options = $this->renderer->get_format_options('html');
 
         $this->assertIsArray($options);
         $this->assertArrayHasKey('swatch_size', $options);
@@ -121,8 +121,8 @@ class ColorPaletteRendererTest extends TestCase {
             'invalid_option' => 'value'
         ];
 
-        $this->assertTrue($this->renderer->validateOptions($valid_options, 'html'));
-        $this->assertFalse($this->renderer->validateOptions($invalid_options, 'html'));
+        $this->assertTrue($this->renderer->validate_options($valid_options, 'html'));
+        $this->assertFalse($this->renderer->validate_options($invalid_options, 'html'));
     }
 
     public function test_invalid_format(): void {

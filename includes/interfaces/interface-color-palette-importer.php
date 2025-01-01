@@ -8,45 +8,45 @@
  * @since   1.0.0
  */
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
-use GLColorPalette\ColorPalette;
+use GL_Color_Palette_Generator\Models\Color_Palette;
 
 /**
  * Interface for color palette import operations.
  */
-interface ColorPaletteImporterInterface {
+interface Color_Palette_Importer_Interface {
     /**
      * Imports a color palette from a string.
      *
      * @param string $data   Data to import.
      * @param string $format Format of the data (json, css, etc.).
-     * @return ColorPalette Imported palette.
+     * @return Color_Palette Imported palette.
      */
-    public function importFromString(string $data, string $format): ColorPalette;
+    public function import_from_string(string $data, string $format): Color_Palette;
 
     /**
      * Imports a color palette from a file.
      *
      * @param string $file_path Path to the file.
-     * @return ColorPalette Imported palette.
+     * @return Color_Palette Imported palette.
      */
-    public function importFromFile(string $file_path): ColorPalette;
+    public function import_from_file(string $file_path): Color_Palette;
 
     /**
      * Imports a color palette from a URL.
      *
      * @param string $url URL to import from.
-     * @return ColorPalette Imported palette.
+     * @return Color_Palette Imported palette.
      */
-    public function importFromUrl(string $url): ColorPalette;
+    public function import_from_url(string $url): Color_Palette;
 
     /**
      * Gets supported import formats.
      *
      * @return array List of supported formats.
      */
-    public function getSupportedFormats(): array;
+    public function get_supported_formats(): array;
 
     /**
      * Validates import data.
@@ -55,7 +55,7 @@ interface ColorPaletteImporterInterface {
      * @param string $format Format to validate against.
      * @return bool True if valid.
      */
-    public function validateImportData(string $data, string $format): bool;
+    public function validate_import_data(string $data, string $format): bool;
 
     /**
      * Gets format-specific import options.
@@ -63,5 +63,5 @@ interface ColorPaletteImporterInterface {
      * @param string $format Format to get options for.
      * @return array Format options.
      */
-    public function getFormatOptions(string $format): array;
+    public function get_format_options(string $format): array;
 }

@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace GL_Color_Palette_Generator\Providers;
 
-use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
+use GL_Color_Palette_Generator\Exceptions\Palette_Generation_Exception;
 use GL_Color_Palette_Generator\Types\Color_Types;
 
 if (!defined('ABSPATH')) {
@@ -61,45 +61,40 @@ abstract class Abstract_AI_Provider implements AI_Provider {
     }
 
     /**
-     * Generate a color palette based on a prompt
+     * Generate a color palette
      *
-     * @param string $prompt     Text prompt describing desired palette
-     * @param int    $num_colors Number of colors to generate (2-10)
-     * @param array  $options    Additional provider-specific options
-     * @return array{colors: array<string>, metadata: array} Generated palette data
-     * @throws PaletteGenerationException If generation fails
+     * @param array $params Generation parameters
+     * @return array{colors: array<string>, metadata: array{theme: string, mood: string, description: string, provider: string, model?: string, timestamp: int}} Generated palette data
+     * @throws Palette_Generation_Exception If generation fails
      * @throws \InvalidArgumentException If input parameters are invalid
      */
-    public function generate_palette(string $prompt, int $num_colors = 5, array $options = []): array {
-        // Validate input
-        if (empty(trim($prompt))) {
-            throw new \InvalidArgumentException(__('Prompt cannot be empty', 'gl-color-palette-generator'));
+    public function generate_palette(array $params): array {
+        // Validate input parameters
+        if (!isset($params['prompt']) || $params['prompt'] === '') {
+            throw new \InvalidArgumentException(__('Prompt is required', 'gl-color-palette-generator'));
         }
 
-        if ($num_colors < 2 || $num_colors > $this->get_capabilities()['max_colors']) {
+        $num_colors = $params['num_colors'] ?? 5;
+        if ($num_colors < 2 || $num_colors > 10) {
             throw new \InvalidArgumentException(
-                sprintf(
-                    __('Number of colors must be between 2 and %d', 'gl-color-palette-generator'),
-                    $this->get_capabilities()['max_colors']
-                )
+                sprintf(__('Number of colors must be between 2 and 10, got %d', 'gl-color-palette-generator'), $num_colors)
             );
         }
 
-        if (!empty($options) && !$this->validate_options($options)) {
-            throw new \InvalidArgumentException(__('Invalid provider options', 'gl-color-palette-generator'));
+        // Validate provider is ready
+        if (!isset($this->config) || $this->config === []) {
+            throw new \InvalidArgumentException(__('Provider configuration is required', 'gl-color-palette-generator'));
         }
 
         try {
-            $result = $this->generate_colors_internal($prompt, $num_colors, $options);
+            $result = $this->generate_colors_internal($params);
             return $this->validate_and_format_result($result);
         } catch (\Exception $e) {
-            throw new PaletteGenerationException(
+            throw new Palette_Generation_Exception(
                 sprintf(
                     __('Failed to generate palette: %s', 'gl-color-palette-generator'),
                     $e->getMessage()
-                ),
-                0,
-                $e
+                )
             );
         }
     }
@@ -107,13 +102,11 @@ abstract class Abstract_AI_Provider implements AI_Provider {
     /**
      * Internal color generation method to be implemented by providers
      *
-     * @param string $prompt     Text prompt describing desired palette
-     * @param int    $num_colors Number of colors to generate
-     * @param array  $options    Provider-specific options
+     * @param array $params Generation parameters
      * @return array Raw provider response
      * @throws \Exception If generation fails
      */
-    abstract protected function generate_colors_internal(string $prompt, int $num_colors, array $options): array;
+    abstract protected function generate_colors_internal(array $params): array;
 
     /**
      * Validate and format the provider's response
@@ -161,7 +154,7 @@ abstract class Abstract_AI_Provider implements AI_Provider {
      * @return bool True if ready, false otherwise
      */
     public function is_ready(): bool {
-        return isset($this->config['api_key']) && !empty($this->config['api_key']);
+        return isset($this->config['api_key']) && $this->config['api_key'] !== '';
     }
 
     /**
@@ -185,7 +178,7 @@ abstract class Abstract_AI_Provider implements AI_Provider {
      */
     protected function make_request(string $endpoint, array $data, string $method = 'POST'): array {
         $url = rtrim($this->config['base_url'] ?? '', '/') . '/' . ltrim($endpoint, '/');
-        
+
         $args = [
             'method' => $method,
             'timeout' => $this->config['timeout'],
@@ -201,7 +194,7 @@ abstract class Abstract_AI_Provider implements AI_Provider {
         }
 
         $response = wp_remote_request($url, $args);
-        
+
         if (is_wp_error($response)) {
             throw new \Exception($response->get_error_message());
         }

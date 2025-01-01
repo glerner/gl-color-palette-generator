@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace GL_Color_Palette_Generator\Providers;
 
-use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
+use GL_Color_Palette_Generator\Exceptions\Palette_Generation_Exception;
+use InvalidArgumentException;
+use WP_Error;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -24,18 +26,20 @@ if (!defined('ABSPATH')) {
  */
 interface AI_Provider {
     /**
-     * Generate a color palette based on a prompt
+     * Generate a color palette based on parameters
      *
-     * @param string $prompt     Text prompt describing desired palette
-     * @param int    $num_colors Number of colors to generate (2-10)
      * @param array{
-     *     model?: string,
-     *     temperature?: float,
-     *     max_tokens?: int,
-     *     top_p?: float,
-     *     frequency_penalty?: float,
-     *     presence_penalty?: float
-     * } $options Additional provider-specific options
+     *     prompt: string,
+     *     num_colors?: int,
+     *     options?: array{
+     *         model?: string,
+     *         temperature?: float,
+     *         max_tokens?: int,
+     *         top_p?: float,
+     *         frequency_penalty?: float,
+     *         presence_penalty?: float
+     *     }
+     * } $params Generation parameters
      * @return array{
      *     colors: array<string>,
      *     metadata: array{
@@ -46,11 +50,11 @@ interface AI_Provider {
      *         model?: string,
      *         timestamp: int
      *     }
-     * } Generated palette data
-     * @throws PaletteGenerationException If generation fails
-     * @throws \InvalidArgumentException If input parameters are invalid
+     * }|WP_Error Generated palette data or error
+     * @throws Palette_Generation_Exception If generation fails
+     * @throws InvalidArgumentException If input parameters are invalid
      */
-    public function generate_palette(string $prompt, int $num_colors = 5, array $options = []): array;
+    public function generate_palette(array $params);
 
     /**
      * Get provider name

@@ -117,7 +117,7 @@ class Test_Color_Palette_Exporter extends TestCase {
     }
 
     public function test_get_supported_formats(): void {
-        $formats = $this->exporter->getSupportedFormats();
+        $formats = $this->exporter->get_supported_formats();
 
         $this->assertIsArray($formats);
         $this->assertContains('json', $formats);
@@ -126,7 +126,7 @@ class Test_Color_Palette_Exporter extends TestCase {
     }
 
     public function test_get_format_options(): void {
-        $options = $this->exporter->getFormatOptions('json');
+        $options = $this->exporter->get_format_options('json');
 
         $this->assertIsArray($options);
         $this->assertArrayHasKey('pretty_print', $options);
@@ -134,9 +134,9 @@ class Test_Color_Palette_Exporter extends TestCase {
     }
 
     public function test_get_file_extension(): void {
-        $this->assertEquals('json', $this->exporter->getFileExtension('json'));
-        $this->assertEquals('css', $this->exporter->getFileExtension('css'));
-        $this->assertEquals('scss', $this->exporter->getFileExtension('scss'));
+        $this->assertEquals('json', $this->exporter->get_file_extension('json'));
+        $this->assertEquals('css', $this->exporter->get_file_extension('css'));
+        $this->assertEquals('scss', $this->exporter->get_file_extension('scss'));
     }
 
     public function test_validate_options(): void {
@@ -149,8 +149,8 @@ class Test_Color_Palette_Exporter extends TestCase {
             'invalid_option' => 'value'
         ];
 
-        $this->assertTrue($this->exporter->validateOptions($valid_options, 'json'));
-        $this->assertFalse($this->exporter->validateOptions($invalid_options, 'json'));
+        $this->assertTrue($this->exporter->validate_options($valid_options, 'json'));
+        $this->assertFalse($this->exporter->validate_options($invalid_options, 'json'));
     }
 
     public function test_invalid_format(): void {
