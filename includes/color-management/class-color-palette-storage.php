@@ -21,13 +21,14 @@
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use WP_Error;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Storage_Interface;
 
 /**
  * Class Color_Palette_Storage
  *
  * @since 1.0.0
  */
-class Color_Palette_Storage {
+class Color_Palette_Storage implements Color_Palette_Storage_Interface {
     /**
      * Option name prefix for WP options storage
      * @var string
@@ -613,4 +614,127 @@ class Color_Palette_Storage {
 
         return $count;
     }
-} 
+
+    /**
+     * Save a palette to the database
+     *
+     * @param array  $colors Array of colors in the palette
+     * @param string $prompt Optional. The prompt used to generate the palette
+     * @param array  $metadata Optional. Additional metadata about the palette
+     * @return int|false The ID of the saved palette or false on failure
+     */
+    public function save_palette(array $colors, string $prompt = '', array $metadata = []): int|false {
+        global $wpdb;
+
+        $data = [
+            'colors' => maybe_serialize($colors),
+            'prompt' => $prompt,
+            'metadata' => maybe_serialize($metadata),
+            'created_at' => current_time('mysql'),
+        ];
+
+        $result = $wpdb->insert(self::TABLE_NAME, $data);
+        return $result ? $wpdb->insert_id : false;
+    }
+
+    /**
+     * Get a palette by its ID
+     *
+     * @param int $id Palette ID
+     * @return array|null Palette data or null if not found
+     */
+    public function get_palette(int $id): ?array {
+        global $wpdb;
+
+        $row = $wpdb->get_row(
+            $wpdb->prepare("SELECT * FROM " . self::TABLE_NAME . " WHERE id = %d", $id),
+            ARRAY_A
+        );
+
+        if (!$row) {
+            return null;
+        }
+
+        return [
+            'id' => $row['id'],
+            'colors' => maybe_unserialize($row['colors']),
+            'prompt' => $row['prompt'],
+            'metadata' => maybe_unserialize($row['metadata']),
+            'created_at' => $row['created_at'],
+        ];
+    }
+
+    /**
+     * Get palettes created within a date range
+     *
+     * @param string $start_date Start date in Y-m-d format
+     * @param string $end_date End date in Y-m-d format
+     * @return array Array of palettes
+     */
+    public function get_palettes_by_date_range(string $start_date, string $end_date): array {
+        global $wpdb;
+
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM " . self::TABLE_NAME . " WHERE DATE(created_at) BETWEEN %s AND %s ORDER BY created_at DESC",
+                $start_date,
+                $end_date
+            ),
+            ARRAY_A
+        );
+
+        return array_map(function($row) {
+            return [
+                'id' => $row['id'],
+                'colors' => maybe_unserialize($row['colors']),
+                'prompt' => $row['prompt'],
+                'metadata' => maybe_unserialize($row['metadata']),
+                'created_at' => $row['created_at'],
+            ];
+        }, $rows);
+    }
+
+    /**
+     * Get recent palettes
+     *
+     * @param int $limit Number of palettes to return
+     * @return array Array of palettes
+     */
+    public function get_recent_palettes(int $limit = 10): array {
+        global $wpdb;
+
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM " . self::TABLE_NAME . " ORDER BY created_at DESC LIMIT %d",
+                $limit
+            ),
+            ARRAY_A
+        );
+
+        return array_map(function($row) {
+            return [
+                'id' => $row['id'],
+                'colors' => maybe_unserialize($row['colors']),
+                'prompt' => $row['prompt'],
+                'metadata' => maybe_unserialize($row['metadata']),
+                'created_at' => $row['created_at'],
+            ];
+        }, $rows);
+    }
+
+    /**
+     * Delete a palette
+     *
+     * @param int $id Palette ID
+     * @return bool True on success, false on failure
+     */
+    public function delete_palette(int $id): bool {
+        global $wpdb;
+
+        return (bool) $wpdb->delete(
+            self::TABLE_NAME,
+            ['id' => $id],
+            ['%d']
+        );
+    }
+}

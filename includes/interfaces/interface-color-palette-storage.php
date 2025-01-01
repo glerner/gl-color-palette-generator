@@ -1,66 +1,56 @@
 <?php
 
-namespace GLColorPalette\Interfaces;
-
-use GLColorPalette\ColorPalette;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 /**
  * Color Palette Storage Interface
  *
  * Defines the contract for storing and retrieving color palettes.
  *
- * @package GLColorPalette
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
+ * @package GL_Color_Palette_Generator
  * @since   1.0.0
  */
-interface ColorPaletteStorageInterface {
+interface Color_Palette_Storage_Interface {
     /**
-     * Saves a color palette.
+     * Save a palette to the database
      *
-     * @param ColorPalette $palette Palette to save.
-     * @return int|false Palette ID on success, false on failure.
+     * @param array  $colors Array of colors in the palette
+     * @param string $prompt Optional. The prompt used to generate the palette
+     * @param array  $metadata Optional. Additional metadata about the palette
+     * @return int|false The ID of the saved palette or false on failure
      */
-    public function savePalette(ColorPalette $palette): int|false;
+    public function save_palette(array $colors, string $prompt = '', array $metadata = []): int|false;
 
     /**
-     * Retrieves a color palette by ID.
+     * Get a palette by its ID
      *
-     * @param int $id Palette ID.
-     * @return ColorPalette|null Retrieved palette or null if not found.
+     * @param int $id Palette ID
+     * @return array|null Palette data or null if not found
      */
-    public function getPalette(int $id): ?ColorPalette;
+    public function get_palette(int $id): ?array;
 
     /**
-     * Updates an existing color palette.
+     * Get palettes created within a date range
      *
-     * @param int          $id      Palette ID.
-     * @param ColorPalette $palette Updated palette data.
-     * @return bool True on success, false on failure.
+     * @param string $start_date Start date in Y-m-d format
+     * @param string $end_date End date in Y-m-d format
+     * @return array Array of palettes
      */
-    public function updatePalette(int $id, ColorPalette $palette): bool;
+    public function get_palettes_by_date_range(string $start_date, string $end_date): array;
 
     /**
-     * Deletes a color palette.
+     * Get recent palettes
      *
-     * @param int $id Palette ID.
-     * @return bool True on success, false on failure.
+     * @param int $limit Number of palettes to return
+     * @return array Array of palettes
      */
-    public function deletePalette(int $id): bool;
+    public function get_recent_palettes(int $limit = 10): array;
 
     /**
-     * Lists all color palettes with optional filtering.
+     * Delete a palette
      *
-     * @param array $filters Optional. Filter criteria.
-     * @return array List of palettes.
+     * @param int $id Palette ID
+     * @return bool True on success, false on failure
      */
-    public function listPalettes(array $filters = []): array;
-
-    /**
-     * Searches for palettes matching criteria.
-     *
-     * @param array $criteria Search criteria.
-     * @return array Matching palettes.
-     */
-    public function searchPalettes(array $criteria): array;
+    public function delete_palette(int $id): bool;
 }
