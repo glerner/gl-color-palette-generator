@@ -2,6 +2,8 @@
 /**
  * Rate Limiter Class
  *
+ * Handles API rate limiting using a token bucket algorithm
+ *
  * @package GL_Color_Palette_Generator
  * @subpackage Core
  * @since 1.0.0
@@ -13,9 +15,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+use WP_Error;
+
 /**
  * Class Rate_Limiter
- * 
+ *
  * Handles API rate limiting using a token bucket algorithm
  *
  * @since 1.0.0
@@ -97,27 +101,62 @@ class Rate_Limiter {
      * @return bool Whether request is allowed
      */
     public function is_allowed(string $identifier): bool {
+        return $this->get_remaining_tokens($identifier) > 0;
+    }
+
+    /**
+     * Get remaining tokens
+     *
+     * @param string $identifier Unique identifier
+     * @return int Number of remaining tokens
+     */
+    public function get_remaining_tokens(string $identifier): int {
+        $used = $this->get_request_count($identifier);
+        return max(0, $this->max_requests - $used);
+    }
+
+    /**
+     * Get current request count
+     *
+     * @param string $identifier Rate limit identifier
+     * @return int Current request count
+     */
+    public function get_request_count(string $identifier): int {
         $key = $this->get_cache_key($identifier);
-        $current_time = time();
-        
+        $bucket = $this->get_bucket($key);
+        if ($bucket === false) {
+            return 0;
+        }
+
+        return $this->max_requests - $bucket['tokens'];
+    }
+
+    /**
+     * Increment request count
+     *
+     * @param string $identifier Rate limit identifier
+     * @return bool True on success
+     */
+    private function increment_request_count(string $identifier): bool {
+        $key = $this->get_cache_key($identifier);
         $bucket = $this->get_bucket($key);
         if ($bucket === false) {
             $bucket = [
                 'tokens' => $this->max_requests - 1,
-                'last_update' => $current_time
+                'last_update' => time()
             ];
             $this->save_bucket($key, $bucket);
             return true;
         }
 
-        $time_passed = $current_time - $bucket['last_update'];
+        $time_passed = time() - $bucket['last_update'];
         $tokens_to_add = floor($time_passed * ($this->max_requests / $this->window));
-        
+
         $bucket['tokens'] = min(
             $this->max_requests,
             $bucket['tokens'] + $tokens_to_add
         );
-        
+
         if ($bucket['tokens'] < 1) {
             $this->logger->warning('Rate limit exceeded', [
                 'identifier' => $identifier,
@@ -128,42 +167,29 @@ class Rate_Limiter {
         }
 
         $bucket['tokens']--;
-        $bucket['last_update'] = $current_time;
+        $bucket['last_update'] = time();
         $this->save_bucket($key, $bucket);
 
         return true;
     }
 
     /**
-     * Get remaining tokens
+     * Check if request is within rate limit
      *
-     * @param string $identifier Unique identifier
-     * @return int Number of remaining tokens
+     * @param string $identifier Rate limit identifier
+     * @return bool|WP_Error True if within limit, WP_Error if exceeded
      */
-    public function get_remaining_tokens(string $identifier): int {
-        $bucket = $this->get_bucket($this->get_cache_key($identifier));
-        if ($bucket === false) {
-            return $this->max_requests;
+    public function check_rate_limit(string $identifier): bool|WP_Error {
+        if (!$this->is_allowed($identifier)) {
+            return new WP_Error(
+                'rate_limit_exceeded',
+                'Rate limit exceeded. Please try again later.',
+                ['status' => 429]
+            );
         }
 
-        $current_time = time();
-        $time_passed = $current_time - $bucket['last_update'];
-        $tokens_to_add = floor($time_passed * ($this->max_requests / $this->window));
-        
-        return min(
-            $this->max_requests,
-            $bucket['tokens'] + $tokens_to_add
-        );
-    }
-
-    /**
-     * Reset rate limit for identifier
-     *
-     * @param string $identifier Unique identifier
-     * @return bool Success status
-     */
-    public function reset(string $identifier): bool {
-        return wp_cache_delete($this->get_cache_key($identifier));
+        $this->increment_request_count($identifier);
+        return true;
     }
 
     /**
@@ -204,12 +230,28 @@ class Rate_Limiter {
      * @return array Rate limit headers
      */
     public function get_headers(string $identifier): array {
-        $remaining = $this->get_remaining_tokens($identifier);
-        
         return [
-            'X-RateLimit-Limit' => $this->max_requests,
-            'X-RateLimit-Remaining' => $remaining,
-            'X-RateLimit-Reset' => time() + $this->window
+            'X-RateLimit-Limit' => (string) $this->max_requests,
+            'X-RateLimit-Remaining' => (string) $this->get_remaining_tokens($identifier),
+            'X-RateLimit-Reset' => (string) (time() + $this->window)
         ];
+    }
+
+    /**
+     * Get rate limit window
+     *
+     * @return int Time window in seconds
+     */
+    public function get_window(): int {
+        return $this->window;
+    }
+
+    /**
+     * Get maximum requests per window
+     *
+     * @return int Maximum requests
+     */
+    public function get_max_requests(): int {
+        return $this->max_requests;
     }
 }

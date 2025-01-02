@@ -23,7 +23,7 @@ use GL_Color_Palette_Generator\Traits\Logger;
  * Class Color_Utility
  *
  * Core utility class for color operations including:
- * - Color space conversions (RGB, HSL)
+ * - Color space conversions (RGB, HSL, HSV)
  * - Color difference calculations
  * - Color manipulation (lighten, darken, saturate)
  * - Format validation and normalization
@@ -272,6 +272,139 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
     }
 
     /**
+     * Convert RGB to HSV
+     *
+     * @param array $rgb RGB values [r, g, b]
+     * @return array HSV values [h, s, v]
+     */
+    public function rgb_to_hsv(array $rgb): array {
+        $r = $rgb['r'] / 255;
+        $g = $rgb['g'] / 255;
+        $b = $rgb['b'] / 255;
+
+        $max = max($r, $g, $b);
+        $min = min($r, $g, $b);
+        $diff = $max - $min;
+
+        $h = 0;
+        $s = ($max === 0) ? 0 : ($diff / $max);
+        $v = $max;
+
+        if ($diff !== 0) {
+            switch ($max) {
+                case $r:
+                    $h = 60 * fmod(($g - $b) / $diff, 6);
+                    break;
+                case $g:
+                    $h = 60 * (($b - $r) / $diff + 2);
+                    break;
+                case $b:
+                    $h = 60 * (($r - $g) / $diff + 4);
+                    break;
+            }
+        }
+
+        if ($h < 0) {
+            $h += 360;
+        }
+
+        return [
+            'h' => $h,
+            's' => $s * 100,
+            'v' => $v * 100
+        ];
+    }
+
+    /**
+     * Convert HSV to RGB
+     *
+     * @param array $hsv HSV values [h, s, v]
+     * @return array RGB values [r, g, b]
+     */
+    public function hsv_to_rgb(array $hsv): array {
+        $h = $hsv['h'];
+        $s = $hsv['s'] / 100;
+        $v = $hsv['v'] / 100;
+
+        $c = $v * $s;
+        $x = $c * (1 - abs(fmod($h / 60, 2) - 1));
+        $m = $v - $c;
+
+        if ($h >= 0 && $h < 60) {
+            $r = $c; $g = $x; $b = 0;
+        } elseif ($h >= 60 && $h < 120) {
+            $r = $x; $g = $c; $b = 0;
+        } elseif ($h >= 120 && $h < 180) {
+            $r = 0; $g = $c; $b = $x;
+        } elseif ($h >= 180 && $h < 240) {
+            $r = 0; $g = $x; $b = $c;
+        } elseif ($h >= 240 && $h < 300) {
+            $r = $x; $g = 0; $b = $c;
+        } else {
+            $r = $c; $g = 0; $b = $x;
+        }
+
+        return [
+            'r' => round(($r + $m) * 255),
+            'g' => round(($g + $m) * 255),
+            'b' => round(($b + $m) * 255)
+        ];
+    }
+
+    /**
+     * Convert hex color to HSV
+     *
+     * @param string $hex Color in hex format
+     * @return array HSV values [h, s, v]
+     */
+    public function hex_to_hsv(string $hex): array {
+        return $this->rgb_to_hsv($this->hex_to_rgb($hex));
+    }
+
+    /**
+     * Convert HSV to hex color
+     *
+     * @param array $hsv HSV values [h, s, v]
+     * @return string Color in hex format
+     */
+    public function hsv_to_hex(array $hsv): string {
+        return $this->rgb_to_hex($this->hsv_to_rgb($hsv));
+    }
+
+    public function hex_to_lab(string $hex): array {
+        $rgb = $this->hex_to_rgb($hex);
+
+        // Convert to sRGB
+        $r = $rgb['r'] / 255;
+        $g = $rgb['g'] / 255;
+        $b = $rgb['b'] / 255;
+
+        $r = ($r > 0.04045) ? pow(($r + 0.055) / 1.055, 2.4) : $r / 12.92;
+        $g = ($g > 0.04045) ? pow(($g + 0.055) / 1.055, 2.4) : $g / 12.92;
+        $b = ($b > 0.04045) ? pow(($b + 0.055) / 1.055, 2.4) : $b / 12.92;
+
+        // Convert to XYZ
+        $x = ($r * 0.4124 + $g * 0.3576 + $b * 0.1805) * 100;
+        $y = ($r * 0.2126 + $g * 0.7152 + $b * 0.0722) * 100;
+        $z = ($r * 0.0193 + $g * 0.1192 + $b * 0.9505) * 100;
+
+        // Convert XYZ to LAB
+        $x = $x / 95.047;
+        $y = $y / 100.000;
+        $z = $z / 108.883;
+
+        $x = ($x > 0.008856) ? pow($x, 1/3) : (7.787 * $x) + 16/116;
+        $y = ($y > 0.008856) ? pow($y, 1/3) : (7.787 * $y) + 16/116;
+        $z = ($z > 0.008856) ? pow($z, 1/3) : (7.787 * $z) + 16/116;
+
+        return [
+            'l' => (116 * $y) - 16,
+            'a' => 500 * ($x - $y),
+            'b' => 200 * ($y - $z)
+        ];
+    }
+
+    /**
      * Darken a color by a percentage
      *
      * @param string $color Hex color code
@@ -298,11 +431,21 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
     }
 
     /**
+     * Validate hex color format
+     *
+     * @param string $hex Color in hex format
+     * @return bool True if valid hex color
+     */
+    public function is_valid_hex_color(string $hex): bool {
+        return preg_match('/^#[a-fA-F0-9]{6}$/', $hex) === 1;
+    }
+
+    /**
      * Convert multiple colors to a different color space
      *
      * @param array  $colors Array of colors to convert
-     * @param string $from   Source color space (hex, rgb, hsl)
-     * @param string $to     Target color space (rgb, hsl)
+     * @param string $from   Source color space (hex, rgb, hsl, hsv)
+     * @param string $to     Target color space (rgb, hsl, hsv)
      * @param array  $options {
      *     Optional. Conversion options.
      *     @type int    $precision     Number of decimal places
@@ -324,6 +467,7 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
             $rgb = match($from) {
                 'hex' => $this->hex_to_rgb($color),
                 'hsl' => $this->hsl_to_rgb($color),
+                'hsv' => $this->hsv_to_rgb($color),
                 'rgb' => $color,
                 default => throw new \InvalidArgumentException("Unsupported source color space: $from")
             };
@@ -332,6 +476,7 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
             $converted[$key] = match($to) {
                 'rgb' => $rgb,
                 'hsl' => $this->rgb_to_hsl($rgb),
+                'hsv' => $this->rgb_to_hsv($rgb),
                 default => throw new \InvalidArgumentException("Unsupported target color space: $to")
             };
 
@@ -364,15 +509,15 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
      */
     public function format_colors(array $colors, string $format, array $options = []): array {
         $formatted = [];
-        
+
         foreach ($colors as $name => $color) {
             switch ($format) {
                 case 'css':
-                    $formatted[$name] = is_array($color) ? 
-                        $this->array_to_css_color($color) : 
+                    $formatted[$name] = is_array($color) ?
+                        $this->array_to_css_color($color) :
                         $color;
                     break;
-                    
+
                 case 'scss':
                     $formatted[$name] = sprintf(
                         '$%s: %s;',
@@ -380,13 +525,13 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
                         is_array($color) ? $this->array_to_css_color($color) : $color
                     );
                     break;
-                    
+
                 case 'json':
-                    $formatted[$name] = is_array($color) ? 
-                        $color : 
+                    $formatted[$name] = is_array($color) ?
+                        $color :
                         $this->hex_to_rgb($color);
                     break;
-                    
+
                 default:
                     throw new \InvalidArgumentException("Unsupported format: $format");
             }
@@ -413,6 +558,8 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
             return sprintf('rgb(%d, %d, %d)', $color['r'], $color['g'], $color['b']);
         } elseif (isset($color['h'])) {
             return sprintf('hsl(%d, %d%%, %d%%)', $color['h'], $color['s'] * 100, $color['l'] * 100);
+        } elseif (isset($color['hsv'])) {
+            return sprintf('hsv(%d, %d%%, %d%%)', $color['h'], $color['s'] * 100, $color['v'] * 100);
         }
         throw new \InvalidArgumentException('Unsupported color format');
     }

@@ -2,55 +2,88 @@
 
 namespace GL_Color_Palette_Generator\Interfaces;
 
+use GL_Color_Palette_Generator\Models\Color_Palette;
+use WP_Error;
+
 /**
  * Color Palette Storage Interface
  *
- * Defines the contract for storing and retrieving color palettes.
+ * Interface for storing and retrieving color palettes.
  *
  * @package GL_Color_Palette_Generator
+ * @subpackage Interfaces
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
 interface Color_Palette_Storage_Interface {
     /**
-     * Save a palette to the database
+     * Store a palette
      *
-     * @param array  $colors Array of colors in the palette
-     * @param string $prompt Optional. The prompt used to generate the palette
-     * @param array  $metadata Optional. Additional metadata about the palette
-     * @return int|false The ID of the saved palette or false on failure
+     * @param Color_Palette $palette Palette to store
+     * @return bool|WP_Error True on success, WP_Error on failure
      */
-    public function save_palette(array $colors, string $prompt = '', array $metadata = []): int|false;
+    public function store_palette(Color_Palette $palette): bool|WP_Error;
 
     /**
-     * Get a palette by its ID
+     * Get a palette by ID
      *
      * @param int $id Palette ID
-     * @return array|null Palette data or null if not found
+     * @return Color_Palette|null|WP_Error Palette if found, null if not found, WP_Error on failure
      */
-    public function get_palette(int $id): ?array;
+    public function get_palette(int $id): Color_Palette|null|WP_Error;
 
     /**
-     * Get palettes created within a date range
-     *
-     * @param string $start_date Start date in Y-m-d format
-     * @param string $end_date End date in Y-m-d format
-     * @return array Array of palettes
-     */
-    public function get_palettes_by_date_range(string $start_date, string $end_date): array;
-
-    /**
-     * Get recent palettes
-     *
-     * @param int $limit Number of palettes to return
-     * @return array Array of palettes
-     */
-    public function get_recent_palettes(int $limit = 10): array;
-
-    /**
-     * Delete a palette
+     * Delete a palette by ID
      *
      * @param int $id Palette ID
-     * @return bool True on success, false on failure
+     * @return bool|WP_Error True on success, WP_Error on failure
      */
-    public function delete_palette(int $id): bool;
+    public function delete_palette(int $id): bool|WP_Error;
+
+    /**
+     * List palettes
+     *
+     * @param array $args {
+     *     Optional. Arguments to filter palettes.
+     *
+     *     @type int    $per_page Number of items per page. Default 10.
+     *     @type int    $page     Current page number. Default 1.
+     *     @type string $order    Order direction. Default 'DESC'.
+     *     @type array  $meta     Meta query arguments.
+     * }
+     * @return Color_Palette[]|WP_Error Array of palettes or error
+     */
+    public function list_palettes(array $args = []): array|WP_Error;
+
+    /**
+     * Count total palettes
+     *
+     * @return int|WP_Error Total number of palettes or error
+     */
+    public function count_palettes(): int|WP_Error;
+
+    /**
+     * Search palettes
+     *
+     * @param string $query Search query
+     * @param array  $args {
+     *     Optional. Search arguments.
+     *
+     *     @type string $field Field to search in. Default 'metadata'.
+     *     @type int    $limit Maximum number of results. Default 10.
+     *     @type string $order Order direction. Default 'DESC'.
+     * }
+     * @return Color_Palette[]|WP_Error Array of matching palettes or error
+     */
+    public function search_palettes(string $query, array $args = []): array|WP_Error;
+
+    /**
+     * Updates a palette.
+     *
+     * @param int          $id      Palette ID.
+     * @param Color_Palette $palette Updated palette.
+     * @return bool|WP_Error True on success, WP_Error on failure.
+     */
+    public function update_palette(int $id, Color_Palette $palette): bool|WP_Error;
 }

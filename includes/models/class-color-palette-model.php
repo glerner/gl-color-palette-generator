@@ -1,17 +1,22 @@
 <?php
+/**
+ * Color Palette Model Class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Models
+ * @author  George Lerner
+ * @link    https://website-tech.glerner.com/
+ * @since   1.0.0
+ */
 
 namespace GL_Color_Palette_Generator\Models;
 
 /**
- * Color Palette Model
+ * Class GL_Color_Palette_Model
  *
  * Represents a color palette with its properties and metadata.
- *
- * @package GL_Color_Palette_Generator
- * @subpackage Models
- * @since 1.0.0
  */
-class Color_Palette {
+class GL_Color_Palette_Model {
     /**
      * Palette ID
      * @var string

@@ -1,68 +1,33 @@
 <?php
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
-use GLColorPalette\ColorPalette;
+use GL_Color_Palette_Generator\Models\Color_Palette;
+use WP_Error;
 
 /**
  * Color Palette Optimizer Interface
  *
- * Defines the contract for optimizing color palettes for various purposes.
+ * Interface for optimizing color palettes.
  *
- * @package GLColorPalette
- * @author  George Lerner
- * @link    https://website-tech.glerner.com/
- * @since   1.0.0
+ * @package GL_Color_Palette_Generator
+ * @subpackage Interfaces
+ * @since 1.0.0
  */
-interface ColorPaletteOptimizerInterface extends Color_Constants {
+interface Color_Palette_Optimizer_Interface {
     /**
-     * Optimizes a color palette.
+     * Optimize a color palette
      *
-     * @param ColorPalette $palette Palette to optimize.
-     * @param array        $options Optimization options.
-     * @return ColorPalette Optimized palette.
+     * @param Color_Palette $palette Palette to optimize
+     * @param array        $options Optimization options
+     * @return Color_Palette|WP_Error Optimized palette or error
      */
-    public function optimizePalette(ColorPalette $palette, array $options = []): ColorPalette;
+    public function optimize_palette(Color_Palette $palette, array $options = []): Color_Palette|WP_Error;
 
     /**
-     * Optimizes for accessibility.
+     * Get supported optimization options
      *
-     * @param ColorPalette $palette Palette to optimize.
-     * @param string       $level   WCAG level ('A', 'AA', or 'AAA').
-     * @return ColorPalette Optimized palette.
+     * @return array List of supported options
      */
-    public function optimizeForAccessibility(ColorPalette $palette, string $level = 'AAA'): ColorPalette;
-
-    /**
-     * Optimizes for harmony.
-     *
-     * @param ColorPalette $palette Palette to optimize.
-     * @param string       $type    Harmony type (complementary, analogous, etc.).
-     * @return ColorPalette Optimized palette.
-     */
-    public function optimizeForHarmony(ColorPalette $palette, string $type = 'complementary'): ColorPalette;
-
-    /**
-     * Optimizes for contrast.
-     *
-     * @param ColorPalette $palette Palette to optimize.
-     * @param float        $target  Target contrast ratio (defaults to WCAG AAA).
-     * @return ColorPalette Optimized palette.
-     */
-    public function optimizeForContrast(ColorPalette $palette, float $target = self::WCAG_CONTRAST_MIN): ColorPalette;
-
-    /**
-     * Gets available optimization strategies.
-     *
-     * @return array List of available strategies.
-     */
-    public function getAvailableStrategies(): array;
-
-    /**
-     * Gets optimization options.
-     *
-     * @param string $strategy Strategy to get options for.
-     * @return array Strategy options.
-     */
-    public function getStrategyOptions(string $strategy): array;
+    public function get_supported_options(): array;
 }

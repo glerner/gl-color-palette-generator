@@ -22,6 +22,11 @@ Review and update all documentation to accurately reflect current plugin capabil
    - [ ] Remove references to removed features:
      - Batch processing
      - Printer analysis
+     - Perceptual color analysis
+     - Cultural/psychological effects
+     - Device-specific analysis
+     - Color blindness testing (future enhancement)
+     - Caching mechanisms
      - Other deprecated functionality
    - [ ] Update AI capabilities documentation
    - [ ] Review and update theme variation documentation

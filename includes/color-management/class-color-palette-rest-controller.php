@@ -3,8 +3,7 @@
  * Color Palette REST Controller
  *
  * Handles REST API endpoints for palette generation, analysis, optimization,
- * and export functionality. Provides a RESTful interface for the plugin's
- * core features.
+ * and export functionality.
  *
  * @package GL_Color_Palette_Generator
  * @since   1.0.0
@@ -12,75 +11,85 @@
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
+use GL_Color_Palette_Generator\Core\Rate_Limiter;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Generator_Interface;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Analyzer_Interface;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Optimizer_Interface;
+use GL_Color_Palette_Generator\Interfaces\Color_Exporter_Interface;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Storage_Interface;
+use GL_Color_Palette_Generator\Models\Color_Palette;
 use WP_REST_Controller;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
-use GL_Color_Palette_Generator\Core\Rate_Limiter;
-use GL_Color_Palette_Generator\Core\Logger;
 
 class Color_Palette_REST_Controller extends WP_REST_Controller {
     /**
      * API namespace
      * @var string
      */
-    protected string $namespace = 'gl-color-palette/v1';
+    protected $namespace = 'gl-color-palette/v1';
 
     /**
      * Base resource path
      * @var string
      */
-    protected string $rest_base = 'palettes';
+    protected $rest_base = 'palettes';
 
     /**
      * Generator instance
-     * @var Color_Palette_Generator
+     * @var Color_Palette_Generator_Interface
      */
-    private Color_Palette_Generator $generator;
+    private Color_Palette_Generator_Interface $generator;
 
     /**
      * Analyzer instance
-     * @var Color_Palette_Analyzer
+     * @var Color_Palette_Analyzer_Interface
      */
-    private $analyzer;
+    private Color_Palette_Analyzer_Interface $analyzer;
 
     /**
      * Optimizer instance
-     * @var Color_Palette_Optimizer
+     * @var Color_Palette_Optimizer_Interface
      */
-    private $optimizer;
+    private Color_Palette_Optimizer_Interface $optimizer;
 
     /**
      * Exporter instance
-     * @var Color_Palette_Exporter
+     * @var Color_Exporter_Interface
      */
-    private $exporter;
+    private Color_Exporter_Interface $exporter;
+
+    /**
+     * Storage instance
+     * @var Color_Palette_Storage_Interface
+     */
+    private Color_Palette_Storage_Interface $storage;
 
     /**
      * Rate limiter instance
-     *
      * @var Rate_Limiter
      */
-    private $rate_limiter;
-
-    /**
-     * Logger instance
-     *
-     * @var Logger
-     */
-    private $logger;
+    private Rate_Limiter $rate_limiter;
 
     /**
      * Constructor
      */
-    public function __construct() {
-        $this->generator = new Color_Palette_Generator();
-        $this->analyzer = new Color_Palette_Analyzer();
-        $this->optimizer = new Color_Palette_Optimizer();
-        $this->exporter = new Color_Palette_Exporter();
-        $this->rate_limiter = new Rate_Limiter();
-        $this->logger = new Logger();
+    public function __construct(
+        Color_Palette_Generator_Interface $generator,
+        Color_Palette_Analyzer_Interface $analyzer,
+        Color_Palette_Optimizer_Interface $optimizer,
+        Color_Exporter_Interface $exporter,
+        Color_Palette_Storage_Interface $storage,
+        Rate_Limiter $rate_limiter
+    ) {
+        $this->generator = $generator;
+        $this->analyzer = $analyzer;
+        $this->optimizer = $optimizer;
+        $this->exporter = $exporter;
+        $this->storage = $storage;
+        $this->rate_limiter = $rate_limiter;
     }
 
     /**
@@ -268,8 +277,8 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
         $total_pages = ceil($total_items / $args['per_page']);
         $current_page = $args['page'];
 
-        $response->header('X-WP-Total', $total_items);
-        $response->header('X-WP-TotalPages', $total_pages);
+        $response->header('X-WP-Total', (string) $total_items);
+        $response->header('X-WP-TotalPages', (string) $total_pages);
 
         $links = [];
         if ($current_page > 1) {
@@ -285,7 +294,7 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
             );
         }
 
-        if (!empty($links)) {
+        if (count($links) > 0) {
             $response->header('Link', implode(', ', $links));
         }
 
@@ -315,23 +324,44 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
      * @return WP_REST_Response|WP_Error Response object or error.
      */
     public function list_palettes(WP_REST_Request $request): WP_REST_Response|WP_Error {
+        $per_page = $request->get_param('per_page');
+        if ($per_page === null) {
+            $per_page = 10;
+        }
+
+        $page = $request->get_param('page');
+        if ($page === null) {
+            $page = 1;
+        }
+
+        $order = $request->get_param('order');
+        if ($order === null) {
+            $order = 'DESC';
+        }
+
+        $meta = $request->get_param('meta');
+        if ($meta === null) {
+            $meta = [];
+        }
+
         $args = [
-            'per_page' => $request->get_param('per_page'),
-            'page' => $request->get_param('page'),
-            'order' => $request->get_param('order'),
-            'meta' => $request->get_param('meta')
+            'per_page' => (int) $per_page,
+            'page' => (int) $page,
+            'order' => $order,
+            'meta' => $meta
         ];
 
-        $total_items = $this->storage->count($args['meta']);
-        $palettes = $this->storage->list($args);
+        $total_items = $this->storage->count_palettes();
+        if ($total_items instanceof WP_Error) {
+            return $total_items;
+        }
 
-        $response = rest_ensure_response(array_map(function($palette) {
-            return [
-                'id' => $palette->get_metadata('id'),
-                'colors' => $palette->get_colors(),
-                'metadata' => $palette->get_metadata()
-            ];
-        }, $palettes));
+        $palettes = $this->storage->list_palettes($args);
+        if ($palettes instanceof WP_Error) {
+            return $palettes;
+        }
+
+        $response = rest_ensure_response(array_map([$this, 'prepare_palette_for_response'], $palettes));
 
         return $this->add_pagination_headers($response, $total_items, $args);
     }
@@ -346,21 +376,41 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
      */
     public function search_palettes(WP_REST_Request $request): WP_REST_Response|WP_Error {
         $query = $request->get_param('query');
+        if ($query === null || $query === '') {
+            return new WP_Error(
+                'missing_query',
+                __('Search query is required.', 'gl-color-palette-generator'),
+                ['status' => 400]
+            );
+        }
+
+        $field = $request->get_param('field');
+        if ($field === null) {
+            $field = 'metadata';
+        }
+
+        $limit = $request->get_param('per_page');
+        if ($limit === null) {
+            $limit = 10;
+        }
+
+        $order = $request->get_param('order');
+        if ($order === null) {
+            $order = 'DESC';
+        }
+
         $args = [
-            'field' => $request->get_param('field'),
-            'limit' => $request->get_param('per_page'),
-            'order' => $request->get_param('order')
+            'field' => $field,
+            'limit' => (int) $limit,
+            'order' => $order
         ];
 
-        $palettes = $this->storage->search($query, $args);
+        $palettes = $this->storage->search_palettes($query, $args);
+        if ($palettes instanceof WP_Error) {
+            return $palettes;
+        }
 
-        return rest_ensure_response(array_map(function($palette) {
-            return [
-                'id' => $palette->get_metadata('id'),
-                'colors' => $palette->get_colors(),
-                'metadata' => $palette->get_metadata()
-            ];
-        }, $palettes));
+        return rest_ensure_response(array_map([$this, 'prepare_palette_for_response'], $palettes));
     }
 
     /**
@@ -380,7 +430,7 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
             ],
             'per_page' => [
                 'type' => 'integer',
-                'default' => 20,
+                'default' => 10,
                 'minimum' => 1,
                 'maximum' => 100,
                 'description' => __('Maximum number of items to be returned in result set.', 'gl-color-palette-generator'),
@@ -422,7 +472,7 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
             ],
             'per_page' => [
                 'type' => 'integer',
-                'default' => 20,
+                'default' => 10,
                 'minimum' => 1,
                 'maximum' => 100,
                 'description' => __('Maximum number of items to be returned in result set.', 'gl-color-palette-generator'),
@@ -439,40 +489,29 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
     /**
      * Check rate limit before processing request
      *
-     * @param WP_REST_Request $request Request object.
-     * @return bool|WP_Error True if rate limit not exceeded, WP_Error otherwise.
+     * @param string $identifier Rate limit identifier
+     * @return bool|WP_Error True if within limit, WP_Error if exceeded
      */
-    private function check_rate_limit($request) {
-        $user_id = get_current_user_id();
-        $ip = $request->get_header('X-Forwarded-For') ?: $_SERVER['REMOTE_ADDR'];
-        $identifier = $user_id ? "user_{$user_id}" : "ip_{$ip}";
-
-        if (!$this->rate_limiter->check_limit($identifier)) {
-            $this->logger->warning("Rate limit exceeded for {$identifier}");
-            return new WP_Error(
-                'rate_limit_exceeded',
-                'API rate limit exceeded. Please try again later.',
-                array('status' => 429)
-            );
+    private function check_rate_limit(string $identifier): bool|WP_Error {
+        $result = $this->rate_limiter->check_rate_limit($identifier);
+        if ($result instanceof WP_Error) {
+            return $result;
         }
-
         return true;
     }
 
     /**
      * Add rate limit headers to response
      *
-     * @param WP_REST_Response $response Response object.
-     * @param string          $identifier User/IP identifier.
-     * @return WP_REST_Response Response with rate limit headers.
+     * @param WP_REST_Response $response Response object
+     * @param string          $identifier Rate limit identifier
+     * @return WP_REST_Response Response with headers
      */
-    private function add_rate_limit_headers($response, $identifier) {
-        $limit_info = $this->rate_limiter->get_limit_info($identifier);
-
-        $response->header('X-RateLimit-Limit', $limit_info['limit']);
-        $response->header('X-RateLimit-Remaining', $limit_info['remaining']);
-        $response->header('X-RateLimit-Reset', $limit_info['reset']);
-
+    private function add_rate_limit_headers(WP_REST_Response $response, string $identifier): WP_REST_Response {
+        $headers = $this->rate_limiter->get_headers($identifier);
+        foreach ($headers as $name => $value) {
+            $response->header($name, $value);
+        }
         return $response;
     }
 
@@ -482,31 +521,33 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
      * @param WP_REST_Request $request Request object
      * @return WP_REST_Response|WP_Error Response object or error
      */
-    public function analyze_palette(WP_REST_Request $request) {
+    public function analyze_palette(WP_REST_Request $request): WP_REST_Response|WP_Error {
         $palette_id = $request->get_param('id');
-        $aspects = $request->get_param('aspects');
 
-        // Get palette from storage/cache
+        $aspects = $request->get_param('aspects');
+        if ($aspects === null) {
+            $aspects = [];
+        }
+
         $palette = $this->get_palette($palette_id);
-        if (is_wp_error($palette)) {
+        if ($palette instanceof WP_Error) {
             return $palette;
         }
 
-        $analysis = [];
-
-        if (in_array('all', $aspects) || in_array('contrast', $aspects)) {
-            $analysis['contrast'] = $this->analyzer->analyze_contrast($palette);
+        if ($palette === null) {
+            return new WP_Error(
+                'palette_not_found',
+                __('Palette not found.', 'gl-color-palette-generator'),
+                ['status' => 404]
+            );
         }
 
-        if (in_array('all', $aspects) || in_array('harmony', $aspects)) {
-            $analysis['harmony'] = $this->analyzer->analyze_harmony($palette);
+        $analysis = $this->analyzer->analyze_palette($palette, $aspects);
+        if ($analysis instanceof WP_Error) {
+            return $analysis;
         }
 
-        if (in_array('all', $aspects) || in_array('accessibility', $aspects)) {
-            $analysis['accessibility'] = $this->analyzer->analyze_accessibility($palette);
-        }
-
-        return rest_ensure_response($analysis);
+        return new WP_REST_Response($analysis);
     }
 
     /**
@@ -515,30 +556,38 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
      * @param WP_REST_Request $request Request object
      * @return WP_REST_Response|WP_Error Response object or error
      */
-    public function optimize_palette(WP_REST_Request $request) {
+    public function optimize_palette(WP_REST_Request $request): WP_REST_Response|WP_Error {
         $palette_id = $request->get_param('id');
-        $options = [
-            'target_wcag' => $request->get_param('target_wcag'),
-            'max_adjustment' => $request->get_param('max_adjustment'),
-            'preserve_relationships' => $request->get_param('preserve_relationships')
-        ];
 
-        // Get palette from storage/cache
+        $options = $request->get_param('options');
+        if ($options === null) {
+            $options = [];
+        }
+
         $palette = $this->get_palette($palette_id);
-        if (is_wp_error($palette)) {
+        if ($palette instanceof WP_Error) {
             return $palette;
         }
 
-        $optimized = $this->optimizer->optimize($palette, $options);
-        if (is_wp_error($optimized)) {
+        if ($palette === null) {
+            return new WP_Error(
+                'palette_not_found',
+                __('Palette not found.', 'gl-color-palette-generator'),
+                ['status' => 404]
+            );
+        }
+
+        $optimized = $this->optimizer->optimize_palette($palette, $options);
+        if ($optimized instanceof WP_Error) {
             return $optimized;
         }
 
-        return rest_ensure_response([
-            'id' => $optimized->get_metadata('id'),
-            'colors' => $optimized->get_colors(),
-            'metadata' => $optimized->get_metadata()
-        ]);
+        $result = $this->storage->update_palette($palette_id, $optimized);
+        if ($result instanceof WP_Error) {
+            return $result;
+        }
+
+        return new WP_REST_Response($this->prepare_palette_for_response($optimized));
     }
 
     /**
@@ -547,70 +596,120 @@ class Color_Palette_REST_Controller extends WP_REST_Controller {
      * @param WP_REST_Request $request Request object
      * @return WP_REST_Response|WP_Error Response object or error
      */
-    public function export_palette(WP_REST_Request $request) {
+    public function export_palette(WP_REST_Request $request): WP_REST_Response|WP_Error {
         $palette_id = $request->get_param('id');
         $format = $request->get_param('format');
-        $options = $request->get_param('options');
 
-        // Get palette from storage/cache
+        $options = $request->get_param('options');
+        if ($options === null) {
+            $options = [];
+        }
+
         $palette = $this->get_palette($palette_id);
-        if (is_wp_error($palette)) {
+        if ($palette instanceof WP_Error) {
             return $palette;
         }
 
-        $exported = $this->exporter->export($palette, $format, $options);
-        if (is_wp_error($exported)) {
+        if ($palette === null) {
+            return new WP_Error(
+                'palette_not_found',
+                __('Palette not found.', 'gl-color-palette-generator'),
+                ['status' => 404]
+            );
+        }
+
+        $exported = $this->exporter->export_palette($palette, $format, $options);
+        if ($exported instanceof WP_Error) {
             return $exported;
         }
 
-        return rest_ensure_response([
-            'format' => $format,
-            'content' => $exported
-        ]);
+        return new WP_REST_Response($exported);
+    }
+
+    /**
+     * Prepare palette for response
+     *
+     * @param Color_Palette $palette Palette to prepare
+     * @return array Prepared palette data
+     */
+    private function prepare_palette_for_response(Color_Palette $palette): array {
+        return [
+            'id' => $palette->get_id(),
+            'colors' => $palette->get_colors(),
+            'metadata' => $palette->get_metadata(),
+            'created_at' => $palette->get_created_at(),
+            'updated_at' => $palette->get_updated_at() ?? $palette->get_created_at()
+        ];
     }
 
     /**
      * Get a palette by ID
      *
      * @param string $id Palette ID
-     * @return Color_Palette|WP_Error Palette object or error
+     * @return Color_Palette|WP_Error|null Palette object, null if not found, or error
      */
-    private function get_palette(string $id) {
-        // Implementation depends on storage mechanism
-        // This is a placeholder
-        return new \WP_Error(
-            'not_implemented',
-            __('Palette retrieval not implemented', 'gl-color-palette-generator')
-        );
+    protected function get_palette(string $id): Color_Palette|WP_Error|null {
+        return $this->storage->get_palette((int) $id);
     }
 
     /**
-     * Generate a palette
+     * Generate a new color palette
      *
-     * @param WP_REST_Request $request Request object.
-     * @return WP_REST_Response|WP_Error Response object or error.
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response|WP_Error Response object or error
      */
-    public function generate_palette($request) {
-        $rate_check = $this->check_rate_limit($request);
-        if (is_wp_error($rate_check)) {
-            return $rate_check;
+    public function generate_palette(WP_REST_Request $request): WP_REST_Response|WP_Error {
+        $identifier = get_current_user_id();
+        if ($identifier <= 0) {
+            $identifier = $_SERVER['REMOTE_ADDR'] ?? '';
+            if ($identifier === '') {
+                return new WP_Error(
+                    'invalid_user',
+                    __('Could not identify user.', 'gl-color-palette-generator'),
+                    ['status' => 400]
+                );
+            }
+            $identifier = 'ip_' . $identifier;
+        } else {
+            $identifier = 'user_' . $identifier;
         }
 
-        $user_id = get_current_user_id();
-        $ip = $request->get_header('X-Forwarded-For') ?: $_SERVER['REMOTE_ADDR'];
-        $identifier = $user_id ? "user_{$user_id}" : "ip_{$ip}";
+        $rate_limit_check = $this->check_rate_limit($identifier);
+        if ($rate_limit_check instanceof WP_Error) {
+            return $rate_limit_check;
+        }
 
-        try {
-            // Existing palette generation code...
-            $response = new WP_REST_Response($data);
-            return $this->add_rate_limit_headers($response, $identifier);
-        } catch (\Exception $e) {
-            $this->logger->error("Palette generation failed: " . $e->getMessage());
+        $theme = $request->get_param('theme');
+        if ($theme === null || $theme === '') {
             return new WP_Error(
-                'palette_generation_failed',
-                $e->getMessage(),
-                array('status' => 500)
+                'missing_theme',
+                __('Theme parameter is required.', 'gl-color-palette-generator'),
+                ['status' => 400]
             );
         }
+
+        $count = $request->get_param('count');
+        $provider = $request->get_param('provider');
+        $provider_options = $request->get_param('provider_options');
+
+        $options = [
+            'count' => $count ? (int) $count : 5,
+            'provider' => $provider ? (string) $provider : 'openai',
+            'provider_options' => $provider_options ? (array) $provider_options : []
+        ];
+
+        $palette = $this->generator->generate_palette($options);
+        if ($palette instanceof WP_Error) {
+            return $palette;
+        }
+
+        $response = new WP_REST_Response([
+            'id' => $palette->get_id(),
+            'colors' => $palette->get_colors(),
+            'metadata' => $palette->get_metadata()
+        ]);
+
+        $identifier = get_current_user_id() > 0 ? 'user_' . get_current_user_id() : 'ip_' . $_SERVER['REMOTE_ADDR'];
+        return $this->add_rate_limit_headers($response, $identifier);
     }
 }

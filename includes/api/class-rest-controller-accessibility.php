@@ -13,11 +13,28 @@ use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
+use GL_Color_Palette_Generator\Color_Management\Color_Utility;
+use GL_Color_Palette_Generator\Validation\Color_Validation;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 
 /**
  * REST Controller for Accessibility endpoints
  */
 class Rest_Controller_Accessibility extends WP_REST_Controller {
+    /** @var Color_Utility */
+    private Color_Utility $color_utility;
+
+    /** @var Color_Validation */
+    private Color_Validation $color_validation;
+
+    /**
+     * Constructor
+     */
+    public function __construct() {
+        $this->color_utility = new Color_Utility();
+        $this->color_validation = new Color_Validation();
+    }
+
     /**
      * Register routes
      */
@@ -28,15 +45,13 @@ class Rest_Controller_Accessibility extends WP_REST_Controller {
                 'callback' => [$this, 'check_contrast'],
                 'permission_callback' => '__return_true',
                 'args' => [
-                    'color1' => [
+                    'colors' => [
                         'required' => true,
-                        'type' => 'string',
-                        'validate_callback' => [$this, 'validate_color']
-                    ],
-                    'color2' => [
-                        'required' => true,
-                        'type' => 'string',
-                        'validate_callback' => [$this, 'validate_color']
+                        'type' => 'array',
+                        'items' => [
+                            'type' => 'string',
+                            'validate_callback' => [$this->color_validation, 'validate_hex_color']
+                        ]
                     ]
                 ]
             ]
@@ -49,86 +64,38 @@ class Rest_Controller_Accessibility extends WP_REST_Controller {
      * @param WP_REST_Request $request Request object
      * @return WP_REST_Response|WP_Error Response object or error
      */
-    public function check_contrast(WP_REST_Request $request) {
-        $color1 = $request->get_param('color1');
-        $color2 = $request->get_param('color2');
+    public function check_contrast(WP_REST_Request $request): WP_REST_Response|WP_Error {
+        $colors = $request->get_param('colors');
 
-        // Calculate contrast ratio
-        $ratio = $this->get_contrast_ratio($color1, $color2);
+        // Check if color values are valid
+        foreach ($colors as $color) {
+            if ($color === null || !$this->color_utility->is_valid_hex_color($color)) {
+                return new WP_Error(
+                    'invalid_color',
+                    sprintf(__('Invalid color value: %s', 'gl-color-palette-generator'), $color)
+                );
+            }
+        }
 
-        return rest_ensure_response([
-            'ratio' => $ratio,
-            'passes_aa' => $ratio >= 4.5,
-            'passes_aaa' => $ratio >= 7
-        ]);
-    }
+        // Get accessibility analysis
+        $accessibility_results = [];
+        foreach ($colors as $color1) {
+            foreach ($colors as $color2) {
+                if ($color1 === $color2) {
+                    continue;
+                }
 
-    /**
-     * Validate color parameter
-     *
-     * @param string $color Color value to validate
-     * @return bool True if valid, false otherwise
-     */
-    public function validate_color($color) {
-        return preg_match('/^#[0-9a-f]{6}$/i', $color);
-    }
+                $contrast = $this->color_utility->get_contrast_ratio($color1, $color2);
+                $accessibility_results[] = [
+                    'color1' => $color1,
+                    'color2' => $color2,
+                    'contrast_ratio' => $contrast,
+                    'meets_wcag_aa' => $contrast >= Color_Constants::WCAG_CONTRAST_AA,
+                    'meets_wcag_aaa' => $contrast >= Color_Constants::WCAG_CONTRAST_AAA
+                ];
+            }
+        }
 
-    /**
-     * Calculate contrast ratio between two colors
-     *
-     * @param string $color1 First color in hex format
-     * @param string $color2 Second color in hex format
-     * @return float Contrast ratio
-     */
-    private function get_contrast_ratio($color1, $color2) {
-        $l1 = $this->get_relative_luminance($color1);
-        $l2 = $this->get_relative_luminance($color2);
-
-        $lighter = max($l1, $l2);
-        $darker = min($l1, $l2);
-
-        return ($lighter + 0.05) / ($darker + 0.05);
-    }
-
-    /**
-     * Get relative luminance of a color
-     *
-     * @param string $color Color in hex format
-     * @return float Relative luminance
-     */
-    private function get_relative_luminance($color) {
-        $rgb = $this->hex_to_rgb($color);
-        $r = $this->get_luminance_value($rgb['r'] / 255);
-        $g = $this->get_luminance_value($rgb['g'] / 255);
-        $b = $this->get_luminance_value($rgb['b'] / 255);
-
-        return 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
-    }
-
-    /**
-     * Convert hex color to RGB values
-     *
-     * @param string $hex Color in hex format
-     * @return array RGB values
-     */
-    private function hex_to_rgb($hex) {
-        $hex = ltrim($hex, '#');
-        return [
-            'r' => hexdec(substr($hex, 0, 2)),
-            'g' => hexdec(substr($hex, 2, 2)),
-            'b' => hexdec(substr($hex, 4, 2))
-        ];
-    }
-
-    /**
-     * Get luminance value
-     *
-     * @param float $value RGB value (0-1)
-     * @return float Luminance value
-     */
-    private function get_luminance_value($value) {
-        return $value <= 0.03928
-            ? $value / 12.92
-            : pow(($value + 0.055) / 1.055, 2.4);
+        return rest_ensure_response($accessibility_results);
     }
 }

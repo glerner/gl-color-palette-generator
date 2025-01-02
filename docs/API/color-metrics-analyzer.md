@@ -1,7 +1,7 @@
 # Color Metrics Analyzer
 
 ## Overview
-The Color Metrics Analyzer provides comprehensive color analysis capabilities, including accessibility scoring, color combinations, and media compatibility analysis.
+The Color Metrics Analyzer provides color analysis capabilities, focusing on harmony scoring and basic color metrics.
 
 ## Class Reference
 
@@ -14,21 +14,13 @@ class Color_Metrics_Analyzer implements \GL_Color_Palette_Generator\Interfaces\C
 ## Features
 
 ### Color Analysis
-- Basic color metrics
-- Perceptual analysis
-- Cultural significance
-- Psychological effects
+- Basic color metrics (RGB, HSL, HEX conversions)
+- Harmony scoring
+- Contrast ratio calculations
 
 ### Accessibility Analysis
-- WCAG compliance checking
-- Color blindness considerations
-- Readability metrics
-- Contrast ratios
-
-### Media Compatibility
-- Print output analysis
-- Screen display optimization
-- Device-specific considerations
+- WCAG contrast ratio checking
+- Basic readability metrics
 
 ## Usage
 
@@ -36,78 +28,70 @@ class Color_Metrics_Analyzer implements \GL_Color_Palette_Generator\Interfaces\C
 
 ```php
 $analyzer = new Color_Metrics_Analyzer();
-$analysis = $analyzer->analyze_color('#FF0000');
+$metrics = $analyzer->analyze_color('#FF0000');
+
+// Example output:
+[
+    'hex' => '#FF0000',
+    'rgb' => [255, 0, 0],
+    'hsl' => [0, 100, 50]
+]
 ```
 
-### Accessibility Scoring
+### Harmony Analysis
 
 ```php
-$score = $analyzer->calculate_accessibility_score('#000000');
-print_r($score['detailed_scores']);
+// Get detailed harmony analysis
+$harmony_scores = $analyzer->analyze_harmony(['#FF0000', '#00FF00', '#0000FF']);
+
+// Example output:
+[
+    'harmony_score' => 0.85,     // Based on color wheel relationships
+    'balance_score' => 0.75,     // Distribution around color wheel
+    'vibrance_score' => 0.90,    // Saturation and lightness balance
+    'overall_score' => 0.83,     // Weighted average
+    'details' => [
+        'harmony' => [
+            'angles' => [         // Actual angles between colors
+                '120°',          // Close to triadic (120°)
+                '240°'           // Close to triadic (240°)
+            ],
+            'relationships' => [  // Identified relationships
+                'triadic'       // Main harmony type
+            ]
+        ],
+        'balance' => [
+            'hue_variance' => 12.5,  // Lower is better
+            'distribution' => 'even'  // How evenly spaced
+        ],
+        'vibrance' => [
+            'saturation_avg' => 0.85, // Average saturation
+            'lightness_avg' => 0.50   // Average lightness
+        ]
+    ]
+];
 ```
 
-### Color Combinations
+### Contrast Analysis
 
 ```php
-$combinations = $analyzer->get_color_combinations('#FF0000');
-print_r($combinations['complementary']);
+// Check contrast ratio between two colors
+$contrast = $analyzer->calculate_contrast('#000000', '#FFFFFF');
+echo $contrast; // Outputs: 21 (WCAG ratio)
 ```
 
 ## Error Handling
 
-The analyzer includes comprehensive error handling:
+The analyzer includes basic error handling:
+- Invalid color format errors
+- Out of range value errors
+- Missing parameter errors
 
-```php
-try {
-    $analysis = $analyzer->analyze_color('#FF0000');
-} catch (InvalidColorException $e) {
-    // Handle invalid color format
-} catch (AnalysisException $e) {
-    // Handle analysis errors
-}
-```
+## Performance Notes
 
-## Performance Optimization
-
-### Caching
-Results are automatically cached for improved performance:
-
-```php
-// First call - computed
-$first = $analyzer->analyze_color('#FF0000');
-
-// Second call - retrieved from cache
-$second = $analyzer->analyze_color('#FF0000');
-```
-
-### Batch Processing
-Process multiple colors efficiently:
-
-```php
-$colors = ['#FF0000', '#00FF00', '#0000FF'];
-$results = $analyzer->batch_analyze_colors($colors);
-```
-
-## Integration
-
-### WordPress Integration
-The analyzer integrates seamlessly with WordPress:
-
-```php
-// In your plugin or theme
-add_action('init', function() {
-    $analyzer = new Color_Metrics_Analyzer();
-    // Your analysis code here
-});
-```
-
-### Third-Party Integration
-Can be used with external color management systems:
-
-```php
-$analyzer = new Color_Metrics_Analyzer();
-$analysis = $analyzer->analyze_color($external_color);
-```
+- Calculations are performed in real-time
+- No caching is implemented
+- Suitable for analyzing small color sets (typically 2-5 colors)
 
 ## See Also
 - [Color Utility Documentation](color-utility.md)
@@ -164,21 +148,6 @@ CREATE TABLE `{prefix}_color_metrics` (
     `updated_at` datetime NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `color_hex` (`color_hex`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-```
-
-### Analysis Cache Table
-
-```sql
-CREATE TABLE `{prefix}_color_analysis_cache` (
-    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-    `color_hex` varchar(7) NOT NULL,
-    `analysis_type` varchar(50) NOT NULL,
-    `analysis_data` longtext NOT NULL,
-    `created_at` datetime NOT NULL,
-    `expires_at` datetime NOT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `color_analysis` (`color_hex`, `analysis_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 

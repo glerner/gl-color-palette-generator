@@ -23,21 +23,15 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
      *
      * @var Color_Utility
      */
-    private $color_utility;
-
-    /**
-     * Color metrics instance
-     *
-     * @var Color_Metrics
-     */
-    private $color_metrics;
+    private Color_Utility $color_utility;
 
     /**
      * Constructor
+     *
+     * @param Color_Utility $color_utility Color utility instance
      */
-    public function __construct() {
-        $this->color_utility = new Color_Utility();
-        $this->color_metrics = new Color_Metrics();
+    public function __construct(Color_Utility $color_utility) {
+        $this->color_utility = $color_utility;
     }
 
     /**
@@ -47,36 +41,39 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
      * @param array  $options Generation options
      * @return array|WP_Error Array of colors or error
      */
-    public function generate_scheme($base_color, $options = []) {
+    public function generate_scheme(string $base_color, array $options = []): array|WP_Error {
         if (!$this->color_utility->is_valid_hex_color($base_color)) {
             return new WP_Error('invalid_color', 'Invalid base color provided');
         }
 
-        $scheme_type = isset($options['type']) ? $options['type'] : 'monochromatic';
-        $count = isset($options['count']) ? $options['count'] : 5;
+        $scheme_type = $options['type'] ?? Color_Constants::SCHEME_MONOCHROMATIC;
+        $count = (int)($options['count'] ?? 5);
 
         // Validate scheme type
-        $valid_schemes = array_keys(Color_Constants::COLOR_SCHEMES);
-        if (!in_array($scheme_type, $valid_schemes)) {
+        if (!isset(Color_Constants::REQUIRED_ROLES[$scheme_type])) {
             return new WP_Error('invalid_scheme', 'Invalid scheme type provided');
         }
 
-        switch ($scheme_type) {
-            case 'monochromatic':
-                return $this->generate_monochromatic($base_color, $count);
-            case 'analogous':
-                return $this->generate_analogous($base_color, $count);
-            case 'complementary':
-                return $this->generate_complementary($base_color, $count);
-            case 'split-complementary':
-                return $this->generate_split_complementary($base_color, $count);
-            case 'triadic':
-                return $this->generate_triadic($base_color, $count);
-            case 'tetradic':
-                return $this->generate_tetradic($base_color, $count);
-            default:
-                return new WP_Error('invalid_scheme', 'Invalid scheme type provided');
-        }
+        return $this->process_scheme_type($scheme_type, $base_color, $count);
+    }
+
+    /**
+     * Process scheme type
+     *
+     * @param string $scheme_type Scheme type
+     * @param string $base_color Base color
+     * @param int $count Number of colors
+     * @return array|WP_Error Generated colors or error
+     */
+    private function process_scheme_type(string $scheme_type, string $base_color, int $count): array|WP_Error {
+        return match($scheme_type) {
+            Color_Constants::SCHEME_MONOCHROMATIC => $this->generate_monochromatic($base_color, $count),
+            Color_Constants::SCHEME_ANALOGOUS => $this->generate_analogous($base_color, $count),
+            Color_Constants::SCHEME_COMPLEMENTARY => $this->generate_complementary($base_color, $count),
+            Color_Constants::SCHEME_SPLIT_COMPLEMENTARY => $this->generate_split_complementary($base_color, $count),
+            Color_Constants::SCHEME_TRIADIC => $this->generate_triadic($base_color, $count),
+            default => new WP_Error('invalid_scheme', __('Invalid scheme type provided', 'gl-color-palette-generator'))
+        };
     }
 
     /**
@@ -86,19 +83,26 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
      * @param int    $count Number of colors to generate
      * @return array|WP_Error Array of colors or error
      */
-    public function generate_monochromatic($base_color, $count = 5) {
+    public function generate_monochromatic(string $base_color, int $count = 5): array|WP_Error {
         if (!$this->color_utility->is_valid_hex_color($base_color)) {
             return new WP_Error('invalid_color', 'Invalid base color provided');
         }
 
-        $hsv = $this->color_utility->hex_to_hsv($base_color);
-        $colors = [];
+        if ($count < 2 || $count > 10) {
+            return new WP_Error('invalid_count', 'Count must be between 2 and 10');
+        }
 
-        // Keep hue constant, vary saturation and value
-        for ($i = 0; $i < $count; $i++) {
-            $saturation = max(0, min(100, $hsv['s'] + (($i - floor($count / 2)) * 20)));
-            $value = max(0, min(100, $hsv['v'] + (($i - floor($count / 2)) * 20)));
-            $colors[] = $this->color_utility->hsv_to_hex(['h' => $hsv['h'], 's' => $saturation, 'v' => $value]);
+        $hsv = $this->color_utility->hex_to_hsv($base_color);
+        $colors = [$base_color];
+
+        for ($i = 1; $i < $count; $i++) {
+            $step = $i / ($count - 1);
+            $new_hsv = [
+                'h' => $hsv['h'],
+                's' => max(Color_Constants::MIN_SATURATION_RANGE, min(Color_Constants::MAX_SATURATION, $hsv['s'] + ($step - 0.5) * Color_Constants::COLOR_METRICS['saturation']['step'])),
+                'v' => max(Color_Constants::MIN_VALUE_RANGE, min(Color_Constants::MAX_VALUE, $hsv['v'] + ($step - 0.5) * Color_Constants::COLOR_METRICS['value']['step']))
+            ];
+            $colors[] = $this->color_utility->hsv_to_hex($new_hsv);
         }
 
         return $colors;
@@ -111,18 +115,27 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
      * @param int    $count Number of colors to generate
      * @return array|WP_Error Array of colors or error
      */
-    public function generate_analogous($base_color, $count = 5) {
+    public function generate_analogous(string $base_color, int $count = 5): array|WP_Error {
         if (!$this->color_utility->is_valid_hex_color($base_color)) {
             return new WP_Error('invalid_color', 'Invalid base color provided');
         }
 
-        $hsv = $this->color_utility->hex_to_hsv($base_color);
-        $colors = [];
-        $hue_step = Color_Constants::COLOR_HARMONY_RULES['analogous']['angle'];
+        if ($count < 2 || $count > 10) {
+            return new WP_Error('invalid_count', 'Count must be between 2 and 10');
+        }
 
-        for ($i = 0; $i < $count; $i++) {
-            $hue = ($hsv['h'] + ($i - floor($count / 2)) * $hue_step + 360) % 360;
-            $colors[] = $this->color_utility->hsv_to_hex(['h' => $hue, 's' => $hsv['s'], 'v' => $hsv['v']]);
+        $hsv = $this->color_utility->hex_to_hsv($base_color);
+        $colors = [$base_color];
+
+        // Generate analogous colors by shifting hue
+        for ($i = 1; $i < $count; $i++) {
+            $step = $i / ($count - 1);
+            $new_hsv = [
+                'h' => ($hsv['h'] + ($step - 0.5) * 60 + 360) % 360,
+                's' => $hsv['s'],
+                'v' => $hsv['v']
+            ];
+            $colors[] = $this->color_utility->hsv_to_hex($new_hsv);
         }
 
         return $colors;
@@ -135,9 +148,13 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
      * @param int    $count Number of colors to generate
      * @return array|WP_Error Array of colors or error
      */
-    public function generate_complementary($base_color, $count = 4) {
+    public function generate_complementary(string $base_color, int $count = 4): array|WP_Error {
         if (!$this->color_utility->is_valid_hex_color($base_color)) {
             return new WP_Error('invalid_color', 'Invalid base color provided');
+        }
+
+        if ($count < 2 || $count > 10) {
+            return new WP_Error('invalid_count', 'Count must be between 2 and 10');
         }
 
         $hsv = $this->color_utility->hex_to_hsv($base_color);
@@ -164,9 +181,13 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
      * @param int    $count Number of colors to generate
      * @return array|WP_Error Array of colors or error
      */
-    public function generate_split_complementary($base_color, $count = 3) {
+    public function generate_split_complementary(string $base_color, int $count = 3): array|WP_Error {
         if (!$this->color_utility->is_valid_hex_color($base_color)) {
             return new WP_Error('invalid_color', 'Invalid base color provided');
+        }
+
+        if ($count < 2 || $count > 10) {
+            return new WP_Error('invalid_count', 'Count must be between 2 and 10');
         }
 
         $hsv = $this->color_utility->hex_to_hsv($base_color);
@@ -187,9 +208,13 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
      * @param int    $count Number of colors to generate
      * @return array|WP_Error Array of colors or error
      */
-    public function generate_triadic($base_color, $count = 3) {
+    public function generate_triadic(string $base_color, int $count = 3): array|WP_Error {
         if (!$this->color_utility->is_valid_hex_color($base_color)) {
             return new WP_Error('invalid_color', 'Invalid base color provided');
+        }
+
+        if ($count < 2 || $count > 10) {
+            return new WP_Error('invalid_count', 'Count must be between 2 and 10');
         }
 
         $hsv = $this->color_utility->hex_to_hsv($base_color);
@@ -210,9 +235,13 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
      * @param int    $count Number of colors to generate
      * @return array|WP_Error Array of colors or error
      */
-    public function generate_tetradic($base_color, $count = 4) {
+    public function generate_tetradic(string $base_color, int $count = 4): array|WP_Error {
         if (!$this->color_utility->is_valid_hex_color($base_color)) {
             return new WP_Error('invalid_color', 'Invalid base color provided');
+        }
+
+        if ($count < 2 || $count > 10) {
+            return new WP_Error('invalid_count', 'Count must be between 2 and 10');
         }
 
         $hsv = $this->color_utility->hex_to_hsv($base_color);
@@ -228,18 +257,67 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
     }
 
     /**
+     * Get available color scheme types
+     *
+     * @return array List of available scheme types
+     */
+    public function get_available_schemes(): array {
+        return array_keys(Color_Constants::REQUIRED_ROLES);
+    }
+
+    /**
+     * Get color theory rules for scheme generation
+     *
+     * @return array List of available color theory rules
+     */
+    public function get_color_theory_rules(): array {
+        return [
+            Color_Constants::SCHEME_MONOCHROMATIC => [
+                'description' => 'Different shades and tints of the same hue',
+                'harmony' => 'High',
+                'use_case' => 'Clean, minimalist designs'
+            ],
+            Color_Constants::SCHEME_ANALOGOUS => [
+                'description' => 'Colors adjacent on the color wheel',
+                'harmony' => 'High',
+                'use_case' => 'Natural, harmonious designs'
+            ],
+            Color_Constants::SCHEME_COMPLEMENTARY => [
+                'description' => 'Colors opposite on the color wheel',
+                'harmony' => 'Medium',
+                'use_case' => 'Vibrant, contrasting designs'
+            ],
+            Color_Constants::SCHEME_SPLIT_COMPLEMENTARY => [
+                'description' => 'Base color plus two colors adjacent to its complement',
+                'harmony' => 'Medium',
+                'use_case' => 'Balanced, dynamic designs'
+            ],
+            Color_Constants::SCHEME_TRIADIC => [
+                'description' => 'Three colors equally spaced around the color wheel',
+                'harmony' => 'High',
+                'use_case' => 'Vibrant, balanced designs'
+            ],
+            Color_Constants::SCHEME_TETRADIC => [
+                'description' => 'Four colors with two pairs of complementary colors',
+                'harmony' => 'Medium',
+                'use_case' => 'Rich, complex designs'
+            ],
+        ];
+    }
+
+    /**
      * Generate a custom scheme based on color theory rules
      *
      * @param string $base_color Base color in hex format
      * @param array  $rules Color theory rules to apply
      * @return array|WP_Error Array of colors or error
      */
-    public function generate_custom_scheme($base_color, $rules) {
+    public function generate_custom_scheme(string $base_color, array $rules): array|WP_Error {
         if (!$this->color_utility->is_valid_hex_color($base_color)) {
             return new WP_Error('invalid_color', 'Invalid base color provided');
         }
 
-        if (!is_array($rules) || empty($rules)) {
+        if (count($rules) === 0) {
             return new WP_Error('invalid_rules', 'Invalid or empty rules provided');
         }
 
@@ -257,11 +335,11 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
                     $colors[] = $this->color_utility->hsv_to_hex(['h' => $new_hue, 's' => $hsv['s'], 'v' => $hsv['v']]);
                     break;
                 case 'saturation_shift':
-                    $new_saturation = max(0, min(100, $hsv['s'] + $rule['value']));
+                    $new_saturation = max(Color_Constants::MIN_SATURATION_RANGE, min(Color_Constants::MAX_SATURATION, $hsv['s'] + $rule['value']));
                     $colors[] = $this->color_utility->hsv_to_hex(['h' => $hsv['h'], 's' => $new_saturation, 'v' => $hsv['v']]);
                     break;
                 case 'value_shift':
-                    $new_value = max(0, min(100, $hsv['v'] + $rule['value']));
+                    $new_value = max(Color_Constants::MIN_VALUE_RANGE, min(Color_Constants::MAX_VALUE, $hsv['v'] + $rule['value']));
                     $colors[] = $this->color_utility->hsv_to_hex(['h' => $hsv['h'], 's' => $hsv['s'], 'v' => $new_value]);
                     break;
             }
@@ -277,12 +355,16 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
      * @param array  $options Extraction options
      * @return array|WP_Error Array of colors or error
      */
-    public function generate_from_image($image_path, $options = []) {
+    public function generate_from_image(string $image_path, array $options = []): array|WP_Error {
         if (!file_exists($image_path)) {
             return new WP_Error('invalid_image', 'Image file does not exist');
         }
 
-        $count = isset($options['count']) ? $options['count'] : 5;
+        $count = (int)($options['count'] ?? 5);
+        if ($count < 2 || $count > 10) {
+            return new WP_Error('invalid_count', 'Count must be between 2 and 10');
+        }
+
         $colors = [];
 
         try {
@@ -344,5 +426,147 @@ class Color_Scheme_Generator implements Color_Scheme_Generator_Interface {
         } catch (\Exception $e) {
             return new WP_Error('image_processing_error', $e->getMessage());
         }
+    }
+
+    /**
+     * Generate a themed scheme
+     *
+     * @param string $theme Theme or mood name
+     * @param array  $options Theme options
+     * @return array|WP_Error Array of colors or error
+     */
+    public function generate_themed_scheme(string $theme, array $options = []): array|WP_Error {
+        if ($theme === '') {
+            return new WP_Error('invalid_theme', 'Theme must not be empty');
+        }
+
+        $base_color = $options['base_color'] ?? null;
+        if ($base_color !== null && !$this->color_utility->is_valid_hex_color($base_color)) {
+            return new WP_Error('invalid_color', 'Invalid base color provided');
+        }
+
+        // Generate base color if not provided
+        if ($base_color === null) {
+            $base_color = $this->generate_theme_base_color($theme);
+        }
+
+        return $this->generate_scheme($base_color, [
+            'type' => $options['scheme_type'] ?? Color_Constants::SCHEME_MONOCHROMATIC,
+            'count' => $options['count'] ?? 5,
+        ]);
+    }
+
+    /**
+     * Adjust scheme contrast
+     *
+     * @param array $colors Array of colors in hex format
+     * @param array $options Adjustment options
+     * @return array|WP_Error Array of colors or error
+     */
+    public function adjust_scheme_contrast(array $colors, array $options = []): array|WP_Error {
+        if (count($colors) === 0) {
+            return new WP_Error('invalid_colors', 'Colors array cannot be empty');
+        }
+
+        $target_contrast = $options['target_contrast'] ?? Color_Constants::COLOR_METRICS['contrast']['target'];
+
+        $adjusted_colors = [];
+        foreach ($colors as $color) {
+            if (!$this->color_utility->is_valid_hex_color($color)) {
+                return new WP_Error('invalid_color', 'Invalid color in scheme');
+            }
+
+            $adjusted_colors[] = $this->adjust_single_color_contrast($color, $target_contrast);
+        }
+
+        return $adjusted_colors;
+    }
+
+    /**
+     * Validate a color scheme
+     *
+     * @param array $colors Array of colors in hex format
+     * @param array $rules Validation rules
+     * @return bool|WP_Error True if valid, WP_Error if not
+     */
+    public function validate_scheme(array $colors, array $rules = []): bool|WP_Error {
+        if (count($colors) === 0) {
+            return new WP_Error('invalid_colors', 'Colors array cannot be empty');
+        }
+
+        $scheme_type = $rules['type'] ?? Color_Constants::SCHEME_MONOCHROMATIC;
+        $required_roles = Color_Constants::REQUIRED_ROLES[$scheme_type] ?? Color_Constants::REQUIRED_ROLES[Color_Constants::SCHEME_MONOCHROMATIC];
+
+        // Check required roles
+        if (count($colors) < count($required_roles)) {
+            return new WP_Error(
+                'insufficient_colors',
+                'Not enough colors for scheme type: ' . $scheme_type
+            );
+        }
+
+        // Validate each color
+        foreach ($colors as $color) {
+            if (!$this->color_utility->is_valid_hex_color($color)) {
+                return new WP_Error('invalid_color', 'Invalid color in scheme');
+            }
+        }
+
+        // Validate contrast if specified
+        if (isset($rules['min_contrast'])) {
+            $min_contrast = (float)$rules['min_contrast'];
+            foreach ($colors as $i => $color1) {
+                foreach ($colors as $j => $color2) {
+                    if ($i !== $j) {
+                        $contrast = $this->color_utility->get_contrast_ratio($color1, $color2);
+                        if ($contrast < $min_contrast) {
+                            return new WP_Error(
+                                'insufficient_contrast',
+                                sprintf(
+                                    'Insufficient contrast between colors %s and %s: %f',
+                                    $color1,
+                                    $color2,
+                                    $contrast
+                                )
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Generate a base color for a theme
+     *
+     * @param string $theme Theme name
+     * @return string Generated base color
+     */
+    private function generate_theme_base_color(string $theme): string {
+        // Implementation depends on theme definitions
+        // For now, return a default color
+        return '#336699';
+    }
+
+    /**
+     * Adjust contrast of a single color
+     *
+     * @param string $color Color to adjust
+     * @param float $target_contrast Target contrast ratio
+     * @return string Adjusted color
+     */
+    private function adjust_single_color_contrast(string $color, float $target_contrast): string {
+        $hsv = $this->color_utility->hex_to_hsv($color);
+
+        // Adjust value to achieve target contrast
+        if ($target_contrast > Color_Constants::COLOR_METRICS['contrast']['target']) {
+            $hsv['v'] = min($hsv['v'] * 1.2, Color_Constants::MAX_VALUE);
+        } else {
+            $hsv['v'] = max($hsv['v'] * 0.8, Color_Constants::MIN_VALUE_RANGE);
+        }
+
+        return $this->color_utility->hsv_to_hex($hsv);
     }
 }

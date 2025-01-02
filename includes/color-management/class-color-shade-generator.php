@@ -3,24 +3,21 @@
 namespace GL_Color_Palette_Generator\Color_Management;
 
 use GL_Color_Palette_Generator\Interfaces\Color_Shade_Generator_Interface;
-use GL_Color_Palette_Generator\Traits\Color_Shade_Generator_Trait;
-use GL_Color_Palette_Generator\Color_Constants;
-use GL_Color_Palette_Generator\Color_Utility;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
+use WP_Error;
 
 /**
  * Color Variation Generator Class
  *
- * Generates tints and shades from base colors while ensuring WCAG compliance.
- * This is distinct from WordPress theme style variations - it focuses on creating
- * lighter and darker versions of a single color that meet accessibility standards.
+ * Generates WordPress theme color variations that meet accessibility standards.
+ * Focuses on creating lighter and darker versions of theme colors that maintain
+ * WCAG compliance for WordPress themes.
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Color_Management
  * @since 1.0.0
  */
-class Color_Variation_Generator implements Color_Shade_Generator_Interface, Color_Constants {
-    use Color_Shade_Generator_Trait;
-
+class Color_Variation_Generator implements Color_Shade_Generator_Interface {
     /**
      * @var Color_Utility
      */
@@ -36,445 +33,314 @@ class Color_Variation_Generator implements Color_Shade_Generator_Interface, Colo
     }
 
     /**
-     * Generate tints and shades that meet accessibility requirements
+     * Generate standard tints and shades for WordPress theme colors
+     * Creates a range of visually distinct variations: lighter, light, dark, darker
+     * Base color is always stored but might be adjusted in the variations if needed
      *
      * @param string $color Base color in hex format
      * @param array  $options Optional settings for generation
      * @return array Array of generated tints and shades
      */
     public function generate_tints_and_shades(string $color, array $options = []): array {
-        // Set default options
-        $options = array_merge([
-            'include_base' => true,
-            'contrast_level' => 'AA',
-            'small_text' => true,
-            'is_dark_mode' => false,
-            'custom_steps' => []
-        ], $options);
+        if (!$this->color_utility->is_valid_hex_color($color)) {
+            return [];
+        }
 
-        // Convert hex to RGB
         $rgb = $this->color_utility->hex_to_rgb($color);
-        list($r, $g, $b) = $rgb;
-
-        // Calculate current luminance
-        $luminance = $this->calculate_relative_luminance($r, $g, $b);
-
-        // Determine target luminance based on mode
-        $target_min = $options['is_dark_mode'] ? self::DARK_MODE_MIN_LUMINANCE : self::LIGHT_MODE_MIN_LUMINANCE;
-        $target_max = $options['is_dark_mode'] ? self::DARK_MODE_MAX_LUMINANCE : self::LIGHT_MODE_MAX_LUMINANCE;
-
-        // Generate variations
-        $variations = [];
-
-        // Adjust base color to meet luminance requirements if needed
-        $base_color = $this->adjust_color_to_target_luminance($rgb, $target_min, $target_max);
-
-        // Generate contrast colors
-        $contrast_color = $this->generate_contrast_color($base_color, $options['is_dark_mode']);
-
-        $variations['base'] = $this->color_utility->rgb_to_hex($base_color);
-        $variations['contrast'] = $this->color_utility->rgb_to_hex($contrast_color);
-
-        // Generate additional shades based on the base color
-        $shades = $this->generate_accessible_shades($base_color, $options);
-        $variations = array_merge($variations, $shades);
-
-        return [
-            'original' => $color,
-            'variations' => $variations
-        ];
-    }
-
-    /**
-     * Generate a contrast color that meets WCAG requirements while avoiding harsh contrast
-     *
-     * @param array $base_color RGB color array
-     * @param bool $is_dark_mode Whether in dark mode
-     * @return array RGB color array
-     */
-    private function generate_contrast_color(array $base_color, bool $is_dark_mode): array {
-        $target_min = $is_dark_mode ? self::LIGHT_MODE_MIN_LUMINANCE : self::DARK_MODE_MIN_LUMINANCE;
-        $target_max = $is_dark_mode ? self::LIGHT_MODE_MAX_LUMINANCE : self::DARK_MODE_MAX_LUMINANCE;
-
-        // Start with optimal contrast target
-        $color = $this->adjust_color_to_target_luminance($base_color, $target_min, $target_max);
-        $contrast = $this->get_contrast_ratio($this->color_utility->rgb_to_hex($base_color), $this->color_utility->rgb_to_hex($color));
-
-        // If contrast is too harsh, gradually reduce it while maintaining AAA standard
-        if ($contrast > self::CONTRAST_THRESHOLD_MAX) {
-            $color = $this->reduce_contrast_to_target($base_color, $color, self::CONTRAST_THRESHOLD_TARGET);
-        }
-        // If contrast is too low, increase it to at least meet AA standard
-        elseif ($contrast < self::CONTRAST_THRESHOLD_MIN) {
-            $color = $this->increase_contrast_to_minimum($base_color, $color, self::CONTRAST_THRESHOLD_MIN);
-        }
-
-        return $color;
-    }
-
-    /**
-     * Reduce contrast while maintaining minimum threshold
-     *
-     * @param array $base_color Base RGB color
-     * @param array $contrast_color Contrast RGB color
-     * @param float $target_contrast Target contrast ratio
-     * @return array Adjusted RGB color
-     */
-    private function reduce_contrast_to_target(array $base_color, array $contrast_color, float $target_contrast): array {
-        $base_luminance = $this->calculate_relative_luminance(...$base_color);
-        $contrast_luminance = $this->calculate_relative_luminance(...$contrast_color);
-
-        // Determine if we need to increase or decrease luminance
-        $should_increase = $contrast_luminance < $base_luminance;
-
-        while ($this->get_contrast_ratio(
-            $this->color_utility->rgb_to_hex($base_color),
-            $this->color_utility->rgb_to_hex($contrast_color)
-        ) > $target_contrast) {
-            if ($should_increase) {
-                $contrast_color = $this->adjust_brightness($contrast_color, 5);
-            } else {
-                $contrast_color = $this->adjust_brightness($contrast_color, -5);
-            }
-        }
-
-        return $contrast_color;
-    }
-
-    /**
-     * Increase contrast to meet minimum threshold
-     *
-     * @param array $base_color Base RGB color
-     * @param array $contrast_color Contrast RGB color
-     * @param float $min_contrast Minimum contrast ratio
-     * @return array Adjusted RGB color
-     */
-    private function increase_contrast_to_minimum(array $base_color, array $contrast_color, float $min_contrast): array {
-        $base_luminance = $this->calculate_relative_luminance(...$base_color);
-        $contrast_luminance = $this->calculate_relative_luminance(...$contrast_color);
-
-        // Determine if we need to increase or decrease luminance
-        $should_increase = $contrast_luminance > $base_luminance;
-
-        while ($this->color_utility->get_contrast_ratio(
-            $this->color_utility->rgb_to_hex($base_color),
-            $this->color_utility->rgb_to_hex($contrast_color)
-        ) < $min_contrast) {
-            if ($should_increase) {
-                $contrast_color = $this->adjust_brightness($contrast_color, 5);
-            } else {
-                $contrast_color = $this->adjust_brightness($contrast_color, -5);
-            }
-        }
-
-        return $contrast_color;
-    }
-
-    /**
-     * Adjust color to meet target luminance range
-     *
-     * @param array $color RGB color array
-     * @param float $min_luminance Minimum target luminance
-     * @param float $max_luminance Maximum target luminance
-     * @return array Adjusted RGB color array
-     */
-    private function adjust_color_to_target_luminance(array $color, float $min_luminance, float $max_luminance): array {
-        list($r, $g, $b) = $color;
-        $current_luminance = $this->calculate_relative_luminance($r, $g, $b);
-
-        if ($current_luminance < $min_luminance) {
-            return $this->increase_luminance($color, $min_luminance);
-        } elseif ($current_luminance > $max_luminance) {
-            return $this->decrease_luminance($color, $max_luminance);
-        }
-
-        return $color;
-    }
-
-    /**
-     * Generate accessible shade variations
-     *
-     * @param array $base_color RGB color array
-     * @param array $options Generation options
-     * @return array Array of shade variations
-     */
-    private function generate_accessible_shades(array $base_color, array $options): array {
-        $shades = [];
-        $steps = [-20, -10, 10, 20];
-
-        foreach ($steps as $step) {
-            $shade = $this->adjust_brightness($base_color, $step);
-            if ($this->meets_contrast_requirements($this->color_utility->rgb_to_hex($shade), $options)) {
-                $key = $step < 0 ? 'darker' . abs($step) : 'lighter' . $step;
-                $shades[$key] = $this->color_utility->rgb_to_hex($shade);
-            }
-        }
-
-        return $shades;
-    }
-
-    /**
-     * Check if a color meets contrast requirements
-     *
-     * @param string $color Color to check
-     * @param bool $is_dark_mode Whether in dark mode
-     * @return bool Whether color meets requirements
-     */
-    private function meets_contrast_requirements(string $color, bool $is_dark_mode): bool {
-        // Check contrast against base background
-        $base_contrast = $this->color_utility->get_contrast_ratio(
-            $color,
-            $is_dark_mode ? self::COLOR_NEAR_BLACK : self::COLOR_OFF_WHITE
-        );
-
-        if ($base_contrast < self::CONTRAST_THRESHOLD_MIN) {
-            return false;
-        }
-
-        // Check contrast against text colors
-        $text_contrast = $this->color_utility->get_contrast_ratio(
-            $color,
-            $is_dark_mode ? self::COLOR_OFF_WHITE : self::COLOR_NEAR_BLACK
-        );
-
-        return $text_contrast >= self::CONTRAST_THRESHOLD_TARGET;
-    }
-
-    /**
-     * Adjust brightness of an RGB color
-     *
-     * @param array $rgb RGB color values
-     * @param int   $steps Steps to adjust (-100 to 100)
-     * @return string Hex color code
-     */
-    private function adjust_brightness(array $rgb, int $steps): string {
-        $steps = max(-100, min(100, $steps));
-
-        if ($steps > 0) {
-            $rgb = array_map(function($value) use ($steps) {
-                return $value + ((255 - $value) * ($steps / 100));
-            }, $rgb);
-        } else {
-            $rgb = array_map(function($value) use ($steps) {
-                return $value * (1 + ($steps / 100));
-            }, $rgb);
-        }
-
-        $rgb = array_map('round', $rgb);
-        return $this->color_utility->rgb_to_hex($rgb);
-    }
-
-    /**
-     * Calculate relative luminance of an RGB color
-     *
-     * @param int $r Red component
-     * @param int $g Green component
-     * @param int $b Blue component
-     * @return float Relative luminance
-     */
-    private function calculate_relative_luminance(int $r, int $g, int $b): float {
-        $r_linear = $this->linearize_component($r);
-        $g_linear = $this->linearize_component($g);
-        $b_linear = $this->linearize_component($b);
-
-        return 0.2126 * $r_linear + 0.7152 * $g_linear + 0.0722 * $b_linear;
-    }
-
-    /**
-     * Linearize a color component
-     *
-     * @param int $component Color component (0-255)
-     * @return float Linearized component
-     */
-    private function linearize_component(int $component): float {
-        $component /= 255;
-
-        if ($component <= 0.03928) {
-            return $component / 12.92;
-        }
-
-        return pow(($component + 0.055) / 1.055, 2.4);
-    }
-
-    /**
-     * Increase luminance of an RGB color
-     *
-     * @param array $color RGB color array
-     * @param float $target_luminance Target luminance
-     * @return array Adjusted RGB color array
-     */
-    private function increase_luminance(array $color, float $target_luminance): array {
-        list($r, $g, $b) = $color;
-        $current_luminance = $this->calculate_relative_luminance($r, $g, $b);
-
-        $ratio = $target_luminance / $current_luminance;
-
-        $r = round($r * $ratio);
-        $g = round($g * $ratio);
-        $b = round($b * $ratio);
-
-        return [$r, $g, $b];
-    }
-
-    /**
-     * Decrease luminance of an RGB color
-     *
-     * @param array $color RGB color array
-     * @param float $target_luminance Target luminance
-     * @return array Adjusted RGB color array
-     */
-    private function decrease_luminance(array $color, float $target_luminance): array {
-        list($r, $g, $b) = $color;
-        $current_luminance = $this->calculate_relative_luminance($r, $g, $b);
-
-        $ratio = $target_luminance / $current_luminance;
-
-        $r = round($r * $ratio);
-        $g = round($g * $ratio);
-        $b = round($b * $ratio);
-
-        return [$r, $g, $b];
-    }
-
-    /**
-     * Generate theme base colors
-     *
-     * @param string $primary_color Primary color in hex
-     * @param bool $is_dark_mode Whether to generate dark mode colors
-     * @return array Generated base colors
-     */
-    public function generate_theme_base_colors(string $primary_color, bool $is_dark_mode = false): array {
-        $rgb = $this->color_utility->hex_to_rgb($primary_color);
         $hsl = $this->color_utility->rgb_to_hsl($rgb);
+        $variations = ['base' => $color]; // Always store base color
 
-        // Generate base color (background)
-        if ($is_dark_mode) {
-            $base_hsl = [
-                'h' => $hsl['h'],
-                's' => min(15, $hsl['s']),
-                'l' => 15
-            ];
-        } else {
-            $base_hsl = [
-                'h' => $hsl['h'],
-                's' => min(10, $hsl['s']),
-                'l' => 98
-            ];
+        // Determine base adjustments for light and dark variations
+        $is_light = $hsl['l'] >= Color_Constants::COLOR_METRICS['lightness']['threshold'];
+        $base_hsl_light = $is_light ? $hsl : $this->adjust_for_spacing($hsl, true);
+        $base_hsl_dark = $is_light ? $this->adjust_for_spacing($hsl, false) : $hsl;
+
+        // Generate variations ensuring proper spacing
+        $lighter = $this->ensure_spacing_from_white($base_hsl_light);
+        $light = $this->ensure_spacing_between($base_hsl_light, $lighter, false);
+        $dark = $this->ensure_spacing_between($base_hsl_dark, $light, false);
+        $darker = $this->ensure_spacing_from_black($base_hsl_dark);
+
+        // Ensure proper contrast with text colors
+        $lighter = $this->adjust_for_text_contrast($lighter, true);
+        $light = $this->adjust_for_text_contrast($light, true);
+        $dark = $this->adjust_for_text_contrast($dark, false);
+        $darker = $this->adjust_for_text_contrast($darker, false);
+
+        // Build the variations array
+        $variations['lighter'] = $this->color_utility->hsl_to_hex($lighter);
+        $variations['light'] = $this->color_utility->hsl_to_hex($light);
+        $variations['dark'] = $this->color_utility->hsl_to_hex($dark);
+        $variations['darker'] = $this->color_utility->hsl_to_hex($darker);
+
+        return $variations;
+    }
+
+    /**
+     * Ensure color has proper spacing from white
+     *
+     * @param array $hsl HSL color values
+     * @return array Adjusted HSL values
+     */
+    private function ensure_spacing_from_white(array $hsl): array {
+        $off_white_min = Color_Constants::COLOR_METRICS['lightness']['off_white_min'];
+        $spacing = Color_Constants::COLOR_METRICS['lightness']['spacing_min'];
+
+        // Ensure we're not too close to off-white
+        if ($hsl['l'] > $off_white_min - $spacing) {
+            $hsl['l'] = $off_white_min - $spacing;
         }
 
-        $base_rgb = $this->color_utility->hsl_to_rgb($base_hsl);
-        $base_color = $this->color_utility->rgb_to_hex($base_rgb);
-
-        // Generate contrast color (text)
-        $contrast_rgb = $this->generate_contrast_color($base_rgb, !$is_dark_mode);
-        $contrast_color = $this->color_utility->rgb_to_hex($contrast_rgb);
-
-        return [
-            'base' => $base_color,
-            'contrast' => $contrast_color
-        ];
+        return $hsl;
     }
 
     /**
-     * Get text color based on background luminance
+     * Ensure color has proper spacing from black
      *
-     * @param float $bg_luminance Background luminance
-     * @param bool $is_dark_mode Whether in dark mode
-     * @return string Text color hex
+     * @param array $hsl HSL color values
+     * @return array Adjusted HSL values
      */
-    private function get_text_color(float $bg_luminance, bool $is_dark_mode = false): string {
-        $threshold = $is_dark_mode
-            ? Color_Constants::COLOR_METRICS['luminance']['dark_mode_threshold']
-            : Color_Constants::COLOR_METRICS['luminance']['threshold'];
+    private function ensure_spacing_from_black(array $hsl): array {
+        $near_black_max = Color_Constants::COLOR_METRICS['lightness']['near_black_max'];
+        $spacing = Color_Constants::COLOR_METRICS['lightness']['spacing_min'];
 
-        return $bg_luminance > $threshold
-            ? Color_Constants::COLOR_METRICS['colors']['dark']
-            : Color_Constants::COLOR_METRICS['colors']['light'];
+        // Ensure we're not too close to near-black
+        if ($hsl['l'] < $near_black_max + $spacing) {
+            $hsl['l'] = $near_black_max + $spacing;
+        }
+
+        return $hsl;
     }
 
     /**
-     * Ensure sufficient contrast for text color
+     * Ensure proper spacing between two colors
      *
-     * @param string $background_color Background color in hex
-     * @param bool $is_dark_mode Whether in dark mode
-     * @return string Text color in hex
+     * @param array $hsl HSL color to adjust
+     * @param array $compare_hsl HSL color to compare against
+     * @param bool $make_lighter Whether to adjust lighter or darker
+     * @return array Adjusted HSL values
      */
-    private function ensure_text_contrast(string $background_color, bool $is_dark_mode): string {
-        $bg_rgb = $this->color_utility->hex_to_rgb($background_color);
-        $bg_luminance = $this->calculate_relative_luminance(...$bg_rgb);
+    private function ensure_spacing_between(array $hsl, array $compare_hsl, bool $make_lighter): array {
+        $spacing = Color_Constants::COLOR_METRICS['lightness']['spacing_min'];
+        $diff = abs($hsl['l'] - $compare_hsl['l']);
 
-        // Start with appropriate neutral text color based on background luminance
-        $text_color = $this->get_text_color($bg_luminance, $is_dark_mode);
+        if ($diff < $spacing) {
+            $adjustment = $spacing - $diff;
+            $hsl['l'] += $make_lighter ? $adjustment : -$adjustment;
 
-        // Calculate contrast
+            // Check bounds
+            $hsl['l'] = max(
+                Color_Constants::COLOR_METRICS['lightness']['min'],
+                min(
+                    Color_Constants::COLOR_METRICS['lightness']['max'],
+                    $hsl['l']
+                )
+            );
+        }
+
+        return $hsl;
+    }
+
+    /**
+     * Adjust base color for proper spacing
+     *
+     * @param array $hsl HSL color values
+     * @param bool $make_lighter Whether to adjust lighter or darker
+     * @return array Adjusted HSL values
+     */
+    private function adjust_for_spacing(array $hsl, bool $make_lighter): array {
+        $spacing = Color_Constants::COLOR_METRICS['lightness']['spacing_min'] * 2; // Need room for two variations
+
+        if ($make_lighter) {
+            $max_allowed = Color_Constants::COLOR_METRICS['lightness']['off_white_min'] - $spacing;
+            if ($hsl['l'] > $max_allowed) {
+                $hsl['l'] = $max_allowed;
+            }
+        } else {
+            $min_allowed = Color_Constants::COLOR_METRICS['lightness']['near_black_max'] + $spacing;
+            if ($hsl['l'] < $min_allowed) {
+                $hsl['l'] = $min_allowed;
+            }
+        }
+
+        return $hsl;
+    }
+
+    /**
+     * Adjust color until it has sufficient contrast with text colors
+     * If we hit the bounds, we'll return the last valid value
+     *
+     * @param array $hsl HSL color values
+     * @param bool $lighter Whether to adjust lighter or darker
+     * @return array Adjusted HSL values
+     */
+    private function adjust_for_text_contrast(array $hsl, bool $lighter): array {
+        $rgb = $this->color_utility->hsl_to_rgb($hsl);
+        $hex = $this->color_utility->rgb_to_hex($rgb);
+        $text_color = $lighter ? Color_Constants::COLOR_NEAR_BLACK : Color_Constants::COLOR_OFF_WHITE;
+        $last_valid_hsl = $hsl;
+
+        $attempts = 0;
+        while ($attempts < Color_Constants::COLOR_METRICS['lightness']['max_attempts']) {
+            $contrast = $this->color_utility->get_contrast_ratio($hex, $text_color);
+
+            // Store last valid value before potentially going too far
+            if ($contrast >= Color_Constants::WCAG_CONTRAST_MIN) {
+                $last_valid_hsl = $hsl;
+            }
+
+            if ($contrast >= Color_Constants::WCAG_CONTRAST_TARGET) {
+                break;
+            }
+
+            // Check if we're about to hit the bounds
+            $new_l = $hsl['l'] + ($lighter ?
+                Color_Constants::COLOR_METRICS['lightness']['step'] :
+                -Color_Constants::COLOR_METRICS['lightness']['step']
+            );
+
+            if ($new_l <= Color_Constants::COLOR_METRICS['lightness']['min'] ||
+                $new_l >= Color_Constants::COLOR_METRICS['lightness']['max']) {
+                return $last_valid_hsl;
+            }
+
+            $hsl = $this->adjust_lightness($hsl, $lighter ?
+                Color_Constants::COLOR_METRICS['lightness']['step'] :
+                -Color_Constants::COLOR_METRICS['lightness']['step']
+            );
+            $rgb = $this->color_utility->hsl_to_rgb($hsl);
+            $hex = $this->color_utility->rgb_to_hex($rgb);
+            $attempts++;
+        }
+
+        return $contrast >= Color_Constants::WCAG_CONTRAST_MIN ? $hsl : $last_valid_hsl;
+    }
+
+    /**
+     * Generate a contrasting text color (off-white or near-black) for backgrounds
+     *
+     * @param string $background_color Background color in hex format
+     * @param bool   $is_dark_mode Whether in dark mode
+     * @param array  $options Optional settings
+     * @return string Text color in hex format (either off-white or near-black)
+     */
+    public function generate_contrast_color(string $background_color, bool $is_dark_mode, array $options = []): string {
+        $rgb = $this->color_utility->hex_to_rgb($background_color);
+        $text_color = $is_dark_mode ? Color_Constants::COLOR_OFF_WHITE : Color_Constants::COLOR_NEAR_BLACK;
+
         $contrast = $this->color_utility->get_contrast_ratio(
-            $text_color,
-            $background_color
+            $this->color_utility->rgb_to_hex($rgb),
+            $text_color
         );
 
-        // If contrast is insufficient, use high contrast colors
-        if ($contrast < Color_Constants::ACCESSIBILITY_CONFIG['contrast']['min_ratio']) {
-            return $bg_luminance > Color_Constants::COLOR_METRICS['luminance']['threshold']
-                ? Color_Constants::COLOR_METRICS['colors']['dark']
-                : Color_Constants::COLOR_METRICS['colors']['light'];
+        // If contrast is insufficient, switch to opposite
+        if ($contrast < Color_Constants::WCAG_CONTRAST_TARGET) {
+            $text_color = $is_dark_mode ? Color_Constants::COLOR_NEAR_BLACK : Color_Constants::COLOR_OFF_WHITE;
         }
 
         return $text_color;
     }
 
     /**
-     * Generate system colors that harmonize with the theme
+     * Generate a contrasting theme color variation
+     * Creates a contrasting color from the same base, useful for hover states
+     * or emphasis while maintaining theme cohesion
      *
-     * @param array $base_colors Array of base theme colors
-     * @param bool $is_dark_mode Whether generating for dark mode
-     * @return array Generated system colors
+     * @param string $base_color Base color in hex format
+     * @param bool   $prefer_lighter Whether to prefer lighter variations
+     * @return string Contrasting color in hex format
      */
-    private function generate_system_colors(array $base_colors, bool $is_dark_mode): array {
-        $system_colors = [];
+    public function generate_contrasting_variation(string $base_color, bool $prefer_lighter = true): string {
+        $rgb = $this->color_utility->hex_to_rgb($base_color);
+        $hsl = $this->color_utility->rgb_to_hsl($rgb);
 
-        // Get primary color's HSL for reference
-        $primary_hsl = $this->color_utility->rgb_to_hsl($this->color_utility->hex_to_rgb($base_colors['primary']));
-        $primary_saturation = $primary_hsl[1];
+        // Start with moderate adjustment
+        $adjustment = $prefer_lighter ? Color_Constants::COLOR_METRICS['lightness']['initial_shift'] : -Color_Constants::COLOR_METRICS['lightness']['initial_shift'];
+        $contrast_hsl = $this->adjust_lightness($hsl, $adjustment);
 
-        foreach (self::SYSTEM_COLOR_RULES as $type => $rules) {
-            // Generate default variant
-            $default_hsl = [
-                $rules['hue'],
-                $primary_saturation * $rules['variants']['default']['saturation'],
-                $is_dark_mode
-                    ? $rules['variants']['default']['lightness_dark']
-                    : $rules['variants']['default']['lightness_light']
-            ];
-
-            $default_rgb = $this->color_utility->hsl_to_rgb($default_hsl);
-            $system_colors["system-{$type}"] = $this->color_utility->rgb_to_hex($default_rgb);
-
-            // Generate light variant
-            $light_hsl = [
-                $rules['hue'],
-                $primary_saturation * $rules['variants']['light']['saturation'],
-                $is_dark_mode
-                    ? $rules['variants']['light']['lightness_dark']
-                    : $rules['variants']['light']['lightness_light']
-            ];
-
-            $light_rgb = $this->color_utility->hsl_to_rgb($light_hsl);
-            $system_colors["system-{$type}-light"] = $this->color_utility->rgb_to_hex($light_rgb);
-
-            // Generate text colors ensuring contrast
-            $text_color = $this->ensure_text_contrast(
-                $system_colors["system-{$type}"],
-                $is_dark_mode
+        // If contrast is insufficient, increase adjustment gradually
+        $contrast_rgb = $this->color_utility->hsl_to_rgb($contrast_hsl);
+        $attempts = 0;
+        while ($attempts < Color_Constants::COLOR_METRICS['lightness']['max_attempts']) {
+            $contrast = $this->color_utility->get_contrast_ratio(
+                $this->color_utility->rgb_to_hex($rgb),
+                $this->color_utility->rgb_to_hex($contrast_rgb)
             );
-            $system_colors["system-{$type}-text"] = $text_color;
 
-            $light_text_color = $this->ensure_text_contrast(
-                $system_colors["system-{$type}-light"],
-                $is_dark_mode
+            if ($contrast >= Color_Constants::WCAG_CONTRAST_TARGET) {
+                break;
+            }
+
+            $contrast_hsl = $this->adjust_lightness($contrast_hsl, $prefer_lighter ?
+                Color_Constants::COLOR_METRICS['lightness']['step'] :
+                -Color_Constants::COLOR_METRICS['lightness']['step']
             );
-            $system_colors["system-{$type}-light-text"] = $light_text_color;
+            $contrast_rgb = $this->color_utility->hsl_to_rgb($contrast_hsl);
+            $attempts++;
         }
 
-        return $system_colors;
+        return $this->color_utility->hsl_to_hex($contrast_hsl);
+    }
+
+    /**
+     * Analyze color accessibility for WordPress themes
+     *
+     * @param string $color Color in hex format
+     * @param array  $options Optional analysis settings
+     * @return array Analysis results
+     */
+    public function analyze_color(string $color, array $options = []): array {
+        $rgb = $this->color_utility->hex_to_rgb($color);
+        $hsl = $this->color_utility->rgb_to_hsl($rgb);
+
+        $contrast_light = $this->color_utility->get_contrast_ratio(
+            $this->color_utility->rgb_to_hex($rgb),
+            Color_Constants::COLOR_OFF_WHITE
+        );
+
+        $contrast_dark = $this->color_utility->get_contrast_ratio(
+            $this->color_utility->rgb_to_hex($rgb),
+            Color_Constants::COLOR_NEAR_BLACK
+        );
+
+        return [
+            'contrast_ratio_light' => $contrast_light,
+            'contrast_ratio_dark' => $contrast_dark,
+            'is_light' => $hsl['l'] > Color_Constants::COLOR_METRICS['lightness']['threshold'],
+            'is_dark' => $hsl['l'] <= Color_Constants::COLOR_METRICS['lightness']['threshold'],
+            'meets_target' => $contrast_light >= Color_Constants::WCAG_CONTRAST_TARGET ||
+                            $contrast_dark >= Color_Constants::WCAG_CONTRAST_TARGET,
+            'meets_minimum' => $contrast_light >= Color_Constants::WCAG_CONTRAST_MIN ||
+                             $contrast_dark >= Color_Constants::WCAG_CONTRAST_MIN
+        ];
+    }
+
+    /**
+     * Check if colors meet contrast requirements
+     *
+     * @param string $color1 First color in hex format
+     * @param string $color2 Second color in hex format
+     * @return bool Whether colors meet contrast requirements
+     */
+    public function check_contrast(string $color1, string $color2): bool {
+        return $this->color_utility->get_contrast_ratio($color1, $color2) >= Color_Constants::WCAG_CONTRAST_MIN;
+    }
+
+    /**
+     * Adjust lightness of a color while maintaining hue and saturation
+     *
+     * @param array $hsl HSL color values
+     * @param float $adjustment Amount to adjust lightness
+     * @return array Adjusted HSL values
+     */
+    private function adjust_lightness(array $hsl, float $adjustment): array {
+        $hsl['l'] = max(
+            Color_Constants::COLOR_METRICS['lightness']['min'],
+            min(
+                Color_Constants::COLOR_METRICS['lightness']['max'],
+                $hsl['l'] + $adjustment
+            )
+        );
+        return $hsl;
     }
 }

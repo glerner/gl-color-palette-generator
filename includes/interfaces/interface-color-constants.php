@@ -2,7 +2,11 @@
 /**
  * Color Constants Interface
  *
- * Defines constants for color roles and schemes used throughout the plugin.
+ * Defines constants for color management, including:
+ * - Color roles and variations
+ * - WCAG accessibility requirements
+ * - Color scheme definitions
+ * - Design constraints for visual comfort
  *
  * @todo This is not actually an interface, but a constants container.
  * Should be refactored to class-color-constants.php in includes/types/.
@@ -410,6 +414,14 @@ interface Color_Constants {
     const DECORATIVE_CONTRAST_MIN = 0.30;    // Minimum for decorative elements
 
     /**
+     * Off-white and near-black luminance ranges
+     */
+    const OFF_WHITE_LUMINANCE_MIN = 0.85;  // Must be very close to white
+    const OFF_WHITE_LUMINANCE_MAX = 0.95;  // But not pure white for visual comfort
+    const NEAR_BLACK_LUMINANCE_MIN = 0.05; // Not pure black for visual comfort
+    const NEAR_BLACK_LUMINANCE_MAX = 0.15; // Must be very close to black
+
+    /**
      * Primary Colors - RGB and CMY
      */
     const COLOR_PRIMARY_RED = ['#FF0000', 'Red'];
@@ -482,6 +494,17 @@ interface Color_Constants {
     ];
 
     /**
+     * Harmony Score Thresholds
+     * Defines minimum scores for different aspects of color harmony
+     */
+    public const HARMONY_THRESHOLDS = [
+        'overall' => 0.7,      // Minimum overall harmony score
+        'harmony' => 0.6,      // Minimum harmony angle score
+        'balance' => 0.5,      // Minimum color balance score
+        'vibrance' => 0.4      // Minimum vibrance score
+    ];
+
+    /**
      * Palette Demonstration Sections
      * Defines how to showcase the palette in the preview
      */
@@ -547,7 +570,9 @@ interface Color_Constants {
         'saturation' => [
             'min' => 0,                // Minimum saturation
             'max' => 100,              // Maximum saturation
-            'step' => 5                // Standard saturation adjustment step
+            'step' => 5,               // Standard saturation adjustment step
+            'min_range' => 20,         // Minimum range between most and least saturated colors
+            'neutral_threshold' => 10   // Below this value, color is considered neutral/grayscale
         ],
         'lightness' => [
             'min' => 0,                // Minimum lightness
@@ -591,6 +616,20 @@ interface Color_Constants {
      * @var array
      */
     public const COLOR_METRICS = [
+        'lightness' => [
+            'step' => 5,              // Small incremental adjustment
+            'initial_shift' => 20,    // Initial shift for variations
+            'large_shift' => 40,      // Larger shift for extreme variations
+            'max_attempts' => 10,     // Maximum adjustment attempts
+            'min' => 0,              // Minimum lightness value
+            'max' => 100,            // Maximum lightness value
+            'threshold' => 50,       // Threshold for light/dark determination
+            'off_white_min' => 90,   // Minimum lightness for off-white
+            'off_white_max' => 97,   // Maximum lightness for off-white
+            'near_black_min' => 3,   // Minimum lightness for near-black
+            'near_black_max' => 10,  // Maximum lightness for near-black
+            'spacing_min' => 15,     // Minimum lightness difference between variations
+        ],
         'brightness' => [
             'min' => 0.0,
             'max' => 1.0,
@@ -598,22 +637,42 @@ interface Color_Constants {
             'dark_threshold' => 0.3
         ],
         'saturation' => [
-            'min' => 0,
-            'max' => 100,
-            'low_threshold' => 20,
-            'high_threshold' => 80
+            'min' => 0,              // Minimum saturation value
+            'max' => 100,            // Maximum saturation value
+            'low_threshold' => 20,   // Threshold for low saturation
+            'high_threshold' => 80,  // Threshold for high saturation
+            'min_range' => 20,       // Minimum range between most and least saturated colors
+            'step' => 10,            // Standard step size for saturation adjustments
+            'neutral_threshold' => 10 // Below this value, color is considered neutral/grayscale
         ],
         'contrast' => [
-            'min_ratio' => 4.5,
-            'large_text_ratio' => 3.0,
-            'enhanced_ratio' => 7.0
+            'min_ratio' => 4.5,      // Minimum WCAG AA contrast ratio
+            'large_text_ratio' => 3.0, // WCAG AA ratio for large text
+            'enhanced_ratio' => 7.0,   // Enhanced contrast ratio
+            'target' => 4.5,          // Target contrast ratio
+            'max' => 21.0,            // Maximum achievable contrast
+            'step' => 0.1             // Step size for contrast adjustments
         ],
         'difference' => [
             'just_noticeable' => 2.3,
             'distinct' => 5.0,
             'obvious' => 10.0
+        ],
+        'value' => [
+            'min' => 0,              // Minimum value (0-100)
+            'max' => 100,            // Maximum value (0-100)
+            'min_range' => 20,       // Minimum range between lightest and darkest colors
+            'step' => 10             // Standard step size for value adjustments
         ]
     ];
+
+    // Convenience constants for direct access
+    public const MIN_SATURATION_RANGE = self::COLOR_METRICS['saturation']['min_range'];
+    public const MAX_SATURATION = self::COLOR_METRICS['saturation']['max'];
+    public const SATURATION_STEP = self::COLOR_METRICS['saturation']['step'];
+    public const MIN_VALUE_RANGE = self::COLOR_METRICS['value']['min_range'];
+    public const MAX_VALUE = self::COLOR_METRICS['value']['max'];
+    public const VALUE_STEP = self::COLOR_METRICS['value']['step'];
 
     /**
      * Color Psychological Effects

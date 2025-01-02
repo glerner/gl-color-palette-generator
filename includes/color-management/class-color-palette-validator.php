@@ -9,330 +9,263 @@
 
 namespace GL_Color_Palette_Generator\Color_Management;
 
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Validator_Interface;
+use GL_Color_Palette_Generator\Models\Color_Palette;
+use GL_Color_Palette_Generator\Color_Management\Color_Accessibility;
+use GL_Color_Palette_Generator\Color_Management\Color_Wheel;
+use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
+use WP_Error;
 
 /**
  * Class Color_Palette_Validator
  * Validates color palettes for various criteria including contrast, accessibility, and harmony
  */
-class Color_Palette_Validator implements \GL_Color_Palette_Generator\Interfaces\Color_Palette_Validator {
+class Color_Palette_Validator implements Color_Palette_Validator_Interface {
     /**
-     * Color Utility instance
-     *
+     * Color accessibility checker
+     * @var Color_Accessibility
+     */
+    private Color_Accessibility $accessibility;
+
+    /**
+     * Color wheel
+     * @var Color_Wheel
+     */
+    private Color_Wheel $color_wheel;
+
+    /**
+     * Color utility
      * @var Color_Utility
      */
-    private $color_utility;
+    private Color_Utility $color_utility;
+
+    /**
+     * Last validation errors
+     * @var array
+     */
+    private array $last_errors = [];
 
     /**
      * Constructor
      */
-    public function __construct() {
-        $this->color_utility = new Color_Utility();
+    public function __construct(
+        Color_Accessibility $accessibility,
+        Color_Wheel $color_wheel,
+        Color_Utility $color_utility
+    ) {
+        $this->accessibility = $accessibility;
+        $this->color_wheel = $color_wheel;
+        $this->color_utility = $color_utility;
     }
 
     /**
-     * Validate entire palette
+     * Validate a color palette
      *
-     * @param array $palette Array of hex colors.
-     * @param array $options Validation options.
-     * @return array Validation results.
+     * @param Color_Palette $palette Palette to validate
+     * @param array        $options Validation options
+     * @return bool|WP_Error True if valid, WP_Error on failure
      */
-    public function validate_palette($palette, $options = []) {
+    public function validate_palette(Color_Palette $palette, array $options = []): bool|WP_Error {
+        $this->last_errors = [];
+
         $default_options = [
             'check_contrast' => true,
             'check_accessibility' => true,
             'check_harmony' => true,
-            'check_distinctness' => true,
-            'check_format' => true,
-            'required_roles' => [], // Allow specifying which roles are required for this palette
-            'scheme_type' => null   // Allow specifying the scheme type for appropriate validation
+            'level' => 'AA',
+            'scheme_type' => Color_Constants::SCHEME_MONOCHROMATIC
         ];
 
         $options = array_merge($default_options, $options);
-        $results = [
-            'is_valid' => true,
-            'errors' => [],
-            'warnings' => [],
-            'details' => []
-        ];
+        $colors = $palette->get_colors();
 
-        // Basic format validation
-        if ($options['check_format']) {
-            $format_results = $this->validate_format($palette);
-            if (!$format_results['is_valid']) {
-                $results['is_valid'] = false;
-                $results['errors'] = array_merge($results['errors'], $format_results['errors']);
+        if (count($colors) === 0) {
+            return new WP_Error('empty_palette', 'Palette contains no colors');
+        }
+
+        // Validate color formats
+        foreach ($colors as $color) {
+            if (!$this->validate_color_format($color)) {
+                $this->last_errors[] = "Invalid color format: {$color}";
+                return new WP_Error('invalid_format', 'One or more colors have invalid format');
             }
         }
 
-        // Skip other checks if format is invalid
-        if (!$results['is_valid']) {
-            return $results;
-        }
-
-        // Validate required roles if specified
-        if (!empty($options['required_roles'])) {
-            foreach ($options['required_roles'] as $role) {
-                if (!isset($palette[$role])) {
-                    $results['errors'][] = sprintf(
-                        __('Missing required color role: %s', 'gl-color-palette-generator'),
-                        $role
-                    );
-                    $results['is_valid'] = false;
-                }
+        // Check accessibility if requested
+        if ($options['check_accessibility']) {
+            $accessibility_result = $this->validate_accessibility($colors, $options['level']);
+            if (is_wp_error($accessibility_result)) {
+                $this->last_errors[] = $accessibility_result->get_error_message();
+                return $accessibility_result;
             }
         }
 
-        // Color distinctness
-        if ($options['check_distinctness']) {
-            $distinctness_results = $this->validate_distinctness($palette);
-            $results['details']['distinctness'] = $distinctness_results;
-            if (!$distinctness_results['is_valid']) {
-                $results['warnings'][] = __('Some colors are too similar', 'gl-color-palette-generator');
+        // Check harmony if requested
+        if ($options['check_harmony']) {
+            $harmony_result = $this->validate_harmony($colors, $options['scheme_type']);
+            if (is_wp_error($harmony_result)) {
+                $this->last_errors[] = $harmony_result->get_error_message();
+                return $harmony_result;
             }
         }
 
-        // Contrast validation
-        if ($options['check_contrast']) {
-            $contrast_results = $this->validate_contrast($palette);
-            $results['details']['contrast'] = $contrast_results;
-            if (!$contrast_results['is_valid']) {
-                $results['warnings'][] = __('Some color combinations have contrast issues', 'gl-color-palette-generator');
-            }
-        }
-
-        return $results;
+        return true;
     }
 
     /**
      * Validate color format
      *
-     * @param array $palette Array of colors.
-     * @return array Validation results.
+     * @param string $color Color to validate
+     * @param string $format Expected format (hex, rgb, rgba, hsl, hsla)
+     * @return bool True if valid
      */
-    private function validate_format($palette) {
-        $results = [
-            'is_valid' => true,
-            'errors' => []
-        ];
-
-        if (!is_array($palette)) {
-            $results['is_valid'] = false;
-            $results['errors'][] = __('Palette must be an array', 'gl-color-palette-generator');
-            return $results;
-        }
-
-        foreach ($palette as $role => $color) {
-            if (!preg_match('/^#[0-9a-f]{6}$/i', $color)) {
-                $results['is_valid'] = false;
-                $results['errors'][] = sprintf(
-                    __('Invalid color format for role %s: %s', 'gl-color-palette-generator'),
-                    $role,
-                    $color
-                );
-            }
-        }
-
-        return $results;
+    public function validate_color_format(string $color, string $format = 'hex'): bool {
+        return $this->color_utility->is_valid_hex_color($color);
     }
 
     /**
-     * Validate color distinctness
+     * Validate color accessibility
      *
-     * @param array $palette Array of colors.
-     * @return array Validation results.
+     * @param array  $colors Colors to validate
+     * @param string $level  WCAG level ('AA', or 'AAA')
+     * @return bool|WP_Error True if valid, WP_Error on failure
      */
-    private function validate_distinctness($palette) {
-        $results = [
-            'is_valid' => true,
-            'similar_pairs' => []
-        ];
+    public function validate_accessibility(array $colors, string $level = 'AA'): bool|WP_Error {
+        if (count($colors) < 2) {
+            return new WP_Error('insufficient_colors', 'Need at least 2 colors to check accessibility');
+        }
 
-        for ($i = 0; $i < count($palette); $i++) {
-            for ($j = $i + 1; $j < count($palette); $j++) {
-                $difference = $this->color_utility->calculate_color_difference(
-                    $palette[array_keys($palette)[$i]],
-                    $palette[array_keys($palette)[$j]]
-                );
+        // Get target and minimum contrast based on WCAG level
+        $target_contrast = Color_Constants::WCAG_CONTRAST_TARGET;  // Our target (AAA or better)
+        $min_contrast = match ($level) {
+            'AAA' => Color_Constants::WCAG_CONTRAST_AAA,
+            'AA' => Color_Constants::WCAG_CONTRAST_AA,
+            'A' => Color_Constants::WCAG_CONTRAST_AA_LARGE,
+            default => Color_Constants::WCAG_CONTRAST_MIN,   // Our minimum requirement
+        };
 
-                if ($difference < Color_Constants::MIN_COLOR_DIFFERENCE) {
-                    $results['is_valid'] = false;
-                    $results['similar_pairs'][] = [
-                        'colors' => [$palette[array_keys($palette)[$i]], $palette[array_keys($palette)[$j]]],
-                        'difference' => $difference
-                    ];
+        foreach ($colors as $fg_color) {
+            foreach ($colors as $bg_color) {
+                if ($fg_color === $bg_color) {
+                    continue;
+                }
+
+                $contrast = $this->accessibility->check_contrast($fg_color, $bg_color);
+
+                // First check if we meet our target contrast
+                if ($contrast >= $target_contrast) {
+                    continue;  // Exceeds our target, no need to check minimum
+                }
+
+                // If we don't meet target, ensure we at least meet minimum for the specified level
+                if ($contrast < $min_contrast) {
+                    return new WP_Error(
+                        'insufficient_contrast',
+                        sprintf(
+                            'Contrast ratio %.2f between %s and %s is below %s level requirement (%.2f). Target contrast is %.2f',
+                            $contrast,
+                            $fg_color,
+                            $bg_color,
+                            $level,
+                            $min_contrast,
+                            $target_contrast
+                        )
+                    );
                 }
             }
         }
 
-        return $results;
-    }
-
-    /**
-     * Validate contrast ratios
-     *
-     * @param array $palette Array of colors.
-     * @return array Validation results.
-     */
-    private function validate_contrast($palette) {
-        $results = [
-            'is_valid' => true,
-            'contrast_pairs' => []
-        ];
-
-        for ($i = 0; $i < count($palette); $i++) {
-            for ($j = $i + 1; $j < count($palette); $j++) {
-                $contrast = $this->color_utility->get_contrast_ratio(
-                    $palette[array_keys($palette)[$i]],
-                    $palette[array_keys($palette)[$j]]
-                );
-
-                // Check if contrast is within acceptable range
-                if ($contrast < Color_Constants::WCAG_CONTRAST_MIN ||
-                    $contrast > Color_Constants::CONTRAST_MAX) {
-                    $results['is_valid'] = false;
-                    $results['contrast_pairs'][] = [
-                        'colors' => [$palette[array_keys($palette)[$i]], $palette[array_keys($palette)[$j]]],
-                        'contrast' => $contrast,
-                        'issue' => $contrast < Color_Constants::WCAG_CONTRAST_MIN ? 'insufficient' : 'excessive'
-                    ];
-                }
-            }
-        }
-
-        return $results;
-    }
-
-    /**
-     * Validate accessibility
-     *
-     * @param array $palette Array of colors.
-     * @return array Validation results.
-     */
-    private function validate_accessibility($palette) {
-        $accessibility_checker = new Accessibility_Checker();
-        $results = [
-            'is_valid' => true,
-            'checks' => []
-        ];
-
-        foreach ($palette as $role => $color) {
-            // Check against white and black backgrounds
-            $results['checks'][] = [
-                'color' => $color,
-                'on_white' => $accessibility_checker->check_combination($color, '#FFFFFF'),
-                'on_black' => $accessibility_checker->check_combination($color, '#000000')
-            ];
-        }
-
-        // Check if at least one color is suitable for text
-        $has_text_color = false;
-        foreach ($results['checks'] as $check) {
-            if ($check['on_white']['aa_small'] || $check['on_black']['aa_small']) {
-                $has_text_color = true;
-                break;
-            }
-        }
-
-        if (!$has_text_color) {
-            $results['is_valid'] = false;
-        }
-
-        return $results;
+        return true;
     }
 
     /**
      * Validate color harmony
      *
-     * @param array $palette Array of colors.
-     * @return array Validation results.
+     * @param array  $colors Colors to validate
+     * @param string $scheme_type Type of color scheme to validate against
+     * @return bool|WP_Error True if valid, WP_Error on failure
      */
-    private function validate_harmony($palette) {
-        $results = [
-            'is_valid' => true,
-            'harmony_score' => 0,
-            'details' => []
-        ];
-
-        // Convert colors to HSL for harmony analysis
-        $hsl_colors = array_map(
-            [$this->color_utility, 'hex_to_hsl'],
-            $palette
-        );
-
-        // Check hue spacing
-        $hues = array_column($hsl_colors, 'h');
-        sort($hues);
-        $hue_spacing = $this->analyze_hue_spacing($hues);
-        $results['details']['hue_spacing'] = $hue_spacing;
-
-        // Check saturation and lightness distribution
-        $saturations = array_column($hsl_colors, 's');
-        $lightnesses = array_column($hsl_colors, 'l');
-
-        $results['details']['saturation_range'] = [
-            'min' => min($saturations),
-            'max' => max($saturations),
-            'spread' => max($saturations) - min($saturations)
-        ];
-
-        $results['details']['lightness_range'] = [
-            'min' => min($lightnesses),
-            'max' => max($lightnesses),
-            'spread' => max($lightnesses) - min($lightnesses)
-        ];
-
-        // Calculate overall harmony score
-        $results['harmony_score'] = $this->calculate_harmony_score(
-            $hue_spacing,
-            $results['details']['saturation_range'],
-            $results['details']['lightness_range']
-        );
-
-        $results['is_valid'] = $results['harmony_score'] >= 70;
-
-        return $results;
-    }
-
-    /**
-     * Analyze hue spacing
-     *
-     * @param array $hues Array of hue values.
-     * @return array Spacing analysis.
-     */
-    private function analyze_hue_spacing($hues) {
-        $spacing = [];
-        for ($i = 0; $i < count($hues); $i++) {
-            $next = ($i + 1) % count($hues);
-            $diff = $hues[$next] - $hues[$i];
-            if ($diff < 0) {
-                $diff += 360;
-            }
-            $spacing[] = $diff;
+    public function validate_harmony(
+        array $colors,
+        string $scheme_type = Color_Constants::SCHEME_MONOCHROMATIC
+    ): bool|WP_Error {
+        if (count($colors) < 2) {
+            return new WP_Error('insufficient_colors', 'Need at least 2 colors to check harmony');
         }
 
-        return [
-            'min_spacing' => min($spacing),
-            'max_spacing' => max($spacing),
-            'average_spacing' => array_sum($spacing) / count($spacing)
-        ];
+        // Get required roles for scheme type
+        $required_roles = Color_Constants::REQUIRED_ROLES[$scheme_type] ?? null;
+        if ($required_roles === null) {
+            return new WP_Error('invalid_scheme', 'Invalid color scheme type');
+        }
+
+        if (count($colors) < count($required_roles)) {
+            return new WP_Error(
+                'insufficient_colors',
+                sprintf('Scheme type %s requires at least %d colors', $scheme_type, count($required_roles))
+            );
+        }
+
+        // Calculate harmony scores
+        $harmony_score = $this->color_wheel->calculate_harmony_score($colors);
+        $balance_score = $this->color_wheel->calculate_color_balance($colors);
+        $vibrance_score = $this->color_wheel->calculate_vibrance_score($colors);
+        
+        // Calculate overall score (weighted average)
+        $overall_score = (
+            $harmony_score * 0.5 +    // Harmony is most important
+            $balance_score * 0.3 +    // Balance is second
+            $vibrance_score * 0.2     // Vibrance is third
+        );
+        
+        $thresholds = Color_Constants::HARMONY_THRESHOLDS;
+        $failed_aspects = [];
+        
+        if ($harmony_score < $thresholds['harmony']) {
+            $failed_aspects[] = sprintf('Harmony (%.2f < %.2f)', $harmony_score, $thresholds['harmony']);
+        }
+        if ($balance_score < $thresholds['balance']) {
+            $failed_aspects[] = sprintf('Balance (%.2f < %.2f)', $balance_score, $thresholds['balance']);
+        }
+        if ($vibrance_score < $thresholds['vibrance']) {
+            $failed_aspects[] = sprintf('Vibrance (%.2f < %.2f)', $vibrance_score, $thresholds['vibrance']);
+        }
+        if ($overall_score < $thresholds['overall']) {
+            $failed_aspects[] = sprintf('Overall (%.2f < %.2f)', $overall_score, $thresholds['overall']);
+        }
+        
+        if ($failed_aspects === []) {
+            return true;
+        }
+        
+        return new WP_Error(
+            'invalid_harmony',
+            sprintf(
+                'Colors do not meet harmony requirements for scheme type %s:
+                Failed aspects: %s
+                
+                Scores:
+                - Harmony: %.2f
+                - Balance: %.2f
+                - Vibrance: %.2f
+                - Overall: %.2f',
+                $scheme_type,
+                implode(', ', $failed_aspects),
+                $harmony_score,
+                $balance_score,
+                $vibrance_score,
+                $overall_score
+            )
+        );
     }
 
     /**
-     * Calculate harmony score
+     * Get last validation errors
      *
-     * @param array $hue_spacing Hue spacing analysis.
-     * @param array $saturation_range Saturation range.
-     * @param array $lightness_range Lightness range.
-     * @return int Harmony score (0-100).
+     * @return array List of validation errors with context
      */
-    private function calculate_harmony_score($hue_spacing, $saturation_range, $lightness_range) {
-        $hue_score = min(100, ($hue_spacing['min_spacing'] / 30) * 100);
-
-        $saturation_score = 100 - min(100, abs($saturation_range['spread'] - 40));
-
-        $lightness_score = 100 - min(100, abs($lightness_range['spread'] - 50));
-
-        return (int) (($hue_score + $saturation_score + $lightness_score) / 3);
+    public function get_last_errors(): array {
+        return $this->last_errors;
     }
 }
