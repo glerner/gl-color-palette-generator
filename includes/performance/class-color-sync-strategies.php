@@ -1,5 +1,5 @@
 <?php
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator;
 
 class ColorSyncStrategies {
     private $sync_manager;

@@ -85,7 +85,7 @@ jQuery(document).ready(function($) {
 (function($) {
     'use strict';
 
-    const GLColorPaletteSettings = {
+    const GL_Color_Palette_GeneratorSettings = {
         /**
          * Initialize the settings page functionality.
          */
@@ -220,6 +220,6 @@ jQuery(document).ready(function($) {
     };
 
     $(document).ready(function() {
-        GLColorPaletteSettings.init();
+        GL_Color_Palette_GeneratorSettings.init();
     });
 })(jQuery);

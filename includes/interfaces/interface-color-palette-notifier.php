@@ -1,13 +1,13 @@
 <?php
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 /**
  * Color Palette Notifier Interface
  *
  * Defines the contract for sending notifications about color palette events and changes.
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0

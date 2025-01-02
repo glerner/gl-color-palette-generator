@@ -4,15 +4,15 @@
  *
  * Handles AI-powered color naming and description generation using OpenAI's API.
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Services
  * @since 1.0.0
  */
 
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator;
 
-use GLColorPalette\Interfaces\AIColorServiceInterface;
-use GLColorPalette\Validation\ColorNameValidator;
+use GL_Color_Palette_Generator\Interfaces\AIColorServiceInterface;
+use GL_Color_Palette_Generator\Validation\ColorNameValidator;
 
 class AIColorService implements AIColorServiceInterface {
     /** 

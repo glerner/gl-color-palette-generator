@@ -1,6 +1,6 @@
 <?php
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 interface Exporter {
     public function export_palette(array $palette, string $format): string;

@@ -9,7 +9,7 @@ use GL_Color_Palette_Generator\Models\Color_Palette;
  *
  * Defines the contract for rendering color palettes in various formats.
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0

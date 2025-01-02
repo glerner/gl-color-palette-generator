@@ -1,6 +1,6 @@
 <?php
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 interface ColorProcessor {
     public function convert_color(string $color, string $from_space, string $to_space): array;

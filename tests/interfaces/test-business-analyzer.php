@@ -2,15 +2,15 @@
 /**
  * Business Analyzer Interface Tests
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Tests\Interfaces
  * @since 1.0.0
  */
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\BusinessAnalyzer;
+use GL_Color_Palette_Generator\Interfaces\BusinessAnalyzer;
 
 class BusinessAnalyzerTest extends TestCase {
     private $analyzer;

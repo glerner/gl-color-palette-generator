@@ -1,6 +1,6 @@
 <?php
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 interface Validator {
     public function validate($data, array $rules): bool;

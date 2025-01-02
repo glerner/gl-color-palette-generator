@@ -1,9 +1,9 @@
 <?php
 
-namespace GLColorPalette\Tests;
+namespace GL_Color_Palette_Generator\Tests;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\ColorPalette;
+use GL_Color_Palette_Generator\ColorPalette;
 
 class ColorPaletteTest extends TestCase {
     private ColorPalette $palette;

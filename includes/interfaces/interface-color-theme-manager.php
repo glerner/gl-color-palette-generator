@@ -1,13 +1,13 @@
 <?php
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 /**
  * Color Theme Manager Interface
  *
  * Defines the contract for managing and applying color themes across platforms.
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0

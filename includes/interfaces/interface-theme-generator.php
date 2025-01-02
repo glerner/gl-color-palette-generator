@@ -1,5 +1,5 @@
 <?php
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 interface ThemeGenerator {
     public function generate_theme_json(array $palette): string;

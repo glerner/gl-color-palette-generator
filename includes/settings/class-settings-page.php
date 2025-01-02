@@ -1,5 +1,5 @@
 <?php
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator;
 
 class ColorPaletteGeneratorSettings {
     private $options_group = 'color_palette_generator';

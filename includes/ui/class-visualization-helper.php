@@ -1,5 +1,5 @@
 <?php
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator;
 
 class VisualizationHelper {
     private $svg_generator;

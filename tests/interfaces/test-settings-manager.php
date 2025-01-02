@@ -3,15 +3,15 @@
 /**
  * Settings Manager Interface Tests
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Tests\Interfaces
  * @since 1.0.0
  */
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\SettingsManager;
+use GL_Color_Palette_Generator\Interfaces\SettingsManager;
 
 class SettingsManagerTest extends TestCase {
     private $manager;

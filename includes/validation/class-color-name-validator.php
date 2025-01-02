@@ -1,5 +1,5 @@
 <?php
-namespace GLColorPalette\Validation;
+namespace GL_Color_Palette_Generator\Validation;
 
 /**
  * Color Name Validator

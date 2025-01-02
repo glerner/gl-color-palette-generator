@@ -8,7 +8,7 @@
  * @since      1.0.0
  */
 
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator;
 
 /**
  * Manages plugin dependencies and requirements

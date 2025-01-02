@@ -1,9 +1,9 @@
 <?php
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator;
 
-use GLColorPalette\WCAGCompliance;
-use GLColorPalette\Color_Analysis;
-use GLColorPalette\AccessibilityChecker;
+use GL_Color_Palette_Generator\WCAGCompliance;
+use GL_Color_Palette_Generator\Color_Analysis;
+use GL_Color_Palette_Generator\AccessibilityChecker;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 
 /**
@@ -12,7 +12,7 @@ use GL_Color_Palette_Generator\Color_Management\Color_Utility;
  * Generates HTML previews of color palettes and WordPress theme elements
  * with the selected color scheme applied.
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @since 1.0.0
  */
 class PreviewGenerator {

@@ -1,7 +1,7 @@
 (function($) {
     'use strict';
 
-    const GLColorPaletteComponents = {
+    const GL_Color_Palette_GeneratorComponents = {
         /**
          * Initialize all component functionalities.
          */
@@ -227,6 +227,6 @@
     };
 
     $(document).ready(function() {
-        GLColorPaletteComponents.init();
+        GL_Color_Palette_GeneratorComponents.init();
     });
 })(jQuery);

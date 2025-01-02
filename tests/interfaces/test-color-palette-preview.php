@@ -6,7 +6,7 @@
  * design mockups, code snippets, and visualization generation.
  * Validates various preview templates, options, and error handling.
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Tests\Interfaces
  * @since 1.0.0
  * @version 1.1.0
@@ -14,10 +14,10 @@
  * @copyright 2024 GL Color Palette Generator
  */
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\ColorPalettePreview;
+use GL_Color_Palette_Generator\Interfaces\ColorPalettePreview;
 
 class ColorPalettePreviewTest extends TestCase {
     private $preview;

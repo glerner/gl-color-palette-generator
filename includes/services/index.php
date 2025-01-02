@@ -2,7 +2,7 @@
 /**
  * Service components for external integrations
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  */
 
 // Silence is golden

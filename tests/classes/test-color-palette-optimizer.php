@@ -2,19 +2,19 @@
 /**
  * Color Palette Optimizer Tests
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
 
-namespace GLColorPalette\Tests;
+namespace GL_Color_Palette_Generator\Tests;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\ColorPalette;
-use GLColorPalette\ColorPaletteOptimizer;
-use GLColorPalette\ColorPaletteAnalyzer;
-use GLColorPalette\ColorPaletteFormatter;
+use GL_Color_Palette_Generator\ColorPalette;
+use GL_Color_Palette_Generator\ColorPaletteOptimizer;
+use GL_Color_Palette_Generator\ColorPaletteAnalyzer;
+use GL_Color_Palette_Generator\ColorPaletteFormatter;
 
 class ColorPaletteOptimizerTest extends TestCase {
     private ColorPaletteOptimizer $optimizer;

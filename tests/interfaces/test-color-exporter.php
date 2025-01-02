@@ -1,9 +1,9 @@
 <?php
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\ColorExporter;
+use GL_Color_Palette_Generator\Interfaces\ColorExporter;
 
 class ColorExporterTest extends TestCase {
     private $exporter;

@@ -1,5 +1,5 @@
 <?php
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator;
 
 class AdminInterface {
     private $plugin_slug = 'color-palette-generator';

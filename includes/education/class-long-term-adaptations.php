@@ -1,5 +1,5 @@
 <?php
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator;
 
 /**
  * Long Term Adaptations System

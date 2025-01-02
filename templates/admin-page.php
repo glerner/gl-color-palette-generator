@@ -2,7 +2,7 @@
 /**
  * Admin page template for Color Palette Generator
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  */
 
 defined('ABSPATH') || exit;

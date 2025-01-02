@@ -1,6 +1,6 @@
 <?php
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 interface Cacheable {
     public function get_cache_key(): string;

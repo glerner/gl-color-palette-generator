@@ -1,5 +1,5 @@
 <?php
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 interface AdminInterface {
     public function register_menu_pages(): void;

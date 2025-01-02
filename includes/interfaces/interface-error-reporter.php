@@ -1,5 +1,5 @@
 <?php
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 interface ErrorReporter {
     public function log_error(string $message, array $context = []): void;

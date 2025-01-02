@@ -1,5 +1,5 @@
 <?php
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 interface DataExporter {
     public function export_to_format(array $data, string $format): string;

@@ -4,12 +4,12 @@
  *
  * Defines the contract for generating color palette previews.
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Interfaces
  * @since 1.0.0
  */
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 /**
  * Interface PreviewGenerator

@@ -1,6 +1,6 @@
 <?php
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 interface ErrorHandler {
     public function log_error(string $message, string $level = 'error'): void;

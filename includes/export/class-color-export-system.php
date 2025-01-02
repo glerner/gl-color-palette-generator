@@ -1,9 +1,9 @@
 <?php
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator;
 
-use GLColorPalette\Color_Management\Color_Shade_Generator;
-use GLColorPalette\Interfaces\AccessibilityChecker;
-use GLColorPalette\Traits\Color_Shade_Generator_Trait;
+use GL_Color_Palette_Generator\Color_Management\Color_Shade_Generator;
+use GL_Color_Palette_Generator\Interfaces\AccessibilityChecker;
+use GL_Color_Palette_Generator\Traits\Color_Shade_Generator_Trait;
 
 class ColorExportSystem {
     use Color_Shade_Generator_Trait;

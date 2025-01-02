@@ -1,11 +1,11 @@
 <?php
 
-namespace GLColorPalette\Tests;
+namespace GL_Color_Palette_Generator\Tests;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\ColorPalette;
-use GLColorPalette\ColorPaletteConverter;
-use GLColorPalette\ColorPaletteFormatter;
+use GL_Color_Palette_Generator\ColorPalette;
+use GL_Color_Palette_Generator\ColorPaletteConverter;
+use GL_Color_Palette_Generator\ColorPaletteFormatter;
 
 class ColorPaletteConverterTest extends TestCase {
     private $converter;

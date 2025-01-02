@@ -2,11 +2,11 @@
 /**
  * OpenAI Provider Configuration
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @since 1.0.0
  */
 
-namespace GLColorPalette\Providers;
+namespace GL_Color_Palette_Generator\Providers;
 
 /**
  * OpenAI specific configuration

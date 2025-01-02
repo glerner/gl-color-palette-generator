@@ -4,11 +4,11 @@
  *
  * Handles color analysis, including accessibility, harmony, and psychological aspects.
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @since 1.0.0
  */
 
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 

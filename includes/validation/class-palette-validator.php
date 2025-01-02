@@ -1,5 +1,5 @@
 <?php
-namespace GLColorPalette\Validation;
+namespace GL_Color_Palette_Generator\Validation;
 
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use GL_Color_Palette_Generator\Utility\Color_Utility;

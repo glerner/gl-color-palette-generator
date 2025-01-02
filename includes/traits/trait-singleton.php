@@ -1,6 +1,6 @@
 <?php
 
-namespace GLColorPalette\Traits;
+namespace GL_Color_Palette_Generator\Traits;
 
 trait Singleton {
     protected static $instance = null;

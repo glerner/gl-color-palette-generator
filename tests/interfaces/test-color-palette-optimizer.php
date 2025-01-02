@@ -1,9 +1,9 @@
 <?php
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\ColorPaletteOptimizer;
+use GL_Color_Palette_Generator\Interfaces\ColorPaletteOptimizer;
 
 class ColorPaletteOptimizerTest extends TestCase {
     private $optimizer;

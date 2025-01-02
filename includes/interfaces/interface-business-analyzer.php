@@ -4,12 +4,12 @@
  *
  * Defines the contract for analyzing color palettes in business contexts.
  *
- * @package GLColorPalette
+ * @package GL_Color_Palette_Generator
  * @subpackage Interfaces
  * @since 1.0.0
  */
 
-namespace GLColorPalette\Interfaces;
+namespace GL_Color_Palette_Generator\Interfaces;
 
 /**
  * Interface BusinessAnalyzer

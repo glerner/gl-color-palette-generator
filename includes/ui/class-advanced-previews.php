@@ -1,5 +1,5 @@
 <?php
-namespace GLColorPalette;
+namespace GL_Color_Palette_Generator;
 class AdvancedPreviews {
     private $svg_generator;
     private $css_generator;

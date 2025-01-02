@@ -1,9 +1,9 @@
 <?php
 
-namespace GLColorPalette\Tests\Interfaces;
+namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GLColorPalette\Interfaces\PaletteGenerator;
+use GL_Color_Palette_Generator\Interfaces\PaletteGenerator;
 
 class PaletteGeneratorTest extends TestCase {
     private $generator;
