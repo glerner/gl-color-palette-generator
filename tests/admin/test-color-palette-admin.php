@@ -56,7 +56,7 @@ class Test_Color_Palette_Admin extends Test_Case {
             'times' => 1,
             'args' => [
                 'gl-color-palette-admin',
-                'glColorPaletteAdmin',
+                'gl_color_palette_generator_admin',
                 [
                     'ajaxurl' => admin_url('admin-ajax.php'),
                     'nonce' => wp_create_nonce('gl_color_palette_admin')

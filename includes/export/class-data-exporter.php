@@ -1,7 +1,7 @@
 <?php
 namespace GL_Color_Palette_Generator;
 
-class GLColorPaletteExporter {
+class GL_Color_Palette_GeneratorExporter {
     /**
      * Export all plugin data
      */

@@ -177,19 +177,19 @@ jQuery(document).ready(function($) {
                 action: 'gl_test_api_connection',
                 provider: this.providerSelect.val(),
                 api_key: this.apiKeyField.val(),
-                nonce: glColorPalette.nonce
+                nonce: gl_color_palette_generator.nonce
             };
 
-            this.testButton.prop('disabled', true).text(glColorPalette.i18n.testing);
+            this.testButton.prop('disabled', true).text(gl_color_palette_generator.i18n.testing);
 
             $.post(ajaxurl, data, function(response) {
                 if (response.success) {
-                    self.showNotice('success', glColorPalette.i18n.connectionSuccess);
+                    self.showNotice('success', gl_color_palette_generator.i18n.connectionSuccess);
                 } else {
                     self.showNotice('error', response.data.message);
                 }
             }).always(function() {
-                self.testButton.prop('disabled', false).text(glColorPalette.i18n.testConnection);
+                self.testButton.prop('disabled', false).text(gl_color_palette_generator.i18n.testConnection);
             });
         },
 

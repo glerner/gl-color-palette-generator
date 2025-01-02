@@ -2,7 +2,7 @@
 /**
  * Plugin Information Class
  *
- * @package    GLColorPalette
+ * @package    GL_Color_Palette_Generator
  * @author     George Lerner
  * @link       https://website-tech.glerner.com/
  * @since      1.0.0
@@ -13,7 +13,7 @@ namespace GL_Color_Palette_Generator;
 /**
  * Static class to hold plugin information
  *
- * @package    GLColorPalette
+ * @package    GL_Color_Palette_Generator
  * @author     George Lerner
  * @link       https://website-tech.glerner.com/
  * @since      1.0.0

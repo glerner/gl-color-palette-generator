@@ -1,7 +1,7 @@
 <?php
 namespace GL_Color_Palette_Generator;
 
-class GLColorPaletteManager {
+class GL_Color_Palette_GeneratorManager {
     use GL_Color_Palette_GeneratorDatabaseTables;
 
     /**

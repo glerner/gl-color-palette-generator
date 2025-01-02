@@ -1,7 +1,7 @@
 <?php
 namespace GL_Color_Palette_Generator;
 
-trait GLColorPaletteDatabaseTables {
+trait GL_Color_Palette_GeneratorDatabaseTables {
     /**
      * Get table name
      */

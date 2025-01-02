@@ -8,7 +8,7 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 /**
  * GL Color Palette Generator Uninstall Class
  */
-class GLColorPaletteUninstall {
+class GL_Color_Palette_GeneratorUninstall {
     /**
      * Run the uninstaller
      */
@@ -181,4 +181,4 @@ class GLColorPaletteUninstall {
 }
 
 // Run the uninstaller
-GLColorPaletteUninstall::uninstall();
+GL_Color_Palette_Generator_Uninstall::uninstall();

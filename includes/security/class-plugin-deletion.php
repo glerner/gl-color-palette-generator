@@ -1,7 +1,7 @@
 <?php
 namespace GL_Color_Palette_Generator;
 
-class GLColorPaletteDeletion {
+class GL_Color_Palette_GeneratorDeletion {
     /**
      * Initialize
      */
@@ -160,7 +160,7 @@ class GLColorPaletteDeletion {
         // Export data if requested
         if (isset($_POST['export_data']) && $_POST['export_data'] == '1') {
             require_once GL_COLOR_PALETTE_PLUGIN_DIR . 'includes/class-data-exporter.php';
-            GLColorPaletteExporter::export_all_data();
+            GL_Color_Palette_Generator_Exporter::export_all_data();
         }
 
         // Deactivate plugin

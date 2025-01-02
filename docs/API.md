@@ -37,7 +37,7 @@ The plugin supports multiple AI providers through a standardized configuration i
 1. Create a new provider configuration class that extends `Provider_Config`:
 
 ```php
-namespace GLColorPalette\Providers;
+namespace GL_Color_Palette_Generator\Providers;
 class New_Provider_Config extends Provider_Config {
     /**
      * Returns the provider name
@@ -132,7 +132,7 @@ You can implement custom color generation logic by creating a class that impleme
 
 ```php
 namespace YourNamespace;
-use GLColorPalette\Interfaces\Color_Generator;
+use GL_Color_Palette_Generator\Interfaces\Color_Generator;
 class Custom_Generator implements Color_Generator {
     /**
      * Generates a color palette
@@ -222,8 +222,8 @@ POST /wp-json/gl-color-palette/v1/analyze
 ## Error Handling
 
 ```php
-use GLColorPalette\Exceptions\Provider_Exception;
-use GLColorPalette\Exceptions\Validation_Exception;
+use GL_Color_Palette_Generator\Exceptions\Provider_Exception;
+use GL_Color_Palette_Generator\Exceptions\Validation_Exception;
 try {
     $generator->generate_palette();
 } catch (Provider_Exception $e) {
@@ -236,8 +236,8 @@ try {
 php:tests/test-ajax-handler.php
 ```php
 <?php
-namespace GLColorPalette\Tests;
-use GLColorPalette\Ajax_Handler;
+namespace GL_Color_Palette_Generator\Tests;
+use GL_Color_Palette_Generator\Ajax_Handler;
 use WP_UnitTestCase;
 class Test_Ajax_Handler extends WP_UnitTestCase {
     private $ajax_handler;

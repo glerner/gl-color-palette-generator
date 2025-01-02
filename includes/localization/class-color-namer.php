@@ -31,7 +31,7 @@ class ColorNamer {
                 $this->settings->get_setting('api_key')
             );
         } elseif ($this->settings->get_setting('naming_service') === 'color_pizza') {
-            $this->color_pizza_client = new \GLColorPalette\Providers\Color_Pizza_Provider();
+            $this->color_pizza_client = new \GL_Color_Palette_Generator\Providers\Color_Pizza_Provider();
         }
     }
 

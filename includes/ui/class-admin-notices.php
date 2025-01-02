@@ -1,7 +1,7 @@
 <?php
 namespace GL_Color_Palette_Generator;
 
-class GLColorPaletteAdminNotices {
+class GL_Color_Palette_GeneratorAdminNotices {
     /**
      * Show deletion notice
      */

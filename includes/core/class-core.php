@@ -29,7 +29,7 @@ class Core {
      */
     public function init() {
         // Initialize dependency manager
-        $this->dependency_manager = new GLColorPaletteDependencyManager();
+        $this->dependency_manager = new GL_Color_Palette_GeneratorDependencyManager();
 
         if (!$this->dependency_manager->init()) {
             add_action('admin_notices', [$this, 'show_dependency_errors']);
