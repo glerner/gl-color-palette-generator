@@ -82,8 +82,8 @@ class Test_Case extends WP_UnitTestCase {
      * @param float  $delta Allowed variance
      */
     protected function assertContrastRatio($color1, $color2, $expected_ratio, $delta = 0.1) {
-        $analyzer = new \GL_Color_Palette_Generator\Core\Color_Metrics_Analyzer();
-        $actual_ratio = $analyzer->calculate_contrast($color1, $color2);
+        $checker = new \GL_Color_Palette_Generator\Accessibility\Accessibility_Checker();
+        $actual_ratio = $checker->calculate_contrast_ratio($color1, $color2);
         
         $this->assertEqualsWithDelta(
             $expected_ratio,
@@ -108,11 +108,11 @@ class Test_Case extends WP_UnitTestCase {
      * @param string $context Context (normal or large text)
      */
     protected function assertWCAGAACompliant($color1, $color2, $context = 'normal') {
-        $analyzer = new \GL_Color_Palette_Generator\Core\Color_Metrics_Analyzer();
-        $results = $analyzer->check_accessibility([$color1, $color2]);
+        $checker = new \GL_Color_Palette_Generator\Accessibility\Accessibility_Checker();
+        $is_compliant = $checker->meets_wcag_aa($color1, $color2, $context);
         
         $this->assertTrue(
-            $results['WCAG_AA'],
+            $is_compliant,
             sprintf(
                 'Expected colors %s and %s to be WCAG AA compliant for %s text',
                 $color1,
@@ -130,11 +130,11 @@ class Test_Case extends WP_UnitTestCase {
      * @param string $context Context (normal or large text)
      */
     protected function assertWCAGAAACompliant($color1, $color2, $context = 'normal') {
-        $analyzer = new \GL_Color_Palette_Generator\Core\Color_Metrics_Analyzer();
-        $results = $analyzer->check_accessibility([$color1, $color2]);
+        $checker = new \GL_Color_Palette_Generator\Accessibility\Accessibility_Checker();
+        $is_compliant = $checker->meets_wcag_aaa($color1, $color2, $context);
         
         $this->assertTrue(
-            $results['WCAG_AAA'],
+            $is_compliant,
             sprintf(
                 'Expected colors %s and %s to be WCAG AAA compliant for %s text',
                 $color1,

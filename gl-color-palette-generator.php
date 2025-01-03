@@ -21,10 +21,9 @@ if (!defined('ABSPATH')) {
 // Plugin version
 define('GL_CPG_VERSION', '1.0.0');
 
-// Plugin directory
+// Plugin paths and URLs
+define('GL_CPG_PLUGIN_FILE', __FILE__);
 define('GL_CPG_PLUGIN_DIR', plugin_dir_path(__FILE__));
-
-// Plugin URL
 define('GL_CPG_PLUGIN_URL', plugin_dir_url(__FILE__));
 
 // Load Composer's autoloader

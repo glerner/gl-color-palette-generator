@@ -20,6 +20,8 @@
 namespace GL_Color_Palette_Generator\Validation;
 
 use WP_Error;
+use GL_Color_Palette_Generator\Color_Management\Color_Utility;
+use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 
 /**
  * Class Color_Validation
@@ -30,10 +32,26 @@ use WP_Error;
  */
 class Color_Validation {
     /**
+     * Color utility instance
+     *
+     * @var Color_Utility
+     */
+    private $color_utility;
+
+    /**
+     * Constructor
+     *
+     * @param Color_Utility $color_utility Color utility instance
+     */
+    public function __construct(Color_Utility $color_utility) {
+        $this->color_utility = $color_utility;
+    }
+
+    /**
      * Validate color format
      *
      * @param string $color The color value to validate
-     * @param string $format The expected format (hex, rgb, hsl, rgba, hsla)
+     * @param string $format The expected format (hex, rgb, hsl)
      * @return array Validation results
      */
     public function validate_color($color, $format = 'hex') {
@@ -55,12 +73,6 @@ class Color_Validation {
                 case 'hsl':
                     $result = $this->validate_hsl_color($color);
                     break;
-                case 'rgba':
-                    $result = $this->validate_rgba_color($color);
-                    break;
-                case 'hsla':
-                    $result = $this->validate_hsla_color($color);
-                    break;
                 default:
                     throw new \Exception("Unsupported color format: {$format}");
             }
@@ -74,6 +86,109 @@ class Color_Validation {
                 'format' => $format
             ];
         }
+    }
+
+    /**
+     * Validate hex color format
+     *
+     * @param string $color Hex color to validate
+     * @return array Validation results
+     */
+    private function validate_hex_color($color) {
+        $pattern = '/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/';
+        $is_valid = preg_match($pattern, $color);
+
+        return [
+            'is_valid' => (bool) $is_valid,
+            'message' => $is_valid ? 'Valid hex color' : 'Invalid hex color format',
+            'normalized_value' => strtoupper($color),
+            'format' => 'hex'
+        ];
+    }
+
+    /**
+     * Validate RGB color format
+     *
+     * @param string|array $color RGB color to validate
+     * @return array Validation results
+     */
+    private function validate_rgb_color($color) {
+        if (is_string($color)) {
+            $pattern = '/^rgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)$/';
+            $is_valid = preg_match($pattern, $color);
+        } else if (is_array($color)) {
+            $is_valid = count($color) === 3 &&
+                       array_reduce($color, function($carry, $item) {
+                           return $carry && is_numeric($item) && $item >= 0 && $item <= 255;
+                       }, true);
+        } else {
+            $is_valid = false;
+        }
+
+        return [
+            'is_valid' => $is_valid,
+            'message' => $is_valid ? 'Valid RGB color' : 'Invalid RGB color format',
+            'normalized_value' => $color,
+            'format' => 'rgb'
+        ];
+    }
+
+    /**
+     * Validate HSL color format
+     *
+     * @param string|array $color HSL color to validate
+     * @return array Validation results
+     */
+    private function validate_hsl_color($color): array {
+        if (is_string($color)) {
+            $pattern = '/^hsl\((\d{1,3}),\s*(\d{1,3})%,\s*(\d{1,3})%\)$/';
+            $is_valid = preg_match($pattern, $color);
+        } else if (is_array($color)) {
+            $is_valid = count($color) === 3 &&
+                       is_numeric($color[0]) && $color[0] >= 0 && $color[0] < 360 &&
+                       is_numeric($color[1]) && $color[1] >= 0 && $color[1] <= 100 &&
+                       is_numeric($color[2]) && $color[2] >= 0 && $color[2] <= 100;
+        } else {
+            $is_valid = false;
+        }
+
+        return [
+            'is_valid' => $is_valid,
+            'message' => $is_valid ? 'Valid HSL color' : 'Invalid HSL color format',
+            'normalized_value' => $color,
+            'format' => 'hsl'
+        ];
+    }
+
+    /**
+     * Validate contrast requirements
+     *
+     * @param string $color Color to validate
+     * @return array Validation results
+     */
+    private function validate_contrast_requirements(string $color): array {
+        $results = [];
+        $rgb = $this->color_utility->hex_to_rgb($color);
+        $luminance = $this->color_utility->get_relative_luminance($color);
+
+        // Check contrast with off-white and near-black for better visual comfort
+        $light_contrast = $this->color_utility->get_contrast_ratio(
+            $color,
+            Color_Constants::COLOR_OFF_WHITE  // Off-white for better visual comfort
+        );
+        $dark_contrast = $this->color_utility->get_contrast_ratio(
+            $color,
+            Color_Constants::COLOR_NEAR_BLACK  // Near-black for better visual comfort
+        );
+
+        $min_contrast = Color_Constants::ACCESSIBILITY_CONFIG['contrast']['min_ratio'];
+
+        $results['passes_light_contrast'] = $light_contrast >= $min_contrast;
+        $results['passes_dark_contrast'] = $dark_contrast >= $min_contrast;
+        $results['light_contrast_ratio'] = $light_contrast;
+        $results['dark_contrast_ratio'] = $dark_contrast;
+
+        return $results;
     }
 
     /**
@@ -126,73 +241,6 @@ class Color_Validation {
                 'version_control' => $this->validate_version_control($palette)
             ]
         ];
-    }
-
-    /**
-     * Private helper methods
-     */
-    private function validate_hex_color($color) {
-        $pattern = '/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/';
-        $is_valid = preg_match($pattern, $color);
-
-        return [
-            'is_valid' => (bool) $is_valid,
-            'message' => $is_valid ? 'Valid hex color' : 'Invalid hex color format',
-            'normalized_value' => strtoupper($color),
-            'format' => 'hex'
-        ];
-    }
-
-    private function validate_rgb_color($color) {
-        if (is_string($color)) {
-            $pattern = '/^rgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)$/';
-            $is_valid = preg_match($pattern, $color);
-        } else if (is_array($color)) {
-            $is_valid = count($color) === 3 &&
-                       array_reduce($color, function($carry, $item) {
-                           return $carry && is_numeric($item) && $item >= 0 && $item <= 255;
-                       }, true);
-        } else {
-            $is_valid = false;
-        }
-
-        return [
-            'is_valid' => $is_valid,
-            'message' => $is_valid ? 'Valid RGB color' : 'Invalid RGB color format',
-            'normalized_value' => $color,
-            'format' => 'rgb'
-        ];
-    }
-
-    /**
-     * Validate contrast requirements
-     *
-     * @param string $color Color to validate
-     * @return array Validation results
-     */
-    private function validate_contrast_requirements(string $color): array {
-        $results = [];
-        $rgb = $this->color_utility->hex_to_rgb($color);
-        $luminance = $this->color_utility->calculate_relative_luminance($rgb);
-
-        // Check contrast with white and black
-        $white_contrast = $this->accessibility_checker->get_contrast_ratio(
-            $color,
-            Color_Constants::COLOR_METRICS['colors']['light']
-        );
-        $black_contrast = $this->accessibility_checker->get_contrast_ratio(
-            $color,
-            Color_Constants::COLOR_METRICS['colors']['dark']
-        );
-
-        $min_contrast = Color_Constants::ACCESSIBILITY_CONFIG['contrast']['min_ratio'];
-
-        $results['passes_light_contrast'] = $white_contrast >= $min_contrast;
-        $results['passes_dark_contrast'] = $black_contrast >= $min_contrast;
-        $results['light_contrast_ratio'] = $white_contrast;
-        $results['dark_contrast_ratio'] = $black_contrast;
-
-        return $results;
     }
 
     /**

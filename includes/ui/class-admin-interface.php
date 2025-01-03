@@ -200,11 +200,9 @@ class AdminInterface {
                 throw new Exception('Failed to generate palette');
             }
 
-            $preview = $this->preview_generator->generate_preview($palette);
-
+            // Return just the palette for now, preview will be handled by block-based demo page
             wp_send_json_success([
-                'palette' => $palette,
-                'preview' => $preview
+                'palette' => $palette
             ]);
         } catch (Exception $e) {
             wp_send_json_error([

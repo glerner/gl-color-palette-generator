@@ -14,6 +14,13 @@ namespace GL_Color_Palette_Generator\Utils;
  */
 class Error_Handler {
     /**
+     * Array of error messages
+     *
+     * @var array
+     */
+    private array $errors = [];
+
+    /**
      * Initialize error handling
      */
     public function init() {
@@ -31,8 +38,8 @@ class Error_Handler {
      * @param int    $errline Line number where error occurred.
      * @return bool
      */
-    public function handle_error($errno, $errstr, $errfile, $errline) {
-        if (!(error_reporting() & $errno)) {
+    public function handle_error(int $errno, string $errstr, string $errfile, int $errline): bool {
+        if (!(bool)(error_reporting() & $errno)) {
             return false;
         }
 
@@ -75,7 +82,7 @@ class Error_Handler {
     public function handle_shutdown() {
         $error = error_get_last();
 
-        if ($error !== null && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        if ($error !== null && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
             $error_message = sprintf(
                 'Fatal Error [%s]: %s in %s on line %d',
                 $this->get_error_type($error['type']),
@@ -94,7 +101,7 @@ class Error_Handler {
      * @param int $type Error type number.
      * @return string
      */
-    private function get_error_type($type) {
+    public function get_error_type($type) {
         switch ($type) {
             case E_ERROR:
                 return 'E_ERROR';
@@ -136,9 +143,26 @@ class Error_Handler {
      *
      * @param string $message Error message to log.
      */
-    private function log_error($message) {
+    public function log_error($message) {
+        $this->errors[] = $message;
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log(sprintf('[GL Color Palette Generator] %s', $message));
         }
+    }
+
+    /**
+     * Get all logged errors
+     *
+     * @return array Array of error messages
+     */
+    public function get_errors(): array {
+        return $this->errors;
+    }
+
+    /**
+     * Clear all logged errors
+     */
+    public function clear_errors(): void {
+        $this->errors = [];
     }
 }

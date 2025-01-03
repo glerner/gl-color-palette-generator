@@ -106,7 +106,7 @@ abstract class Test_Provider_Integration extends Test_Case_Integration {
     protected function assertValidPalette($palette) {
         $this->assertIsArray($palette, 'Palette should be an array');
         $this->assertNotEmpty($palette, 'Palette should not be empty');
-        
+
         foreach ($palette as $color) {
             $this->assertMatchesRegularExpression(
                 '/^#[0-9A-F]{6}$/i',
@@ -122,12 +122,21 @@ abstract class Test_Provider_Integration extends Test_Case_Integration {
      * @param array $palette The palette to check
      */
     protected function assertPaletteAccessible($palette) {
-        $analyzer = new \GL_Color_Palette_Generator\Core\Color_Metrics_Analyzer();
-        $results = $analyzer->check_accessibility($palette);
-        
-        $this->assertTrue(
-            $results['WCAG_AA'],
-            'Palette colors should meet WCAG AA contrast requirements'
-        );
+        $checker = new \GL_Color_Palette_Generator\Accessibility\Accessibility_Checker();
+
+        // Check each color against others for WCAG AA compliance
+        $colors_count = count($palette);
+        for ($i = 0; $i < $colors_count; $i++) {
+            for ($j = $i + 1; $j < $colors_count; $j++) {
+                $this->assertTrue(
+                    $checker->meets_wcag_aa($palette[$i], $palette[$j], 'normal'),
+                    sprintf(
+                        'Colors %s and %s should meet WCAG AA contrast requirements',
+                        $palette[$i],
+                        $palette[$j]
+                    )
+                );
+            }
+        }
     }
 }
