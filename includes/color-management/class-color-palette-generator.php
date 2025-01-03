@@ -50,141 +50,135 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
      */
     public function generate_palette(array $options = []): Color_Palette|WP_Error {
         try {
-            $base_color = $options['base_color'] ?? $this->generate_random_color();
-            $algorithm = $options['algorithm'] ?? 'monochromatic';
+            $scheme_type = $options['scheme_type'] ?? Color_Constants::SCHEME_MONOCHROMATIC;
 
+            // Handle AI-generated palettes
+            if ($scheme_type === Color_Constants::SCHEME_AI_GENERATED) {
+                return $this->generate_ai_palette($options);
+            }
+
+            // Handle traditional color wheel schemes
+            $base_color = $options['base_color'] ?? $this->generate_random_color();
             if ($base_color === '' || !Color_Types::is_valid_hex_color($base_color)) {
                 return new WP_Error('invalid_color', __('Invalid base color provided', 'gl-color-palette-generator'));
             }
 
-            switch ($algorithm) {
-                case 'complementary':
-                    return $this->generate_complementary($base_color, $options);
-                case 'analogous':
-                    return $this->generate_analogous($base_color, $options);
-                case 'triadic':
-                    return $this->generate_triadic($base_color, $options);
-                case 'monochromatic':
-                    return $this->generate_monochromatic($base_color, $options);
-                default:
-                    return new WP_Error('invalid_algorithm', __('Invalid algorithm specified', 'gl-color-palette-generator'));
-            }
+            return $this->generate_color_wheel_palette($base_color, $scheme_type, $options);
         } catch (\Exception $e) {
             return new WP_Error('generation_failed', $e->getMessage());
         }
     }
 
     /**
-     * Generate complementary color palette
+     * Generate an AI-powered color palette
      *
-     * @param string $base_color Base color to build from.
-     * @param array  $options    Generation options.
-     * @return Color_Palette|WP_Error Generated palette or error.
+     * @param array $options Generation options including business context and image data.
+     * @return Color_Palette Generated palette.
      */
-    public function generate_complementary(string $base_color, array $options = []): Color_Palette|WP_Error {
-        try {
-            $hsl = $this->color_utility->hex_to_hsl($base_color);
-            $complement_hsl = $hsl;
-            $complement_hsl['h'] = ($hsl['h'] + 180) % 360;
+    private function generate_ai_palette(array $options): Color_Palette {
+        $ai_provider = AI_Provider_Factory::create_provider();
+        $business_context = $options['business_context'] ?? [];
+        $image_data = $options['image_data'] ?? null;
 
-            $colors = [
-                'base' => $base_color,
-                'complement' => $this->color_utility->hsl_to_hex($complement_hsl)
-            ];
-
-            return new Color_Palette($colors);
-        } catch (\Exception $e) {
-            return new WP_Error('complementary_generation_failed', $e->getMessage());
+        // Check if we have enough context (any field with content is fine for now)
+        if (empty($business_context) && empty($image_data)) {
+            throw new \InvalidArgumentException('Need either business context or image for AI generation');
         }
-    }
 
-    /**
-     * Generate analogous color palette
-     *
-     * @param string $base_color Base color to build from.
-     * @param array  $options    Generation options.
-     * @return Color_Palette|WP_Error Generated palette or error.
-     */
-    public function generate_analogous(string $base_color, array $options = []): Color_Palette|WP_Error {
-        try {
-            $hsl = $this->color_utility->hex_to_hsl($base_color);
-            $angle = $options['angle'] ?? 30;
+        // Prepare the generation context
+        $context = [
+            'business' => $business_context,
+            'image' => $image_data,
+            'constraints' => $options['constraints'] ?? [],
+            'accessibility' => $options['accessibility'] ?? true
+        ];
 
-            $colors = [
-                'base' => $base_color,
-                'analogous1' => $this->color_utility->hsl_to_hex([
-                    'h' => ($hsl['h'] + $angle) % 360,
-                    's' => $hsl['s'],
-                    'l' => $hsl['l']
-                ]),
-                'analogous2' => $this->color_utility->hsl_to_hex([
-                    'h' => ($hsl['h'] - $angle + 360) % 360,
-                    's' => $hsl['s'],
-                    'l' => $hsl['l']
-                ])
-            ];
-
-            return new Color_Palette($colors);
-        } catch (\Exception $e) {
-            return new WP_Error('analogous_generation_failed', $e->getMessage());
-        }
-    }
-
-    /**
-     * Generate triadic color palette
-     *
-     * @param string $base_color Base color to build from.
-     * @param array  $options    Generation options.
-     * @return Color_Palette|WP_Error Generated palette or error.
-     */
-    public function generate_triadic(string $base_color, array $options = []): Color_Palette|WP_Error {
-        try {
-            $hsl = $this->color_utility->hex_to_hsl($base_color);
-
-            $colors = [
-                'base' => $base_color,
-                'triad1' => $this->color_utility->hsl_to_hex([
-                    'h' => ($hsl['h'] + 120) % 360,
-                    's' => $hsl['s'],
-                    'l' => $hsl['l']
-                ]),
-                'triad2' => $this->color_utility->hsl_to_hex([
-                    'h' => ($hsl['h'] + 240) % 360,
-                    's' => $hsl['s'],
-                    'l' => $hsl['l']
-                ])
-            ];
-
-            return new Color_Palette($colors);
-        } catch (\Exception $e) {
-            return new WP_Error('triadic_generation_failed', $e->getMessage());
-        }
-    }
-
-    /**
-     * Generate monochromatic color palette
-     *
-     * @param string $base_color Base color to build from.
-     * @param array  $options    Generation options.
-     * @return Color_Palette|WP_Error Generated palette or error.
-     */
-    public function generate_monochromatic(string $base_color, array $options = []): Color_Palette|WP_Error {
-        try {
-            $hsl = $this->color_utility->hex_to_hsl($base_color);
-            $count = $options['count'] ?? 5;
-            $step = 100 / ($count + 1);
-
-            $colors = ['base' => $base_color];
-            for ($i = 1; $i < $count; $i++) {
-                $new_hsl = $hsl;
-                $new_hsl['l'] = min(100, max(0, $step * $i));
-                $colors["shade$i"] = $this->color_utility->hsl_to_hex($new_hsl);
+        // Generate base colors using AI
+        if ($image_data) {
+            if ($image_data['context_type'] === 'extract') {
+                $colors = $this->extract_colors_from_image($image_data['image_path']);
+            } else {
+                // Always let AI enhance image colors for web
+                $colors = $ai_provider->generate_colors_from_image($image_data['image_path'], $context);
             }
-
-            return new Color_Palette($colors);
-        } catch (\Exception $e) {
-            return new WP_Error('monochromatic_generation_failed', $e->getMessage());
+        } else {
+            $colors = $ai_provider->generate_themed_colors($context);
         }
+
+        // Always ensure WCAG compliance
+        $colors = $this->ensure_accessibility($colors);
+
+        // Create palette with metadata
+        return new Color_Palette([
+            'colors' => $colors,  // Already has roles from AI or extract_colors_from_image
+            'scheme_type' => Color_Constants::SCHEME_AI_GENERATED,
+            'inspiration' => [
+                'type' => $image_data ? 'image' : 'business',
+                'source' => $this->get_inspiration_source($options)
+            ]
+        ]);
+    }
+
+    /**
+     * Extract colors directly from an image using existing code
+     *
+     * @param string $image_path Path to the image file.
+     * @return array Array of color data in format matching Color_Constants::AI_RESPONSE_FORMAT
+     */
+    private function extract_colors_from_image(string $image_path): array {
+        // Get colors from image
+        $hex_colors = $this->color_utility->extract_colors($image_path);
+
+        // Format to match AI response format, though not done using AI
+        $response = [];
+        $roles = ['primary', 'secondary', 'accent', 'contrast'];
+        $fallbacks = ['#000000', '#FFFFFF', '#808080', '#404040'];
+
+        foreach ($roles as $i => $role) {
+            $hex = $hex_colors[$i] ?? $fallbacks[$i];
+            $response[$role] = [
+                'hex' => $hex,
+                'name' => $this->color_utility->get_color_name($hex),
+                'emotion' => 'Extracted from image'
+            ];
+        }
+
+        return $response;
+    }
+
+    /**
+     * Ensure colors meet WCAG accessibility requirements
+     * 
+     * @param array $colors Colors in AI response format
+     * @return array Adjusted colors in same format
+     */
+    private function ensure_accessibility(array $colors): array {
+        // Keep all color data, just adjust hex values if needed
+        foreach ($colors as $role => $color_data) {
+            $adjusted_hex = $this->color_utility->ensure_contrast($color_data['hex']);
+            $colors[$role]['hex'] = $adjusted_hex;
+            // Update name if color changed
+            if ($adjusted_hex !== $color_data['hex']) {
+                $colors[$role]['name'] = $this->color_utility->get_color_name($adjusted_hex);
+            }
+        }
+        return $colors;
+    }
+
+    /**
+     * Get the inspiration source description
+     *
+     * @param array $options Generation options.
+     * @return string Source description.
+     */
+    private function get_inspiration_source(array $options): string {
+        if (isset($options['image_data'])) {
+            return basename($options['image_data']['image_path']);
+        }
+        if (isset($options['business_context']['description'])) {
+            return $options['business_context']['description'];
+        }
+        return 'Generated theme';
     }
 
     /**
@@ -233,9 +227,9 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
      */
     protected function build_ai_prompt(array $context): string {
         $prompt_parts = [
-            "You are a color palette expert for websites, with full knowledge of color mood, color contrast, and Accessibility Guidelines for color contrast. You are also a WordPress theme.json developer.",
+            "You are a color palette expert for websites, with full knowledge of color mood and psychology, color contrast, and color harmony. You are also a WordPress theme.json developer.",
             "",
-            "Generate a website color palette with the following requirements:",
+            "Generate base colors for a website color palette with the following requirements:",
             "",
             "Business Description:",
             $context['business_type'] ?? 'Not specified',
@@ -388,12 +382,7 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
      * @return array List of available algorithms.
      */
     public function get_available_algorithms(): array {
-        return [
-            'monochromatic' => __('Monochromatic', 'gl-color-palette-generator'),
-            'complementary' => __('Complementary', 'gl-color-palette-generator'),
-            'analogous' => __('Analogous', 'gl-color-palette-generator'),
-            'triadic' => __('Triadic', 'gl-color-palette-generator')
-        ];
+        return array_keys(Color_Constants::COLOR_SCHEMES);
     }
 
     /**
@@ -406,7 +395,7 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
             'algorithm' => 'monochromatic',
             'count' => 5,
             'angle' => 30,
-            'contrast_ratio' => Color_Constants::WCAG_CONTRAST_AA
+            'contrast_ratio' => Color_Constants::WCAG_CONTRAST_TARGET
         ];
     }
 

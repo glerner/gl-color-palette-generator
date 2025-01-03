@@ -47,12 +47,17 @@ interface Color_Constants {
     public const SCHEME_MONOCHROMATIC = 'monochromatic';
     public const SCHEME_ANALOGOUS = 'analogous';
     public const SCHEME_COMPLEMENTARY = 'complementary';
+    public const SCHEME_ANALOGOUS_COMPLEMENT = 'analogous-complement';
+    public const SCHEME_MONOCHROMATIC_ACCENT = 'monochromatic-accent';
+    public const SCHEME_DUAL_TONE = 'dual-tone';
+    public const SCHEME_NEUTRAL_POP = 'neutral-pop';
     public const SCHEME_SPLIT_COMPLEMENTARY = 'split-complementary';
     public const SCHEME_TRIADIC = 'triadic';
     public const SCHEME_TETRADIC = 'tetradic';
+    public const SCHEME_SQUARE = 'square';
     public const SCHEME_CUSTOM = 'custom';
     public const SCHEME_FROM_IMAGE = 'from-image';
-    public const SCHEME_THEMED = 'themed';
+    public const SCHEME_AI_GENERATED = 'ai-generated';
 
     /**
      * Color Wheel Relationships
@@ -72,7 +77,9 @@ interface Color_Constants {
 
     /**
      * Color Role Relationships
-     * Maps semantic roles to color wheel positions
+     * Maps semantic roles to color wheel positions.
+     * Only used for color-wheel-based schemes (analogous, complementary, etc.).
+     * Other schemes (AI-generated, neutral-pop, etc.) determine relationships differently.
      */
     const COLOR_ROLE_RELATIONSHIPS = [
         'monochromatic' => [
@@ -120,8 +127,10 @@ interface Color_Constants {
 
     /**
      * Required minimum roles for each scheme type
+     * Default is used when no specific requirements are defined
      */
     const REQUIRED_ROLES = [
+        'default' => ['primary', 'secondary', 'accent', 'contrast'],
         'monochromatic' => ['primary', 'contrast'],
         'complementary' => ['primary', 'accent', 'contrast'],
         'analogous'     => ['primary', 'secondary', 'tertiary', 'contrast'],
@@ -144,6 +153,7 @@ interface Color_Constants {
     /**
      * Common Color Applications
      * Maps semantic roles to typical WordPress theme elements
+     * Descriptions are for light-mode (plugin automatically adds dark-mode)
      */
     const COLOR_APPLICATIONS = [
         'primary' => [
@@ -289,43 +299,76 @@ interface Color_Constants {
     const COLOR_SCHEMES = [
         'monochromatic' => [
             'type'  => 'monochromatic',
-            'name'  => 'Mono',
+            'name'  => 'Single Color',
             'label' => 'Monochromatic',
-            'roles' => ['primary', 'contrast']
+            'roles' => ['primary', 'secondary', 'tertiary']
         ],
-        'complementary' => [
-            'type'  => 'complementary',
-            'name'  => 'Duo',
-            'label' => 'Complementary',
-            'roles' => ['primary', 'accent', 'contrast']
-        ],
-        'split-complementary' => [
-            'type'  => 'split-complementary',
-            'name'  => 'Split',
-            'label' => 'Split Complementary',
-            'roles' => ['primary', 'secondary', 'accent', 'contrast'],
-            'relationships' => [
-                'secondary' => 'analogous',     // Secondary is analogous to primary
-                'accent'    => 'complementary'  // Accent is complementary to primary
-            ]
+        'monochromatic-accent' => [
+            'type'  => 'monochromatic-accent',
+            'name'  => 'Minimalist',
+            'label' => 'Monochromatic with Accent',
+            'roles' => ['primary', 'secondary', 'accent', 'background', 'text']
         ],
         'analogous' => [
             'type'  => 'analogous',
             'name'  => 'Harmony',
             'label' => 'Analogous',
-            'roles' => ['primary', 'secondary', 'tertiary', 'contrast']
+            'roles' => ['primary', 'secondary', 'tertiary']
+        ],
+        'analogous-complement' => [
+            'type'  => 'analogous-complement',
+            'name'  => 'Modern Theme',
+            'label' => 'Analogous with Complement',
+            'roles' => ['primary', 'secondary', 'accent', 'background', 'text']
+        ],
+        'complementary' => [
+            'type'  => 'complementary',
+            'name'  => 'Contrast',
+            'label' => 'Complementary',
+            'roles' => ['primary', 'secondary']
+        ],
+        'split-complementary' => [
+            'type'  => 'split-complementary',
+            'name'  => 'Balance',
+            'label' => 'Split Complementary',
+            'roles' => ['primary', 'secondary', 'tertiary']
         ],
         'triadic' => [
             'type'  => 'triadic',
             'name'  => 'Triad',
             'label' => 'Triadic',
-            'roles' => ['primary', 'secondary', 'tertiary', 'contrast']
+            'roles' => ['primary', 'secondary', 'tertiary']
         ],
         'tetradic' => [
             'type'  => 'tetradic',
-            'name'  => 'Quartet',
+            'name'  => 'Double Complement',
             'label' => 'Tetradic',
-            'roles' => ['primary', 'secondary', 'tertiary', 'accent', 'contrast']
+            'roles' => ['primary', 'secondary', 'tertiary', 'quaternary']
+        ],
+        'square' => [
+            'type'  => 'square',
+            'name'  => 'Four Point',
+            'label' => 'Square',
+            'roles' => ['primary', 'secondary', 'tertiary', 'quaternary']
+        ],
+        'dual-tone' => [
+            'type'  => 'dual-tone',
+            'name'  => 'Professional',
+            'label' => 'Dual Tone',
+            'roles' => ['primary', 'secondary', 'background', 'text']
+        ],
+        'neutral-pop' => [
+            'type'  => 'neutral-pop',
+            'name'  => 'Business',
+            'label' => 'Neutral with Pop',
+            'roles' => ['primary', 'secondary', 'accent', 'background', 'text']
+        ],
+        'ai-generated' => [
+            'type'  => 'ai-generated',
+            'name'  => 'AI Design',
+            'label' => 'AI-Generated Palette',
+            'roles' => ['primary', 'secondary', 'accent', 'background', 'text'],
+            'description' => 'Let AI generate a custom color palette optimized for your specific needs. Can work from themes (e.g., "Valentine\'s Day"), business goals (e.g., "trustworthy finance site"), or even photos (adjusting colors for optimal web usage).'
         ]
     ];
 
@@ -593,6 +636,11 @@ interface Color_Constants {
      * @var array
      */
     public const COLOR_SPACE_CONVERSION = [
+        'formats' => [
+            'hex' => '/^#?([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/',
+            'rgb' => '/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/',
+            'hsl' => '/^hsl\(\s*(\d{1,3})\s*,\s*(\d{1,3})%\s*,\s*(\d{1,3})%\s*\)$/'
+        ],
         'rgb_to_xyz' => [
             [0.4124564, 0.3575761, 0.1804375],
             [0.2126729, 0.7151522, 0.0721750],
@@ -774,6 +822,25 @@ interface Color_Constants {
                 'name' => 'Artistic color name',
                 'emotion' => 'Emotional impact description'
             ]
+        ],
+        'palette_story' => 'Overall description of how the palette works together to achieve the business goals and appeal to the target audience'
+    ];
+
+    /**
+     * Palette Description Schema
+     * Defines the structure for describing a color palette
+     */
+    public const PALETTE_DESCRIPTION_SCHEMA = [
+        'palette_name' => 'Name of the color palette',
+        'brand_identity' => [
+            'primary_colors' => 'Description of how primary colors reflect brand values',
+            'secondary_colors' => 'Description of how secondary colors support the brand',
+            'accent_colors' => 'Description of how accent colors add visual interest'
+        ],
+        'color_psychology' => [
+            'emotional_impact' => 'Intended emotional response from the target audience',
+            'cultural_significance' => 'Cultural considerations and meanings',
+            'industry_relevance' => 'How colors align with industry standards'
         ],
         'palette_story' => 'Overall description of how the palette works together to achieve the business goals and appeal to the target audience'
     ];

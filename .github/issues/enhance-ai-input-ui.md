@@ -8,7 +8,7 @@ created: 2024-12-21
 ---
 
 **Description**
-Enhance the color palette generator UI to collect comprehensive business and design context for AI-driven color generation.
+Enhance the color palette generator UI to collect comprehensive business and design context for AI-driven color generation, including image-based generation with context.
 
 **Current State**
 Basic form in `templates/admin-page.php` has:
@@ -32,7 +32,19 @@ These questions form the foundation of our AI-driven color generation:
 
 Note: the plugin will ensure that the AI-generated palette meets WCAG color contrast compliance
 
-2. Business Context Section
+2. Image Upload Section (New)
+   - Website screenshot upload
+   - Inspiration photo upload
+   - Image context options:
+     - "Extract exact colors" (basic color extraction)
+     - "Enhance for web" (AI adjusts colors for optimal web usage)
+     - "Match style but improve" (AI creates new palette inspired by image)
+   - Image processing options (let AI handle):
+     - White balance correction
+     - Exposure adjustment
+     - Contrast enhancement
+
+3. Business Context Section
    - Industry (existing)
    - Business size/stage
    - Target market location
@@ -40,7 +52,7 @@ Note: the plugin will ensure that the AI-generated palette meets WCAG color cont
    - Brand values (multiple selection)
    - Business goals
 
-3. Target Audience Section
+4. Target Audience Section
    - Age range
    - Gender distribution
    - Income level
@@ -48,25 +60,25 @@ Note: the plugin will ensure that the AI-generated palette meets WCAG color cont
    - Cultural background
    - Tech-savviness
 
-4. Brand Personality Section
+5. Brand Personality Section
    - Brand voice (formal to casual slider)
    - Key personality traits
    - Emotional associations
    - Brand archetype selection
 
-5. Visual Preferences
+6. Visual Preferences
    - Preferred color families
    - Style preferences (modern, traditional, etc.)
    - Inspiration sources
    - Existing brand colors (if any)
 
-6. Technical Requirements
+7. Technical Requirements
    - Accessibility level (WCAG AA/AAA)
    - Platform/medium (web, print, both)
    - Dark mode support
    - Color count preference
 
-7. Cultural Considerations
+8. Cultural Considerations
    - Target markets/regions
    - Cultural color meanings
    - Religious considerations
@@ -85,6 +97,24 @@ Note: the plugin will ensure that the AI-generated palette meets WCAG color cont
         <div class="gl-field target-audience">...</div>
         <!-- Desired mood/emotional impact -->
         <div class="gl-field mood-impact">...</div>
+    </section>
+
+    <!-- Image Upload -->
+    <section class="gl-section image-upload">
+        <div class="gl-field screenshot-upload">
+            <label>Website Screenshot or Inspiration Photo</label>
+            <input type="file" accept="image/*" />
+            <select class="image-context">
+                <option value="extract">Extract exact colors</option>
+                <option value="enhance">Enhance for web</option>
+                <option value="inspire">Match style but improve</option>
+            </select>
+            <div class="image-processing-options">
+                <label><input type="checkbox" checked> Auto white balance</label>
+                <label><input type="checkbox" checked> Auto exposure</label>
+                <label><input type="checkbox" checked> Enhance contrast</label>
+            </div>
+        </div>
     </section>
 
     <!-- Business Context -->
@@ -112,50 +142,25 @@ Note: the plugin will ensure that the AI-generated palette meets WCAG color cont
 </form>
 ```
 
-2. UI Components Needed:
-   - Multi-select dropdowns
-   - Range sliders
-   - Color pickers
-   - Tag inputs
-   - Toggle switches
-   - Radio button groups
-   - Collapsible sections
+2. JavaScript Enhancements:
+- Dynamic form fields based on generation method
+- Image preview and basic analysis
+- Real-time validation
+- Accessibility checks
 
-3. Progressive Disclosure:
-   - Show basic fields first
-   - "Advanced options" expandable sections
-   - Dynamic field visibility based on context
+3. Processing Flow:
+```mermaid
+graph TD
+    A[User Input] --> B{Has Image?}
+    B -->|Yes| C[Process Image]
+    C --> D[Extract Colors]
+    D --> E[Apply Context]
+    B -->|No| E
+    E --> F[Generate Palette]
+    F --> G[Preview]
+```
 
-4. Validation:
-   - Required fields
-   - Contextual validation
-   - Error messaging
-   - Help text/tooltips
-
-**JavaScript Enhancements**
-1. Dynamic form behavior
-2. Real-time validation
-3. Field dependencies
-4. Preview updates
-5. Form state management
-
-**CSS Requirements**
-1. Responsive layout
-2. Accessible design
-3. Clear visual hierarchy
-4. Consistent spacing
-5. Mobile-friendly inputs
-
-**Benefits**
-- More accurate AI color generation
-- Better user experience
-- Comprehensive context gathering
-- Professional appearance
-- Improved results
-
-**Testing**
-1. Form validation
-2. Mobile responsiveness
-3. Accessibility
-4. Browser compatibility
-5. Performance impact
+**Notes**
+- All user input enhances AI understanding, whether using images or not
+- Image processing is optional but can improve results
+- Business context always guides final palette decisions

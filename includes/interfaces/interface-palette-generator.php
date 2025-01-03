@@ -19,18 +19,41 @@ interface PaletteGenerator {
      * @param array $criteria {
      *     Optional. Criteria for palette generation.
      *     @type string $base_color    Base color to build palette around.
-     *     @type string $harmony_type  Type of color harmony (see Color_Constants::COLOR_HARMONY_TYPES).
+     *     @type string $scheme_type   Type of color scheme (see Color_Constants::COLOR_SCHEMES).
      *     @type int    $color_count   Number of colors in palette (default 5).
      *     @type array  $constraints   Color constraints (brightness, saturation ranges).
-     *     @type bool   $accessibility Whether to enforce WCAG compliance.
+     *     @type array  $business_context {
+     *         Optional. Business and brand context for AI generation.
+     *         @type string $description    Business description.
+     *         @type string $industry       Business industry.
+     *         @type string $target_audience Target audience description.
+     *         @type string $mood           Desired mood/emotional impact.
+     *     }
+     *     @type array  $image_data {
+     *         Optional. Image-based generation data.
+     *         @type string $image_path     Path to uploaded image.
+     *         @type string $context_type   How to use image: 'extract' or 'inspire'.
+     *     }
      * }
      * @return array {
      *     Generated palette data.
-     *     @type array  $colors        Array of hex color codes.
-     *     @type array  $color_names   Human-readable color names.
-     *     @type string $harmony_type  Harmony type used.
-     *     @type array  $relationships Color relationships explanation.
-     *     @type array  $metadata      Additional palette metadata.
+     *     @type array  $colors {
+     *         Array of colors with roles as keys.
+     *         @type array $primary {
+     *             @type string $hex     Hex color code.
+     *             @type string $name    Human-readable color name.
+     *             @type string $emotion Description of emotional impact.
+     *         }
+     *         @type array $secondary Similar structure to primary.
+     *         @type array $accent    Similar structure to primary.
+     *         @type array $contrast  Similar structure to primary.
+     *     }
+     *     @type string $scheme_type   Scheme type used.
+     *     @type array  $inspiration {
+     *         Optional. Source of inspiration.
+     *         @type string $type      'image' or 'business'.
+     *         @type string $source    Description of inspiration source.
+     *     }
      * }
      * @throws \InvalidArgumentException If criteria are invalid.
      */
@@ -46,13 +69,15 @@ interface PaletteGenerator {
      *     @type bool   $check_harmony     Verify color harmony.
      *     @type string $accessibility     WCAG compliance level (see Color_Constants::WCAG_LEVELS).
      *     @type array  $required_colors   Colors that must be included.
+     *     @type array  $business_context  Business context for contextual validation.
      * }
      * @return array {
      *     Validation results.
-     *     @type bool   $is_valid      Overall validation status.
-     *     @type array  $issues        Array of identified issues.
-     *     @type array  $suggestions   Improvement suggestions.
-     *     @type float  $harmony_score Color harmony score (0-1).
+     *     @type bool   $valid            Overall validation result.
+     *     @type array  $contrast_scores   WCAG contrast scores.
+     *     @type array  $harmony_scores    Color harmony scores.
+     *     @type array  $context_scores    How well colors fit business context.
+     *     @type array  $messages         Validation messages and suggestions.
      * }
      */
     public function validate_palette(array $palette, array $rules = []): array;
@@ -91,4 +116,4 @@ interface PaletteGenerator {
      * }
      */
     public function get_palette_statistics(array $palette): array;
-} 
+}
