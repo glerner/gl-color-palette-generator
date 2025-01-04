@@ -10,7 +10,7 @@
 
 namespace GL_Color_Palette_Generator\Tests;
 
-class TestHelpers {
+class Test_Helpers {
     /**
      * Create a test palette
      *
@@ -43,4 +43,4 @@ class TestHelpers {
         global $wpdb;
         $wpdb->query("TRUNCATE TABLE {$wpdb->prefix}gl_color_palettes");
     }
-} 
+}

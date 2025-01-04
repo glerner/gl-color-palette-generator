@@ -5,7 +5,7 @@ use PHPUnit\Framework\TestListener;
 use PHPUnit\Framework\TestResult;
 use PHPUnit\TextUI\DefaultResultPrinter;
 
-class TestPrinter extends DefaultResultPrinter implements TestListener
+class Test_Printer extends DefaultResultPrinter implements TestListener
 {
     private $buffer = '';
     private $headersSafe = false;

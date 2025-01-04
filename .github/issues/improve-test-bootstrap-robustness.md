@@ -10,9 +10,9 @@ priority: medium
 ## Current Situation
 We have multiple bootstrap files with overlapping functionality and unclear usage:
 1. `bootstrap.php` - General bootstrap file
-2. `bootstrap-wp.php` - WordPress-specific bootstrap
-3. `bootstrap-wp-mock.php` - WP_Mock bootstrap
-4. `bootstrap-unit.php` - Unit test bootstrap
+2. `bootstrap/wp.php` - WordPress-specific bootstrap
+3. `bootstrap/wp-mock.php` - WP_Mock bootstrap
+4. `bootstrap/unit.php` - Unit test bootstrap
 
 This leads to:
 - Confusion about which bootstrap file to use for different test types
@@ -34,6 +34,7 @@ Add PHPDoc blocks to each test file indicating required bootstrap type:
  */
 class Test_Color_Metrics_Analyzer extends Test_Case {
 ```
+Other option: `@bootstrap wp`
 
 ### 2. Consolidate Bootstrap Files
 - `bootstrap.php` → Main entry point that delegates to specific bootstrappers
@@ -68,9 +69,9 @@ tests/
    - [ ] Add required packages to composer.json
    - [ ] Update phpunit.xml with new bootstrap paths
    - [ ] Add autoloading rules for test classes
-2. [ ] Create bootstrap directory structure
-   - [ ] Move existing bootstrap files to `tests/bootstrap/`
-   - [ ] Create `common.php` for shared functionality
+2. [x] Create bootstrap directory structure
+   - [x] Move existing bootstrap files to `tests/bootstrap/`
+   - [x] Create `common.php` for shared functionality
 3. [ ] Implement smart bootstrap detection
    - [ ] Directory-based fallback (`unit/*` → wp-mock, `integration/*` → wp)
    - [ ] Annotation-based override capability

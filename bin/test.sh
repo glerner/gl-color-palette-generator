@@ -2,7 +2,7 @@
 
 # Help text
 show_help() {
-    echo "Usage: $0 [options]"
+    echo "Usage: $0 [options] [--file FILE]"
     echo "Run tests for GL Color Palette Generator"
     echo ""
     echo "Options:"
@@ -16,6 +16,7 @@ show_help() {
     echo "  --core          Run core tests"
     echo "  --all           Run all tests"
     echo "  --coverage      Generate code coverage report"
+    echo "  --file FILE     Run specific test file"
     echo ""
     echo "Advanced options (if needed):"
     echo "  --testsuite NAME    Run specific test suite"
@@ -27,6 +28,7 @@ show_help() {
     echo "  $0 --mock           # Run WP Mock tests"
     echo "  $0 --providers      # Run only provider tests"
     echo "  $0 --all           # Run all tests"
+    echo "  $0 --mock --file tests/test-file.php  # Run specific test file"
 }
 
 # Default values
@@ -36,6 +38,7 @@ TESTSUITE=""
 DIRECTORY=""
 COVERAGE=""
 GROUP=""
+TEST_FILE=""
 
 # Validate WP_ROOT is set
 if [ -z "${WP_ROOT:-}" ]; then
@@ -46,6 +49,10 @@ if [ -z "${WP_ROOT:-}" ]; then
     echo "  bash ./bin/sync-to-wp.sh && \\"
     echo "  cd ~/sites/wordpress/wp-content/plugins/gl-color-palette-generator && \\"
     echo "  WP_ROOT=/app bin/test.sh --integration"
+
+    echo "Run a specific test file:"
+    echo "  $0 --mock --file tests/color-management/test-ai-palette-generator.php"
+
     exit 1
 fi
 
@@ -104,46 +111,46 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         --unit)
-            BOOTSTRAP="${TEST_DIR}/bootstrap-wp-mock.php"
+            BOOTSTRAP="${TEST_DIR}/bootstrap/wp-mock.php"
             TESTSUITE="unit"
             shift
             ;;
         --mock)
-            BOOTSTRAP="${TEST_DIR}/bootstrap-wp-mock.php"
+            BOOTSTRAP="${TEST_DIR}/bootstrap/wp-mock.php"
             TESTSUITE="unit"
             shift
             ;;
         --integration)
-            BOOTSTRAP="${TEST_DIR}/bootstrap-wp.php"
+            BOOTSTRAP="${TEST_DIR}/bootstrap/wp.php"
             TESTSUITE="integration"
             shift
             ;;
         --providers)
-            BOOTSTRAP="${TEST_DIR}/bootstrap-wp-mock.php"
+            BOOTSTRAP="${TEST_DIR}/bootstrap/wp-mock.php"
             DIRECTORY="${TEST_DIR}/providers"
             shift
             ;;
         --api)
-            BOOTSTRAP="${TEST_DIR}/bootstrap-wp-mock.php"
+            BOOTSTRAP="${TEST_DIR}/bootstrap/wp-mock.php"
             DIRECTORY="${TEST_DIR}/api"
             shift
             ;;
         --admin)
-            BOOTSTRAP="${TEST_DIR}/bootstrap-wp-mock.php"
+            BOOTSTRAP="${TEST_DIR}/bootstrap/wp-mock.php"
             DIRECTORY="${TEST_DIR}/admin"
             shift
             ;;
         --core)
-            BOOTSTRAP="${TEST_DIR}/bootstrap-wp-mock.php"
+            BOOTSTRAP="${TEST_DIR}/bootstrap/wp-mock.php"
             DIRECTORY="${TEST_DIR}/core"
             shift
             ;;
         --all)
-            # If --integration is also specified, use bootstrap-wp.php
+            # If --integration is also specified, use bootstrap/wp.php
             if [[ "$*" == *"--integration"* ]]; then
-                BOOTSTRAP="${TEST_DIR}/bootstrap-wp.php"
+                BOOTSTRAP="${TEST_DIR}/bootstrap/wp.php"
             else
-                BOOTSTRAP="${TEST_DIR}/bootstrap-wp-mock.php"
+                BOOTSTRAP="${TEST_DIR}/bootstrap/wp-mock.php"
             fi
             shift
             ;;
@@ -163,6 +170,10 @@ while [[ $# -gt 0 ]]; do
             BOOTSTRAP="$2"
             shift 2
             ;;
+        --file)
+            TEST_FILE="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown option: $1"
             show_help
@@ -177,7 +188,7 @@ CMD="$PHPUNIT"
 [[ -n "$TESTSUITE" ]] && CMD="$CMD --testsuite $TESTSUITE"
 [[ -n "$GROUP" ]] && CMD="$CMD $GROUP"
 [[ -n "$COVERAGE" ]] && CMD="$CMD $COVERAGE"
-[[ -n "$DIRECTORY" ]] && CMD="$CMD $DIRECTORY"
+[[ -n "$TEST_FILE" ]] && CMD="$CMD $TEST_FILE" || [[ -n "$DIRECTORY" ]] && CMD="$CMD $DIRECTORY"
 
 # Add verbose output
 CMD="$CMD --debug --verbose"
