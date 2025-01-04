@@ -98,8 +98,8 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
             if ($image_data['context_type'] === 'extract') {
                 $colors = $this->extract_colors_from_image($image_data['image_path']);
             } else {
-                // Always let AI enhance image colors for web
-                $colors = $ai_provider->generate_colors_from_image($image_data['image_path'], $context);
+                // AI enhancement for web-optimized colors
+                $colors = $ai_provider->generate_colors_from_image($image_data['image_path'], $context, 'ai-enhance');
             }
         } else {
             $colors = $ai_provider->generate_themed_colors($context);
@@ -148,7 +148,7 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
 
     /**
      * Ensure colors meet WCAG accessibility requirements
-     * 
+     *
      * @param array $colors Colors in AI response format
      * @return array Adjusted colors in same format
      */

@@ -55,9 +55,9 @@ interface Color_Constants {
     public const SCHEME_TRIADIC = 'triadic';
     public const SCHEME_TETRADIC = 'tetradic';
     public const SCHEME_SQUARE = 'square';
+    public const SCHEME_AI_GENERATED = 'ai-generated';
     public const SCHEME_CUSTOM = 'custom';
     public const SCHEME_FROM_IMAGE = 'from-image';
-    public const SCHEME_AI_GENERATED = 'ai-generated';
 
     /**
      * Color Wheel Relationships
@@ -326,7 +326,7 @@ interface Color_Constants {
             'name'  => 'Contrast',
             'label' => 'Complementary',
             'roles' => ['primary', 'secondary']
-        ],
+            ],
         'split-complementary' => [
             'type'  => 'split-complementary',
             'name'  => 'Balance',
@@ -338,7 +338,7 @@ interface Color_Constants {
             'name'  => 'Triad',
             'label' => 'Triadic',
             'roles' => ['primary', 'secondary', 'tertiary']
-        ],
+            ],
         'tetradic' => [
             'type'  => 'tetradic',
             'name'  => 'Double Complement',
@@ -356,7 +356,7 @@ interface Color_Constants {
             'name'  => 'Professional',
             'label' => 'Dual Tone',
             'roles' => ['primary', 'secondary', 'background', 'text']
-        ],
+            ],
         'neutral-pop' => [
             'type'  => 'neutral-pop',
             'name'  => 'Business',
@@ -524,7 +524,7 @@ interface Color_Constants {
         ],
         'triadic' => [
             'angle' => 120,
-            'description' => 'Three colors that are evenly spaced around the color wheel'
+            'description' => 'Three colors equally spaced around the color wheel'
         ],
         'tetradic' => [
             'angle' => 90,

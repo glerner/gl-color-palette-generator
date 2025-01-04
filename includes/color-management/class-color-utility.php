@@ -563,4 +563,86 @@ class Color_Utility implements \GL_Color_Palette_Generator\Interfaces\Color_Util
         }
         throw new \InvalidArgumentException('Unsupported color format');
     }
+
+        /**
+     * Get the hue component of a color in HSL space (0-360 degrees)
+     *
+     * @param string $hex_color The hex color code
+     * @return int The hue value (0-360)
+     */
+    public function get_hue($hex_color): int {
+        list($r, $g, $b) = $this->hex_to_rgb($hex_color);
+
+        $r = $r / 255;
+        $g = $g / 255;
+        $b = $b / 255;
+
+        $max = max($r, $g, $b);
+        $min = min($r, $g, $b);
+
+        if ($max === $min) {
+            return 0;
+        }
+
+        $d = $max - $min;
+
+        switch ($max) {
+            case $r:
+                $h = ($g - $b) / $d + ($g < $b ? 6 : 0);
+                break;
+            case $g:
+                $h = ($b - $r) / $d + 2;
+                break;
+            case $b:
+                $h = ($r - $g) / $d + 4;
+                break;
+        }
+
+        return (int) round($h * 60);
+    }
+
+    /**
+     * Get the saturation component of a color in HSL space (0-100 percent)
+     *
+     * @param string $hex_color The hex color code
+     * @return int The saturation value (0-100)
+     */
+    public function get_saturation($hex_color): int {
+        list($r, $g, $b) = $this->hex_to_rgb($hex_color);
+
+        $r = $r / 255;
+        $g = $g / 255;
+        $b = $b / 255;
+
+        $max = max($r, $g, $b);
+        $min = min($r, $g, $b);
+
+        $l = ($max + $min) / 2;
+
+        if ($max === $min) {
+            return 0;
+        }
+
+        $d = $max - $min;
+
+        return (int) round(($d / (1 - abs(2 * $l - 1))) * 100);
+    }
+
+    /**
+     * Calculate WCAG 2.0 contrast ratio between two colors
+     *
+     * @param string $color1 First hex color
+     * @param string $color2 Second hex color
+     * @return float Contrast ratio (1-21)
+     */
+    public function check_contrast_ratio($color1, $color2): float {
+        $l1 = $this->get_relative_luminance($color1);
+        $l2 = $this->get_relative_luminance($color2);
+
+        $lighter = max($l1, $l2);
+        $darker = min($l1, $l2);
+
+        return ($lighter + 0.05) / ($darker + 0.05);
+    }
+
 }
