@@ -6,7 +6,7 @@
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Unit;
 
 use WP_Mock\Tools\TestCase;
 

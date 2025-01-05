@@ -51,7 +51,7 @@ if [ -z "${WP_ROOT:-}" ]; then
     echo "  WP_ROOT=/app bin/test.sh --integration"
 
     echo "Run a specific test file:"
-    echo "  $0 --mock --file tests/color-management/test-ai-palette-generator.php"
+    echo "  $0 --mock --file tests/wp-mock/color-management/test-ai-palette-generator.php"
 
     exit 1
 fi
@@ -111,13 +111,13 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         --unit)
-            BOOTSTRAP="${TEST_DIR}/bootstrap/wp-mock.php"
+            BOOTSTRAP="${TEST_DIR}/bootstrap/unit.php"
             TESTSUITE="unit"
             shift
             ;;
         --mock)
             BOOTSTRAP="${TEST_DIR}/bootstrap/wp-mock.php"
-            TESTSUITE="unit"
+            TESTSUITE="wp-mock"
             shift
             ;;
         --integration)
@@ -126,22 +126,26 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --providers)
-            BOOTSTRAP="${TEST_DIR}/bootstrap/wp-mock.php"
+            BOOTSTRAP="${TEST_DIR}/bootstrap/unit.php"
+            # Most provider tests are pure unit tests
             DIRECTORY="${TEST_DIR}/providers"
             shift
             ;;
         --api)
             BOOTSTRAP="${TEST_DIR}/bootstrap/wp-mock.php"
+            # API tests need WordPress mocks
             DIRECTORY="${TEST_DIR}/api"
             shift
             ;;
         --admin)
             BOOTSTRAP="${TEST_DIR}/bootstrap/wp-mock.php"
+            # Admin tests need WordPress mocks
             DIRECTORY="${TEST_DIR}/admin"
             shift
             ;;
         --core)
-            BOOTSTRAP="${TEST_DIR}/bootstrap/wp-mock.php"
+            BOOTSTRAP="${TEST_DIR}/bootstrap/unit.php"
+            # Core tests should be pure unit tests
             DIRECTORY="${TEST_DIR}/core"
             shift
             ;;
@@ -149,8 +153,11 @@ while [[ $# -gt 0 ]]; do
             # If --integration is also specified, use bootstrap/wp.php
             if [[ "$*" == *"--integration"* ]]; then
                 BOOTSTRAP="${TEST_DIR}/bootstrap/wp.php"
-            else
+            elif [[ "$*" == *"--mock"* ]]; then
                 BOOTSTRAP="${TEST_DIR}/bootstrap/wp-mock.php"
+            else
+                BOOTSTRAP="${TEST_DIR}/bootstrap/unit.php"
+                # Default to unit tests
             fi
             shift
             ;;

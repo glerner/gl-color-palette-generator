@@ -36,7 +36,7 @@ class Test_Color_Metrics extends Test_Case implements Color_Constants {
     /**
      * Set up test environment
      */
-    protected function setUp(): void {
+    public function setUp(): void {
         parent::setUp();
 
         $this->color_utility = Mockery::mock(Color_Utility::class);
@@ -46,7 +46,7 @@ class Test_Color_Metrics extends Test_Case implements Color_Constants {
     /**
      * Clean up test environment
      */
-    protected function tearDown(): void {
+    public function tearDown(): void {
         Mockery::close();
         parent::tearDown();
     }

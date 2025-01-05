@@ -320,4 +320,77 @@ class Test_Color_Palette_Generator extends TestCase implements Color_Constants {
         $result = $this->instance->validate_scheme($base_colors, 'triadic', $found_colors);
         $this->assertTrue($result);
     }
+
+    /**
+     * Test generate_from_prompt method with valid input
+     */
+    public function test_generate_from_prompt_with_valid_input() {
+        $context = [
+            'business_type' => 'Modern tech startup focused on AI solutions',
+            'target_audience' => 'Tech-savvy professionals aged 25-45',
+            'desired_mood' => 'Professional, innovative, and trustworthy'
+        ];
+
+        $expected_colors = ['#336699', '#66CC99', '#FF9966', '#9966CC'];
+        $expected_description = [
+            'palette_story' => 'Test story',
+            'colors' => $expected_colors
+        ];
+
+        $this->ai_provider_mock->shouldReceive('generate_palette')
+            ->once()
+            ->with($context)
+            ->andReturn($expected_colors);
+
+        $this->settings_mock->shouldReceive('save_palette_description')
+            ->once()
+            ->with($expected_description);
+
+        $result = $this->instance->generate_from_prompt($context);
+        $this->assertIsArray($result);
+        $this->assertEquals($expected_colors, $result['colors']);
+    }
+
+        /**
+     * Test verify_wcag_compliance method
+     */
+    public function test_verify_wcag_compliance() {
+        $colors = [
+            self::COLOR_PRIMARY_BLUE[0],
+            self::COLOR_PRIMARY_RED[0],
+            self::COLOR_PRIMARY_GREEN[0],
+            self::COLOR_PRIMARY_YELLOW[0]
+        ];
+
+        $this->color_util_mock->shouldReceive('get_contrast_ratio')
+            ->times(4)
+            ->andReturn(5.0);  // Return a valid contrast ratio above WCAG minimum
+
+        $result = $this->instance->verify_wcag_compliance($colors);
+        $this->assertTrue($result);
+    }
+
+    /**
+     * Test adjust_for_wcag_compliance method
+     */
+    public function test_adjust_for_wcag_compliance() {
+        $colors = [
+            '#000000',    // Pure black
+            '#FFFFFF',    // Pure white
+            '#808080',    // Mid gray
+            '#FFD700'     // Gold
+        ];
+
+        $this->color_util_mock->shouldReceive('get_contrast_ratio')
+            ->times(8)  // Each color tested against both light and dark backgrounds
+            ->andReturn(4.0, 12.0);  // Alternating contrast ratios
+
+        $this->color_util_mock->shouldReceive('adjust_color_for_contrast')
+            ->times(2)  // Only colors with insufficient contrast need adjustment
+            ->andReturn('#606060', '#FFB700');
+
+        $result = $this->instance->adjust_for_wcag_compliance($colors);
+        $this->assertIsArray($result);
+        $this->assertCount(4, $result);
+    }
 }

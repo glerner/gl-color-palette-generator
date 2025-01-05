@@ -8,9 +8,12 @@
 
 namespace GL_Color_Palette_Generator\Tests\Bootstrap;
 
+use GL_Color_Palette_Generator\Tests\Unit\Test_Case;
+
 // Start output buffering before anything else
 ob_start();
 
+echo "\n=== GL_Color_Palette_Generator WordPress Integration Testing Bootstrap ===\n";
 echo "\n=== Phase 1: Environment Setup ===\n";
 
 // Mock header functions BEFORE WordPress loads
@@ -102,4 +105,20 @@ if (file_exists($bootstrap_path)) {
     exit(1);
 }
 
+// Add backward compatibility for old namespace
+class_alias('GL_Color_Palette_Generator\Tests\Unit\Test_Case', 'GL_Color_Palette_Generator\Tests\Test_Case');
+
 echo "\n=== WordPress Bootstrap Complete ===\n";
+
+// Verify WP_UnitTestCase is available
+if (!class_exists('WP_UnitTestCase')) {
+    echo "\n=== ERROR: WP_UnitTestCase Not Found ===\n";
+    echo "WordPress test suite classes not properly loaded.\n";
+    echo "Please check that:\n";
+    echo "1. WP_TESTS_DIR is set correctly: $_tests_dir\n";
+    echo "2. WordPress test bootstrap.php was loaded successfully\n";
+    echo "3. WP_UnitTestCase class is available in the test suite\n";
+    exit(1);
+}
+
+echo "\n=== WordPress Test Suite Verification Complete ===\n";

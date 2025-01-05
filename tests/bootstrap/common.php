@@ -8,6 +8,9 @@
 
 namespace GL_Color_Palette_Generator\Tests\Bootstrap;
 
+// No use statement needed here since we're dynamically loading classes
+
+echo "\n=== GL_Color_Palette_Generator Common Testing Bootstrap ===\n";
 echo "\n=== Phase 1: Composer Autoloader ===\n";
 echo "Loading composer autoloader\n";
 
@@ -25,26 +28,76 @@ echo "\n=== Phase 2: Test Base Classes Setup ===\n";
 echo "Loading test base classes:\n";
 
 $test_classes = [
-    'unit/class-test-case.php' => 'Test_Case',
-    'integration/class-test-case-integration.php' => 'Test_Case_Integration',
+    'class-test-case.php' => 'Test_Case',
+    'class-test-case-integration.php' => 'Test_Case_Integration',
 ];
 
-foreach ($test_classes as $file => $class) {
-    $path = dirname(__DIR__) . '/' . $file;
-    echo "Loading $class from $path\n";
-    if (!file_exists($path)) {
-        echo "WARNING: Test class file not found: $path\n";
-        continue;
-    }
-    require_once $path;
+// Determine which bootstrap file included this file
+$trace = debug_backtrace();
+$including_file = basename($trace[0]['file']);
+$bootstrap_type = match($including_file) {
+    /* Returns [namespace prefix, directory sub-path]
+     * Example: ['Unit', 'unit'] means
+     * test base classes are in "GL_Color_Palette_Generator\Tests\Unit\" namespace
+     * and "tests/unit/" directory path
+    */
+    'unit.php' => ['Unit', 'unit'], // Unit tests without WordPress
+    'wp-mock.php' => ['Unit', 'unit'],  // WP_Mock tests mock WordPress functions
+    'wp.php' => ['Integration', 'integration'],  // Integration tests with actual WordPress code
+    default => throw new \RuntimeException("Unknown bootstrap file: $including_file")
+};
+[$namespace_prefix, $path_prefix] = $bootstrap_type;
 
-    $full_class = "GL_Color_Palette_Generator\\Tests\\$class";
-    if (!class_exists($full_class)) {
-        echo "WARNING: Class $full_class not found after loading $file\n";
-    } else {
-        echo "Successfully loaded $full_class\n";
+echo "For test file $including_file, Detected bootstrap type: $namespace_prefix and $path_prefix\n";
+
+foreach ($test_classes as $file => $class) {
+    $paths = [
+        dirname(__DIR__) . "/$file",
+        dirname(__DIR__) . "/unit/$file",
+        dirname(__DIR__) . "/integration/$file"
+    ];
+
+    $loaded = false;
+    foreach ($paths as $path) {
+        if (file_exists($path)) {
+            echo "Loading $class from $path\n";
+            require_once $path;
+            $loaded = true;
+
+            // Determine namespace based on file location
+            $class_namespace = $namespace_prefix; // default to bootstrap's namespace
+            if (str_contains($path, '/integration/')) {
+                $class_namespace = 'Integration';
+            } elseif (str_contains($path, '/unit/')) {
+                $class_namespace = 'Unit';
+            }
+
+            $full_class = "GL_Color_Palette_Generator\\Tests\\{$class_namespace}\\$class";
+            if (class_exists($full_class)) {
+                echo "Successfully loaded $full_class\n";
+                break;
+            }
+            echo "WARNING: Class $full_class not found after loading $file\n";
+            break;
+        }
     }
 }
+
+
+// While test files are still using wrong class "use" statements, make aliases
+if (class_exists("GL_Color_Palette_Generator\\Tests\\Unit\\Test_Case")) {
+    class_alias(
+        "GL_Color_Palette_Generator\\Tests\\Unit\\Test_Case",
+        "GL_Color_Palette_Generator\\Tests\\Test_Case"
+    );
+}
+if (class_exists("GL_Color_Palette_Generator\\Tests\\Integration\\Test_Case_Integration")) {
+    class_alias(
+        "GL_Color_Palette_Generator\\Tests\\Integration\\Test_Case_Integration",
+        "GL_Color_Palette_Generator\\Tests\\Test_Case_Integration"
+    );
+}
+
 
 echo "\n=== Phase 3: Mock Classes Setup ===\n";
 echo "Loading mock classes:\n";
@@ -75,14 +128,17 @@ foreach ($mock_classes as $file => $class) {
  * Determine bootstrap type based on test file location or annotation
  *
  * @param string $test_file Full path to the test file.
- * @return string Bootstrap type ('wp' or 'wp-mock').
+ * @return array Bootstrap type info [namespace, path].
  */
 function determine_bootstrap_type($test_file) {
     // Check for @bootstrap annotation.
     if (file_exists($test_file)) {
         $content = file_get_contents($test_file);
         if (preg_match('/@bootstrap\s+(wp|wp-mock)/i', $content, $matches)) {
-            return strtolower($matches[1]);
+            return match(strtolower($matches[1])) {
+                'wp-mock' => ['Unit', 'unit'],
+                'wp' => ['Integration', 'integration']
+            };
         }
     }
 
@@ -99,7 +155,10 @@ function determine_bootstrap_type($test_file) {
         }
         $bootstrap_types = array_unique($bootstrap_types);
         if (count($bootstrap_types) === 1) {
-            return $bootstrap_types[0];
+            return match($bootstrap_types[0]) {
+                'wp-mock' => ['Unit', 'unit'],
+                'wp' => ['Integration', 'integration']
+            };
         }
         if (count($bootstrap_types) > 1) {
             throw new \RuntimeException(
@@ -110,14 +169,14 @@ function determine_bootstrap_type($test_file) {
 
     // Fallback to directory-based detection
     if (strpos($test_file, '/unit/') !== false) {
-        return 'wp-mock';
+        return ['Unit', 'unit'];
     }
     if (strpos($test_file, '/integration/') !== false) {
-        return 'wp';
+        return ['Integration', 'integration'];
     }
 
     // Default to wp-mock for unknown locations
-    return 'wp-mock';
+    return ['Unit', 'unit'];
 }
 
 echo "\n=== Common Bootstrap Complete ===\n";

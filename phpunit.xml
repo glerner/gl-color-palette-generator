@@ -39,17 +39,23 @@
             <directory suffix=".php">./tests/integration/</directory>
         </testsuite>
         <testsuite name="unit">
-            <directory suffix=".php">./tests/unit/</directory>
-            <directory suffix=".php">./tests/color-management</directory>
-            <directory suffix=".php">./tests/core</directory>
-            <directory suffix=".php">./tests/generators</directory>
-            <directory suffix=".php">./tests/providers</directory>
-            <directory suffix=".php">./tests/settings</directory>
-            <directory suffix=".php">./tests/security</directory>
-            <exclude>./tests/integration</exclude>
+            <directory suffix=".php">./tests/unit</directory>
+            <directory suffix=".php">./tests/unit/utils</directory>
+            <directory suffix=".php">./tests/unit/types</directory>
+            <directory suffix=".php">./tests/unit/system</directory>
+        </testsuite>
+        <testsuite name="wp-mock">
+            <directory suffix=".php">./tests/wp-mock/color-management</directory>
+            <directory suffix=".php">./tests/wp-mock/core</directory>
+            <directory suffix=".php">./tests/wp-mock/generators</directory>
+            <directory suffix=".php">./tests/wp-mock/providers</directory>
+            <directory suffix=".php">./tests/wp-mock/settings</directory>
+            <directory suffix=".php">./tests/wp-mock/security</directory>
         </testsuite>
     </testsuites>
+    <!-- Comment out until fixed
     <listeners>
-        <listener class="GL_Color_Palette_Generator\Tests\Test_Printer"/>
+        <listener class="GL_Color_Palette_Generator\Tests\Unit\Test_Printer"/>
     </listeners>
+    -->
 </phpunit>

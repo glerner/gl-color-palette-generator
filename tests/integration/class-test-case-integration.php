@@ -7,9 +7,9 @@
  * @bootstrap wp
  */
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Integration;
 
-use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Tests\Unit\Test_Case;
 
 /**
  * Base test case class for integration tests

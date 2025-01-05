@@ -124,3 +124,39 @@ tests/
 - **CI/CD**: Warning for missing annotations, but fallback ensures tests still run
 - **Development Flow**: Minimal impact, clear defaults with optional overrides
 - **Long-term**: Keep both mechanisms for flexibility and safety
+
+## Current Status
+- Basic unit test structure implemented with separate bootstraps for unit, wp-mock, and integration tests
+- Some directories moved to appropriate test suites
+
+## TODO
+- Review and categorize remaining test directories:
+- [ ] tests/classes/ (likely wp-mock)
+- [ ] tests/export/ (likely wp-mock)
+- [ ] tests/includes/ (mixed, needs per-file review)
+- [ ] tests/interfaces/ (mixed, needs per-file review)
+- [ ] tests/performance/ (likely wp-mock)
+- [ ] tests/ui/ (likely wp-mock)
+
+## Criteria for Categorization
+- Unit tests: Pure PHP, no WordPress dependencies
+- WP-Mock tests: Requires WordPress functions/classes but can use mocks
+- Integration tests: Requires full WordPress environment
+
+## Additional Tasks
+- [ ] Document test organization in README.md
+- [ ] Update test running scripts if needed
+- [ ] Consider creating test suite specific base classes
+- [ ] Add PHPStan/static analysis rules to help identify pure PHP vs WordPress-dependent code
+- [ ] Create test suite templates for each type (unit, wp-mock, integration)
+- [ ] Add examples of each test type in documentation
+
+## Test Suite Organization
+Current:
+```php
+<testsuite name="unit">
+    <directory suffix=".php">./tests/unit/</directory>
+    <directory suffix=".php">./tests/utils</directory>
+    <directory suffix=".php">./tests/types</directory>
+</testsuite>
+```
