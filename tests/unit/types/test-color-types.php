@@ -7,15 +7,26 @@
  * @since 1.0.0
  */
 
-namespace GL_Color_Palette_Generator\Tests\Types;
+ namespace GL_Color_Palette_Generator\Tests\Unit\Types;
 
-use GL_Color_Palette_Generator\Tests\Test_Case;
-use GL_Color_Palette_Generator\Types\Color_Types;
+ use GL_Color_Palette_Generator\Tests\Unit\Unit_Test;
+ use GL_Color_Palette_Generator\Types\Color_Types;
 
-/**
- * Tests for the Color Types class
- */
-class Test_Color_Types extends Test_Case {
+ class Test_Color_Types extends Unit_Test {
+
+    public function setUp(): void {
+        parent::setUp();
+    }
+
+    public function tearDown(): void {
+        parent::tearDown();
+    }
+
+
+
+
+
+
     /**
      * Test hex color validation
      *
@@ -27,7 +38,7 @@ class Test_Color_Types extends Test_Case {
         $this->assertTrue(Color_Types::is_valid_hex_color('#FFFFFF'));
         $this->assertTrue(Color_Types::is_valid_hex_color('#123'));
         $this->assertTrue(Color_Types::is_valid_hex_color('#ABC'));
-        
+
         // Invalid colors
         $this->assertFalse(Color_Types::is_valid_hex_color('000000'));
         $this->assertFalse(Color_Types::is_valid_hex_color('#12345'));

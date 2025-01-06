@@ -167,5 +167,35 @@ The GL Color Palette Generator creates accessible color palettes for WordPress t
    - Style Variation permutations
    - Downloadable .zip of variations
 
+
+## Unit Testing
+
+### Finding WordPress Functions to Mock
+
+To find all WordPress functions used in your plugin that need mocking, run:
+
+```bash
+cd ~/sites/gl-color-palette-generator && \
+grep -r "^[[:space:]]*\(add_\|admin_\|get_\|wp_\|is_\|esc_\|\_\_\|\_e\|admin_\)" . --include="*.php" | \
+sed -E 's/.*[^a-zA-Z_](add_|get_|wp_|is_|esc_|__|_e|admin_)[a-zA-Z_]+\(.*/\1&/' | \
+grep -o '[a-zA-Z_]\+(' | sort -u | sed 's/(//'
+```
+
+To find WordPress functions with multiple underscores (like `wp_nonce_field`):
+
+```bash
+cd ~/sites/gl-color-palette-generator && \
+grep -r "^[[:space:]]*\([a-zA-Z_]\+_[a-zA-Z_]\+\)\+" . --include="*.php" | \
+grep -o '[a-zA-Z_]\+_[a-zA-Z_]\+(' | sort -u | sed 's/(//'
+```
+
+### Mocking *only* WordPress Functions
+Take out of the list these functions :
+PHP built-in functions (array_, str_, is_*, etc.)
+Testing-related functions (tests_*)
+Debug functions (xdebug_*)
+Cache-related functions (apc_, wincache_)
+Your plugin's custom functions (generate_*)
+
 ### Testing Notes
 - Keep adding lines like " * @bootstrap wp-mock" to specify which PHPUnit bootstrap method to use, see .github/issues/improve-test-bootstrap-robustness.md

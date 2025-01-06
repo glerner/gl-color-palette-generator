@@ -52,33 +52,43 @@ namespace GL_Color_Palette_Generator\Tests\Bootstrap {
     echo "\n=== WP_Mock Phase 2.5: WordPress Test Classes Setup ===\n";
 }
 
-namespace {
-  // WP_UnitTestCase is defined in the global namespace
-    if (!class_exists('WP_UnitTestCase')) {
 
-        $trace = debug_backtrace();
-        $test_file = $trace[0]['file'] ?? 'unknown';
-        echo "Creating WP_UnitTestCase for file: $test_file\n";
-        echo "NOTE: Consider updating this test file to use:\n";
-        echo "    use GL_Color_Palette_Generator\\Tests\\Unit\\Test_Case;\n";
-        echo "    class YourTestClass extends Test_Case\n";
+namespace {
+    // WP_UnitTestCase is defined in the global namespace
+    if (!class_exists('WP_UnitTestCase')) {
+        // Initialize WP_Mock before defining test case class
+        \WP_Mock::bootstrap();
+
+        $debug = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        foreach ($debug as $trace) {
+            if (isset($trace['file']) &&
+                strpos($trace['file'], 'gl-color-palette-generator/tests/') !== false &&
+                (strpos($trace['file'], 'test-class-') !== false || strpos($trace['file'], 'Test.php') !== false)) {
+                echo "Found test file: " . $trace['file'] . "\n";
+                if (!class_exists('GL_Color_Palette_Generator\Tests\Unit\Test_Case')) {
+                    echo "NOTE: Consider updating this test file to use:\n";
+                    echo "    use GL_Color_Palette_Generator\\Tests\\Unit\\Test_Case;\n";
+                    echo "    class YourTestClass extends Test_Case\n";
+                }
+                break;
+            }
+        }
 
         class WP_UnitTestCase extends \PHPUnit\Framework\TestCase {
+            protected function setUp(): void {
+                parent::setUp();
+                \WP_Mock::setUp();
+            }
 
-        // WP_Mock setup/teardown
-        protected function setUp(): void {
-            parent::setUp();
-            \WP_Mock::setUp();
-        }
-        protected function tearDown(): void {
-            \WP_Mock::tearDown();
-            parent::tearDown();
-        }
-        // Add any common WordPress test methods here if needed
+            protected function tearDown(): void {
+                \WP_Mock::tearDown();
+                parent::tearDown();
+            }
         }
 
         echo "Created WP_UnitTestCase based on PHPUnit TestCase\n";
     }
+
 
     echo "\n=== WP_Mock Phase 3: WordPress Functions Setup ===\n";
     echo "Defining WordPress functions:\n";

@@ -200,6 +200,97 @@ class Test_Color_Scheme_Generator extends TestCase implements Color_Constants {
     }
 
     /**
+ * Test generate_square method
+ */
+public function test_generate_square() {
+    $base_color = '#ff0000';
+
+    // Test default count
+    $result = $this->instance->generate_square($base_color);
+    $this->assertIsArray($result);
+    $this->assertCount(4, $result);
+
+    // Test custom count
+    $result = $this->instance->generate_square($base_color, 2);
+    $this->assertIsArray($result);
+    $this->assertCount(2, $result);
+
+    // Test invalid color
+    $result = $this->instance->generate_square('invalid');
+    $this->assertInstanceOf(WP_Error::class, $result);
+}
+
+/**
+ * Test generate_compound method
+ */
+public function test_generate_compound() {
+    $base_color = '#ff0000';
+
+    // Test default count
+    $result = $this->instance->generate_compound($base_color);
+    $this->assertIsArray($result);
+    $this->assertCount(3, $result);
+
+    // Test custom count
+    $result = $this->instance->generate_compound($base_color, 2);
+    $this->assertIsArray($result);
+    $this->assertCount(2, $result);
+
+    // Test invalid color
+    $result = $this->instance->generate_compound('invalid');
+    $this->assertInstanceOf(WP_Error::class, $result);
+}
+
+/**
+ * Test generate_monochromatic_accent method
+ */
+public function test_generate_monochromatic_accent() {
+    $base_color = '#ff0000';
+
+    // Test default count
+    $result = $this->instance->generate_monochromatic_accent($base_color);
+    $this->assertIsArray($result);
+    $this->assertCount(self::MONOCHROMATIC_ACCENT_COLORS, $result);
+
+    // Test invalid color
+    $result = $this->instance->generate_monochromatic_accent('invalid');
+    $this->assertInstanceOf(WP_Error::class, $result);
+}
+
+/**
+ * Test generate_dual_tone method
+ */
+public function test_generate_dual_tone() {
+    $base_color = '#ff0000';
+
+    // Test default count
+    $result = $this->instance->generate_dual_tone($base_color);
+    $this->assertIsArray($result);
+    $this->assertCount(self::DUAL_TONE_COLORS, $result);
+
+    // Test invalid color
+    $result = $this->instance->generate_dual_tone('invalid');
+    $this->assertInstanceOf(WP_Error::class, $result);
+}
+
+/**
+ * Test generate_neutral_pop method
+ */
+public function test_generate_neutral_pop() {
+    $base_color = '#ff0000';
+
+    // Test default count
+    $result = $this->instance->generate_neutral_pop($base_color);
+    $this->assertIsArray($result);
+    $this->assertCount(self::NEUTRAL_POP_COLORS, $result);
+
+    // Test invalid color
+    $result = $this->instance->generate_neutral_pop('invalid');
+    $this->assertInstanceOf(WP_Error::class, $result);
+}
+
+
+    /**
      * Test generate_custom_scheme method
      */
     public function test_generate_custom_scheme() {

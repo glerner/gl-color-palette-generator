@@ -174,7 +174,7 @@ interface Color_Palette_Generator_Interface {
      * }
      * @return array|WP_Error Generated palette data or error.
      */
-    public function generate_ai_palette(array $options = []): array|WP_Error;
+    public function generate_ai_palette(array $options): Color_Palette;
 
     /**
      * Generates a palette from an image.

@@ -20,7 +20,7 @@
         "wp-coding-standards/wpcs": "^3.0",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
         "yoast/phpunit-polyfills": "^2.0",
-        "10up/wp_mock": "^0.5.0",
+        "10up/wp_mock": "^0.5",
         "brain/monkey": "^2.0",
         "phpstan/phpstan": "^1.10",
         "phpstan/phpstan-strict-rules": "^1.5",

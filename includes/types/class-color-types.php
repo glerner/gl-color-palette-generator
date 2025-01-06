@@ -37,7 +37,7 @@ class Color_Types {
      */
     public static function is_valid_metadata(array $metadata): bool {
         $required_fields = ['name', 'description', 'theme', 'created', 'modified', 'provider'];
-        
+
         foreach ($required_fields as $field) {
             if (!isset($metadata[$field]) || !is_string($metadata[$field])) {
                 return false;
@@ -65,7 +65,7 @@ class Color_Types {
      */
     public static function is_valid_provider_options(array $options): bool {
         $allowed_fields = ['model', 'temperature', 'max_tokens', 'top_p', 'frequency_penalty', 'presence_penalty'];
-        
+
         foreach ($options as $key => $value) {
             if (!in_array($key, $allowed_fields, true)) {
                 return false;

@@ -16,6 +16,7 @@ use GL_Color_Palette_Generator\Providers\Provider_Interface;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Generator_Interface;
 use GL_Color_Palette_Generator\Models\Color_Palette;
+use GL_Color_Palette_Generator\Color_Management\Color_Scheme_Generator;
 use GL_Color_Palette_Generator\Types\Provider_Config;
 use GL_Color_Palette_Generator\Types\Color_Types;
 use WP_Error;
@@ -34,12 +35,20 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
     private Color_Utility $color_utility;
 
     /**
+     * Scheme generator instance
+     *
+     * @var Color_Scheme_Generator
+     */
+    private Color_Scheme_Generator $scheme_generator;
+
+    /**
      * Constructor
      *
      * @param Color_Utility $color_utility Color utility instance.
      */
     public function __construct(Color_Utility $color_utility) {
         $this->color_utility = $color_utility;
+        $this->scheme_generator = new Color_Scheme_Generator($this->color_utility);
     }
 
     /**
@@ -75,7 +84,7 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
      * @param array $options Generation options including business context and image data.
      * @return Color_Palette Generated palette.
      */
-    private function generate_ai_palette(array $options): Color_Palette {
+    public function generate_ai_palette(array $options): Color_Palette {
         $ai_provider = AI_Provider_Factory::create_provider();
         $business_context = $options['business_context'] ?? [];
         $image_data = $options['image_data'] ?? null;
@@ -309,6 +318,231 @@ class Color_Palette_Generator implements Color_Palette_Generator_Interface {
             return new WP_Error('ai_generation_failed', $e->getMessage());
         }
     }
+
+
+/**
+ * Generate a complementary color scheme
+ *
+ * @param string $base_color Base color in hex format
+ * @param array  $options    Generation options
+ * @return array|WP_Error Color scheme or error
+ */
+public function generate_complementary(string $base_color, array $options = []): array|WP_Error {
+    $count = $options['count'] ?? self::COMPLEMENTARY_COLORS;
+    $validated_count = $this->validate_count($count, 'complementary');
+    if (is_wp_error($validated_count)) {
+        return $validated_count;
+    }
+    return $this->scheme_generator->generate_complementary($base_color, $validated_count);
+}
+
+/**
+ * Generate an analogous color scheme
+ *
+ * @param string $base_color Base color in hex format
+ * @param array  $options    Generation options
+ * @return array|WP_Error Color scheme or error
+ */
+public function generate_analogous(string $base_color, array $options = []): array|WP_Error {
+    $count = $options['count'] ?? self::ANALOGOUS_COLORS;
+    $validated_count = $this->validate_count($count, 'analogous');
+    if (is_wp_error($validated_count)) {
+        return $validated_count;
+    }
+    return $this->scheme_generator->generate_analogous($base_color, $validated_count);
+}
+
+/**
+ * Generate an analogous complement color scheme
+ *
+ * @param string $base_color Base color in hex format
+ * @param array  $options    Generation options
+ * @return array|WP_Error Color scheme or error
+ */
+public function generate_analogous_complement(string $base_color, array $options = []): array|WP_Error {
+    $count = $options['count'] ?? self::ANALOGOUS_COMPLEMENT_COLORS;
+    $validated_count = $this->validate_count($count, 'analogous_complement');
+    if (is_wp_error($validated_count)) {
+        return $validated_count;
+    }
+    return $this->scheme_generator->generate_analogous_complement($base_color, $validated_count);
+}
+
+/**
+ * Generate a triadic color scheme
+ *
+ * @param string $base_color Base color in hex format
+ * @param array  $options    Generation options
+ * @return array|WP_Error Color scheme or error
+ */
+public function generate_triadic(string $base_color, array $options = []): array|WP_Error {
+    $count = $options['count'] ?? self::TRIADIC_COLORS;
+    $validated_count = $this->validate_count($count, 'triadic');
+    if (is_wp_error($validated_count)) {
+        return $validated_count;
+    }
+    return $this->scheme_generator->generate_triadic($base_color, $validated_count);
+}
+
+/**
+ * Generate a split complementary color scheme
+ *
+ * @param string $base_color Base color in hex format
+ * @param array  $options    Generation options
+ * @return array|WP_Error Color scheme or error
+ */
+public function generate_split_complementary(string $base_color, array $options = []): array|WP_Error {
+    $count = $options['count'] ?? self::SPLIT_COMPLEMENTARY_COLORS;
+    $validated_count = $this->validate_count($count, 'split_complementary');
+    if (is_wp_error($validated_count)) {
+        return $validated_count;
+    }
+    return $this->scheme_generator->generate_split_complementary($base_color, $validated_count);
+}
+
+/**
+ * Generate a tetradic color scheme
+ *
+ * @param string $base_color Base color in hex format
+ * @param array  $options    Generation options
+ * @return array|WP_Error Color scheme or error
+ */
+public function generate_tetradic(string $base_color, array $options = []): array|WP_Error {
+    $count = $options['count'] ?? self::TETRADIC_COLORS;
+    $validated_count = $this->validate_count($count, 'tetradic');
+    if (is_wp_error($validated_count)) {
+        return $validated_count;
+    }
+    return $this->scheme_generator->generate_tetradic($base_color, $validated_count);
+}
+
+/**
+ * Generate a square color scheme
+ *
+ * @param string $base_color Base color in hex format
+ * @param array  $options    Generation options
+ * @return array|WP_Error Color scheme or error
+ */
+public function generate_square(string $base_color, array $options = []): array|WP_Error {
+    $count = $options['count'] ?? self::SQUARE_COLORS;
+    $validated_count = $this->validate_count($count, 'square');
+    if (is_wp_error($validated_count)) {
+        return $validated_count;
+    }
+    return $this->scheme_generator->generate_square($base_color, $validated_count);
+}
+
+/**
+ * Generate a monochromatic color scheme
+ *
+ * @param string $base_color Base color in hex format
+ * @param array  $options    Generation options
+ * @return array|WP_Error Color scheme or error
+ */
+public function generate_monochromatic(string $base_color, array $options = []): array|WP_Error {
+    $count = $options['count'] ?? self::MONOCHROMATIC_COLORS;
+    $validated_count = $this->validate_count($count, 'monochromatic');
+    if (is_wp_error($validated_count)) {
+        return $validated_count;
+    }
+
+    return $this->scheme_generator->generate_monochromatic($base_color, $validated_count);
+}
+
+/**
+ * Generate a monochromatic accent color scheme
+ *
+ * @param string $base_color Base color in hex format
+ * @param array  $options    Generation options
+ * @return array|WP_Error Color scheme or error
+ */
+public function generate_monochromatic_accent(string $base_color, array $options = []): array|WP_Error {
+    $count = $options['count'] ?? self::MONOCHROMATIC_ACCENT_COLORS;
+    $validated_count = $this->validate_count($count, 'monochromatic_accent');
+    if (is_wp_error($validated_count)) {
+        return $validated_count;
+    }
+    return $this->scheme_generator->generate_monochromatic_accent($base_color, $validated_count);
+}
+
+
+/**
+ * Generate a compound color scheme
+ *
+ * @param string $base_color Base color in hex format
+ * @param array  $options    Generation options
+ * @return array|WP_Error Color scheme or error
+ */
+public function generate_compound(string $base_color, array $options = []): array|WP_Error {
+    return $this->scheme_generator->generate_compound($base_color);
+}
+
+/**
+ * Generate a dual tone color scheme
+ *
+ * @param string $base_color Base color in hex format
+ * @param array  $options    Generation options
+ * @return array|WP_Error Color scheme or error
+ */
+public function generate_dual_tone(string $base_color, array $options = []): array|WP_Error {
+    $count = $options['count'] ?? self::DUAL_TONE_COLORS;
+    $validated_count = $this->validate_count($count, 'dual_tone');
+    if (is_wp_error($validated_count)) {
+        return $validated_count;
+    }
+    return $this->scheme_generator->generate_dual_tone($base_color, $validated_count);
+}
+
+/**
+ * Generate a neutral pop color scheme
+ *
+ * @param string $base_color Base color in hex format
+ * @param array  $options    Generation options
+ * @return array|WP_Error Color scheme or error
+ */
+public function generate_neutral_pop(string $base_color, array $options = []): array|WP_Error {
+    $count = $options['count'] ?? self::NEUTRAL_POP_COLORS;
+    $validated_count = $this->validate_count($count, 'neutral_pop');
+    if (is_wp_error($validated_count)) {
+        return $validated_count;
+    }
+    return $this->scheme_generator->generate_neutral_pop($base_color, $validated_count);
+}
+
+
+/**
+ * Validate color count for a given scheme type
+ *
+ * @param int    $count       Number of colors requested
+ * @param string $scheme_type Type of color scheme
+ * @return int|WP_Error Validated count or error
+ */
+private function validate_count(int $count, string $scheme_type): int|WP_Error {
+    $required_colors = match($scheme_type) {
+        'complementary' => self::COMPLEMENTARY_COLORS,
+        'analogous' => self::ANALOGOUS_COLORS,
+        'triadic' => self::TRIADIC_COLORS,
+        'tetradic' => self::TETRADIC_COLORS,
+        'square' => self::SQUARE_COLORS,
+        'monochromatic' => self::MONOCHROMATIC_COLORS,
+        'compound' => self::COMPOUND_COLORS,
+        default => 5
+    };
+
+    if ($count !== $required_colors) {
+        return new WP_Error(
+            'invalid_count',
+            sprintf('%s schemes require exactly %d colors', $scheme_type, $required_colors)
+        );
+    }
+    return $count;
+}
+
+
+
+
+
+
 
     /**
      * Verify WCAG compliance of a color palette
