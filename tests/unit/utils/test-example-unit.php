@@ -1,9 +1,9 @@
 <?php
 namespace GL_Color_Palette_Generator\Tests\Unit\Utils;
 
-use GL_Color_Palette_Generator\Tests\Unit\Unit_Test;
+use GL_Color_Palette_Generator\Tests\Unit_Test_Case;
 
-class Example_Unit_Test extends Unit_Test {
+class Test_Example_Unit extends Unit_Test_Case {
     public function setUp(): void {
         parent::setUp();
     }

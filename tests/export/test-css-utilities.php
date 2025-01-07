@@ -9,12 +9,12 @@
 namespace GL_Color_Palette_Generator\Tests\Export;
 
 use GL_Color_Palette_Generator\Export\CSS_Utilities;
-use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Tests\Unit_Test_Case;
 
 /**
  * Test CSS Utilities
  */
-class Test_CSS_Utilities extends Test_Case {
+class Test_CSS_Utilities extends Unit_Test_Case {
     /**
      * Test CSS variable name generation
      */

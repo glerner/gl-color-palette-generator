@@ -8,13 +8,13 @@
 
 namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
-use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Tests\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Cache;
 
 /**
  * Test Color Palette Cache Interface implementation
  */
-class Test_Color_Palette_Cache extends Test_Case {
+class Test_Color_Palette_Cache extends Unit_Test_Case {
     /** @var Color_Palette_Cache */
     private $cache;
 

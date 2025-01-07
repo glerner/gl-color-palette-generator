@@ -11,7 +11,7 @@
 
 namespace GL_Color_Palette_Generator\Tests\Classes;
 
-use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Tests\Unit_Test_Case;
 use GL_Color_Palette_Generator\Classes\Color_Palette_Cache;
 use GL_Color_Palette_Generator\Classes\Color_Palette;
 use Brain\Monkey\Functions;
@@ -22,7 +22,7 @@ use Brain\Monkey\Functions;
  * @package GL_Color_Palette_Generator
  * @subpackage Tests\Classes
  */
-class Test_Color_Palette_Cache extends Test_Case {
+class Test_Color_Palette_Cache extends WP_Mock_Test_Case {
     protected Color_Palette_Cache $cache;
     protected Color_Palette $test_palette;
 

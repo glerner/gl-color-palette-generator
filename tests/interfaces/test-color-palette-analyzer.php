@@ -8,13 +8,13 @@
 
 namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
-use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Tests\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Analyzer;
 
 /**
  * Test Color Palette Analyzer Interface implementation
  */
-class Test_Color_Palette_Analyzer extends Test_Case {
+class Test_Color_Palette_Analyzer extends Unit_Test_Case {
     /** @var Color_Palette_Analyzer */
     private $analyzer;
 

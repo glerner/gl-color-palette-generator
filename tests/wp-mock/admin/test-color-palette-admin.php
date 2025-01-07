@@ -10,7 +10,7 @@
 
 namespace GL_Color_Palette_Generator\Tests\Admin;
 
-use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Tests\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Admin\Color_Palette_Admin;
 use GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator;
 use WP_Mock;
@@ -18,7 +18,7 @@ use WP_Mock;
 /**
  * Tests for Color Palette Admin
  */
-class Test_Color_Palette_Admin extends Test_Case {
+class Test_Color_Palette_Admin extends WP_Mock_Test_Case {
     protected Color_Palette_Admin $admin;
     protected Color_Palette_Generator $generator;
 

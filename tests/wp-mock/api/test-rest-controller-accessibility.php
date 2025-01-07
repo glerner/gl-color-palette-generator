@@ -8,14 +8,14 @@
 
 namespace GL_Color_Palette_Generator\Tests\API;
 
-use GL_Color_Palette_Generator\Tests\Test_Case;
+use GL_Color_Palette_Generator\Tests\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\API\Rest_Controller_Accessibility;
 use WP_Mock;
 
 /**
  * Test REST Controller Accessibility functionality
  */
-class Test_Rest_Controller_Accessibility extends Test_Case {
+class Test_Rest_Controller_Accessibility extends WP_Mock_Test_Case {
     /** @var Rest_Controller_Accessibility */
     private $controller;
 

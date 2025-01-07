@@ -68,7 +68,7 @@ namespace {
                 if (!class_exists('GL_Color_Palette_Generator\Tests\Unit\Test_Case')) {
                     echo "NOTE: Consider updating this test file to use:\n";
                     echo "    use GL_Color_Palette_Generator\\Tests\\Unit\\Test_Case;\n";
-                    echo "    class YourTestClass extends Test_Case\n";
+                    echo "    class YourTestClass extends Unit_Test_Case\n";
                 }
                 break;
             }

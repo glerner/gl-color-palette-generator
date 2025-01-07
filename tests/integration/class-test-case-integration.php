@@ -14,7 +14,7 @@ use GL_Color_Palette_Generator\Tests\Unit\Test_Case;
 /**
  * Base test case class for integration tests
  */
-abstract class Test_Case_Integration extends Test_Case {
+abstract class Test_Case_Integration extends Unit_Test_Case {
     /**
      * Set up test environment
      */

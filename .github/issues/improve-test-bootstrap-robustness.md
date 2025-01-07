@@ -66,16 +66,20 @@ tests/
 
 ### Phase 1: Infrastructure Setup
 1. [ ] Update dependency configuration
-   - [ ] Add required packages to composer.json
-   - [ ] Update phpunit.xml with new bootstrap paths
-   - [ ] Add autoloading rules for test classes
+   - [x] Add required packages to composer.json
+   - [x] Update phpunit.xml with new bootstrap paths
+   - [x] Add autoloading rules for test classes
 2. [x] Create bootstrap directory structure
    - [x] Move existing bootstrap files to `tests/bootstrap/`
    - [x] Create `common.php` for shared functionality
-3. [ ] Implement smart bootstrap detection
+3. [x] Create base test case classes
+   - [x] Unit_Test_Case for pure PHP tests
+   - [x] WP_Mock_Test_Case for WordPress mocking
+   - [x] Integration_Test_Case for WordPress integration
+4. [ ] Implement smart bootstrap detection
    - [ ] Directory-based fallback (`unit/*` → wp-mock, `integration/*` → wp)
    - [ ] Annotation-based override capability
-4. [ ] Create initial documentation
+5. [ ] Create initial documentation
    - [ ] Bootstrap types and their purposes
    - [ ] Directory structure conventions
    - [ ] How to override defaults with annotations
@@ -159,4 +163,56 @@ Current:
     <directory suffix=".php">./tests/utils</directory>
     <directory suffix=".php">./tests/types</directory>
 </testsuite>
+```
+
+# Test Bootstrap Robustness Improvements
+
+## ✅ Completed Changes
+
+1. Created three distinct base test case classes:
+   - `tests/class-unit-test-case.php` - For pure unit tests with Mockery
+   - `tests/class-wp-mock-test-case.php` - For WordPress function mocking
+   - [tests/class-integration-test-case.php](cci:7://file:///home/george/sites/gl-color-palette-generator/tests/class-integration-test-case.php:0:0-0:0) - For WordPress integration tests
+
+2. Reorganized test class hierarchy:
+   - Unit tests now extend `Unit_Test_Case`
+   - WP_Mock tests extend `WP_Mock_Test_Case`
+   - Integration tests extend `Integration_Test_Case`
+
+3. Updated test files:
+   - Moved WP_Mock tests from unit/ to wp-mock/
+   - Updated class extensions in all test files
+   - Maintained proper separation of concerns
+
+## 🔄 Next Steps
+
+1. Review and update bootstrap files:
+   - Ensure proper initialization for each test type
+   - Verify autoloading works correctly
+   - Check WP_Mock setup
+
+2. Consider moving remaining files to appropriate directories:
+   - Pure unit tests in `tests/unit/`
+   - WP_Mock tests in `tests/wp-mock/`
+   - Integration tests in `tests/integration/`
+
+3. Run full test suite to verify changes
+
+## Example Usage
+
+```php
+// Pure Unit Test
+class Test_Color_Metrics_Analyzer extends Unit_Test_Case {
+    // Pure unit tests with Mockery support
+}
+
+// WordPress Mock Test
+class Test_WordPress_Functions extends WP_Mock_Test_Case {
+    // Tests that need WordPress function mocking
+}
+
+// Integration Test
+class Test_WordPress_Integration extends Integration_Test_Case {
+    // Full WordPress integration tests
+}
 ```

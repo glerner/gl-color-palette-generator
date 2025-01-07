@@ -182,6 +182,56 @@ The plugin uses a comprehensive PHPUnit configuration (`phpunit.xml`) that inclu
    - Integration tests in `./tests/integration/`
    - Unit tests across multiple feature-specific directories
 
+4. Code Coverage Annotations:
+   - `@codeCoverageIgnore`: Add this to the docblock of any class or file that should be excluded from code coverage reports. Use this for:
+     - Abstract base classes that aren't meant to be tested directly (e.g., [Unit_Test_Case](cci:2://file:///home/george/sites/gl-color-palette-generator/tests/class-unit-test-case.php:28:0-45:1))
+     - Interfaces and traits that contain no testable code
+     - Legacy or deprecated code that is kept for reference but no longer actively tested
+     - Bootstrap or configuration files that set up the testing environment
+
+Other useful coverage annotations:
+
+- `@codeCoverageIgnoreStart` and `@codeCoverageIgnoreEnd`: Exclude specific sections of code from coverage reports
+- `@codeCoverageIgnoreMethod`: Exclude a specific method from coverage reports
+- `@codeCoverageIgnoreClass`: Exclude a specific class from coverage reports
+
+```php
+   /**
+    * Base class for unit tests
+    *
+    * @package GL_Color_Palette_Generator
+    * @subpackage Tests
+    * @codeCoverageIgnore
+    */
+   abstract class Unit_Test_Case extends \WP_UnitTestCase {
+       // ...
+   }
+```
+
+```php
+// @codeCoverageIgnoreStart
+if (defined('DOING_AJAX')) {
+    // Legacy AJAX handling code
+}
+// @codeCoverageIgnoreEnd
+```
+```php
+/**
+ * @codeCoverageIgnoreMethod
+ */
+private function deprecatedHelper() {
+    // Old helper method kept for backward compatibility
+}
+```
+```php
+/**
+ * @codeCoverageIgnoreClass
+ */
+class Deprecated_Class {
+    // Old class kept for backward compatibility
+}
+```
+
 ### Environment-Specific Setup
 
 #### Using Lando

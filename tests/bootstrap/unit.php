@@ -10,6 +10,11 @@ See docs/development-guidelines.md for a grep command to find all the functions 
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
 ini_set('display_errors', 1);
 
+// Define plugin directory
+if (!defined('GL_CPG_PLUGIN_DIR')) {
+    define('GL_CPG_PLUGIN_DIR', dirname(dirname(__DIR__)) . '/');
+}
+
 // Define WordPress constants
 define('ABSPATH', dirname(__DIR__, 2) . '/');
 define('WP_DEBUG', true);

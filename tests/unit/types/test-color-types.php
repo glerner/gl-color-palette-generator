@@ -9,10 +9,10 @@
 
  namespace GL_Color_Palette_Generator\Tests\Unit\Types;
 
- use GL_Color_Palette_Generator\Tests\Unit\Unit_Test;
+ use GL_Color_Palette_Generator\Tests\Unit_Test_Case;
  use GL_Color_Palette_Generator\Types\Color_Types;
 
- class Test_Color_Types extends Unit_Test {
+ class Test_Color_Types extends Unit_Test_Case {
 
     public function setUp(): void {
         parent::setUp();

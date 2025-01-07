@@ -6,6 +6,7 @@
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
+         bootstrap="./tests/bootstrap.php"
          >
     <coverage processUncoveredFiles="true">
         <include>
@@ -34,20 +35,20 @@
         <env name="WP_TESTS_MULTISITE" value="0"/>
         <env name="DOING_AJAX" value="0"/>
     </php>
-<testsuites>
-    <testsuite name="integration">
-        <directory suffix=".php">./tests/integration</directory>
-    </testsuite>
-    <testsuite name="unit">
-        <directory suffix=".php">./tests/unit/utils</directory>
-        <directory suffix=".php">./tests/unit/types</directory>
-        <directory suffix=".php">./tests/unit/system</directory>
-    </testsuite>
-    <testsuite name="wp-mock">
-        <directory suffix=".php">./tests/wp-mock</directory>
-    </testsuite>
-</testsuites>
+    <testsuites>
+        <testsuite name="integration">
+            <directory suffix=".php">./tests/integration</directory>
+        </testsuite>
+        <testsuite name="unit">
+            <directory suffix=".php">./tests/unit/utils</directory>
+            <directory suffix=".php">./tests/unit/types</directory>
+            <directory suffix=".php">./tests/unit/system</directory>
+        </testsuite>
+        <testsuite name="wp-mock">
+            <directory suffix=".php">./tests/wp-mock</directory>
+        </testsuite>
+    </testsuites>
     <listeners>
-        <listener class="GL_Color_Palette_Generator\Tests\Unit\Test_Printer"/>
+        <listener class="GL_Color_Palette_Generator\Tests\Test_Printer"/>
     </listeners>
 </phpunit>
