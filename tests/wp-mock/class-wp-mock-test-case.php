@@ -6,11 +6,11 @@
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock;
 
+use GL_Color_Palette_Generator\Tests\Unit\Unit_Test_Case;
 use WP_Mock;
 use Mockery;
-use WP_Mock\Tools\TestCase;
 
 /**
  * Base Test Case class that provides WP_Mock integration

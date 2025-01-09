@@ -1,12 +1,11 @@
 <?php
 /**
- * Base Test Case for WordPress Integration Tests
+ * Integration Test Case base class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Integration;
 
 use WP_UnitTestCase;
 
