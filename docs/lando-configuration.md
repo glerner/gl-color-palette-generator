@@ -153,20 +153,32 @@ Excludes prevent unnecessary files from being mounted into the container, improv
 
 ## Getting Started
 
-1. Copy .lando.example.yml to .lando.yml:
+1. Create a .lando.yml file:
+
+- If you already have a .lando.yml, merge the contents of .lando.example.yml into it.
+- Otherwise, copy .lando.example.yml to .lando.yml:
    ```bash
    cp .lando.example.yml .lando.yml
    ```
-   If you already have a .lando.yml, merge the contents of .lando.example.yml into it.
 
-2. Start the environment:
+2. Install Lando:
+   Visit https://docs.lando.dev/getting-started/installation.html
+   Follow the installation instructions for your operating system
+   Verify installation with `lando version`
+
+3. Start the environment:
    ```bash
    lando start
    ```
 
-3. Install dependencies:
+4. Install dependencies:
    ```bash
    lando composer install
    ```
 
-4. Access the development sites at the URLs listed above.
+5. Rebuild the environment:
+   ```bash
+   lando rebuild -y
+   ```
+
+6. Access the development sites at the URLs listed above.
