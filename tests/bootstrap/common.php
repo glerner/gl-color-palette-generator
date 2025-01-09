@@ -28,8 +28,9 @@ echo "\n=== Phase 2: Test Base Classes Setup ===\n";
 echo "Loading test base classes:\n";
 
 $test_classes = [
-    'class-test-case.php' => 'Test_Case',
-    'class-test-case-integration.php' => 'Test_Case_Integration',
+    'class-unit-test-case.php' => 'Unit_Test_Case',  // Base class first
+    'class-wp-mock-test-case.php' => 'WP_Mock_Test_Case',  // WP Mock class
+    'class-test-case-integration.php' => 'Test_Case_Integration',  // Integration last
 ];
 
 // Determine which bootstrap file included this file
@@ -42,7 +43,7 @@ $bootstrap_type = match($including_file) {
      * and "tests/unit/" directory path
     */
     'unit.php' => ['Unit', 'unit'], // Unit tests without WordPress
-    'wp-mock.php' => ['Unit', 'unit'],  // WP_Mock tests mock WordPress functions
+    'wp-mock.php' => ['WP_Mock', 'wp-mock'],  // WP_Mock tests mock WordPress functions
     'wp.php' => ['Integration', 'integration'],  // Integration tests with actual WordPress code
     default => throw new \RuntimeException("Unknown bootstrap file: $including_file")
 };
@@ -54,7 +55,8 @@ foreach ($test_classes as $file => $class) {
     $paths = [
         dirname(__DIR__) . "/$file",
         dirname(__DIR__) . "/unit/$file",
-        dirname(__DIR__) . "/integration/$file"
+        dirname(__DIR__) . "/integration/$file",
+        dirname(__DIR__) . "/wp-mock/$file"
     ];
 
     $loaded = false;
@@ -70,8 +72,9 @@ foreach ($test_classes as $file => $class) {
                 $class_namespace = 'Integration';
             } elseif (str_contains($path, '/unit/')) {
                 $class_namespace = 'Unit';
+            } elseif (str_contains($path, '/wp-mock/')) {
+                $class_namespace = 'WP_Mock';
             }
-
             $full_class = "GL_Color_Palette_Generator\\Tests\\{$class_namespace}\\$class";
             if (class_exists($full_class)) {
                 echo "Successfully loaded $full_class\n";
@@ -85,19 +88,18 @@ foreach ($test_classes as $file => $class) {
 
 
 // While test files are still using wrong class "use" statements, make aliases
-if (class_exists("GL_Color_Palette_Generator\\Tests\\Unit\\Test_Case")) {
+if (class_exists("GL_Color_Palette_Generator\\Tests\\Unit\\Unit_Test_Case")) {
     class_alias(
-        "GL_Color_Palette_Generator\\Tests\\Unit\\Test_Case",
-        "GL_Color_Palette_Generator\\Tests\\Test_Case"
+        "GL_Color_Palette_Generator\\Tests\\Unit\\Unit_Test_Case",
+        "GL_Color_Palette_Generator\\Tests\\Unit_Test_Case"
     );
 }
-if (class_exists("GL_Color_Palette_Generator\\Tests\\Integration\\Test_Case_Integration")) {
+if (class_exists("GL_Color_Palette_Generator\\Tests\\WP_Mock\\WP_Mock_Test_Case")) {
     class_alias(
-        "GL_Color_Palette_Generator\\Tests\\Integration\\Test_Case_Integration",
-        "GL_Color_Palette_Generator\\Tests\\Test_Case_Integration"
+        "GL_Color_Palette_Generator\\Tests\\WP_Mock\\WP_Mock_Test_Case",
+        "GL_Color_Palette_Generator\\Tests\\WP_Mock_Test_Case"
     );
 }
-
 
 echo "\n=== Phase 3: Mock Classes Setup ===\n";
 echo "Loading mock classes:\n";
@@ -136,7 +138,7 @@ function determine_bootstrap_type($test_file) {
         $content = file_get_contents($test_file);
         if (preg_match('/@bootstrap\s+(wp|wp-mock)/i', $content, $matches)) {
             return match(strtolower($matches[1])) {
-                'wp-mock' => ['Unit', 'unit'],
+                'wp-mock' => ['WP_Mock', 'wp-mock'],
                 'wp' => ['Integration', 'integration']
             };
         }

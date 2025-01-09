@@ -47,8 +47,6 @@ namespace GL_Color_Palette_Generator\Tests\Bootstrap {
     echo "Loading common bootstrap functionality\n";
     require_once __DIR__ . '/common.php';
 
-
-
     echo "\n=== WP_Mock Phase 2.5: WordPress Test Classes Setup ===\n";
 }
 
@@ -93,7 +91,7 @@ namespace {
     echo "\n=== WP_Mock Phase 3: WordPress Functions Setup ===\n";
     echo "Defining WordPress functions:\n";
 
-        /**
+    /**
      * Mock WordPress nonce creation function.
      *
      * @param string|int $action Nonce action name or number
@@ -172,8 +170,6 @@ namespace GL_Color_Palette_Generator\Tests\Bootstrap {
     echo "Initializing WP_Mock\n";
     \WP_Mock::bootstrap();
 
-    echo "\n=== WP_Mock Phase 5: WP_Mock Expectations ===\n";
-
 
     echo "\n=== WP_Mock Phase 5: WP_Mock Expectations ===\n";
 
@@ -237,6 +233,27 @@ namespace GL_Color_Palette_Generator\Tests\Bootstrap {
             return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
         }
     ]);
+
+        // Mock translation functions
+        \WP_Mock::userFunction('__', [
+            'return_arg' => 0,
+            'return' => function($text) { return $text; }
+        ]);
+
+        \WP_Mock::userFunction('_x', [
+            'return_arg' => 0,
+            'return' => function($text) { return $text; }
+        ]);
+
+        \WP_Mock::userFunction('esc_html__', [
+            'return_arg' => 0,
+            'return' => function($text) { return $text; }
+        ]);
+
+        \WP_Mock::userFunction('esc_attr__', [
+            'return_arg' => 0,
+            'return' => function($text) { return $text; }
+        ]);
 
     echo "\n=== WP_Mock Phase 6: Constants Setup ===\n";
     echo "Defining constants:\n";
