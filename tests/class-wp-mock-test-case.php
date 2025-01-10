@@ -8,7 +8,7 @@
 
 namespace GL_Color_Palette_Generator\Tests\WP_Mock;
 
-use GL_Color_Palette_Generator\Tests\Unit\Unit_Test_Case;
+use GL_Color_Palette_Generator\Tests\Unit_Test_Case;
 use WP_Mock;
 use Mockery;
 
@@ -39,22 +39,31 @@ class WP_Mock_Test_Case extends Unit_Test_Case {
      * Tears down WP_Mock after each test
      */
     protected function tearDown(): void {
-        foreach ($this->mocked_functions as $function_name) {
-            if (function_exists($function_name)) {
-                runkit_function_remove($function_name);
-            }
-        }
-        $this->mocked_functions = [];
         WP_Mock::tearDown();
+        Mockery::close();
         parent::tearDown();
     }
 
     /**
-     * Assert that all expected filters were called
+     * Assert that all expected hooks were called
      * This method should be called at the end of each test
      */
-    protected function assertHooksWereCalled() {
+    protected function assertHooksWereCalled(): void {
+        $this->assertFiltersCalled();
+        $this->assertActionsCalled();
+    }
+
+    /**
+     * Assert that all expected filters were called
+     */
+    protected function assertFiltersCalled(): void {
         $this->assertTrue(WP_Mock::expectedFiltersCalled());
+    }
+
+    /**
+     * Assert that all expected actions were called
+     */
+    protected function assertActionsCalled(): void {
         $this->assertTrue(WP_Mock::expectedActionsCalled());
     }
 
@@ -96,6 +105,18 @@ class WP_Mock_Test_Case extends Unit_Test_Case {
     protected function mock_option(string $option_name, $value): void {
         $this->mock_function('get_option', $value);
         $this->mock_function('update_option', true);
+    }
+
+    /**
+    * Mock WordPress transient functions
+    *
+    * @param string $transient Transient name
+    * @param mixed  $value     Value to return
+    */
+    protected function mock_transient(string $transient, $value): void {
+        $this->mock_function('get_transient', $value);
+        $this->mock_function('set_transient', true);
+        $this->mock_function('delete_transient', true);
     }
 
     /**
@@ -150,7 +171,7 @@ class WP_Mock_Test_Case extends Unit_Test_Case {
      * @param array $request_data Request data to mock
      * @return WP_REST_Request Mock request object
      */
-    protected function mock_rest_request(array $request_data = []): object {
+    protected function mock_rest_request(array $request_data = []): \WP_REST_Request {
         $request = $this->getMockBuilder('WP_REST_Request')
             ->disableOriginalConstructor()
             ->getMock();

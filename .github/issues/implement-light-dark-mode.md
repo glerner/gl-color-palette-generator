@@ -11,6 +11,7 @@ created: 2024-12-25
 
 ## Description
 Add support for automatic light/dark mode switching using CSS `light-dark()` function in generated theme variations, following WordPress's new guidance on block theme styling.
+Add support for print-specific styles, including undoing both light and dark mode styles for print.
 
 ## Background
 WordPress now recommends using the CSS `light-dark()` function for theme color schemes, as detailed in:
@@ -50,6 +51,44 @@ https://developer.wordpress.org/news/2024/12/mastering-light-and-dark-mode-styli
 - Add preview toggle for light/dark modes
 - Show contrast ratios for both modes
 - Display paired colors side by side
+
+### 6. Print Styles
+Add support for print-specific styles that override both light and dark mode colors:
+- Reset all background colors to white
+- Set all text colors to black
+- Remove unnecessary decorative elements
+- Ensure proper contrast for printed content
+- Handle links and other interactive elements appropriately for print medium
+
+This ensures consistent, readable output regardless of the user's chosen color scheme.
+
+Include the CSS in the theme variation, if possible, or add it to the theme variation's `style.css` file.
+
+Example CSS structure:
+```css
+@media print {
+  /* Reset colors for printing */
+  :root {
+    --wp--preset--color--background: #ffffff !important;
+    --wp--preset--color--foreground: #000000 !important;
+    /* Reset other color variables as needed */
+  }
+
+  /* Ensure black text on white background */
+  * {
+    color: #000 !important;
+    background-color: #fff !important;
+    text-shadow: none !important;
+  }
+
+  /* Handle links */
+  a {
+    text-decoration: underline;
+  }
+}
+```
+
+See also `./CSS for Print Black Text on White.md`
 
 ## Technical Implementation
 
