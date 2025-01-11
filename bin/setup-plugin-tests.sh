@@ -190,6 +190,11 @@ install_test_suite() {
     echo "  DROP DATABASE IF EXISTS $DB_NAME;"
     echo "  CREATE DATABASE IF NOT EXISTS $DB_NAME;"
 
+
+###### Need to run in Lando environment to create database.
+
+
+
     # Check if MySQL is reachable
     # Mysql expects there should be no space between -p and the password value.
     # should be this command:
@@ -206,7 +211,11 @@ install_test_suite() {
     fi
 
     # Try to create database
-    if ! mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "CREATE DATABASE IF NOT EXISTS $DB_NAME"; then
+    # command should be this:
+    # mysql -h "database" -uroot -e "CREATE DATABASE IF NOT EXISTS wordpress_tests;"
+    # from inside lando ssh
+    # and assign user 'wordpress' with password 'wordpress'
+    if ! mysql -h "$DB_HOST" -uroot -e "CREATE DATABASE IF NOT EXISTS $DB_NAME"; then
         echo "Error: Failed to create test database. Check user permissions."
         exit 1
     fi

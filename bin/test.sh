@@ -61,6 +61,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PLUGIN_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
 TEST_DIR="$PLUGIN_DIR/tests"
 
+echo "=== Starting test.sh ==="
 echo "Using directories:"
 echo "  Plugin directory: $PLUGIN_DIR"
 echo "  Test directory: $TEST_DIR"
@@ -201,27 +202,22 @@ CMD="$PHPUNIT"
 CMD="$CMD --debug --verbose"
 
 # Show test discovery info
-echo "Looking for tests in:"
+echo "Looking for tests in (as defined in phpunit.xml):"
 if [ "$TESTSUITE" == "integration" ]; then
-    echo "  - ${TEST_DIR}/integration/"
-    if [ ! -d "${TEST_DIR}/integration" ]; then
-        echo "Error: integration test directory not found at ${TEST_DIR}/integration"
-        exit 1
-    fi
-    # List test files
-    echo "Found test files:"
-    find "${TEST_DIR}/integration" -name "test-*.php" -type f
-
-    # Show test file contents
-    for test_file in $(find "${TEST_DIR}/integration" -name "test-*.php" -type f); do
-        echo "Contents of $test_file:"
-        cat "$test_file"
-    done
+    echo "  - ${TEST_DIR}/integration/ (suffix: .php)"
 elif [ "$TESTSUITE" == "unit" ]; then
-    echo "  - ${TEST_DIR}/providers/"
-    echo "  - ${TEST_DIR}/api/"
-    echo "  - ${TEST_DIR}/admin/"
-    echo "  - ${TEST_DIR}/core/"
+    echo "  - ${TEST_DIR}/unit/ (suffix: .php)"
+elif [ "$TESTSUITE" == "mock" ]; then
+    echo "  - ${TEST_DIR}/wp-mock/ (suffix: .php)"
+fi
+
+# List test files if directory exists
+if [ -d "${TEST_DIR}/${TESTSUITE}" ]; then
+    echo "Found test files:"
+    find "${TEST_DIR}/${TESTSUITE}" -name "*.php" -type f
+else
+    echo "Error: test directory not found at ${TEST_DIR}/${TESTSUITE}"
+    exit 1
 fi
 
 # Show configuration
@@ -235,5 +231,5 @@ echo "  Test directory contents:"
 ls -la "${TEST_DIR}/"
 
 # Run tests
-echo "Running: $CMD"
+echo "\nRunning: $CMD"
 $CMD
