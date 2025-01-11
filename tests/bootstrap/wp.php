@@ -36,13 +36,14 @@ require_once __DIR__ . '/common.php';
 
 echo "\n=== Phase 3: Environment Variables ===\n";
 // Load local environment variables.
-$env_path = dirname(__DIR__, 2) . '/.env.local.testing';
+$env_path = dirname(__DIR__, 2) . '/.env.testing';
 if (file_exists($env_path)) {
     echo "Loading environment from: $env_path\n";
-    $dotenv = \Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2), '.env.local.testing');
+    $dotenv = \Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2), '.env.testing');
     $dotenv->load();
 } else {
     echo "WARNING: Environment file not found: $env_path\n";
+    echo "If you want to use environment variables, please copy .env.sample.testing to .env.testing and edit for your local environment\n";
 }
 
 echo "\n=== Phase 4: WordPress Test Suite Setup ===\n";

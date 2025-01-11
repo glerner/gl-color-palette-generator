@@ -62,6 +62,7 @@ PLUGIN_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
 TEST_DIR="$PLUGIN_DIR/tests"
 
 echo "=== Starting test.sh ==="
+echo "=== Starting test.sh ==="
 echo "Using directories:"
 echo "  Plugin directory: $PLUGIN_DIR"
 echo "  Test directory: $TEST_DIR"
@@ -207,7 +208,7 @@ if [ "$TESTSUITE" == "integration" ]; then
     echo "  - ${TEST_DIR}/integration/ (suffix: .php)"
 elif [ "$TESTSUITE" == "unit" ]; then
     echo "  - ${TEST_DIR}/unit/ (suffix: .php)"
-elif [ "$TESTSUITE" == "mock" ]; then
+elif [ "$TESTSUITE" == "wp-mock" ]; then
     echo "  - ${TEST_DIR}/wp-mock/ (suffix: .php)"
 fi
 
@@ -231,5 +232,6 @@ echo "  Test directory contents:"
 ls -la "${TEST_DIR}/"
 
 # Run tests
+echo "\nRunning: $CMD"
 echo "\nRunning: $CMD"
 $CMD
