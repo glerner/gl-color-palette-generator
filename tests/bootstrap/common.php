@@ -27,12 +27,6 @@ if ($autoloader instanceof \Composer\Autoload\ClassLoader) {
 echo "\n=== Phase 2: Test Base Classes Setup ===\n";
 echo "Loading test base classes:\n";
 
-$test_classes = [
-    'class-unit-test-case.php' => 'Unit_Test_Case',  // Base class first
-    'class-wp-mock-test-case.php' => 'WP_Mock_Test_Case',  // WP Mock class
-    'class-test-case-integration.php' => 'Test_Case_Integration',  // Integration last
-];
-
 // Determine which bootstrap file included this file
 $trace = debug_backtrace();
 $including_file = basename($trace[0]['file']);
@@ -49,9 +43,35 @@ $bootstrap_type = match($including_file) {
 };
 [$namespace_prefix, $path_prefix] = $bootstrap_type;
 
+// Load test base classes
+$test_classes = [];
+if ($path_prefix === 'wp-mock') {
+    $test_classes['class-wp-mock-test-case.php'] = 'WP_Mock_Test_Case';
+} elseif ($path_prefix === 'unit') {
+    $test_classes['class-unit-test-case.php'] = 'Unit_Test_Case';
+} elseif ($path_prefix === 'integration') {
+    $test_classes['class-test-case-integration.php'] = 'Test_Case_Integration';
+}
+
 echo "For test file $including_file, Detected bootstrap type: $namespace_prefix and $path_prefix\n";
 
+// Files that are part of test infrastructure (not to be tested)
+$excluded_test_files = [
+    'bootstrap.php',
+    'bootstrap/common.php',
+    'bootstrap/unit.php',
+    'bootstrap/wp-mock.php',
+    'bootstrap/wp.php',
+    'bootstrap/wp-functions.php',
+    'class-unit-test-case.php',
+    'class-wp-mock-test-case.php',
+    'class-test-helpers.php',
+    'class-test-printer.php'
+];
+
+
 foreach ($test_classes as $file => $class) {
+
     $paths = [
         dirname(__DIR__) . "/$file",
         dirname(__DIR__) . "/unit/$file",
@@ -61,6 +81,7 @@ foreach ($test_classes as $file => $class) {
 
     $loaded = false;
     foreach ($paths as $path) {
+
         if (file_exists($path)) {
             echo "Loading $class from $path\n";
             require_once $path;
@@ -111,6 +132,7 @@ $mock_classes = [
 
 foreach ($mock_classes as $file => $class) {
     $path = dirname(__DIR__) . '/unit/mocks/' . $file;
+
     echo "Loading $class from $path\n";
     if (!file_exists($path)) {
         echo "WARNING: Mock class file not found: $path\n";

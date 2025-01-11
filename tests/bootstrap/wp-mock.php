@@ -2,7 +2,7 @@
 /**
  * Bootstrap file for WP_Mock tests
  *
- * This file sets up the testing environment for WordPress unit tests using WP_Mock.
+ * This file sets up the testing environment for WordPress WP_Mock tests.
  * It handles:
  * - Environment variable loading
  * - WordPress function mocking
@@ -47,7 +47,7 @@ namespace GL_Color_Palette_Generator\Tests\Bootstrap {
     echo "Loading common bootstrap functionality\n";
     require_once __DIR__ . '/common.php';
 
-    echo "\n=== WP_Mock Phase 2.5: WordPress Test Classes Setup ===\n";
+    echo "\n=== WP_Mock Phase 3: WordPress Test Classes Setup ===\n";
 }
 
 
@@ -56,6 +56,9 @@ namespace {
     if (!class_exists('WP_UnitTestCase')) {
         // Initialize WP_Mock before defining test case class
         \WP_Mock::bootstrap();
+
+        // Load WordPress function mocks
+        require_once __DIR__ . '/wp-functions.php';
 
         $debug = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
         foreach ($debug as $trace) {
@@ -85,81 +88,6 @@ namespace {
         }
 
         echo "Created WP_UnitTestCase based on PHPUnit TestCase\n";
-    }
-
-
-    echo "\n=== WP_Mock Phase 3: WordPress Functions Setup ===\n";
-    echo "Defining WordPress functions:\n";
-
-    /**
-     * Mock WordPress nonce creation function.
-     *
-     * @param string|int $action Nonce action name or number
-     * @return string Always returns 'test_nonce' for testing
-     */
-    if (!function_exists('wp_create_nonce')) {
-        function wp_create_nonce($action = -1) {
-            return 'test_nonce';
-        }
-    }
-
-    /**
-     * Mock WordPress admin URL function.
-     *
-     * @param string $path Optional path relative to admin URL
-     * @return string Mocked admin URL with path
-     */
-    if (!function_exists('admin_url')) {
-        function admin_url($path = 'admin.php') {
-            return 'http://example.com/wp-admin/' . ltrim($path, '/');
-        }
-    }
-
-    if (!function_exists('plugins_url')) {
-        function plugins_url($path = '', $plugin = '') {
-            return 'http://example.com/wp-content/plugins/' . ltrim($path, '/');
-        }
-    }
-
-    if (!function_exists('wp_json_encode')) {
-        function wp_json_encode($data, $options = 0, $depth = 512) {
-            return json_encode($data, $options, $depth);
-        }
-    }
-
-    if (!function_exists('sanitize_text_field')) {
-        function sanitize_text_field($str) {
-            return trim(strip_tags($str));
-        }
-    }
-
-    if (!function_exists('wp_parse_args')) {
-        function wp_parse_args($args, $defaults = '') {
-            if (is_object($args)) {
-                $parsed_args = get_object_vars($args);
-            } elseif (is_array($args)) {
-                $parsed_args = &$args;
-            } else {
-                parse_str($args, $parsed_args);
-            }
-
-            if (is_array($defaults)) {
-                return array_merge($defaults, $parsed_args);
-            }
-            return $parsed_args;
-        }
-    }
-
-    if (!function_exists('esc_html')) {
-        function esc_html($text) {
-            return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
-        }
-    }
-
-    if (!function_exists('esc_attr')) {
-        function esc_attr($text) {
-            return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
-        }
     }
 
 }
