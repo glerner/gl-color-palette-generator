@@ -3,13 +3,13 @@
 namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\Interfaces\ColorPaletteConverter;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Converter;
 
-class ColorPaletteConverterTest extends TestCase {
+class Test_Color_Palette_Converter extends TestCase {
     private $converter;
 
     public function setUp(): void {
-        $this->converter = $this->createMock(ColorPaletteConverter::class);
+        $this->converter = $this->createMock(Color_Palette_Converter::class);
     }
 
     public function test_convert_color_space_transforms_colors(): void {

@@ -6,7 +6,7 @@
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
 use GL_Color_Palette_Generator\Color_Analysis;
 use WP_UnitTestCase;

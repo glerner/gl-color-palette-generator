@@ -6,12 +6,12 @@
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
 use GL_Color_Palette_Generator\Color_Palette_Formatter;
 use PHPUnit\Framework\TestCase;
 
-class ColorPaletteFormatterTest extends TestCase {
+class Test_Color_Palette_Formatter extends TestCase {
     private Color_Palette_Formatter $formatter;
 
     public function setUp(): void {

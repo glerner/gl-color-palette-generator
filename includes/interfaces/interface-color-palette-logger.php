@@ -12,7 +12,7 @@ namespace GL_Color_Palette_Generator\Interfaces;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorPaletteLogger {
+interface Color_Palette_Logger {
     /**
      * Logs palette operation event.
      *

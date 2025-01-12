@@ -3,13 +3,13 @@
 namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\Interfaces\ColorPaletteImporter;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Importer;
 
-class ColorPaletteImporterTest extends TestCase {
+class Test_Color_Palette_Importer extends TestCase {
     private $importer;
 
     public function setUp(): void {
-        $this->importer = $this->createMock(ColorPaletteImporter::class);
+        $this->importer = $this->createMock(Color_Palette_Importer::class);
     }
 
     public function test_import_from_file_loads_palette(): void {

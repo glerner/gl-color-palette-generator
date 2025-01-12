@@ -3,13 +3,13 @@
 namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\Interfaces\ColorPaletteVersionControl;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Version_Control;
 
-class ColorPaletteVersionControlTest extends TestCase {
+class Test_Color_Palette_Version_Control extends TestCase {
     private $versionControl;
 
     public function setUp(): void {
-        $this->versionControl = $this->createMock(ColorPaletteVersionControl::class);
+        $this->versionControl = $this->createMock(Color_Palette_Version_Control::class);
     }
 
     public function test_create_version_returns_valid_version(): void {

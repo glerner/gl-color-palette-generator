@@ -8,19 +8,19 @@
  * @since   1.0.0
  */
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\ColorPaletteImporter;
-use GL_Color_Palette_Generator\ColorPaletteFormatter;
+use GL_Color_Palette_Generator\Color_Palette_Importer;
+use GL_Color_Palette_Generator\Color_Palette_Formatter;
 
-class ColorPaletteImporterTest extends TestCase {
-    private ColorPaletteImporter $importer;
-    private ColorPaletteFormatter $formatter;
+class Test_Color_Palette_Importer extends TestCase {
+    private Color_Palette_Importer $importer;
+    private Color_Palette_Formatter $formatter;
 
     public function setUp(): void {
-        $this->formatter = new ColorPaletteFormatter();
-        $this->importer = new ColorPaletteImporter($this->formatter);
+        $this->formatter = new Color_Palette_Formatter();
+        $this->importer = new Color_Palette_Importer($this->formatter);
     }
 
     /**

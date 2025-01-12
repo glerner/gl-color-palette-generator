@@ -8,22 +8,22 @@
  * @since   1.0.0
  */
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\ColorPalette;
-use GL_Color_Palette_Generator\ColorPaletteRenderer;
-use GL_Color_Palette_Generator\ColorPaletteFormatter;
+use GL_Color_Palette_Generator\Color_Palette;
+use GL_Color_Palette_Generator\Color_Palette_Renderer;
+use GL_Color_Palette_Generator\Color_Palette_Formatter;
 
-class ColorPaletteRendererTest extends TestCase {
-    private ColorPaletteRenderer $renderer;
-    private ColorPaletteFormatter $formatter;
-    private ColorPalette $test_palette;
+class Test_Color_Palette_Renderer extends TestCase {
+    private Color_Palette_Renderer $renderer;
+    private Color_Palette_Formatter $formatter;
+    private Color_Palette $test_palette;
 
     public function setUp(): void {
-        $this->formatter = new ColorPaletteFormatter();
-        $this->renderer = new ColorPaletteRenderer($this->formatter);
-        $this->test_palette = new ColorPalette([
+        $this->formatter = new Color_Palette_Formatter();
+        $this->renderer = new Color_Palette_Renderer($this->formatter);
+        $this->test_palette = new Color_Palette([
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00', '#0000FF'],
             'metadata' => ['type' => 'test']
@@ -183,7 +183,7 @@ class ColorPaletteRendererTest extends TestCase {
     }
 
     public function test_render_with_empty_palette(): void {
-        $empty_palette = new ColorPalette([
+        $empty_palette = new Color_Palette([
             'name' => 'Empty Palette',
             'colors' => []
         ]);

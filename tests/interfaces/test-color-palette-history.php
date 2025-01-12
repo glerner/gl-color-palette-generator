@@ -10,13 +10,13 @@
 namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\Interfaces\ColorPaletteHistory;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_History;
 
-class ColorPaletteHistoryTest extends TestCase {
+class Test_Color_Palette_History extends TestCase {
     private $history;
 
     public function setUp(): void {
-        $this->history = $this->createMock(ColorPaletteHistory::class);
+        $this->history = $this->createMock(Color_Palette_History::class);
     }
 
     /**

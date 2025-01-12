@@ -17,13 +17,13 @@
 namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\Interfaces\ColorPalettePreview;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Preview;
 
-class ColorPalettePreviewTest extends TestCase {
+class Test_Color_Palette_Preview extends TestCase {
     private $preview;
 
     public function setUp(): void {
-        $this->preview = $this->createMock(ColorPalettePreview::class);
+        $this->preview = $this->createMock(Color_Palette_Preview::class);
     }
 
     /**

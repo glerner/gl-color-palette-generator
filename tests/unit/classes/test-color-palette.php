@@ -1,15 +1,15 @@
 <?php
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\ColorPalette;
+use GL_Color_Palette_Generator\Color_Palette;
 
-class ColorPaletteTest extends TestCase {
-    private ColorPalette $palette;
+class Color_Palette_Test extends TestCase {
+    private Color_Palette $palette;
 
     public function setUp(): void {
-        $this->palette = new ColorPalette([
+        $this->palette = new Color_Palette([
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00', '#0000FF'],
             'metadata' => ['source' => 'test']
@@ -17,7 +17,7 @@ class ColorPaletteTest extends TestCase {
     }
 
     public function test_constructor_with_default_values(): void {
-        $palette = new ColorPalette();
+        $palette = new Color_Palette();
         $this->assertEquals('Untitled Palette', $palette->getName());
         $this->assertEmpty($palette->getColors());
         $this->assertEmpty($palette->getMetadata());

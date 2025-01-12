@@ -3,13 +3,13 @@
 namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\Interfaces\ColorPaletteRenderer;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Renderer;
 
-class ColorPaletteRendererTest extends TestCase {
+class Test_Color_Palette_Renderer extends TestCase {
     private $renderer;
 
     public function setUp(): void {
-        $this->renderer = $this->createMock(ColorPaletteRenderer::class);
+        $this->renderer = $this->createMock(Color_Palette_Renderer::class);
     }
 
     public function test_render_as_html_generates_markup(): void {

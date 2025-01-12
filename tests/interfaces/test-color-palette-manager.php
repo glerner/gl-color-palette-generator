@@ -3,13 +3,13 @@
 namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\Interfaces\ColorPaletteManager;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Manager;
 
-class ColorPaletteManagerTest extends TestCase {
+class Test_Color_Palette_Manager extends TestCase {
     protected $manager;
 
     public function setUp(): void {
-        $this->manager = $this->createMock(ColorPaletteManager::class);
+        $this->manager = $this->createMock(Color_Palette_Manager::class);
     }
 
     public function test_create_palette_stores_new_palette(): void {

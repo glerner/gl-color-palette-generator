@@ -12,7 +12,7 @@ namespace GL_Color_Palette_Generator\Interfaces;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorPaletteNotifier {
+interface Color_Palette_Notifier {
     /**
      * Sends notification about palette event.
      *

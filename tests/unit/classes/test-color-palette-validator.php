@@ -8,21 +8,21 @@
  * @since   1.0.0
  */
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\ColorPalette;
-use GL_Color_Palette_Generator\ColorPaletteValidator;
+use GL_Color_Palette_Generator\Color_Palette;
+use GL_Color_Palette_Generator\Color_Palette_Validator;
 
-class ColorPaletteValidatorTest extends TestCase {
-    protected ColorPaletteValidator $validator;
+class Test_Color_Palette_Validator extends TestCase {
+    protected Color_Palette_Validator $validator;
 
     public function setUp(): void {
-        $this->validator = new ColorPaletteValidator();
+        $this->validator = new Color_Palette_Validator();
     }
 
     public function test_validate_valid_palette(): void {
-        $palette = new ColorPalette([
+        $palette = new Color_Palette([
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00', '#0000FF'],
             'metadata' => [
@@ -37,7 +37,7 @@ class ColorPaletteValidatorTest extends TestCase {
     }
 
     public function test_validate_invalid_color_format(): void {
-        $palette = new ColorPalette([
+        $palette = new Color_Palette([
             'name' => 'Invalid Colors',
             'colors' => ['invalid', '#FF0000']
         ]);
@@ -47,7 +47,7 @@ class ColorPaletteValidatorTest extends TestCase {
     }
 
     public function test_validate_empty_name(): void {
-        $palette = new ColorPalette([
+        $palette = new Color_Palette([
             'name' => '',
             'colors' => ['#FF0000']
         ]);
@@ -57,7 +57,7 @@ class ColorPaletteValidatorTest extends TestCase {
     }
 
     public function test_validate_empty_colors(): void {
-        $palette = new ColorPalette([
+        $palette = new Color_Palette([
             'name' => 'Empty Colors',
             'colors' => []
         ]);
@@ -67,7 +67,7 @@ class ColorPaletteValidatorTest extends TestCase {
     }
 
     public function test_validate_invalid_metadata_type(): void {
-        $palette = new ColorPalette([
+        $palette = new Color_Palette([
             'name' => 'Invalid Metadata',
             'colors' => ['#FF0000'],
             'metadata' => [
@@ -80,7 +80,7 @@ class ColorPaletteValidatorTest extends TestCase {
     }
 
     public function test_validate_invalid_metadata_datetime(): void {
-        $palette = new ColorPalette([
+        $palette = new Color_Palette([
             'name' => 'Invalid DateTime',
             'colors' => ['#FF0000'],
             'metadata' => [
@@ -93,7 +93,7 @@ class ColorPaletteValidatorTest extends TestCase {
     }
 
     public function test_validate_invalid_metadata_version(): void {
-        $palette = new ColorPalette([
+        $palette = new Color_Palette([
             'name' => 'Invalid Version',
             'colors' => ['#FF0000'],
             'metadata' => [
@@ -146,7 +146,7 @@ class ColorPaletteValidatorTest extends TestCase {
 
     public function test_validate_too_many_colors(): void {
         $colors = array_fill(0, 101, '#FF0000');
-        $palette = new ColorPalette([
+        $palette = new Color_Palette([
             'name' => 'Too Many Colors',
             'colors' => $colors
         ]);
@@ -157,7 +157,7 @@ class ColorPaletteValidatorTest extends TestCase {
 
     public function test_validate_name_too_long(): void {
         $long_name = str_repeat('a', 101);
-        $palette = new ColorPalette([
+        $palette = new Color_Palette([
             'name' => $long_name,
             'colors' => ['#FF0000']
         ]);

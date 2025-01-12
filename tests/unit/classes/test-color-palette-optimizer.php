@@ -8,25 +8,25 @@
  * @since   1.0.0
  */
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\ColorPalette;
-use GL_Color_Palette_Generator\ColorPaletteOptimizer;
-use GL_Color_Palette_Generator\ColorPaletteAnalyzer;
-use GL_Color_Palette_Generator\ColorPaletteFormatter;
+use GL_Color_Palette_Generator\Color_Palette;
+use GL_Color_Palette_Generator\Color_Palette_Optimizer;
+use GL_Color_Palette_Generator\Color_Palette_Analyzer;
+use GL_Color_Palette_Generator\Color_Palette_Formatter;
 
-class ColorPaletteOptimizerTest extends TestCase {
-    private ColorPaletteOptimizer $optimizer;
-    private ColorPaletteAnalyzer $analyzer;
-    private ColorPaletteFormatter $formatter;
-    private ColorPalette $test_palette;
+class Test_Color_Palette_Optimizer extends TestCase {
+    private Color_Palette_Optimizer $optimizer;
+    private Color_Palette_Analyzer $analyzer;
+    private Color_Palette_Formatter $formatter;
+    private Color_Palette $test_palette;
 
     public function setUp(): void {
-        $this->formatter = new ColorPaletteFormatter();
-        $this->analyzer = new ColorPaletteAnalyzer($this->formatter);
-        $this->optimizer = new ColorPaletteOptimizer($this->analyzer, $this->formatter);
-        $this->test_palette = new ColorPalette([
+        $this->formatter = new Color_Palette_Formatter();
+        $this->analyzer = new Color_Palette_Analyzer($this->formatter);
+        $this->optimizer = new Color_Palette_Optimizer($this->analyzer, $this->formatter);
+        $this->test_palette = new Color_Palette([
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00', '#0000FF'],
             'metadata' => ['type' => 'test']
@@ -36,7 +36,7 @@ class ColorPaletteOptimizerTest extends TestCase {
     public function test_optimize_palette_default(): void {
         $optimized = $this->optimizer->optimizePalette($this->test_palette);
 
-        $this->assertInstanceOf(ColorPalette::class, $optimized);
+        $this->assertInstanceOf(Color_Palette::class, $optimized);
         $this->assertNotEquals($this->test_palette->getColors(), $optimized->getColors());
         $this->assertArrayHasKey('optimization', $optimized->getMetadata());
     }

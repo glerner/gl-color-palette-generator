@@ -3,13 +3,13 @@
 namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\Interfaces\ColorPaletteSearch;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Search;
 
-class ColorPaletteSearchTest extends TestCase {
+class Test_Color_Palette_Search extends TestCase {
     private $search;
 
     public function setUp(): void {
-        $this->search = $this->createMock(ColorPaletteSearch::class);
+        $this->search = $this->createMock(Color_Palette_Search::class);
     }
 
     public function test_search_returns_matching_palettes(): void {

@@ -8,22 +8,22 @@
  * @since   1.0.0
  */
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\ColorPalette;
-use GL_Color_Palette_Generator\ColorPaletteAnalyzer;
-use GL_Color_Palette_Generator\ColorPaletteFormatter;
+use GL_Color_Palette_Generator\Color_Palette;
+use GL_Color_Palette_Generator\Color_Palette_Analyzer;
+use GL_Color_Palette_Generator\Color_Palette_Formatter;
 
-class ColorPaletteAnalyzerTest extends TestCase {
-    protected ColorPaletteAnalyzer $analyzer;
-    protected ColorPaletteFormatter $formatter;
-    protected ColorPalette $test_palette;
+class Test_Color_Palette_Analyzer extends TestCase {
+    protected Color_Palette_Analyzer $analyzer;
+    protected Color_Palette_Formatter $formatter;
+    protected Color_Palette $test_palette;
 
     public function setUp(): void {
-        $this->formatter = new ColorPaletteFormatter();
-        $this->analyzer = new ColorPaletteAnalyzer($this->formatter);
-        $this->test_palette = new ColorPalette([
+        $this->formatter = new Color_Palette_Formatter();
+        $this->analyzer = new Color_Palette_Analyzer($this->formatter);
+        $this->test_palette = new Color_Palette([
             'name' => 'Test Palette',
             'colors' => ['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF'],
             'metadata' => ['type' => 'test']
@@ -93,7 +93,7 @@ class ColorPaletteAnalyzerTest extends TestCase {
     }
 
     public function test_complementary_colors(): void {
-        $palette = new ColorPalette([
+        $palette = new Color_Palette([
             'colors' => ['#FF0000', '#00FFFF'] // Red and Cyan
         ]);
 
@@ -102,7 +102,7 @@ class ColorPaletteAnalyzerTest extends TestCase {
     }
 
     public function test_analogous_colors(): void {
-        $palette = new ColorPalette([
+        $palette = new Color_Palette([
             'colors' => ['#FF0000', '#FF3300', '#FF6600'] // Red and orange shades
         ]);
 
@@ -111,7 +111,7 @@ class ColorPaletteAnalyzerTest extends TestCase {
     }
 
     public function test_triadic_colors(): void {
-        $palette = new ColorPalette([
+        $palette = new Color_Palette([
             'colors' => ['#FF0000', '#00FF00', '#0000FF'] // Red, Green, Blue
         ]);
 
@@ -120,7 +120,7 @@ class ColorPaletteAnalyzerTest extends TestCase {
     }
 
     public function test_accessibility_levels(): void {
-        $palette = new ColorPalette([
+        $palette = new Color_Palette([
             'colors' => ['#000000', '#FFFFFF'] // Maximum contrast
         ]);
 
@@ -132,7 +132,7 @@ class ColorPaletteAnalyzerTest extends TestCase {
     }
 
     public function test_contrast_ratio_calculation(): void {
-        $palette = new ColorPalette([
+        $palette = new Color_Palette([
             'colors' => ['#000000', '#FFFFFF'] // Maximum contrast
         ]);
 
@@ -142,13 +142,13 @@ class ColorPaletteAnalyzerTest extends TestCase {
 
     public function test_harmony_score_calculation(): void {
         // Test complementary harmony
-        $complementary = new ColorPalette([
+        $complementary = new Color_Palette([
             'colors' => ['#FF0000', '#00FFFF']
         ]);
         $comp_harmony = $this->analyzer->analyzeHarmony($complementary);
 
         // Test analogous harmony
-        $analogous = new ColorPalette([
+        $analogous = new Color_Palette([
             'colors' => ['#FF0000', '#FF1A00', '#FF3300']
         ]);
         $ana_harmony = $this->analyzer->analyzeHarmony($analogous);

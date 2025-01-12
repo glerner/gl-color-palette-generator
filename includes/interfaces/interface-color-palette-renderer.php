@@ -14,7 +14,7 @@ use GL_Color_Palette_Generator\Models\Color_Palette;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorPaletteRendererInterface {
+interface Color_Palette_Renderer_Interface {
     /**
      * Renders a color palette.
      *

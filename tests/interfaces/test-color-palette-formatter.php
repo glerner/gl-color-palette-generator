@@ -3,13 +3,13 @@
 namespace GL_Color_Palette_Generator\Tests\Interfaces;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\Interfaces\ColorPaletteFormatter;
+use GL_Color_Palette_Generator\Interfaces\Color_Palette_Formatter;
 
-class ColorPaletteFormatterTest extends TestCase {
+class Test_Color_Palette_Formatter extends TestCase {
     private $formatter;
 
     public function setUp(): void {
-        $this->formatter = $this->createMock(ColorPaletteFormatter::class);
+        $this->formatter = $this->createMock(Color_Palette_Formatter::class);
     }
 
     public function test_format_colors_converts_values(): void {

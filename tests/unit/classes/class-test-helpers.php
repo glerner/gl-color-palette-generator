@@ -8,7 +8,7 @@
  * @since      1.0.0
  */
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
 class Test_Helpers {
     /**

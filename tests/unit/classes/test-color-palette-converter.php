@@ -1,21 +1,21 @@
 <?php
 
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
 use PHPUnit\Framework\TestCase;
-use GL_Color_Palette_Generator\ColorPalette;
-use GL_Color_Palette_Generator\ColorPaletteConverter;
-use GL_Color_Palette_Generator\ColorPaletteFormatter;
+use GL_Color_Palette_Generator\Color_Palette;
+use GL_Color_Palette_Generator\Color_Palette_Converter;
+use GL_Color_Palette_Generator\Color_Palette_Formatter;
 
-class ColorPaletteConverterTest extends TestCase {
+class Test_Color_Palette_Converter extends TestCase {
     private $converter;
     private $formatter;
     private $palette;
 
     public function setUp(): void {
-        $this->formatter = new ColorPaletteFormatter();
-        $this->converter = new ColorPaletteConverter($this->formatter);
-        $this->palette = new ColorPalette([
+        $this->formatter = new Color_Palette_Formatter();
+        $this->converter = new Color_Palette_Converter($this->formatter);
+        $this->palette = new Color_Palette([
             'name' => 'Test Palette',
             'colors' => ['#FF0000', '#00FF00', '#0000FF']
         ]);
@@ -143,7 +143,7 @@ class ColorPaletteConverterTest extends TestCase {
 
     public function test_convert_handles_empty_palette(): void {
         // Arrange
-        $empty_palette = new ColorPalette([
+        $empty_palette = new Color_Palette([
             'name' => 'Empty',
             'colors' => []
         ]);
@@ -158,7 +158,7 @@ class ColorPaletteConverterTest extends TestCase {
 
     public function test_convert_handles_single_color(): void {
         // Arrange
-        $single_color = new ColorPalette([
+        $single_color = new Color_Palette([
             'name' => 'Single',
             'colors' => ['#FF0000']
         ]);
@@ -228,7 +228,7 @@ class ColorPaletteConverterTest extends TestCase {
 
     public function test_format_specific_features(): void {
         // Test JSON with metadata
-        $palette_with_meta = new ColorPalette([
+        $palette_with_meta = new Color_Palette([
             'name' => 'Meta Test',
             'colors' => ['#FF0000'],
             'metadata' => ['author' => 'Test User']
