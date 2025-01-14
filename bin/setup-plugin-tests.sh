@@ -57,9 +57,11 @@ PLUGIN_SLUG=$(basename "$PLUGIN_DIR")
 # Set default paths and database settings from WordPress config
 if [ ! -z "${LANDO_INFO:-}" ]; then
     # In Lando environment, use LANDO_WEBROOT but clean up the path
+    echo "Using Lando configuration..."
     WP_ROOT=$(echo "${LANDO_WEBROOT:-/app}" | sed 's/\/\.//')
 else
     # For local environment, try to find WordPress root
+    echo "Not using Lando configuration, assuming local environment..."
     local_root=$(find_wordpress_root "$(pwd)")
     if [ $? -eq 0 ]; then
         WP_ROOT="$local_root"
@@ -89,7 +91,7 @@ fi
 
 # Get Lando info if available
 if [ ! -z "${LANDO_INFO:-}" ]; then
-    echo "Getting Lando configuration..."
+    echo "Getting Lando internal configuration..."
     # Extract database service info
     DB_HOST=$(echo "$LANDO_INFO" | grep -o '"internal_connection":{[^}]*}' | grep -o '"host":"[^"]*"' | head -1 | cut -d'"' -f4)
     DB_USER=$(echo "$LANDO_INFO" | grep -o '"creds":{[^}]*}' | grep -o '"user":"[^"]*"' | head -1 | cut -d'"' -f4)
@@ -186,46 +188,77 @@ install_test_suite() {
     echo "  Name: $DB_NAME"
     echo "  Password: $DB_PASS"
     echo "  Password length: ${#DB_PASS}"
-    echo "SQL commands to be executed:"
-    echo "  DROP DATABASE IF EXISTS $DB_NAME;"
-    echo "  CREATE DATABASE IF NOT EXISTS $DB_NAME;"
 
-
-###### Need to run in Lando environment to create database.
-
-
+    # Inside container or local, we use mysql directly
+    echo "Using mysql with connection details..."
+    MYSQL_CMD="mysql"
 
     # Check if MySQL is reachable
-    # Mysql expects there should be no space between -p and the password value.
-    # should be this command:
-    # mysql -h "database" -u "wordpress" -p"wordpress" -e "SELECT 1"
-    if ! mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "SELECT 1" >/dev/null 2>&1; then
-        echo "Error: Cannot connect to MySQL server"
+    echo "Attempting to connect to MySQL..."
+    if ! $MYSQL_CMD -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "SELECT 1" 2>&1; then
+        echo "Error: Cannot connect to MySQL server. Full error output above."
+        echo "Debug: Current environment:"
+        echo "  MYSQL_CMD: $MYSQL_CMD"
+        echo "  DB_HOST: $DB_HOST"
+        echo "  DB_USER: $DB_USER"
+        echo "  DB_NAME: $DB_NAME"
         exit 1
     fi
+    echo "✅ MySQL connection successful"
 
     # Try to drop database if exists
-    if ! mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "DROP DATABASE IF EXISTS $DB_NAME"; then
-        echo "Error: Failed to drop test database. Check user permissions."
+    echo "Attempting to drop existing database..."
+    if [ ! -z "${LANDO_INFO:-}" ]; then
+        # In Lando environment, use root user for dropping database
+        echo "Using root user to drop database..."
+        if ! $MYSQL_CMD -h "$DB_HOST" -uroot -e "DROP DATABASE IF EXISTS $DB_NAME" 2>&1; then
+            echo "Error: Failed to drop test database as root user. Full error output above."
+            exit 1
+        fi
+    else
+        # In local environment, use provided user
+        if ! $MYSQL_CMD -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "DROP DATABASE IF EXISTS $DB_NAME" 2>&1; then
+            echo "Error: Failed to drop test database. Full error output above."
+            exit 1
+        fi
+    fi
+    echo "✅ Existing database dropped (if it existed)"
+
+    # Create database and grant permissions
+    if [ ! -z "${LANDO_INFO:-}" ]; then
+        # In Lando environment, use root user
+        echo "Creating database and granting permissions (Lando environment)..."
+        echo "Debug: Running commands as root user:"
+        echo "  CREATE DATABASE IF NOT EXISTS $DB_NAME;"
+        echo "  GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%';"
+
+        if ! $MYSQL_CMD -h "$DB_HOST" -uroot -e "CREATE DATABASE IF NOT EXISTS $DB_NAME; GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%';" 2>&1; then
+            echo "Error: Failed to create test database or grant permissions. Full error output above."
+            echo "Debug: Trying to verify database exists..."
+            $MYSQL_CMD -h "$DB_HOST" -uroot -e "SHOW DATABASES LIKE '$DB_NAME';"
+            exit 1
+        fi
+    else
+        # In local environment, use provided user
+        echo "Creating database (local environment)..."
+        echo "Debug: Running commands as $DB_USER:"
+        echo "  CREATE DATABASE IF NOT EXISTS $DB_NAME;"
+
+        if ! $MYSQL_CMD -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;" 2>&1; then
+            echo "Error: Failed to create test database. Full error output above."
+            exit 1
+        fi
+    fi
+    echo "✅ Database created successfully"
+
+    # Verify database exists and is accessible
+    echo "Verifying database access..."
+    if ! $MYSQL_CMD -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "USE $DB_NAME; SELECT DATABASE();" 2>&1; then
+        echo "Error: Cannot access test database after creation. Full error output above."
+        echo "Debug: Trying to list all databases..."
+        $MYSQL_CMD -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "SHOW DATABASES;"
         exit 1
     fi
-
-    # Try to create database
-    # command should be this:
-    # mysql -h "database" -uroot -e "CREATE DATABASE IF NOT EXISTS wordpress_tests;"
-    # from inside lando ssh
-    # and assign user 'wordpress' with password 'wordpress'
-    if ! mysql -h "$DB_HOST" -uroot -e "CREATE DATABASE IF NOT EXISTS $DB_NAME"; then
-        echo "Error: Failed to create test database. Check user permissions."
-        exit 1
-    fi
-
-    # Verify database exists
-    if ! mysql -h "$DB_HOST" -u "$DB_USER" $DB_PASS_ARG -e "USE $DB_NAME"; then
-        echo "Error: Cannot access test database after creation"
-        exit 1
-    fi
-
     echo "✅ Test database created and verified"
 
     # Install WordPress test framework

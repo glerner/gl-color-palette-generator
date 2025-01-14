@@ -62,7 +62,6 @@ PLUGIN_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
 TEST_DIR="$PLUGIN_DIR/tests"
 
 echo "=== Starting test.sh ==="
-echo "=== Starting test.sh ==="
 echo "Using directories:"
 echo "  Plugin directory: $PLUGIN_DIR"
 echo "  Test directory: $TEST_DIR"
@@ -232,6 +231,5 @@ echo "  Test directory contents:"
 ls -la "${TEST_DIR}/"
 
 # Run tests
-echo "\nRunning: $CMD"
-echo "\nRunning: $CMD"
+echo -e "\nRunning: $CMD"
 $CMD
