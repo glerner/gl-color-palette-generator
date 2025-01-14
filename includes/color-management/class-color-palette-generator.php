@@ -538,11 +538,50 @@ private function validate_count(int $count, string $scheme_type): int|WP_Error {
     return $count;
 }
 
+    /**
+     * Generate a color palette from an image
+     *
+     * @param string $image_path Path to the image file
+     * @param array  $options    Optional. Additional options for image processing
+     * @return array|WP_Error Color palette data or error on failure
+     */
+    public function generate_from_image($image_path, $options = []) {
+        // Validate image path
+        if (!file_exists($image_path)) {
+            return new WP_Error(
+                'invalid_image',
+                __('Image file not found', 'gl-color-palette-generator')
+            );
+        }
 
+        try {
+            // Extract dominant colors from image
+            $colors = $this->color_utility->extract_colors_from_image($image_path, $options);
 
+            if (empty($colors)) {
+                return new WP_Error(
+                    'extraction_failed',
+                    __('Failed to extract colors from image', 'gl-color-palette-generator')
+                );
+            }
 
-
-
+            // Create and return the palette
+            return [
+                'colors' => $colors,
+                'source' => 'image',
+                'metadata' => [
+                    'image_path' => $image_path,
+                    'extraction_method' => $options['method'] ?? 'dominant',
+                    'timestamp' => time()
+                ]
+            ];
+        } catch (\Exception $e) {
+            return new WP_Error(
+                'generation_failed',
+                $e->getMessage()
+            );
+        }
+    }
 
     /**
      * Verify WCAG compliance of a color palette
