@@ -31,14 +31,10 @@ echo "Loading test base classes:\n";
 $trace = debug_backtrace();
 $including_file = basename($trace[0]['file']);
 $bootstrap_type = match($including_file) {
-    /* Returns [namespace prefix, directory sub-path]
-     * Example: ['Unit', 'unit'] means
-     * test base classes are in "GL_Color_Palette_Generator\Tests\Unit\" namespace
-     * and "tests/unit/" directory path
-    */
     'unit.php' => ['Unit', 'unit'], // Unit tests without WordPress
     'wp-mock.php' => ['WP_Mock', 'wp-mock'],  // WP_Mock tests mock WordPress functions
     'wp.php' => ['Integration', 'integration'],  // Integration tests with actual WordPress code
+    'integration.php' => ['Integration', 'integration'],  // Integration tests with actual WordPress code
     default => throw new \RuntimeException("Unknown bootstrap file: $including_file")
 };
 [$namespace_prefix, $path_prefix] = $bootstrap_type;

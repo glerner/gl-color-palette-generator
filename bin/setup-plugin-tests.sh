@@ -186,7 +186,7 @@ install_test_suite() {
     echo "  Host: $DB_HOST"
     echo "  User: $DB_USER"
     echo "  Name: $DB_NAME"
-    echo "  Password: $DB_PASS"
+    # echo "  Password: $DB_PASS"
     echo "  Password length: ${#DB_PASS}"
 
     # Inside container or local, we use mysql directly

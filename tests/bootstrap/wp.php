@@ -1,14 +1,16 @@
 <?php
 /**
- * Bootstrap file for WordPress integration tests
+ * Bootstrap file for WordPress test framework support
+ *
+ * This bootstrap file sets up the WordPress testing environment for any test
+ * that extends WP_UnitTestCase. This includes unit tests, integration tests,
+ * and any other tests that need WordPress core functionality.
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Tests
  */
 
 namespace GL_Color_Palette_Generator\Tests\Bootstrap;
-
-use GL_Color_Palette_Generator\Tests\Unit\Test_Case;
 
 // Start output buffering before anything else
 ob_start();
@@ -88,9 +90,8 @@ function manually_load_plugin() {
     require_once $plugin_file;
 
     echo "Initializing plugin\n";
-    // Initialize plugin after loading
+    // Only trigger plugins_loaded, let WordPress handle init
     do_action('plugins_loaded');
-    do_action('init');
 }
 
 // Add filter to load our plugin.
@@ -105,9 +106,6 @@ if (file_exists($bootstrap_path)) {
     echo "ERROR: WordPress bootstrap file not found at: $bootstrap_path\n";
     exit(1);
 }
-
-// Add backward compatibility for old namespace
-class_alias('GL_Color_Palette_Generator\Tests\Unit\Test_Case', 'GL_Color_Palette_Generator\Tests\Test_Case');
 
 echo "\n=== WordPress Bootstrap Complete ===\n";
 
