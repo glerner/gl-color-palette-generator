@@ -6,7 +6,7 @@
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests\Cache;
+namespace GL_Color_Palette_Generator\Tests\Unit\Cache;
 
 use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Cache\Palette_Cache;

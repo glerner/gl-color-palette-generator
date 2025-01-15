@@ -6,7 +6,7 @@
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests\Core;
+namespace GL_Color_Palette_Generator\Tests\Unit\Core;
 
 use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Core\Error_Handler;

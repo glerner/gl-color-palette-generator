@@ -6,7 +6,7 @@
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests\Validation;
+namespace GL_Color_Palette_Generator\Tests\Unit\Validation;
 
 use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Validation\Color_Validator;

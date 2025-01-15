@@ -1,6 +1,6 @@
 <?php
 
-namespace GL_Color_Palette_Generator\Tests\Export;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Export;
 
 use GL_Color_Palette_Generator\Export\Theme_JSON_Generator;
 use GL_Color_Palette_Generator\Color_Management\Color_Validator;
