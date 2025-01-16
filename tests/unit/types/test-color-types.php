@@ -9,7 +9,7 @@
 
  namespace GL_Color_Palette_Generator\Tests\Unit\Types;
 
- use GL_Color_Palette_Generator\Tests\Unit_Test_Case;
+ use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
  use GL_Color_Palette_Generator\Types\Color_Types;
 
  class Test_Color_Types extends Unit_Test_Case {

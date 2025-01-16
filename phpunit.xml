@@ -10,15 +10,15 @@
          >
     <coverage processUncoveredFiles="true">
         <include>
-            <directory suffix=".php">includes</directory>
+            <directory suffix=".php">./includes</directory>
         </include>
         <exclude>
-            <directory suffix=".php">vendor</directory>
-            <directory suffix=".php">tests</directory>
+            <directory suffix=".php">./vendor</directory>
+            <directory suffix=".php">./tests</directory>
         </exclude>
         <report>
-            <clover outputFile="build/logs/clover.xml"/>
-            <html outputDirectory="build/coverage"/>
+            <clover outputFile="./build/logs/clover.xml"/>
+            <html outputDirectory="./build/coverage"/>
         </report>
     </coverage>
     <php>
@@ -40,19 +40,13 @@
         <directory suffix=".php">./tests/integration</directory>
     </testsuite>
     <testsuite name="unit">
-        <directory suffix=".php">./tests/unit/utils</directory>
-        <directory suffix=".php">./tests/unit/types</directory>
-        <directory suffix=".php">./tests/unit/system</directory>
-        <directory suffix=".php">./tests/unit/classes</directory>
-        <directory suffix=".php">./tests/unit/interfaces</directory>
-        <directory suffix=".php">./tests/unit/export</directory>
-        <directory suffix=".php">./tests/unit/performance</directory>
+        <directory suffix=".php">./tests/unit</directory>
     </testsuite>
     <testsuite name="wp-mock">
         <directory suffix=".php">./tests/wp-mock</directory>
     </testsuite>
 </testsuites>
     <listeners>
-        <listener class="GL_Color_Palette_Generator\Tests\Test_Printer"/>
+        <listener class="GL_Color_Palette_Generator\Tests\Base\Test_Printer"/>
     </listeners>
 </phpunit>

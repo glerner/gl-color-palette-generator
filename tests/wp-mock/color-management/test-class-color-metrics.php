@@ -11,7 +11,7 @@ namespace GL_Color_Palette_Generator\Tests\Color_Management;
 use GL_Color_Palette_Generator\Color_Management\Color_Metrics;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
-use GL_Color_Palette_Generator\Tests\WP_Mock_Test_Case;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Error;
 use Mockery;
 

@@ -8,7 +8,7 @@
 
 namespace GL_Color_Palette_Generator\Tests\API;
 
-use GL_Color_Palette_Generator\Tests\WP_Mock_Test_Case;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\API\Rest_Controller_Accessibility;
 use WP_Mock;
 

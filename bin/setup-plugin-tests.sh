@@ -303,6 +303,11 @@ download_wp_tests
 # Generate config file
 generate_wp_tests_config
 
+# Create build directories for test coverage reports
+echo "Creating build directories for test coverage..."
+mkdir -p ./build/logs ./build/coverage
+chmod -R 777 ./build
+
 # Install test suite
 install_test_suite
 

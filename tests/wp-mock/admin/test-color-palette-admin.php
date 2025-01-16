@@ -8,9 +8,9 @@
  * @link    https://website-tech.glerner.com/
  */
 
-namespace GL_Color_Palette_Generator\Tests\Admin;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Admin;
 
-use GL_Color_Palette_Generator\Tests\WP_Mock_Test_Case;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Admin\Color_Palette_Admin;
 use GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator;
 use WP_Mock;

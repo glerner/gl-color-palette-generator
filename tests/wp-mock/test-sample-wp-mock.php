@@ -1,7 +1,7 @@
 <?php
 namespace GL_Color_Palette_Generator\Tests\WP_Mock;
 
-use GL_Color_Palette_Generator\Tests\WP_Mock_Test_Case;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 
 class Sample_WP_Mock_Test extends WP_Mock_Test_Case {
     public function setUp(): void {

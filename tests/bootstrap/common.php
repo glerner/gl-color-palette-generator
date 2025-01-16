@@ -59,10 +59,10 @@ $excluded_test_files = [
     'bootstrap/wp-mock.php',
     'bootstrap/wp.php',
     'bootstrap/wp-functions.php',
-    'class-unit-test-case.php',
-    'class-wp-mock-test-case.php',
-    'class-test-helpers.php',
-    'class-test-printer.php'
+    'base/class-unit-test-case.php',
+    'base/class-wp-mock-test-case.php',
+    'base/class-test-helpers.php',
+    'base/class-test-printer.php'
 ];
 
 

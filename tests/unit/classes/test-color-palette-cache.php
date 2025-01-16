@@ -11,7 +11,7 @@
 
 namespace GL_Color_Palette_Generator\Tests\Unit;
 
-use GL_Color_Palette_Generator\Tests\Unit_Test_Case;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Classes\Color_Palette_Cache;
 use GL_Color_Palette_Generator\Classes\Color_Palette;
 
