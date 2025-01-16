@@ -23,6 +23,20 @@ show_help() {
     echo "  --group NAME        Run tests with specific group"
     echo "  --bootstrap FILE    Use specific bootstrap file"
     echo ""
+    echo "Note: If tests are slow or failing, check for and clean large trace files."
+    echo "Lando mounts the container's /var/www/ to your host system, so clean files"
+    echo "directly on your host OS:"
+    echo ""
+    echo "Linux:"
+    echo "  sudo rm /var/www/html/logs/trace.*.xt"
+    echo "  sudo journalctl --vacuum-size=100M"
+    echo "macOS:"
+    echo "  sudo rm /var/www/html/logs/trace.*.xt"
+    echo "  sudo rm /var/log/system.log.*"
+    echo "Windows:"
+    echo "  del C:\\var\\www\\html\\logs\\trace.*.xt"
+    echo "  cleanmgr /sageset:65535"
+    echo ""
     echo "Examples:"
     echo "  $0 --unit           # Run all unit tests"
     echo "  $0 --mock           # Run WP Mock tests"
@@ -265,6 +279,14 @@ echo "  Current directory: $(pwd)"
 # echo "  Test directory contents:"
 # ls -la "${TEST_DIR}/"
 
+echo "=== System Status Before Tests ==="
+df -h
+du -sh /tmp/* /var/tmp/* /app/* 2>/dev/null | sort -h
+
 # Run tests
 echo -e "\n${GREEN}Running:${NC} $CMD"
 $CMD
+
+echo "=== System Status After Tests ==="
+df -h
+du -sh /tmp/* /var/tmp/* /app/* 2>/dev/null | sort -h
