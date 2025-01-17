@@ -8,13 +8,12 @@ declare(strict_types=1);
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests\Providers;
+namespace GL_Color_Palette_Generator\Tests\Unit\Providers;
 
 use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use GL_Color_Palette_Generator\Providers\Color_Pizza_Provider;
 use GL_Color_Palette_Generator\Providers\Provider;
 use GL_Color_Palette_Generator\Types\Provider_Config;
-use WP_Mock;
 
 /**
  * Tests for the Color Pizza Provider

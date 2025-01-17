@@ -7,13 +7,12 @@
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests\Providers;
+namespace GL_Color_Palette_Generator\Tests\Unit\Providers;
 
 use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use GL_Color_Palette_Generator\Providers\Google_PaLM_Provider;
 use GL_Color_Palette_Generator\Providers\Provider;
 use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
-use WP_Mock;
 
 /**
  * Google PaLM Provider test case

@@ -7,13 +7,12 @@
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests\Providers;
+namespace GL_Color_Palette_Generator\Tests\Unit\Providers;
 
 use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
 use GL_Color_Palette_Generator\Providers\Anthropic_Provider;
 use GL_Color_Palette_Generator\Providers\Provider;
 use GL_Color_Palette_Generator\Types\Provider_Config;
-use WP_Mock;
 
 /**
  * Tests for the Anthropic Provider
@@ -24,13 +23,13 @@ class Test_Anthropic_Provider extends Test_Provider_Mock {
     public function setUp(): void
     {
         parent::setUp();
-        WP_Mock::setUp();
+        
         $this->provider = new Anthropic_Provider($this->get_test_credentials());
     }
 
     public function tearDown(): void
     {
-        WP_Mock::tearDown();
+        
         parent::tearDown();
     }
 

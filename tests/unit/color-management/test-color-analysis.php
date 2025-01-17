@@ -1,5 +1,5 @@
 <?php
-namespace GL_Color_Palette_Generator\Tests;
+namespace GL_Color_Palette_Generator\Tests\Unit\Color_Management;
 
 use PHPUnit\Framework\TestCase;
 use GL_Color_Palette_Generator\Color_Management\Color_Analysis;

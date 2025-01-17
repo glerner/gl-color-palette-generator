@@ -1,5 +1,5 @@
 <?php
-namespace GL_Color_Palette_Generator\Tests\Color_Management;
+namespace GL_Color_Palette_Generator\Tests\Unit\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Validator;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
@@ -40,7 +40,7 @@ class Test_Color_Validator extends TestCase {
         ];
 
         $result = $this->instance->validate_colors_for_scheme($colors, 'invalid');
-        $this->assertWPError($result);
+        $this->assertFalse($result);
         $this->assertEquals('invalid_scheme', $result->get_error_code());
     }
 
@@ -53,7 +53,7 @@ class Test_Color_Validator extends TestCase {
         ];
 
         $result = $this->instance->validate_colors_for_scheme($colors, 'complementary');
-        $this->assertWPError($result);
+        $this->assertFalse($result);
         $this->assertEquals('missing_color', $result->get_error_code());
     }
 
@@ -67,7 +67,7 @@ class Test_Color_Validator extends TestCase {
         ];
 
         $result = $this->instance->validate_colors_for_scheme($colors, 'complementary');
-        $this->assertWPError($result);
+        $this->assertFalse($result);
         $this->assertEquals('invalid_role', $result->get_error_code());
     }
 

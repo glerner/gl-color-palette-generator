@@ -1,23 +1,22 @@
 <?php
 declare(strict_types=1);
 
-namespace GL_Color_Palette_Generator\Tests\Generators;
+namespace GL_Color_Palette_Generator\Tests\Unit\Generators;
 
 use GL_Color_Palette_Generator\Generators\Name_Generator;
-use WP_Mock;
-use WP_Mock\Tools\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class Test_Name_Generator extends TestCase {
     protected Name_Generator $name_generator;
 
     public function setUp(): void {
         parent::setUp();
-        WP_Mock::setUp();
+        
         $this->name_generator = new Name_Generator();
     }
 
     public function tearDown(): void {
-        WP_Mock::tearDown();
+        
         parent::tearDown();
     }
 

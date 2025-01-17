@@ -6,19 +6,18 @@
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests\Color_Management;
+namespace GL_Color_Palette_Generator\Tests\Unit\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Metrics;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
-use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
-use WP_Error;
+use PHPUnit\Framework\TestCase;
 use Mockery;
 
 /**
  * Class Test_Color_Metrics
  */
-class Test_Color_Metrics extends WP_Mock_Test_Case implements Color_Constants {
+class Test_Color_Metrics extends TestCase implements Color_Constants {
     /**
      * Test instance
      *

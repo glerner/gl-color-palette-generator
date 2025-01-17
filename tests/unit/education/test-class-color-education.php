@@ -1,6 +1,6 @@
 <?php
 
-namespace GL_Color_Palette_Generator\Tests\Education;
+namespace GL_Color_Palette_Generator\Tests\Unit\Education;
 
 use GL_Color_Palette_Generator\Education\Color_Education;
 use PHPUnit\Framework\TestCase;

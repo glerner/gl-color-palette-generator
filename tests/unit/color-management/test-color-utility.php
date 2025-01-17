@@ -7,7 +7,7 @@
  * @link    https://website-tech.glerner.com/
  */
 
-namespace GL_Color_Palette_Generator\Tests\Color_Management;
+namespace GL_Color_Palette_Generator\Tests\Unit\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;

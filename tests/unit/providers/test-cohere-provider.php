@@ -1,30 +1,28 @@
 <?php declare(strict_types=1);
 
 /**
- * Azure OpenAI Provider Tests
+ * Cohere Provider Tests
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests\Providers;
+namespace GL_Color_Palette_Generator\Tests\Unit\Providers;
 
 use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
-use GL_Color_Palette_Generator\Providers\Azure_OpenAI_Provider;
+use GL_Color_Palette_Generator\Providers\Cohere_Provider;
 use GL_Color_Palette_Generator\Providers\Provider;
 use GL_Color_Palette_Generator\Types\Provider_Config;
-use GL_Color_Palette_Generator\Exceptions\PaletteGenerationException;
-use WP_Mock;
 
 /**
- * Azure OpenAI Provider test case
+ * Tests for the Cohere Provider
  */
-class Test_Azure_OpenAI_Provider extends Test_Provider_Mock {
+class Test_Cohere_Provider extends Test_Provider_Mock {
     protected Provider $provider;
 
     public function setUp(): void {
         parent::setUp();
-        $this->provider = new Azure_OpenAI_Provider(new Provider_Config($this->get_test_credentials()));
+        $this->provider = new Cohere_Provider(new Provider_Config($this->get_test_credentials()));
     }
 
     public function tearDown(): void {
@@ -34,20 +32,12 @@ class Test_Azure_OpenAI_Provider extends Test_Provider_Mock {
     protected function get_test_credentials(): array {
         return [
             'api_key' => 'test_key_123',
-            'endpoint' => 'https://test.openai.azure.com',
-            'deployment' => 'test-deployment',
-            'model' => 'gpt-4'
+            'model' => 'command'
         ];
     }
 
     public function test_validate_credentials() {
-        $provider = new Azure_OpenAI_Provider(new Provider_Config([]));
-        $this->assertInstanceOf(\WP_Error::class, $provider->validate_credentials());
-
-        $provider = new Azure_OpenAI_Provider(new Provider_Config(['api_key' => 'test']));
-        $this->assertInstanceOf(\WP_Error::class, $provider->validate_credentials());
-
-        $provider = new Azure_OpenAI_Provider(new Provider_Config(['api_key' => 'test', 'endpoint' => 'test']));
+        $provider = new Cohere_Provider([]);
         $this->assertInstanceOf(\WP_Error::class, $provider->validate_credentials());
 
         $this->assertTrue($this->provider->validate_credentials());
@@ -74,7 +64,13 @@ class Test_Azure_OpenAI_Provider extends Test_Provider_Mock {
 
         // Mock the API response
         $mock_response = $this->get_mock_palette_response();
-        $this->mock_http_response(json_encode($mock_response));
+        $this->mock_http_response(json_encode([
+            'generations' => [
+                [
+                    'text' => json_encode($mock_response)
+                ]
+            ]
+        ]));
 
         $result = $this->provider->generate_palette($params);
         $this->assert_palette_structure($result);
@@ -87,7 +83,7 @@ class Test_Azure_OpenAI_Provider extends Test_Provider_Mock {
         ];
 
         // Mock an invalid response
-        $this->mock_http_response('{"invalid": "response"}');
+        $this->mock_http_response('{"generations": [{"text": "invalid"}]}');
 
         $result = $this->provider->generate_palette($params);
         $this->assertInstanceOf(\WP_Error::class, $result);
@@ -106,25 +102,33 @@ class Test_Azure_OpenAI_Provider extends Test_Provider_Mock {
         $this->assertInstanceOf(\WP_Error::class, $result);
     }
 
-    public function test_custom_endpoint() {
+    public function test_custom_model() {
         $config = new Provider_Config([
             'api_key' => 'test_key_123',
-            'model' => 'gpt-4',
-            'endpoint' => 'https://custom-azure-endpoint.com'
+            'model' => 'command-nightly'
         ]);
         
-        $provider = new Azure_OpenAI_Provider($config);
+        $provider = new Cohere_Provider($config);
         
-        // Mock successful response with custom endpoint
+        // Mock successful response with custom model
         $mock_response = $this->get_mock_palette_response();
         WP_Mock::userFunction('wp_remote_post')
             ->with(
-                'https://custom-azure-endpoint.com',
-                \Mockery::any()
+                \Mockery::any(),
+                \Mockery::on(function($args) {
+                    $body = json_decode($args['body'], true);
+                    return $body['model'] === 'command-nightly';
+                })
             )
             ->andReturn([
                 'response' => ['code' => 200],
-                'body' => json_encode($mock_response)
+                'body' => json_encode([
+                    'generations' => [
+                        [
+                            'text' => json_encode($mock_response)
+                        ]
+                    ]
+                ])
             ]);
 
         $result = $provider->generate_palette([
@@ -137,8 +141,7 @@ class Test_Azure_OpenAI_Provider extends Test_Provider_Mock {
 
     public function test_get_requirements() {
         $requirements = $this->provider->get_requirements();
+        $this->assertIsArray($requirements);
         $this->assertArrayHasKey('api_key', $requirements);
-        $this->assertArrayHasKey('endpoint', $requirements);
-        $this->assertArrayHasKey('deployment_name', $requirements);
     }
-}
+} 
