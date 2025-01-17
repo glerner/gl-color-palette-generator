@@ -78,4 +78,73 @@ class Test_Color_Analysis extends TestCase {
         $this->expectException(\InvalidArgumentException::class);
         $this->analyzer->get_contrast_ratio('invalid', '#000000');
     }
+
+    /**
+     * Tests from Color_Analyzer interface
+     */
+    public function test_analyze_harmony(): void {
+        $colors = ['#FF0000', '#00FF00', '#0000FF'];
+        $result = $this->analyzer->analyze_harmony($colors);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('harmony_type', $result);
+        $this->assertArrayHasKey('score', $result);
+        $this->assertArrayHasKey('suggestions', $result);
+        
+        // Verify harmony type is valid
+        $this->assertContains(
+            $result['harmony_type'],
+            ['complementary', 'analogous', 'triadic', 'tetradic', 'monochromatic']
+        );
+
+        // Verify score is between 0 and 1
+        $this->assertGreaterThanOrEqual(0, $result['score']);
+        $this->assertLessThanOrEqual(1, $result['score']);
+    }
+
+    public function test_analyze_color_properties(): void {
+        $color = '#FF5733';
+        $result = $this->analyzer->analyze_color_properties($color);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('hue', $result);
+        $this->assertArrayHasKey('saturation', $result);
+        $this->assertArrayHasKey('brightness', $result);
+        $this->assertArrayHasKey('temperature', $result);
+
+        // Verify property ranges
+        $this->assertGreaterThanOrEqual(0, $result['hue']);
+        $this->assertLessThanOrEqual(360, $result['hue']);
+        $this->assertGreaterThanOrEqual(0, $result['saturation']);
+        $this->assertLessThanOrEqual(100, $result['saturation']);
+        $this->assertGreaterThanOrEqual(0, $result['brightness']);
+        $this->assertLessThanOrEqual(100, $result['brightness']);
+    }
+
+    public function test_get_color_relationships(): void {
+        $color = '#FF0000';  // Pure red
+        $result = $this->analyzer->get_color_relationships($color);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('complementary', $result);
+        $this->assertArrayHasKey('analogous', $result);
+        $this->assertArrayHasKey('triadic', $result);
+
+        // Verify complementary is valid hex
+        $this->assertMatchesRegularExpression('/^#[A-Fa-f0-9]{6}$/', $result['complementary']);
+
+        // Verify analogous colors are valid
+        $this->assertIsArray($result['analogous']);
+        $this->assertCount(2, $result['analogous']);
+        foreach ($result['analogous'] as $color) {
+            $this->assertMatchesRegularExpression('/^#[A-Fa-f0-9]{6}$/', $color);
+        }
+
+        // Verify triadic colors are valid
+        $this->assertIsArray($result['triadic']);
+        $this->assertCount(2, $result['triadic']);
+        foreach ($result['triadic'] as $color) {
+            $this->assertMatchesRegularExpression('/^#[A-Fa-f0-9]{6}$/', $color);
+        }
+    }
 }

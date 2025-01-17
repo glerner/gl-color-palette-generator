@@ -298,4 +298,84 @@ class Test_Color_Metrics extends TestCase implements Color_Constants {
         $result = $this->instance->get_contrast_ratio('invalid', '#000000');
         $this->assertInstanceOf(WP_Error::class, $result);
     }
+
+    /**
+     * Tests from Color_Accessibility interface
+     */
+
+    public function test_check_wcag_compliance(): void {
+        $metrics = new Color_Metrics();
+
+        // Test cases from interface contract
+        $test_cases = [
+            [
+                'foreground' => '#000000',
+                'background' => '#FFFFFF',
+                'level' => 'AAA',
+                'expected' => [
+                    'passes' => true,
+                    'contrast_ratio' => 21.0,
+                    'level_achieved' => 'AAA'
+                ]
+            ],
+            [
+                'foreground' => '#757575',
+                'background' => '#FFFFFF',
+                'level' => 'AA',
+                'expected' => [
+                    'passes' => true,
+                    'contrast_ratio' => 4.6,
+                    'level_achieved' => 'AA'
+                ]
+            ]
+        ];
+
+        foreach ($test_cases as $case) {
+            $result = $metrics->check_wcag_compliance($case['foreground'], $case['background'], $case['level']);
+            $this->assertEquals($case['expected']['passes'], $result['passes']);
+            $this->assertEqualsWithDelta($case['expected']['contrast_ratio'], $result['contrast_ratio'], 0.1);
+            $this->assertEquals($case['expected']['level_achieved'], $result['level_achieved']);
+        }
+    }
+
+    public function test_simulate_color_blindness(): void {
+        $metrics = new Color_Metrics();
+        $color = '#FF0000';  // Pure red
+
+        $expected_simulations = [
+            'protanopia' => '#89817E',    // How red appears to protanopes
+            'deuteranopia' => '#887E7E',  // How red appears to deuteranopes
+            'tritanopia' => '#FF9B9B'     // How red appears to tritanopes
+        ];
+
+        foreach ($expected_simulations as $type => $expected) {
+            $result = $metrics->simulate_color_blindness($color, $type);
+            $this->assertEqualsHexColor($expected, $result);
+        }
+    }
+
+    public function test_get_accessible_colors(): void {
+        $metrics = new Color_Metrics();
+        $background = '#FFFFFF';
+        $wcag_level = 'AA';
+
+        $suggestions = $metrics->get_accessible_colors($background, $wcag_level);
+
+        $this->assertIsArray($suggestions);
+        foreach ($suggestions as $color) {
+            $compliance = $metrics->check_wcag_compliance($color, $background, $wcag_level);
+            $this->assertTrue($compliance['passes']);
+        }
+    }
+
+    /**
+     * Helper method to compare hex colors accounting for case differences
+     */
+    private function assertEqualsHexColor(string $expected, string $actual): void {
+        $this->assertEquals(
+            strtoupper($expected),
+            strtoupper($actual),
+            "Hex colors do not match"
+        );
+    }
 }

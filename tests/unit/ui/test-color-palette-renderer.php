@@ -1,4 +1,3 @@
-use PHPUnit\Framework\TestCase;
 <?php
 /**
  * Test Color Palette Renderer UI
@@ -11,7 +10,7 @@ namespace GL_Color_Palette_Generator\Tests\Unit\UI;
 use GL_Color_Palette_Generator\Color_Management\Color_Palette_Renderer;
 use GL_Color_Palette_Generator\Color_Management\Color_Palette;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
-use WP_UnitTestCase;
+use PHPUnit\Framework\TestCase;
 
 class Test_Color_Palette_Renderer_UI extends TestCase {
     private $renderer;
@@ -139,5 +138,62 @@ class Test_Color_Palette_Renderer_UI extends TestCase {
 
         $this->assertStringContainsString('wcag-contrast', $output);
         $this->assertStringContainsString('contrast-ratio', $output);
+    }
+
+    /**
+     * Tests from Palette_Renderer interface
+     */
+    public function test_render_palette_with_custom_format(): void {
+        $format = [
+            'container' => '<div class="custom-palette">%s</div>',
+            'color' => '<div class="custom-color" style="background-color: %s">%s</div>'
+        ];
+
+        $result = $this->renderer->render_palette($this->test_palette, $format);
+
+        $this->assertStringContainsString('custom-palette', $result);
+        $this->assertStringContainsString('custom-color', $result);
+        $this->assertStringContainsString('#2C3E50', $result);
+    }
+
+    public function test_render_palette_with_metadata(): void {
+        $metadata = [
+            'title' => 'Test Palette',
+            'description' => 'A test color palette',
+            'author' => 'Test Author',
+            'created' => '2024-01-17'
+        ];
+
+        $result = $this->renderer->render_palette($this->test_palette, null, $metadata);
+
+        $this->assertStringContainsString('Test Palette', $result);
+        $this->assertStringContainsString('Test Author', $result);
+        $this->assertStringContainsString('2024-01-17', $result);
+    }
+
+    public function test_render_palette_with_accessibility_info(): void {
+        $result = $this->renderer->render_palette_with_accessibility($this->test_palette);
+
+        $this->assertStringContainsString('contrast-ratio', $result);
+        $this->assertStringContainsString('wcag-compliance', $result);
+        foreach ($this->test_palette->get_colors() as $color) {
+            $this->assertStringContainsString($color, $result);
+        }
+    }
+
+    public function test_render_palette_with_color_names(): void {
+        $names = [
+            '#2C3E50' => 'Midnight Blue',
+            '#E74C3C' => 'Cinnabar Red',
+            '#3498DB' => 'Curious Blue',
+            '#2ECC71' => 'Emerald Green'
+        ];
+
+        $result = $this->renderer->render_palette_with_names($this->test_palette, $names);
+
+        foreach ($names as $color => $name) {
+            $this->assertStringContainsString($color, $result);
+            $this->assertStringContainsString($name, $result);
+        }
     }
 }

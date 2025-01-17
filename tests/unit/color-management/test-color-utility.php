@@ -485,4 +485,83 @@ class Test_Color_Utility extends TestCase implements Color_Constants {
         $this->expectException(\InvalidArgumentException::class);
         $this->color_util->format_colors(['test' => '#ff0000'], 'invalid');
     }
+
+    /**
+     * Tests from Color_Converter interface
+     */
+    public function test_convert_rgb_to_hex_interface(): void {
+        $rgb = ['r' => 255, 'g' => 0, 'b' => 0];
+        $result = $this->color_util->convert_rgb_to_hex($rgb);
+
+        $this->assertIsString($result);
+        $this->assertMatchesRegularExpression('/^#[A-F0-9]{6}$/', $result);
+        $this->assertEquals('#FF0000', $result);
+    }
+
+    public function test_convert_hex_to_rgb_interface(): void {
+        $hex = '#FF0000';
+        $result = $this->color_util->convert_hex_to_rgb($hex);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('r', $result);
+        $this->assertArrayHasKey('g', $result);
+        $this->assertArrayHasKey('b', $result);
+        $this->assertEquals(['r' => 255, 'g' => 0, 'b' => 0], $result);
+    }
+
+    public function test_convert_rgb_to_hsl_interface(): void {
+        $rgb = ['r' => 255, 'g' => 0, 'b' => 0];
+        $result = $this->color_util->convert_rgb_to_hsl($rgb);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('h', $result);
+        $this->assertArrayHasKey('s', $result);
+        $this->assertArrayHasKey('l', $result);
+        
+        // Pure red should be hue 0, full saturation, 50% lightness
+        $this->assertEquals(0, $result['h']);
+        $this->assertEquals(100, $result['s']);
+        $this->assertEquals(50, $result['l']);
+    }
+
+    public function test_convert_hsl_to_rgb_interface(): void {
+        $hsl = ['h' => 0, 's' => 100, 'l' => 50];
+        $result = $this->color_util->convert_hsl_to_rgb($hsl);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('r', $result);
+        $this->assertArrayHasKey('g', $result);
+        $this->assertArrayHasKey('b', $result);
+        
+        // Pure red in HSL should convert back to RGB red
+        $this->assertEquals(['r' => 255, 'g' => 0, 'b' => 0], $result);
+    }
+
+    public function test_convert_rgb_to_hsv_interface(): void {
+        $rgb = ['r' => 255, 'g' => 0, 'b' => 0];
+        $result = $this->color_util->convert_rgb_to_hsv($rgb);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('h', $result);
+        $this->assertArrayHasKey('s', $result);
+        $this->assertArrayHasKey('v', $result);
+        
+        // Pure red should be hue 0, full saturation, full value
+        $this->assertEquals(0, $result['h']);
+        $this->assertEquals(100, $result['s']);
+        $this->assertEquals(100, $result['v']);
+    }
+
+    public function test_convert_hsv_to_rgb_interface(): void {
+        $hsv = ['h' => 0, 's' => 100, 'v' => 100];
+        $result = $this->color_util->convert_hsv_to_rgb($hsv);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('r', $result);
+        $this->assertArrayHasKey('g', $result);
+        $this->assertArrayHasKey('b', $result);
+        
+        // Pure red in HSV should convert back to RGB red
+        $this->assertEquals(['r' => 255, 'g' => 0, 'b' => 0], $result);
+    }
 }
