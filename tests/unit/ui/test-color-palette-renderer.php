@@ -1,3 +1,4 @@
+use PHPUnit\Framework\TestCase;
 <?php
 /**
  * Test Color Palette Renderer UI
@@ -5,14 +6,14 @@
  * @package GL_Color_Palette_Generator
  */
 
-namespace GL_Color_Palette_Generator\Tests\Integration\UI;
+namespace GL_Color_Palette_Generator\Tests\Unit\UI;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Palette_Renderer;
 use GL_Color_Palette_Generator\Color_Management\Color_Palette;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use WP_UnitTestCase;
 
-class Test_Color_Palette_Renderer_UI extends WP_UnitTestCase {
+class Test_Color_Palette_Renderer_UI extends TestCase {
     private $renderer;
     private $test_palette;
 

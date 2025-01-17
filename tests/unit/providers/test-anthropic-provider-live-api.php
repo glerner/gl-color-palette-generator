@@ -7,7 +7,7 @@
  * @bootstrap wp
  */
 
-namespace GL_Color_Palette_Generator\Tests\Integration;
+namespace GL_Color_Palette_Generator\Tests\Unit\Providers;
 
 use GL_Color_Palette_Generator\Tests\Test_Provider_Integration;
 use GL_Color_Palette_Generator\Providers\Anthropic_Provider;
