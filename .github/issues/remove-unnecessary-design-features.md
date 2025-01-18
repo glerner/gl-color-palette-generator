@@ -65,6 +65,44 @@ Before removing these classes, we need to:
 - Update any configuration or initialization code
 - Clean up related database tables or options if they exist
 
+## Test Interface Analysis (2025-01-17)
+
+### Core Test Files to Keep
+1. Core Functionality:
+   - `test-accessibility-checker.php` (WCAG compliance)
+   - `test-color-palette-manager.php` (core management)
+   - `test-color-palette-validator.php` (validation)
+   - `test-color-theme-manager.php` (theme.json)
+   - `test-settings-manager.php` (WP settings)
+   - `test-theme-generator.php` (theme variations)
+   - `test-admin-interface.php` (WP admin)
+   - `test-error-handler.php` (error handling)
+   - `test-harmony-generator.php` (color scheme generation)
+
+2. Import/Export (Essential for Integration):
+   - `test-color-exporter.php` (general export)
+   - `test-color-palette-exporter.php` (palette-specific formats)
+   - `test-color-palette-importer.php` (import from other tools)
+
+3. Basic Caching/History:
+   - `test-cache-manager.php` (simple caching)
+   - `test-color-palette-cache.php` (palette caching)
+   - `test-color-palette-history.php` (undo/redo, bug tracking)
+
+### Test Files to Remove/Deprecate
+1. Enterprise/Analytics:
+   - `test-analytics.php`
+   - `test-business-analyzer.php`
+   - `test-cultural-analyzer.php`
+   - `test-performance-monitor.php`
+   - `test-visualization-engine.php`
+   - `test-palette-analysis-interfaces.php`
+
+2. Overly Complex Features:
+   - `test-color-metrics-analyzer.php`
+   - `test-color-palette-notifier.php`
+   - `test-color-palette-version-control.php`
+
 ## Tasks
 
 - [ ] Remove identified classes
