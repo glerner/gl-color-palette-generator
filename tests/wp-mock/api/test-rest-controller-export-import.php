@@ -13,14 +13,14 @@ use GL_Color_Palette_Generator\API\Rest_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use Brain\Monkey\Functions;
 use Mockery;
 
 /**
  * Class Test_Rest_Controller_Export_Import
  */
-class Test_Rest_Controller_Export_Import extends TestCase {
+class Test_Rest_Controller_Export_Import extends WP_Mock_Test_Case {
     use \Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
     /**

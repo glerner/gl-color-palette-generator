@@ -8,7 +8,7 @@
 
 namespace GL_Color_Palette_Generator\Tests\Color_Management;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Color_Management\Color_Scheme_Generator;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
@@ -18,7 +18,7 @@ use Mockery;
 /**
  * Class Test_Color_Scheme_Generator
  */
-class Test_Color_Scheme_Generator extends TestCase implements Color_Constants {
+class Test_Color_Scheme_Generator extends WP_Mock_Test_Case implements Color_Constants {
     /**
      * Test instance
      *

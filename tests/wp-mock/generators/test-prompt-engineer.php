@@ -7,7 +7,7 @@ use GL_Color_Palette_Generator\Generators\Prompt_Engineer;
 use WP_Mock;
 use WP_Mock\Tools\TestCase;
 
-class Test_Prompt_Engineer extends TestCase {
+class Test_Prompt_Engineer extends WP_Mock_Test_Case {
     protected Prompt_Engineer $prompt_engineer;
 
     public function setUp(): void {

@@ -9,7 +9,7 @@ use GL_Color_Palette_Generator\Exceptions\Palette_Generation_Exception;
 use WP_Mock;
 use WP_Mock\Tools\TestCase;
 
-class Test_Settings_Manager extends TestCase {
+class Test_Settings_Manager extends WP_Mock_Test_Case {
     private Settings_Manager $settings_manager;
 
     public function setUp(): void {

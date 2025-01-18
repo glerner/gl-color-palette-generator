@@ -10,14 +10,14 @@
 namespace GL_Color_Palette_Generator\Tests\Core;
 
 use GL_Color_Palette_Generator\Core\Setup;
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use Brain\Monkey\Functions;
 use Mockery;
 
 /**
  * Class Test_Setup
  */
-class Test_Setup extends TestCase {
+class Test_Setup extends WP_Mock_Test_Case {
     use \Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
     /**

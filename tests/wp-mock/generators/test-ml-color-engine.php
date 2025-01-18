@@ -7,7 +7,7 @@ use GL_Color_Palette_Generator\Generators\ML_Color_Engine;
 use WP_Mock;
 use WP_Mock\Tools\TestCase;
 
-class Test_ML_Color_Engine extends TestCase {
+class Test_ML_Color_Engine extends WP_Mock_Test_Case {
     protected ML_Color_Engine $ml_color_engine;
 
     public function setUp(): void {

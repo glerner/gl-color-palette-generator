@@ -1,12 +1,12 @@
 <?php
 namespace GL_Color_Palette_Generator\Tests;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Generators\Palette_Generator;
 use GL_Color_Palette_Generator\Providers\Provider;
 use GL_Color_Palette_Generator\Color_Management\Color_Validator;
 
-class Test_Palette_Generator extends TestCase {
+class Test_Palette_Generator extends WP_Mock_Test_Case {
     protected Palette_Generator $generator;
     protected $mock_provider;
     protected $mock_validator;

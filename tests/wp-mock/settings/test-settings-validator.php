@@ -8,7 +8,7 @@ use GL_Color_Palette_Generator\Exceptions\Palette_Generation_Exception;
 use WP_Mock;
 use WP_Mock\Tools\TestCase;
 
-class Test_Settings_Validator extends TestCase {
+class Test_Settings_Validator extends WP_Mock_Test_Case {
     public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();

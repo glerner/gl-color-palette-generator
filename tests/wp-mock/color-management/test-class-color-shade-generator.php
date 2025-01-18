@@ -8,7 +8,7 @@
 
 namespace GL_Color_Palette_Generator\Tests\Color_Management;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Color_Management\Color_Shade_Generator;
 use GL_Color_Palette_Generator\Color_Management\AccessibilityChecker;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
@@ -19,7 +19,7 @@ use Mockery;
  * Tests the generation of tints and shades (lighter/darker variations) of a single color
  * while ensuring WCAG accessibility compliance.
  */
-class Test_Color_Shade_Generator extends TestCase {
+class Test_Color_Shade_Generator extends WP_Mock_Test_Case {
     /**
      * Test instance
      *

@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
 namespace GL_Color_Palette_Generator\Tests\Integration;
+use GL_Color_Palette_Generator\Tests\Base;
 
-use WP_UnitTestCase;
 
 /**
  * Basic integration test to verify plugin setup
  */
-class Test_Plugin extends WP_UnitTestCase {
+class Test_Plugin extends Integration_Test_Case {
     /**
      * Test that the plugin is loaded and functions exist
      */

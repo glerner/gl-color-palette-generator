@@ -6,7 +6,7 @@
  * @subpackage Tests
  */
 
-namespace GL_Color_Palette_Generator\Tests\Integration;
+namespace GL_Color_Palette_Generator\Tests\Base;
 
 use WP_UnitTestCase;
 use WP_Error;
@@ -23,7 +23,7 @@ class Integration_Test_Case extends WP_UnitTestCase {
      */
     protected function setUp(): void {
         parent::setUp();
-        
+
         // Reset global WordPress state
         global $post, $wp_query, $wp_the_query;
         $post = null;
@@ -32,7 +32,7 @@ class Integration_Test_Case extends WP_UnitTestCase {
 
         // Clear any cached data
         wp_cache_flush();
-        
+
         // Reset any modifications to the test database
         $this->clean_test_db();
     }
@@ -42,7 +42,7 @@ class Integration_Test_Case extends WP_UnitTestCase {
      */
     protected function tearDown(): void {
         parent::tearDown();
-        
+
         // Clean up any Mockery expectations
         \Mockery::close();
     }
@@ -52,23 +52,23 @@ class Integration_Test_Case extends WP_UnitTestCase {
      */
     protected function clean_test_db(): void {
         global $wpdb;
-        
+
         // List of core tables to preserve
         $core_tables = array(
             $wpdb->prefix . 'options',
             $wpdb->prefix . 'users',
             $wpdb->prefix . 'usermeta',
         );
-        
+
         foreach ($wpdb->tables() as $table) {
             if (!in_array($table, $core_tables, true)) {
                 $wpdb->query("TRUNCATE TABLE {$table}");
             }
         }
-        
+
         // Reset sequences
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'gl_color_palette_%'");
-        
+
         // Clear object cache
         wp_cache_flush();
     }

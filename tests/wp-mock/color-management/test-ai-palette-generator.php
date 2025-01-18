@@ -16,10 +16,10 @@ namespace GL_Color_Palette_Generator\Tests\Color_Management;
 use GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator;
 use GL_Color_Palette_Generator\Utils\Color_Utility;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
 
-class Test_AI_Palette_Generator extends TestCase {
+class Test_AI_Palette_Generator extends WP_Mock_Test_Case {
     private $generator;
 
     protected function setUp(): void {
