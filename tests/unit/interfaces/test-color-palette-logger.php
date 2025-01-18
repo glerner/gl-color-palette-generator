@@ -8,13 +8,13 @@
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Logger;
 
 /**
  * Test Color Palette Logger Interface implementation
  */
-class Test_Color_Palette_Logger extends TestCase {
+class Test_Color_Palette_Logger extends Unit_Test_Case {
     private $logger;
 
     public function setUp(): void {

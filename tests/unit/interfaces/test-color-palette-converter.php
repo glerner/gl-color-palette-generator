@@ -2,10 +2,10 @@
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Converter;
 
-class Test_Color_Palette_Converter extends TestCase {
+class Test_Color_Palette_Converter extends Unit_Test_Case {
     private $converter;
 
     public function setUp(): void {

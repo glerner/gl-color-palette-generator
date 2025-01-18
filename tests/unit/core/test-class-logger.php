@@ -8,7 +8,7 @@
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Core;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Core\Logger;
 
 /**
@@ -16,7 +16,7 @@ use GL_Color_Palette_Generator\Core\Logger;
  *
  * @coversDefaultClass \GL_Color_Palette_Generator\Core\Logger
  */
-class Test_Logger extends TestCase {
+class Test_Logger extends Unit_Test_Case {
     /**
      * Test log file path
      *

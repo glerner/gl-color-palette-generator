@@ -9,10 +9,10 @@
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\BusinessAnalyzer;
 
-class BusinessAnalyzerTest extends TestCase {
+class Test_BusinessAnalyzer extends Unit_Test_Case {
     private $analyzer;
 
     public function setUp(): void {

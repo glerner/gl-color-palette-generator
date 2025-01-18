@@ -2,13 +2,13 @@
 
 namespace GL_Color_Palette_Generator\Tests;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use WP_Mock;
 
 /**
  * Base test class for provider tests
  */
-class Test_Provider_Mock extends TestCase {
+class Test_Provider_Mock extends Unit_Test_Case {
     /**
      * Set up the test case.
      */

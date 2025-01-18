@@ -10,12 +10,12 @@
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Color_Palette;
 use GL_Color_Palette_Generator\Color_Palette_Renderer;
 use GL_Color_Palette_Generator\Color_Palette_Formatter;
 
-class Test_Color_Palette_Renderer extends TestCase {
+class Test_Color_Palette_Renderer extends Unit_Test_Case {
     private Color_Palette_Renderer $renderer;
     private Color_Palette_Formatter $formatter;
     private Color_Palette $test_palette;

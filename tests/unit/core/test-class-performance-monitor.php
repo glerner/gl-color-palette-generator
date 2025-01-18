@@ -3,9 +3,9 @@
 namespace GL_Color_Palette_Generator\Tests\Unit\Core;
 
 use GL_Color_Palette_Generator\Performance\Performance_Monitor;
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 
-class Test_Performance_Monitor extends TestCase {
+class Test_Performance_Monitor extends Unit_Test_Case {
     protected $performance_monitor;
 
     public function setUp(): void {

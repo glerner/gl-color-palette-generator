@@ -3,9 +3,9 @@
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Storage;
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 
-class Color_Palette_Storage_Test extends TestCase {
+class Color_Palette_Storage_Test extends Unit_Test_Case {
     private $storage;
 
     public function setUp(): void {

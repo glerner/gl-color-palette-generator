@@ -11,13 +11,13 @@ namespace GL_Color_Palette_Generator\Tests\Unit\Color_Management;
 use GL_Color_Palette_Generator\Color_Management\Color_Metrics;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use Mockery;
 
 /**
  * Class Test_Color_Metrics
  */
-class Test_Color_Metrics extends TestCase implements Color_Constants {
+class Test_Color_Metrics extends Unit_Test_Case implements Color_Constants {
     /**
      * Test instance
      *

@@ -9,9 +9,9 @@
 namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
 use GL_Color_Palette_Generator\Color_Palette_Formatter;
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 
-class Test_Color_Palette_Formatter extends TestCase {
+class Test_Color_Palette_Formatter extends Unit_Test_Case {
     private Color_Palette_Formatter $formatter;
 
     public function setUp(): void {

@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace GL_Color_Palette_Generator\Tests\Unit\Generators;
 
 use GL_Color_Palette_Generator\Generators\Name_Generator;
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 
-class Test_Name_Generator extends TestCase {
+class Test_Name_Generator extends Unit_Test_Case {
     protected Name_Generator $name_generator;
 
     public function setUp(): void {

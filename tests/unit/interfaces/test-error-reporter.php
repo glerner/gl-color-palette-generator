@@ -9,10 +9,10 @@
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\ErrorReporter;
 
-class ErrorReporterTest extends TestCase {
+class Test_ErrorReporter extends Unit_Test_Case {
     private $reporter;
 
     public function setUp(): void {

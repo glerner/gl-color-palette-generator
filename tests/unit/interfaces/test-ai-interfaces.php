@@ -13,7 +13,7 @@
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\AI_Color_Service;
 use GL_Color_Palette_Generator\Interfaces\AI_Provider;
 use GL_Color_Palette_Generator\Interfaces\AI_Service;
@@ -21,7 +21,7 @@ use GL_Color_Palette_Generator\Interfaces\AI_Service;
 /**
  * Test AI Color Service Interface implementation
  */
-class Test_AI_Color_Service extends TestCase {
+class Test_AI_Color_Service extends Unit_Test_Case {
     private $service;
 
     public function setUp(): void {
@@ -95,7 +95,7 @@ class Test_AI_Color_Service extends TestCase {
 /**
  * Test AI Provider Interface implementation
  */
-class Test_AI_Provider extends TestCase {
+class Test_AI_Provider extends Unit_Test_Case {
     private $provider;
 
     public function setUp(): void {
@@ -150,7 +150,7 @@ class Test_AI_Provider extends TestCase {
 /**
  * Test AI Service Interface implementation
  */
-class Test_AI_Service extends TestCase {
+class Test_AI_Service extends Unit_Test_Case {
     private $service;
 
     public function setUp(): void {

@@ -11,12 +11,12 @@ namespace GL_Color_Palette_Generator\Tests\Unit\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 
 /**
  * Class Test_Color_Utility
  */
-class Test_Color_Utility extends TestCase implements Color_Constants {
+class Test_Color_Utility extends Unit_Test_Case implements Color_Constants {
     /**
      * Color utility instance
      *

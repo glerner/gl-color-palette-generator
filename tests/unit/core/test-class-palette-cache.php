@@ -8,7 +8,7 @@
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Core;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Cache\Palette_Cache;
 use GL_Color_Palette_Generator\Core\Logger;
 
@@ -17,7 +17,7 @@ use GL_Color_Palette_Generator\Core\Logger;
  *
  * @coversDefaultClass \GL_Color_Palette_Generator\Cache\Palette_Cache
  */
-class Test_Palette_Cache extends TestCase {
+class Test_Palette_Cache extends Unit_Test_Case {
     /**
      * Cache instance
      *

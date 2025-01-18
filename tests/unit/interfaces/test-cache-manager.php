@@ -9,10 +9,10 @@
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\CacheManager;
 
-class CacheManagerTest extends TestCase {
+class Test_Cache_Manager extends Unit_Test_Case {
     private $manager;
 
     public function setUp(): void {

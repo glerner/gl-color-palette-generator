@@ -2,10 +2,10 @@
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Search;
 
-class Test_Color_Palette_Search extends TestCase {
+class Test_Color_Palette_Search extends Unit_Test_Case {
     private $search;
 
     public function setUp(): void {

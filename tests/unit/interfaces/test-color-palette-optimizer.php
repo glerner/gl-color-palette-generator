@@ -2,10 +2,10 @@
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Optimizer;
 
-class Test_Color_Palette_Optimizer extends TestCase {
+class Test_Color_Palette_Optimizer extends Unit_Test_Case {
     private $optimizer;
 
     public function setUp(): void {

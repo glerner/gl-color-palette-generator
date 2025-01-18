@@ -3,9 +3,9 @@
 namespace GL_Color_Palette_Generator\Tests\Unit\Education;
 
 use GL_Color_Palette_Generator\Education\Color_Education;
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 
-class Test_Color_Education extends TestCase {
+class Test_Color_Education extends Unit_Test_Case {
     private $education;
 
     public function setUp(): void {

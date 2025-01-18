@@ -1,10 +1,10 @@
 <?php
 namespace GL_Color_Palette_Generator\Tests\Unit\Color_Management;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Color_Management\Color_Analysis;
 
-class Test_Color_Analysis extends TestCase {
+class Test_Color_Analysis extends Unit_Test_Case {
     private Color_Analysis $analyzer;
 
     protected function set_up() {

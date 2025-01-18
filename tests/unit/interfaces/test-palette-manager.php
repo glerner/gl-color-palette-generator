@@ -9,10 +9,10 @@
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 
-use PHPUnit\Framework\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\PaletteManager;
 
-class PaletteManagerTest extends TestCase {
+class Test_PaletteManager extends Unit_Test_Case {
     private $manager;
 
     public function setUp(): void {
