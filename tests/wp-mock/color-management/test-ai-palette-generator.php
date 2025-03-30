@@ -19,7 +19,7 @@ use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
 
-class Test_AI_Palette_Generator extends WP_Mock_Test_Case {
+class Test_AI_Palette_Generator extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
     private $generator;
 
     protected function setUp(): void {

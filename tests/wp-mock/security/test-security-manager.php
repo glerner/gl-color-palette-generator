@@ -4,7 +4,7 @@ namespace GL_Color_Palette_Generator\Tests;
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Security\Security_Manager;
 
-class Test_Security_Manager extends WP_Mock_Test_Case {
+class Test_Security_Manager extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
     private Security_Manager $security;
 
     protected function set_up() {

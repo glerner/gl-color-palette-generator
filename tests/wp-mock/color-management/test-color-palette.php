@@ -9,10 +9,13 @@
 namespace GL_Color_Palette_Generator\Tests\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Palette;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use Mockery;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 
-class Test_Color_Palette extends \WP_Mock\Tools\TestCase {
+class Test_Color_Palette extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
     protected $valid_colors = ['#FF0000', '#00FF00', '#0000FF'];
     protected $valid_metadata = [
         'name' => 'Test Palette',

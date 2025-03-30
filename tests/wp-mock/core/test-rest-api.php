@@ -13,18 +13,24 @@
 namespace GL_Color_Palette_Generator\Tests\Core;
 
 use GL_Color_Palette_Generator\Core\REST_API;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use Mockery;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_REST_Request;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_REST_Response;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Error;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 
 /**
  * Test class for REST_API
  *
  * @coversDefaultClass \GL_Color_Palette_Generator\Core\REST_API
  */
-class Test_REST_API extends \WP_Mock\Tools\TestCase {
+class Test_REST_API extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
     /**
      * Set up test environment
      *

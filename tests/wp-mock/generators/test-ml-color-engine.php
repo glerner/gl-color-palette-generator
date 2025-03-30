@@ -4,10 +4,13 @@ declare(strict_types=1);
 namespace GL_Color_Palette_Generator\Tests\Generators;
 
 use GL_Color_Palette_Generator\Generators\ML_Color_Engine;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock\Tools\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 
-class Test_ML_Color_Engine extends WP_Mock_Test_Case {
+class Test_ML_Color_Engine extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
     protected ML_Color_Engine $ml_color_engine;
 
     public function setUp(): void {

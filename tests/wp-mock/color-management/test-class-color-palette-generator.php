@@ -22,7 +22,7 @@ use Mockery;
 /**
  * Class Test_Color_Palette_Generator
  */
-class Test_Color_Palette_Generator extends WP_Mock_Test_Case implements Color_Constants {
+class Test_Color_Palette_Generator extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case implements Color_Constants {
     /**
      * Test instance
      *

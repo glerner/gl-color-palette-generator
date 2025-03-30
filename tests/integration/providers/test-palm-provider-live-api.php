@@ -1,29 +1,30 @@
 <?php
 /**
- * Integration tests for the OpenAI provider
+ * Integration tests for the PaLM provider
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Integration
+ * @subpackage Tests\Integration\Providers
  * @bootstrap wp
  */
 
-namespace GL_Color_Palette_Generator\Tests\Unit\Providers;
+namespace GL_Color_Palette_Generator\Tests\Integration\Providers;
+use GL_Color_Palette_Generator\Tests\Base\Integration_Test_Case;
 
 use GL_Color_Palette_Generator\Tests\Test_Provider_Integration;
-use GL_Color_Palette_Generator\Providers\OpenAI_Provider;
+use GL_Color_Palette_Generator\Providers\Palm_Provider;
 
 /**
- * Test OpenAI integration
+ * Test PaLM integration
  */
-class Test_OpenAI_Integration extends Test_Provider_Integration {
+class Test_Palm_Integration extends Test_Provider_Integration {
     /**
-     * Returns the test credentials for the OpenAI provider
+     * Returns the test credentials for the Palm provider
      *
      * @return array
      */
     protected function get_test_credentials(): array {
         return [
-            'api_key' => getenv('OPENAI_API_KEY')
+            'api_key' => getenv('PALM_API_KEY')
         ];
     }
 
@@ -31,15 +32,15 @@ class Test_OpenAI_Integration extends Test_Provider_Integration {
      * Test that we can create a valid provider instance
      */
     public function test_create_provider() {
-        $provider = new OpenAI_Provider($this->get_test_credentials());
-        $this->assertInstanceOf(OpenAI_Provider::class, $provider);
+        $provider = new Palm_Provider($this->get_test_credentials());
+        $this->assertInstanceOf(Palm_Provider::class, $provider);
     }
 
     /**
      * Test that we can generate a color palette
      */
     public function test_generate_palette() {
-        $provider = new OpenAI_Provider($this->get_test_credentials());
+        $provider = new Palm_Provider($this->get_test_credentials());
         $result = $provider->generate_palette('A sunset over the ocean');
         $this->assertNotWPError($result);
         $this->assertIsArray($result);

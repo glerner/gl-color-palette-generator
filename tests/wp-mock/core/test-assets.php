@@ -9,10 +9,13 @@
 namespace GL_Color_Palette_Generator\Tests\Core;
 
 use GL_Color_Palette_Generator\Core\Assets;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use Mockery;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 
-class Test_Assets extends \WP_Mock\Tools\TestCase {
+class Test_Assets extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
     public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();

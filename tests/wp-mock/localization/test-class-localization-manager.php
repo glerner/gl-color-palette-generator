@@ -5,7 +5,7 @@ namespace GL_Color_Palette_Generator\Tests\Localization;
 use GL_Color_Palette_Generator\Localization\Localization_Manager;
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 
-class Test_Localization_Manager extends WP_Mock_Test_Case {
+class Test_Localization_Manager extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
     private $localization_manager;
 
     public function setUp(): void {

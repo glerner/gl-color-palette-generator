@@ -164,6 +164,51 @@ The tests are organized into several directories under `tests/`:
 - `settings/` - Plugin settings tests
 - `security/` - Security-related tests
 
+#### Test Types
+
+The plugin uses three main types of tests, each with a specific purpose and base class:
+
+1. **Unit Tests**
+   - Extend `GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case`
+   - Test isolated components with no WordPress dependencies
+   - Focus on pure PHP functionality and logic
+   - Located in `tests/unit/` directory
+   - Can use various mocking approaches (no mocks, Mockery, PHPUnit's createMock)
+
+2. **WP-Mock Tests**
+   - Extend `GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case`
+   - Test code that uses WordPress functions but doesn't need a full WordPress environment
+   - Use WP_Mock to simulate WordPress functions and hooks
+   - Faster than integration tests but can test WordPress-dependent code
+
+3. **Integration Tests**
+   - Extend `GL_Color_Palette_Generator\Tests\Base\Integration_Test_Case`
+   - Test code that requires a full WordPress environment
+   - Test interactions with WordPress core, database, and hooks
+   - Located in `tests/integration/` directory
+   - Include tests for live API integrations with external services
+
+#### Test Naming Conventions
+
+The project follows these naming conventions for test files:
+
+1. **Test Classes** (classes that contain actual tests):
+   - Should follow the `Test_*` pattern (e.g., `Test_Ajax_Handler`, `Test_Color_Palette`)
+   - The name should reflect what component they're testing
+   - Example: `Test_Settings_Manager` tests the `Settings_Manager` class
+
+2. **Base Classes** (abstract classes that test classes extend):
+   - Follow a different naming pattern: `*_Test_Case`
+   - Located in the `GL_Color_Palette_Generator\Tests\Base` namespace
+   - Three standard base classes:
+     - `Unit_Test_Case` - For unit tests
+     - `WP_Mock_Test_Case` - For WP-Mock tests
+     - `Integration_Test_Case` - For integration tests
+
+This distinction in naming patterns helps differentiate between the infrastructure classes (base classes) and the actual test implementations.
+
+For more details on mocking approaches used in unit tests, see the [Test Plan](../../tests/TEST-PLAN.md#mocking-approaches-in-unit-tests).
+
 ### Test Configuration
 
 The plugin uses a comprehensive PHPUnit configuration (`phpunit.xml`) that includes:

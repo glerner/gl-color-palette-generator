@@ -4,11 +4,15 @@ declare(strict_types=1);
 namespace GL_Color_Palette_Generator\Tests\Settings;
 
 use GL_Color_Palette_Generator\Settings\Settings_Validator;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Exceptions\Palette_Generation_Exception;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock\Tools\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 
-class Test_Settings_Validator extends WP_Mock_Test_Case {
+class Test_Settings_Validator extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
     public function setUp(): void {
         parent::setUp();
         WP_Mock::setUp();

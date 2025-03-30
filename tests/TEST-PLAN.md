@@ -92,6 +92,35 @@
 - Export/Import functionality
 - Block editor integration
 
+## Mocking Approaches in Unit Tests
+
+The project uses several mocking approaches for unit tests, all of which are valid for isolating the code under test from its dependencies:
+
+### No Mocks
+- Used for testing simple classes with minimal dependencies
+- Direct instantiation of the class under test
+- Appropriate for pure utility functions or classes with no external dependencies
+- Example: `test-color-utility.php`
+
+### Mockery
+- Third-party PHP mocking framework with expressive API
+- Used for complex mocking scenarios
+- Requires explicit setup and teardown with `Mockery::close()`
+- Example: `test-class-color-metrics.php`
+
+### PHPUnit's createMock
+- Built into PHPUnit
+- Simpler syntax for basic mocking needs
+- Good for straightforward dependency mocking
+- Example: `test-class-palette-cache.php`
+
+### WP_Mock
+- Specialized for mocking WordPress functions and hooks
+- Used in wp-mock tests to simulate WordPress environment
+- Requires special setup in bootstrap files
+
+The choice between these approaches doesn't affect test classification (unit, wp-mock, integration) but is based on the complexity of the mocking needs and developer preference.
+
 ## Test Environment Requirements
 
 ### WordPress Test Environment

@@ -9,7 +9,7 @@
 
 namespace GL_Color_Palette_Generator\Tests\Integration;
 
-use GL_Color_Palette_Generator\Tests\Test_Case_Integration;
+use GL_Color_Palette_Generator\Tests\Base\Integration_Test_Case;
 use GL_Color_Palette_Generator\Core\Plugin;
 
 /**

@@ -4,10 +4,13 @@ declare(strict_types=1);
 namespace GL_Color_Palette_Generator\Tests\Generators;
 
 use GL_Color_Palette_Generator\Generators\Prompt_Engineer;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock\Tools\TestCase;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 
-class Test_Prompt_Engineer extends WP_Mock_Test_Case {
+class Test_Prompt_Engineer extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
     protected Prompt_Engineer $prompt_engineer;
 
     public function setUp(): void {

@@ -10,8 +10,12 @@
 # IDE files
 .idea/
 .vscode/
+.windsurfrules
 *.sublime-project
 *.sublime-workspace
+
+# Windsurf Workspace settings
+*.code-workspace
 
 # OS files
 .DS_Store
@@ -20,6 +24,9 @@ Thumbs.db
 # Test coverage
 /coverage/
 .phpunit.result.cache
+
+# Test analyzer temporary files
+.prompt_shown
 
 # Build files
 /build/
@@ -32,3 +39,14 @@ Thumbs.db
 *.log
 *.cache
 *.tmp
+junk.txt
+
+# Test analyzer files
+/test_analysis_results.txt
+/test_files_to_analyze.txt
+/source_files.txt
+/code_issues.md
+/move_test_files.sh
+/untested_files.txt
+/temp_unanalyzed.txt
+/last_processed_line.txt

@@ -15,7 +15,7 @@ use WP_Mock;
 /**
  * Test REST Controller Accessibility functionality
  */
-class Test_Rest_Controller_Accessibility extends WP_Mock_Test_Case {
+class Test_Rest_Controller_Accessibility extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
     /** @var Rest_Controller_Accessibility */
     private $controller;
 

@@ -3,11 +3,12 @@
  * Integration tests for the Hugging Face provider
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Integration
+ * @subpackage Tests\Integration\Providers
  * @bootstrap wp
  */
 
-namespace GL_Color_Palette_Generator\Tests\Unit\Providers;
+namespace GL_Color_Palette_Generator\Tests\Integration\Providers;
+use GL_Color_Palette_Generator\Tests\Base\Integration_Test_Case;
 
 use GL_Color_Palette_Generator\Tests\Test_Provider_Integration;
 use GL_Color_Palette_Generator\Providers\HuggingFace_Provider;
