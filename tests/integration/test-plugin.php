@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 namespace GL_Color_Palette_Generator\Tests\Integration;
-use GL_Color_Palette_Generator\Tests\Base;
+use GL_Color_Palette_Generator\Tests\Base\Integration_Test_Case;
 
 
 /**

@@ -15,7 +15,7 @@ use GL_Color_Palette_Generator\Core\Ajax_Handler;
 /**
  * Test AJAX handler integration
  */
-class Test_Ajax_Handler extends Test_Case_Integration {
+class Test_Ajax_Handler extends Integration_Test_Case {
 
     public function setUp(): void {
         parent::setUp();

@@ -199,3 +199,48 @@ Your plugin's custom functions (generate_*)
 
 ### Testing Notes
 - Keep adding lines like " * @bootstrap wp-mock" to specify which PHPUnit bootstrap method to use, see .github/issues/improve-test-bootstrap-robustness.md
+
+#### Choosing the Right Test Type
+
+We use three main test types in this project: Unit Tests, WP_Mock Tests, and Integration Tests. Each has appropriate use cases, but also situations where they should be avoided:
+
+##### When Unit Tests are Appropriate
+- Testing code with no WordPress dependencies
+- Testing pure utility functions and algorithms
+- When you need fast, isolated tests
+- When testing complex logic that doesn't interact with WordPress
+
+##### When WP_Mock Tests are Appropriate
+- Testing code that uses WordPress functions but can be isolated
+- When you need to verify interactions with WordPress hooks and functions
+- When testing code that should work with specific WordPress behaviors
+
+##### When Integration Tests are Appropriate
+- Testing actual database interactions
+- Testing WordPress hooks and filters in a real environment
+- When testing complex interactions between multiple components
+- When testing admin UI functionality
+
+##### When Different Test Types are Inappropriate
+
+**Unit Tests are Wrong When:**
+- Testing code that relies heavily on WordPress
+- Testing code where isolation would create an artificial environment
+- When the test would require excessive mocking
+
+**WP_Mock Tests are Wrong When:**
+- Testing code with no WordPress dependencies (use unit tests instead)
+- When you mock too much and end up testing your mocks instead of your actual code
+- When testing WordPress core behavior itself (use integration tests)
+- When your mocks don't accurately represent how WordPress actually behaves
+
+**Integration Tests are Wrong When:**
+- Testing code that has no WordPress dependencies
+- Testing code that should be isolated for proper unit testing
+- When you need to verify specific interactions between components
+- When testing edge cases or error conditions that are difficult to create in a full WordPress environment
+
+Choosing the wrong test type can lead to:
+- False positives (tests pass but real code fails)
+- Tests that don't actually test what you think they're testing
+- Tests that break when WordPress changes but your code would still work

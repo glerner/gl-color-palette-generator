@@ -16,7 +16,7 @@ BATCH_SIZE=5
 get_next_batch() {
     # Create a temporary file to store unanalyzed files
     TEMP_UNANALYZED="$PROJECT_ROOT/temp_unanalyzed.txt"
-    
+
     # Find files that haven't been analyzed yet
     while IFS= read -r file; do
         # Check if this file has already been analyzed
@@ -24,17 +24,17 @@ get_next_batch() {
             echo "$file" >> "$TEMP_UNANALYZED"
         fi
     done < "$TEST_FILES"
-    
+
     # If no unanalyzed files are found, report that
     if [ ! -s "$TEMP_UNANALYZED" ]; then
         echo "All files have been analyzed!"
         rm -f "$TEMP_UNANALYZED"
         return 1
     fi
-    
+
     # Take the first BATCH_SIZE files from the unanalyzed list
     head -n "$BATCH_SIZE" "$TEMP_UNANALYZED"
-    
+
     # Clean up
     rm -f "$TEMP_UNANALYZED"
     return 0
@@ -46,17 +46,17 @@ generate_move_script() {
     echo "# Generated on $(date)" >> "$MOVE_SCRIPT"
     echo "# This script will move test files to their correct locations" >> "$MOVE_SCRIPT"
     echo "" >> "$MOVE_SCRIPT"
-    
+
     grep "MOVE:" "$RESULTS_FILE" | while read -r line; do
         source=$(echo "$line" | cut -d':' -f2)
         target=$(echo "$line" | cut -d':' -f3)
-        
+
         echo "# Moving $(basename "$source")" >> "$MOVE_SCRIPT"
         echo "mkdir -p \"$(dirname "$target")\"" >> "$MOVE_SCRIPT"
         echo "git mv \"$source\" \"$target\"" >> "$MOVE_SCRIPT"
         echo "" >> "$MOVE_SCRIPT"
     done
-    
+
     chmod +x "$MOVE_SCRIPT"
     echo "Move script generated: $MOVE_SCRIPT"
 }
@@ -65,7 +65,7 @@ generate_move_script() {
 show_stats() {
     # Create a clean temporary file for counting
     TEMP_COUNT_FILE="$(mktemp)"
-    
+
     # Count test files and decisions
     total_tests=$(wc -l < "$TEST_FILES" | tr -d ' ')
     processed=0
@@ -74,7 +74,7 @@ show_stats() {
     edit_files=0
     edit_move_files=0
     bugs=0
-    
+
     # Count DECISION entries if the file exists and has content
     if [ -s "$RESULTS_FILE" ]; then
         processed=$(grep -c "^DECISION:" "$RESULTS_FILE")
@@ -83,12 +83,12 @@ show_stats() {
         edit_files=$(grep -c "^DECISION:.*:EDIT$" "$RESULTS_FILE")
         edit_move_files=$(grep -c "^DECISION:.*:EDIT-MOVE$" "$RESULTS_FILE")
     fi
-    
+
     # Count bugs if the file exists and has content
     if [ -s "$BUGS_FILE" ]; then
         bugs=$(grep -c "^BUG:" "$BUGS_FILE")
     fi
-    
+
     # Display statistics
     echo "Statistics:"
     echo "Total test files: $total_tests"
@@ -98,38 +98,38 @@ show_stats() {
     echo "Files needing edits only (EDIT): $edit_files"
     echo "Files needing both edits and relocation (EDIT-MOVE): $edit_move_files"
     echo "Bugs/issues found: $bugs"
-    
+
     # Count test types
     unit_count=0
     wp_mock_count=0
     integration_count=0
-    
+
     if [ -s "$RESULTS_FILE" ]; then
         unit_count=$(grep "^DECISION:" "$RESULTS_FILE" | grep -c ":unit:")
         wp_mock_count=$(grep "^DECISION:" "$RESULTS_FILE" | grep -c ":wp-mock:")
         integration_count=$(grep "^DECISION:" "$RESULTS_FILE" | grep -c ":integration:")
     fi
-    
+
     # Show recommended distribution
     echo ""
     echo "Recommended distribution:"
     echo "Unit tests: $unit_count"
     echo "WP-Mock tests: $wp_mock_count"
     echo "Integration tests: $integration_count"
-    
+
     # Show bug severity distribution if any bugs exist
     if [ -s "$BUGS_FILE" ] && [ "$bugs" -gt 0 ]; then
         high_count=$(grep "^BUG:" "$BUGS_FILE" | grep -c ":high:")
         medium_count=$(grep "^BUG:" "$BUGS_FILE" | grep -c ":medium:")
         low_count=$(grep "^BUG:" "$BUGS_FILE" | grep -c ":low:")
-        
+
         echo ""
         echo "Bug severity distribution:"
         echo "High severity: $high_count"
         echo "Medium severity: $medium_count"
         echo "Low severity: $low_count"
     fi
-    
+
     # Clean up
     rm -f "$TEMP_COUNT_FILE"
 }
@@ -137,15 +137,15 @@ show_stats() {
 # Function to check for untested files
 check_untested_files() {
     echo "Checking for untested files..."
-    
+
     # Create a temporary file for untested files
     UNTESTED_FILES="$PROJECT_ROOT/untested_files.txt"
     > "$UNTESTED_FILES"
-    
+
     # Create a temporary filtered source files list
     FILTERED_SOURCE_FILES="$PROJECT_ROOT/.filtered_source_files.tmp"
     > "$FILTERED_SOURCE_FILES"
-    
+
     # Filter out files that don't need testing
     while IFS= read -r source_file; do
         # Skip files in .git/, .github/, node_modules/ directories and index.php files
@@ -156,21 +156,21 @@ check_untested_files() {
             echo "$source_file" >> "$FILTERED_SOURCE_FILES"
         fi
     done < "$SOURCE_FILES"
-    
+
     # Check each filtered source file for a corresponding test
     while IFS= read -r source_file; do
         # Extract the base name without path and extension
         base_name=$(basename "$source_file" .php)
-        
+
         # Look for corresponding test file
         if ! grep -q "test-$base_name.php" "$TEST_FILES" && ! grep -q "test-${base_name/-class/}.php" "$TEST_FILES"; then
             echo "$source_file" >> "$UNTESTED_FILES"
         fi
     done < "$FILTERED_SOURCE_FILES"
-    
+
     # Clean up temporary file
     rm -f "$FILTERED_SOURCE_FILES"
-    
+
     echo "Found $(wc -l < "$UNTESTED_FILES") potentially untested files."
     echo "List saved to: $UNTESTED_FILES"
 }
@@ -187,7 +187,7 @@ main_menu() {
         echo "5. View bugs/issues found"
         echo "6. Exit"
         read -p "Select an option: " option
-        
+
         case $option in
             1)
                 # First display the instructions (only once per session)
@@ -217,9 +217,14 @@ main_menu() {
                     echo "   - Verify the test is actually testing the intended code"
                     echo "   - Check for @covers annotations and their accuracy"
                     echo ""
-                    echo "4. CODE ISSUES (optional):"
+                    echo "4. SCOPE ASSESSMENT:"
+                    echo "   - Determine if the test is for functionality within the scope of a WordPress theme.json generator plugin"
+                    echo "   - Flag potentially deprecated interfaces or classes with 'Also check if should be Deprecated, outside the scope of this plugin'"
+                    echo "   - For clearly deprecated functionality, recommend removal with 'Consider removing this file as it contains tests for deprecated interfaces that are out of scope for the project'"
+                    echo ""
+                    echo "5. CODE ISSUES (optional):"
                     echo "   - If you notice any syntax errors or other issues, document them"
-                    echo "   - Focus primarily on the test type, namespace, and coverage"
+                    echo "   - Focus primarily on the test type, namespace, coverage, and scope"
                     echo ""
                     echo "For each file, add results to $RESULTS_FILE in this format:"
                     echo "DECISION:[file_path]:[unit|wp-mock|integration]:[detailed reason for decision]:[OK|MOVE|EDIT|EDIT-MOVE]"
@@ -230,22 +235,22 @@ main_menu() {
                     echo "BUG:[file_path]:[severity(high|medium|low)]:[issue_type]:[detailed description]"
                     echo "(Use this for issues unrelated to test type, namespace, or base class problems)"
                     echo ""
-                    
+
                     # Create a marker file to indicate the prompt has been shown
                     touch "$PROJECT_ROOT/.prompt_shown"
                 fi
-                
+
                 # Get next batch of files
                 if ! batch=$(get_next_batch); then
                     echo "All files have been processed."
                     continue
                 fi
-                
+
                 if [ -z "$batch" ]; then
                     echo "No unanalyzed files found."
                     continue
                 fi
-                
+
                 # Print the batch for analysis
                 echo ""
                 echo "Next batch of files to analyze:"
@@ -270,6 +275,7 @@ main_menu() {
                 ;;
             6)
                 echo "Exiting."
+                rm "$PROJECT_ROOT/.prompt_shown"
                 exit 0
                 ;;
             *)

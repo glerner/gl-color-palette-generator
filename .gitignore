@@ -46,7 +46,15 @@ junk.txt
 /test_files_to_analyze.txt
 /source_files.txt
 /code_issues.md
-/move_test_files.sh
 /untested_files.txt
 /temp_unanalyzed.txt
+
+# Test processing files
+/test_processing_progress.txt
+/test_processing_scripts/
 /last_processed_line.txt
+
+# files for modifying PHPUnit test files, batch processing
+# bin/test-analyzer.sh
+# bin/move_test_files.sh
+# bin/process-test-results.sh

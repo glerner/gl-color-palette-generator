@@ -15,7 +15,7 @@ use GL_Color_Palette_Generator\Core\Plugin;
 /**
  * Test WordPress integration
  */
-class Test_WordPress_Integration extends Test_Case_Integration {
+class Test_WordPress_Integration extends Integration_Test_Case {
     /**
      * Plugin instance
      *
