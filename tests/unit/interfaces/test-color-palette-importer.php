@@ -1,10 +1,22 @@
 <?php
+/**
+ * Color Palette Importer Interface Tests
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Unit\Interfaces
+ * @since 1.0.0
+ */
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 
 use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Importer;
 
+/**
+ * Test class for Color_Palette_Importer interface
+ *
+ * @covers GL_Color_Palette_Generator\Interfaces\Color_Palette_Importer
+ */
 class Test_Color_Palette_Importer extends Unit_Test_Case {
     private $importer;
 

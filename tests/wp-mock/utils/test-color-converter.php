@@ -3,15 +3,21 @@
  * Test Color Converter Class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests
+ * @subpackage Tests\WP_Mock\Utils
  */
 
-namespace GL_Color_Palette_Generator\Tests\Utils;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Utils;
 
 use GL_Color_Palette_Generator\Utils\Color_Converter;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
 
-class Test_Color_Converter extends \WP_Mock\Tools\TestCase {
+/**
+ * Test class for Color_Converter
+ *
+ * @covers GL_Color_Palette_Generator\Utils\Color_Converter
+ */
+class Test_Color_Converter extends WP_Mock_Test_Case {
     private $converter;
 
     public function setUp(): void {

@@ -6,15 +6,10 @@ namespace GL_Color_Palette_Generator\Tests\Settings;
 use GL_Color_Palette_Generator\Settings\Settings_Manager;
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Settings\Settings_Types;
-use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Exceptions\Palette_Generation_Exception;
-use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
-use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
-use WP_Mock\Tools\TestCase;
-use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 
-class Test_Settings_Manager extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
+class Test_Settings_Manager extends WP_Mock_Test_Case {
     private Settings_Manager $settings_manager;
 
     public function setUp(): void {

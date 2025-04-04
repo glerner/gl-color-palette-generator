@@ -19,6 +19,11 @@ namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Preview;
 
+/**
+ * Test class for Color_Palette_Preview interface
+ *
+ * @covers GL_Color_Palette_Generator\Interfaces\Color_Palette_Preview
+ */
 class Test_Color_Palette_Preview extends Unit_Test_Case {
     private $preview;
 

@@ -1,15 +1,31 @@
 <?php
+/**
+ * Test Performance Monitor Class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\WP_Mock\Performance
+ */
 
-namespace GL_Color_Palette_Generator\Tests\Unit\Core;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Performance;
 
+// Check if the class exists in this location or needs to be imported from a different namespace
+// Adjust the namespace if needed based on the actual location of the Performance_Monitor class
 use GL_Color_Palette_Generator\Performance\Performance_Monitor;
-use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
+use WP_Mock;
+use Mockery;
 
-class Test_Performance_Monitor extends Unit_Test_Case {
+/**
+ * Test class for Performance_Monitor
+ *
+ * @covers GL_Color_Palette_Generator\Performance\Performance_Monitor
+ */
+class Test_Performance_Monitor extends WP_Mock_Test_Case {
     protected $performance_monitor;
 
     public function setUp(): void {
         parent::setUp();
+        WP_Mock::setUp();
         $this->performance_monitor = new Performance_Monitor();
     }
 
@@ -35,10 +51,25 @@ class Test_Performance_Monitor extends Unit_Test_Case {
     public function test_query_count_tracking(): void {
         $initial_count = $this->performance_monitor->get_query_count();
         
-        // Perform some queries
+        // Mock global $wpdb
         global $wpdb;
-        $wpdb->get_results("SELECT * FROM {$wpdb->posts} LIMIT 5");
-        $wpdb->get_results("SELECT * FROM {$wpdb->users} LIMIT 5");
+        $wpdb = Mockery::mock('wpdb');
+        $wpdb->posts = 'wp_posts';
+        $wpdb->users = 'wp_users';
+        $wpdb->shouldReceive('get_results')->twice()->andReturn([]);
+        
+        // Mock query count functions
+        WP_Mock::userFunction('get_num_queries', [
+            'times' => 2,
+            'return' => function() use (&$initial_count) {
+                static $calls = 0;
+                return $initial_count + $calls++;
+            }
+        ]);
+        
+        // Perform some queries
+        $wpdb->get_results("SELECT * FROM posts LIMIT 5");
+        $wpdb->get_results("SELECT * FROM users LIMIT 5");
         
         $final_count = $this->performance_monitor->get_query_count();
         $this->assertEquals($initial_count + 2, $final_count);
@@ -104,23 +135,46 @@ class Test_Performance_Monitor extends Unit_Test_Case {
     public function test_cache_performance_impact(): void {
         // Test performance with and without cache
         $this->performance_monitor->start_measurement('uncached_operation');
-        // Simulate uncached operation
-        $result1 = wp_cache_get('test_key');
+        
+        // Mock cache functions
+        WP_Mock::userFunction('wp_cache_get', [
+            'args' => ['test_key'],
+            'times' => 1,
+            'return' => false
+        ]);
+        
+        WP_Mock::userFunction('wp_cache_set', [
+            'args' => ['test_key', 'test_value'],
+            'times' => 1,
+            'return' => true
+        ]);
+        
+        // Simulate uncached operation - use function in global namespace
+        $result1 = \wp_cache_get('test_key');
         if (false === $result1) {
             usleep(50000);
-            wp_cache_set('test_key', 'test_value');
+            \wp_cache_set('test_key', 'test_value');
         }
         $uncached_time = $this->performance_monitor->end_measurement('uncached_operation');
         
         $this->performance_monitor->start_measurement('cached_operation');
-        // Simulate cached operation
-        $result2 = wp_cache_get('test_key');
+        
+        // Mock second cache get to return a value
+        WP_Mock::userFunction('wp_cache_get', [
+            'args' => ['test_key'],
+            'times' => 1,
+            'return' => 'test_value'
+        ]);
+        
+        // Simulate cached operation - use function in global namespace
+        $result2 = \wp_cache_get('test_key');
         $cached_time = $this->performance_monitor->end_measurement('cached_operation');
         
         $this->assertGreaterThan($cached_time, $uncached_time);
     }
 
     public function tearDown(): void {
+        WP_Mock::tearDown();
         parent::tearDown();
     }
 }

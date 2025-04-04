@@ -1,11 +1,22 @@
 <?php
+/**
+ * Color Scheme Generator Interface Tests
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Unit\Interfaces
+ */
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 
 use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\ColorSchemeGenerator;
 
-class Test_ColorSchemeGenerator extends Unit_Test_Case {
+/**
+ * Test class for ColorSchemeGenerator interface
+ *
+ * @covers GL_Color_Palette_Generator\Interfaces\ColorSchemeGenerator
+ */
+class Test_Color_Scheme_Generator extends Unit_Test_Case {
     private $generator;
 
     public function setUp(): void {

@@ -51,6 +51,7 @@ junk.txt
 
 # Test processing files
 /test_processing_progress.txt
+##### BUG Windsurf can't access files in .gitignore!
 /test_processing_scripts/
 /last_processed_line.txt
 

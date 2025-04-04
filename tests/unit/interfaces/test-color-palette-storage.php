@@ -1,11 +1,23 @@
 <?php
+/**
+ * Color Palette Storage Interface Tests
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Unit\Interfaces
+ * @since 1.0.0
+ */
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Storage;
 use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 
-class Color_Palette_Storage_Test extends Unit_Test_Case {
+/**
+ * Test class for Color_Palette_Storage interface
+ *
+ * @covers GL_Color_Palette_Generator\Interfaces\Color_Palette_Storage
+ */
+class Test_Color_Palette_Storage extends Unit_Test_Case {
     private $storage;
 
     public function setUp(): void {

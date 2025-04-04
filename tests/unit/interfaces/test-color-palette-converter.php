@@ -1,10 +1,22 @@
 <?php
+/**
+ * Color Palette Converter Interface Tests
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Unit\Interfaces
+ * @since 1.0.0
+ */
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 
 use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\Color_Palette_Converter;
 
+/**
+ * Test class for Color_Palette_Converter interface
+ *
+ * @covers GL_Color_Palette_Generator\Interfaces\Color_Palette_Converter
+ */
 class Test_Color_Palette_Converter extends Unit_Test_Case {
     private $converter;
 

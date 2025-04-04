@@ -3,15 +3,21 @@
  * Test Validator Class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests
+ * @subpackage Tests\WP_Mock\Utils
  */
 
-namespace GL_Color_Palette_Generator\Tests\Utils;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Utils;
 
 use GL_Color_Palette_Generator\Utils\Validator;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
 
-class Test_Validator extends \WP_Mock\Tools\TestCase {
+/**
+ * Test class for Validator
+ *
+ * @covers GL_Color_Palette_Generator\Utils\Validator
+ */
+class Test_Validator extends WP_Mock_Test_Case {
     private $validator;
 
     public function setUp(): void {

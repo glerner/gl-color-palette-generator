@@ -12,6 +12,11 @@ namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\HarmonyGenerator;
 
+/**
+ * Test class for HarmonyGenerator interface
+ *
+ * @covers GL_Color_Palette_Generator\Interfaces\HarmonyGenerator
+ */
 class Test_Harmony_Generator extends Unit_Test_Case {
     private $generator;
 

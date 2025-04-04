@@ -333,6 +333,27 @@ The plugin is configured to support Xdebug debugging in your development environ
    }
    ```
 
+#### Visual Studio Code Recommended Extensions
+
+We recommend installing the following VSCode extensions for the best development experience:
+
+1. **PHP Intelephense** (bmewburn.vscode-intelephense-client)
+   - Provides PHP code intelligence including:
+     - Code completion and IntelliSense
+     - Error detection
+     - Code navigation and refactoring tools
+     - Type checking
+
+2. **WordPress Hooks IntelliSense** (johnbillion.vscode-wordpress-hooks)
+   - Provides autocomplete for WordPress hooks:
+     - Action and filter suggestions
+     - Hook documentation
+     - Parameter hints for hook callbacks
+
+Both extensions work together: PHP Intelephense handles general PHP language features, while WordPress Hooks IntelliSense adds WordPress-specific functionality.
+
+> **Note:** If you encounter PHP_CodeSniffer errors about missing extensions (tokenizer, xmlwriter, SimpleXML), install them with: `sudo apt-get install php-xml php-tokenizer`
+
 #### Debugging Tests
 
 1. In VSCode:

@@ -7,7 +7,7 @@
  * @since 1.0.0
  */
 
-namespace GL_Color_Palette_Generator\Tests\System;
+namespace GL_Color_Palette_Generator\Tests\Unit\System;
 
 use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\System\Autoloader;
@@ -17,7 +17,8 @@ use Mockery;
  * Tests for the Autoloader class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\System
+ * @subpackage Tests\Unit\System
+ * @covers GL_Color_Palette_Generator\System\Autoloader
  */
 class Test_Autoloader extends Unit_Test_Case {
     use \Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;

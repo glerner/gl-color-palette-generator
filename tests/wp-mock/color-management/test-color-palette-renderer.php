@@ -3,21 +3,57 @@
  * Test Color Palette Renderer UI
  *
  * @package GL_Color_Palette_Generator
+ * @subpackage Tests\WP_Mock\Color_Management
  */
 
-namespace GL_Color_Palette_Generator\Tests\Unit\UI;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Palette_Renderer;
 use GL_Color_Palette_Generator\Color_Management\Color_Palette;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
-use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
+use WP_Mock;
+use Mockery;
 
-class Test_Color_Palette_Renderer_UI extends Unit_Test_Case {
+/**
+ * Test class for Color_Palette_Renderer UI functionality
+ *
+ * @covers GL_Color_Palette_Generator\Color_Management\Color_Palette_Renderer
+ */
+class Test_Color_Palette_Renderer_UI extends WP_Mock_Test_Case {
     private $renderer;
     private $test_palette;
 
     public function setUp(): void {
         parent::setUp();
+        WP_Mock::setUp();
+        
+        // Mock WordPress functions used in the renderer
+        WP_Mock::userFunction('wp_enqueue_style', [
+            'times' => 'any',
+            'return' => true
+        ]);
+        
+        WP_Mock::userFunction('wp_add_inline_style', [
+            'times' => 'any',
+            'return' => true
+        ]);
+        
+        WP_Mock::userFunction('esc_attr', [
+            'times' => 'any',
+            'return_arg' => 0
+        ]);
+        
+        WP_Mock::userFunction('esc_html', [
+            'times' => 'any',
+            'return_arg' => 0
+        ]);
+        
+        WP_Mock::userFunction('wp_kses_post', [
+            'times' => 'any',
+            'return_arg' => 0
+        ]);
+        
         $this->renderer = new Color_Palette_Renderer();
         $this->test_palette = new Color_Palette([
             'primary' => '#2C3E50',
@@ -54,6 +90,20 @@ class Test_Color_Palette_Renderer_UI extends Unit_Test_Case {
             ],
             'palette_story' => 'A modern and professional palette that combines trust and innovation'
         ];
+        
+        // Mock update_option and get_option
+        WP_Mock::userFunction('update_option', [
+            'args' => ['gl_cpg_last_palette_description', $description],
+            'times' => 1,
+            'return' => true
+        ]);
+        
+        WP_Mock::userFunction('get_option', [
+            'args' => ['gl_cpg_last_palette_description'],
+            'times' => 'any',
+            'return' => $description
+        ]);
+        
         update_option('gl_cpg_last_palette_description', $description);
 
         $output = $this->renderer->render($this->test_palette, [
@@ -195,5 +245,11 @@ class Test_Color_Palette_Renderer_UI extends Unit_Test_Case {
             $this->assertStringContainsString($color, $result);
             $this->assertStringContainsString($name, $result);
         }
+    }
+    
+    public function tearDown(): void {
+        WP_Mock::tearDown();
+        Mockery::close();
+        parent::tearDown();
     }
 }
