@@ -5,14 +5,14 @@
  * @package GL_Color_Palette_Generator
  */
 
-namespace GL_Color_Palette_Generator\Tests\Color_Management;
+namespace GL_Color_Palette_Generator\Tests\Integration\Color_Management;
+use GL_Color_Palette_Generator\Tests\Base\Integration_Test_Case;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Palette_Renderer;
 use GL_Color_Palette_Generator\Color_Management\Color_Palette;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
-use WP_UnitTestCase;
 
-class Test_Color_Palette_Renderer extends WP_UnitTestCase {
+class Test_Color_Palette_Renderer extends \GL_Color_Palette_Generator\Tests\Base\Integration_Test_Case {
 	private $renderer;
 	private $palette;
 

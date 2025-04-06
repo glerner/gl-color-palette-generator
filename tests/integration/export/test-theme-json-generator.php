@@ -1,6 +1,7 @@
 <?php
 
-namespace GL_Color_Palette_Generator\Tests\WP_Mock\Export;
+namespace GL_Color_Palette_Generator\Tests\Integration\Export;
+use GL_Color_Palette_Generator\Tests\Base\Integration_Test_Case;
 
 use GL_Color_Palette_Generator\Export\Theme_JSON_Generator;
 use GL_Color_Palette_Generator\Color_Management\Color_Validator;
@@ -8,12 +9,11 @@ use GL_Color_Palette_Generator\Color_Management\Color_Variation_Generator;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use GL_Color_Palette_Generator\Localization\Theme_Namer;
-use WP_UnitTestCase;
 
 /**
  * Test Theme_JSON_Generator class
  */
-class Test_Theme_JSON_Generator extends WP_UnitTestCase implements Color_Constants {
+class Test_Theme_JSON_Generator extends \GL_Color_Palette_Generator\Tests\Base\Integration_Test_Case implements Color_Constants {
 	/** @var Theme_JSON_Generator */
 	private $instance;
 	/** @var string */
