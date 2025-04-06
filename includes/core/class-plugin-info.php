@@ -19,49 +19,49 @@ namespace GL_Color_Palette_Generator;
  * @since      1.0.0
  */
 class PluginInfo {
-    /**
-     * Plugin version
-     */
-    const VERSION = '1.0.0';
+	/**
+	 * Plugin version
+	 */
+	const VERSION = '1.0.0';
 
-    /**
-     * Plugin minimum PHP version
-     */
-    const MIN_PHP_VERSION = '8.0';
+	/**
+	 * Plugin minimum PHP version
+	 */
+	const MIN_PHP_VERSION = '8.0';
 
-    /**
-     * Plugin minimum WordPress version
-     */
-    const MIN_WP_VERSION = '6.2';
+	/**
+	 * Plugin minimum WordPress version
+	 */
+	const MIN_WP_VERSION = '6.2';
 
-    /**
-     * Plugin author
-     */
-    const AUTHOR = 'George Lerner';
+	/**
+	 * Plugin author
+	 */
+	const AUTHOR = 'George Lerner';
 
-    /**
-     * Plugin author URI
-     */
-    const AUTHOR_URI = 'https://website-tech.glerner.com/';
+	/**
+	 * Plugin author URI
+	 */
+	const AUTHOR_URI = 'https://website-tech.glerner.com/';
 
-    /**
-     * Plugin URI
-     */
-    const PLUGIN_URI = 'https://github.com/GeorgeLerner/gl-color-palette-generator';
+	/**
+	 * Plugin URI
+	 */
+	const PLUGIN_URI = 'https://github.com/GeorgeLerner/gl-color-palette-generator';
 
-    /**
-     * Get plugin metadata
-     *
-     * @return array Plugin metadata
-     */
-    public static function get_metadata(): array {
-        return [
-            'version' => self::VERSION,
-            'min_php' => self::MIN_PHP_VERSION,
-            'min_wp' => self::MIN_WP_VERSION,
-            'author' => self::AUTHOR,
-            'author_uri' => self::AUTHOR_URI,
-            'plugin_uri' => self::PLUGIN_URI,
-        ];
-    }
-} 
+	/**
+	 * Get plugin metadata
+	 *
+	 * @return array Plugin metadata
+	 */
+	public static function get_metadata(): array {
+		return array(
+			'version'    => self::VERSION,
+			'min_php'    => self::MIN_PHP_VERSION,
+			'min_wp'     => self::MIN_WP_VERSION,
+			'author'     => self::AUTHOR,
+			'author_uri' => self::AUTHOR_URI,
+			'plugin_uri' => self::PLUGIN_URI,
+		);
+	}
+}

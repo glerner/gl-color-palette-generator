@@ -24,294 +24,302 @@ use GL_Color_Palette_Generator\Color_Management\Color_Utility;
  * @since 1.0.0
  */
 class Compliance_Checker implements Compliance_Checker_Interface {
-    /**
-     * WCAG Requirements
-     */
-    private const WCAG_REQUIREMENTS = [
-        'contrast_ratios' => [
-            'target' => Color_Constants::WCAG_CONTRAST_TARGET,  // 7.0 - AAA level
-            'minimum' => Color_Constants::WCAG_CONTRAST_MIN     // 4.7 - Above AA level
-        ]
-    ];
+	/**
+	 * WCAG Requirements
+	 */
+	private const WCAG_REQUIREMENTS = array(
+		'contrast_ratios' => array(
+			'target'  => Color_Constants::WCAG_CONTRAST_TARGET,  // 7.0 - AAA level
+			'minimum' => Color_Constants::WCAG_CONTRAST_MIN,     // 4.7 - Above AA level
+		),
+	);
 
-    /**
-     * Section 508 compliance configurations
-     */
-    private const SECTION_508_REQUIREMENTS = [
-        'contrast_ratios' => [
-            'minimum' => Color_Constants::WCAG_CONTRAST_MIN,
-            'target' => Color_Constants::WCAG_CONTRAST_TARGET
-        ],
-        'color_blindness' => [
-            'deuteranopia' => true,
-            'protanopia' => true,
-            'tritanopia' => true,
-        ],
-    ];
+	/**
+	 * Section 508 compliance configurations
+	 */
+	private const SECTION_508_REQUIREMENTS = array(
+		'contrast_ratios' => array(
+			'minimum' => Color_Constants::WCAG_CONTRAST_MIN,
+			'target'  => Color_Constants::WCAG_CONTRAST_TARGET,
+		),
+		'color_blindness' => array(
+			'deuteranopia' => true,
+			'protanopia'   => true,
+			'tritanopia'   => true,
+		),
+	);
 
-    /**
-     * @var Color_Utility
-     */
-    private $color_utility;
+	/**
+	 * @var Color_Utility
+	 */
+	private $color_utility;
 
-    /**
-     * Constructor
-     *
-     * @param Color_Utility $color_utility Color utility instance
-     */
-    public function __construct(Color_Utility $color_utility) {
-        $this->color_utility = $color_utility;
-    }
+	/**
+	 * Constructor
+	 *
+	 * @param Color_Utility $color_utility Color utility instance
+	 */
+	public function __construct( Color_Utility $color_utility ) {
+		$this->color_utility = $color_utility;
+	}
 
-    /**
-     * Check WCAG compliance for a color palette
-     *
-     * @param array $colors Array of hex color codes
-     * @return array Compliance status and details
-     */
-    public function check_wcag_compliance(array $colors): array {
-        $results = [
-            'status' => 'pass',
-            'level' => null,
-            'details' => [],
-            'violations' => [],
-        ];
+	/**
+	 * Check WCAG compliance for a color palette
+	 *
+	 * @param array $colors Array of hex color codes
+	 * @return array Compliance status and details
+	 */
+	public function check_wcag_compliance( array $colors ): array {
+		$results = array(
+			'status'     => 'pass',
+			'level'      => null,
+			'details'    => array(),
+			'violations' => array(),
+		);
 
-        // Check all color combinations for contrast ratios
-        foreach ($colors as $i => $color1) {
-            foreach ($colors as $j => $color2) {
-                if ($i === $j) continue;
+		// Check all color combinations for contrast ratios
+		foreach ( $colors as $i => $color1 ) {
+			foreach ( $colors as $j => $color2 ) {
+				if ( $i === $j ) {
+					continue;
+				}
 
-                $ratio = $this->validate_contrast_ratio($color1, $color2);
-                $level = $this->determine_wcag_level($ratio);
+				$ratio = $this->validate_contrast_ratio( $color1, $color2 );
+				$level = $this->determine_wcag_level( $ratio );
 
-                if (!$level) {
-                    $results['status'] = 'fail';
-                    $results['violations'][] = [
-                        'colors' => [$color1, $color2],
-                        'ratio' => $ratio,
-                        'required' => self::WCAG_REQUIREMENTS['contrast_ratios']['minimum'],
-                    ];
-                } elseif ($results['level'] === null || $level === 'AAA') {
-                    $results['level'] = $level;
-                }
+				if ( ! $level ) {
+					$results['status']       = 'fail';
+					$results['violations'][] = array(
+						'colors'   => array( $color1, $color2 ),
+						'ratio'    => $ratio,
+						'required' => self::WCAG_REQUIREMENTS['contrast_ratios']['minimum'],
+					);
+				} elseif ( $results['level'] === null || $level === 'AAA' ) {
+					$results['level'] = $level;
+				}
 
-                $results['details'][] = [
-                    'colors' => [$color1, $color2],
-                    'ratio' => $ratio,
-                    'level' => $level,
-                ];
-            }
-        }
+				$results['details'][] = array(
+					'colors' => array( $color1, $color2 ),
+					'ratio'  => $ratio,
+					'level'  => $level,
+				);
+			}
+		}
 
-        return $results;
-    }
+		return $results;
+	}
 
-    /**
-     * Check Section 508 compliance for a color palette
-     *
-     * @param array $colors Array of hex color codes
-     * @return array Compliance status and details
-     */
-    public function check_section508_compliance(array $colors): array {
-        $results = [
-            'status' => 'pass',
-            'details' => [],
-            'violations' => [],
-        ];
+	/**
+	 * Check Section 508 compliance for a color palette
+	 *
+	 * @param array $colors Array of hex color codes
+	 * @return array Compliance status and details
+	 */
+	public function check_section508_compliance( array $colors ): array {
+		$results = array(
+			'status'     => 'pass',
+			'details'    => array(),
+			'violations' => array(),
+		);
 
-        // Check contrast requirements
-        foreach ($colors as $i => $color1) {
-            foreach ($colors as $j => $color2) {
-                if ($i === $j) continue;
+		// Check contrast requirements
+		foreach ( $colors as $i => $color1 ) {
+			foreach ( $colors as $j => $color2 ) {
+				if ( $i === $j ) {
+					continue;
+				}
 
-                $ratio = $this->validate_contrast_ratio($color1, $color2);
-                if ($ratio < self::SECTION_508_REQUIREMENTS['contrast_ratios']['minimum']) {
-                    $results['status'] = 'fail';
-                    $results['violations'][] = [
-                        'type' => 'contrast',
-                        'colors' => [$color1, $color2],
-                        'ratio' => $ratio,
-                        'required' => self::SECTION_508_REQUIREMENTS['contrast_ratios']['minimum'],
-                    ];
-                }
-            }
-        }
+				$ratio = $this->validate_contrast_ratio( $color1, $color2 );
+				if ( $ratio < self::SECTION_508_REQUIREMENTS['contrast_ratios']['minimum'] ) {
+					$results['status']       = 'fail';
+					$results['violations'][] = array(
+						'type'     => 'contrast',
+						'colors'   => array( $color1, $color2 ),
+						'ratio'    => $ratio,
+						'required' => self::SECTION_508_REQUIREMENTS['contrast_ratios']['minimum'],
+					);
+				}
+			}
+		}
 
-        // Check color blindness considerations
-        foreach (self::SECTION_508_REQUIREMENTS['color_blindness'] as $type => $required) {
-            if ($required === false) continue;  // Skip if this type of color blindness testing is not enabled
+		// Check color blindness considerations
+		foreach ( self::SECTION_508_REQUIREMENTS['color_blindness'] as $type => $required ) {
+			if ( $required === false ) {
+				continue;  // Skip if this type of color blindness testing is not enabled
+			}
 
-            $simulation = $this->simulate_color_blindness($colors, $type);
-            // First check if simulation returned valid results
-            if (count($simulation) > 0) {
-                // Then check if the colors are distinguishable
-                $is_distinguishable = $this->validate_color_blindness_distinction($simulation);
-                if (!$is_distinguishable) {
-                    $results['status'] = 'fail';
-                    $results['violations'][] = [
-                        'type' => 'color_blindness',
-                        'condition' => $type,
-                        'colors' => $colors,
-                    ];
-                }
-            }
-        }
+			$simulation = $this->simulate_color_blindness( $colors, $type );
+			// First check if simulation returned valid results
+			if ( count( $simulation ) > 0 ) {
+				// Then check if the colors are distinguishable
+				$is_distinguishable = $this->validate_color_blindness_distinction( $simulation );
+				if ( ! $is_distinguishable ) {
+					$results['status']       = 'fail';
+					$results['violations'][] = array(
+						'type'      => 'color_blindness',
+						'condition' => $type,
+						'colors'    => $colors,
+					);
+				}
+			}
+		}
 
-        return $results;
-    }
+		return $results;
+	}
 
-    /**
-     * Analyze detailed compliance status
-     *
-     * @param array $status Compliance check results
-     * @return array Detailed analysis and recommendations
-     */
-    public function analyze_compliance_details(array $status): array {
-        $analysis = [
-            'summary' => [],
-            'critical_issues' => [],
-            'warnings' => [],
-            'recommendations' => [],
-        ];
+	/**
+	 * Analyze detailed compliance status
+	 *
+	 * @param array $status Compliance check results
+	 * @return array Detailed analysis and recommendations
+	 */
+	public function analyze_compliance_details( array $status ): array {
+		$analysis = array(
+			'summary'         => array(),
+			'critical_issues' => array(),
+			'warnings'        => array(),
+			'recommendations' => array(),
+		);
 
-        if (isset($status['violations']) && $status['violations']) {
-            foreach ($status['violations'] as $violation) {
-                if (isset($violation['type']) && $violation['type'] === 'contrast') {
-                    $analysis['critical_issues'][] = sprintf(
-                        'Insufficient contrast ratio (%f) between colors %s and %s. Minimum required: %f',
-                        $violation['ratio'],
-                        $violation['colors'][0],
-                        $violation['colors'][1],
-                        $violation['required']
-                    );
-                } elseif (isset($violation['type']) && $violation['type'] === 'color_blindness') {
-                    $analysis['critical_issues'][] = sprintf(
-                        'Colors may not be distinguishable for users with %s',
-                        $violation['condition']
-                    );
-                }
-            }
-        }
+		if ( isset( $status['violations'] ) && $status['violations'] ) {
+			foreach ( $status['violations'] as $violation ) {
+				if ( isset( $violation['type'] ) && $violation['type'] === 'contrast' ) {
+					$analysis['critical_issues'][] = sprintf(
+						'Insufficient contrast ratio (%f) between colors %s and %s. Minimum required: %f',
+						$violation['ratio'],
+						$violation['colors'][0],
+						$violation['colors'][1],
+						$violation['required']
+					);
+				} elseif ( isset( $violation['type'] ) && $violation['type'] === 'color_blindness' ) {
+					$analysis['critical_issues'][] = sprintf(
+						'Colors may not be distinguishable for users with %s',
+						$violation['condition']
+					);
+				}
+			}
+		}
 
-        if (count($analysis['critical_issues']) === 0) {
-            $analysis['summary'][] = 'Palette meets basic accessibility requirements';
-        } else {
-            $analysis['summary'][] = sprintf(
-                'Palette has %d critical accessibility issues that need attention',
-                count($analysis['critical_issues'])
-            );
-        }
+		if ( count( $analysis['critical_issues'] ) === 0 ) {
+			$analysis['summary'][] = 'Palette meets basic accessibility requirements';
+		} else {
+			$analysis['summary'][] = sprintf(
+				'Palette has %d critical accessibility issues that need attention',
+				count( $analysis['critical_issues'] )
+			);
+		}
 
-        return $analysis;
-    }
+		return $analysis;
+	}
 
-    /**
-     * Generate compliance recommendations
-     *
-     * @return array List of recommendations for improving compliance
-     */
-    public function generate_compliance_recommendations(): array {
-        return [
-            'contrast' => [
-                sprintf(
-                    'Target contrast ratio is %s:1 (WCAG AAA). If not achievable, minimum acceptable is %s:1 (above WCAG AA)',
-                    Color_Constants::WCAG_CONTRAST_TARGET,
-                    Color_Constants::WCAG_CONTRAST_MIN
-                ),
-                'Note: We do not test separately for large text contrast, as text size is determined by theme implementation',
-                sprintf(
-                    'Maximum comfortable contrast is %s:1 to prevent eye strain',
-                    Color_Constants::CONTRAST_MAX
-                )
-            ],
-            'color_blindness' => [
-                'Avoid relying solely on color to convey information',
-                'Use patterns or icons in addition to color for important UI elements',
-                'Color blindness testing will be implemented in a future version'
-            ],
-            'general' => [
-                'Light mode: Ensure dark text colors maintain sufficient contrast with light backgrounds',
-                'Dark mode: Ensure light text colors maintain sufficient contrast with dark backgrounds',
-                'Include focus indicators that meet contrast requirements',
-                sprintf(
-                    'Light backgrounds should have luminance above %s, dark backgrounds below %s',
-                    Color_Constants::LIGHT_LUMINANCE_THRESHOLD,
-                    Color_Constants::DARK_LUMINANCE_THRESHOLD
-                )
-            ],
-        ];
-    }
+	/**
+	 * Generate compliance recommendations
+	 *
+	 * @return array List of recommendations for improving compliance
+	 */
+	public function generate_compliance_recommendations(): array {
+		return array(
+			'contrast'        => array(
+				sprintf(
+					'Target contrast ratio is %s:1 (WCAG AAA). If not achievable, minimum acceptable is %s:1 (above WCAG AA)',
+					Color_Constants::WCAG_CONTRAST_TARGET,
+					Color_Constants::WCAG_CONTRAST_MIN
+				),
+				'Note: We do not test separately for large text contrast, as text size is determined by theme implementation',
+				sprintf(
+					'Maximum comfortable contrast is %s:1 to prevent eye strain',
+					Color_Constants::CONTRAST_MAX
+				),
+			),
+			'color_blindness' => array(
+				'Avoid relying solely on color to convey information',
+				'Use patterns or icons in addition to color for important UI elements',
+				'Color blindness testing will be implemented in a future version',
+			),
+			'general'         => array(
+				'Light mode: Ensure dark text colors maintain sufficient contrast with light backgrounds',
+				'Dark mode: Ensure light text colors maintain sufficient contrast with dark backgrounds',
+				'Include focus indicators that meet contrast requirements',
+				sprintf(
+					'Light backgrounds should have luminance above %s, dark backgrounds below %s',
+					Color_Constants::LIGHT_LUMINANCE_THRESHOLD,
+					Color_Constants::DARK_LUMINANCE_THRESHOLD
+				),
+			),
+		);
+	}
 
-    /**
-     * Validate contrast ratio between two colors
-     *
-     * @param string $color1 First hex color code
-     * @param string $color2 Second hex color code
-     * @return float Contrast ratio value
-     */
-    public function validate_contrast_ratio(string $color1, string $color2): float {
-        return $this->color_utility->get_contrast_ratio($color1, $color2);
-    }
+	/**
+	 * Validate contrast ratio between two colors
+	 *
+	 * @param string $color1 First hex color code
+	 * @param string $color2 Second hex color code
+	 * @return float Contrast ratio value
+	 */
+	public function validate_contrast_ratio( string $color1, string $color2 ): float {
+		return $this->color_utility->get_contrast_ratio( $color1, $color2 );
+	}
 
-    /**
-     * Determine WCAG compliance level based on contrast ratio
-     *
-     * @param float $ratio Contrast ratio
-     * @return string|false 'AAA', 'AA', or false if non-compliant
-     */
-    private function determine_wcag_level(float $ratio): string|false {
-        // Check AAA compliance first (most strict)
-        if ($ratio >= Color_Constants::WCAG_CONTRAST_AAA) {
-            return 'AAA';
-        }
+	/**
+	 * Determine WCAG compliance level based on contrast ratio
+	 *
+	 * @param float $ratio Contrast ratio
+	 * @return string|false 'AAA', 'AA', or false if non-compliant
+	 */
+	private function determine_wcag_level( float $ratio ): string|false {
+		// Check AAA compliance first (most strict)
+		if ( $ratio >= Color_Constants::WCAG_CONTRAST_AAA ) {
+			return 'AAA';
+		}
 
-        // Then check AA compliance
-        if ($ratio >= Color_Constants::WCAG_CONTRAST_AA) {
-            return 'AA';
-        }
+		// Then check AA compliance
+		if ( $ratio >= Color_Constants::WCAG_CONTRAST_AA ) {
+			return 'AA';
+		}
 
-        // Return false if neither level is met
-        return false;
-    }
+		// Return false if neither level is met
+		return false;
+	}
 
-    /**
-     * Process compliance level
-     *
-     * @param string|false $level Compliance level
-     * @return array Results array
-     */
-    private function process_compliance_level($level): array {
-        if (!$level) {
-            return [
-                'status' => 'fail',
-                'level' => 'none',
-                'message' => 'Does not meet minimum contrast requirements'
-            ];
-        }
+	/**
+	 * Process compliance level
+	 *
+	 * @param string|false $level Compliance level
+	 * @return array Results array
+	 */
+	private function process_compliance_level( $level ): array {
+		if ( ! $level ) {
+			return array(
+				'status'  => 'fail',
+				'level'   => 'none',
+				'message' => 'Does not meet minimum contrast requirements',
+			);
+		}
 
-        return [
-            'status' => 'pass',
-            'level' => $level,
-            'message' => "Meets WCAG {$level} requirements"
-        ];
-    }
+		return array(
+			'status'  => 'pass',
+			'level'   => $level,
+			'message' => "Meets WCAG {$level} requirements",
+		);
+	}
 
-    /**
-     * Color blindness simulation and validation will be implemented after v1.0 release
-     * @todo Implement color blindness simulation algorithms
-     * @see https://github.com/glerner/gl-color-palette-generator/blob/main/.github/issues/implement-color-blindness-testing.md
-     */
-    private function simulate_color_blindness(array $colors, string $type): array {
-        return $colors; // Placeholder until v1.1
-    }
+	/**
+	 * Color blindness simulation and validation will be implemented after v1.0 release
+	 *
+	 * @todo Implement color blindness simulation algorithms
+	 * @see https://github.com/glerner/gl-color-palette-generator/blob/main/.github/issues/implement-color-blindness-testing.md
+	 */
+	private function simulate_color_blindness( array $colors, string $type ): array {
+		return $colors; // Placeholder until v1.1
+	}
 
-    /**
-     * Color blindness validation will be implemented in v1.1
-     * @todo Implement color distinction validation for color blindness
-     * @see https://github.com/glerner/gl-color-palette-generator/blob/main/.github/issues/implement-color-blindness-testing.md
-     */
-    private function validate_color_blindness_distinction(array $colors): bool {
-        return true; // Placeholder until v1.1
-    }
+	/**
+	 * Color blindness validation will be implemented in v1.1
+	 *
+	 * @todo Implement color distinction validation for color blindness
+	 * @see https://github.com/glerner/gl-color-palette-generator/blob/main/.github/issues/implement-color-blindness-testing.md
+	 */
+	private function validate_color_blindness_distinction( array $colors ): bool {
+		return true; // Placeholder until v1.1
+	}
 }

@@ -13,104 +13,118 @@ use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use WP_UnitTestCase;
 
 class Test_Color_Palette_Renderer extends WP_UnitTestCase {
-    private $renderer;
-    private $palette;
+	private $renderer;
+	private $palette;
 
-    public function setUp(): void {
-        parent::setUp();
-        $this->renderer = new Color_Palette_Renderer();
-        $this->palette = new Color_Palette([
-            'primary' => '#2C3E50',
-            'secondary' => '#E74C3C',
-            'tertiary' => '#3498DB',
-            'accent' => '#2ECC71'
-        ]);
-    }
+	public function setUp(): void {
+		parent::setUp();
+		$this->renderer = new Color_Palette_Renderer();
+		$this->palette  = new Color_Palette(
+			array(
+				'primary'   => '#2C3E50',
+				'secondary' => '#E74C3C',
+				'tertiary'  => '#3498DB',
+				'accent'    => '#2ECC71',
+			)
+		);
+	}
 
-    public function test_render_with_default_options() {
-        $output = $this->renderer->render($this->palette);
-        
-        $this->assertIsString($output);
-        $this->assertStringContainsString('gl-color-palette', $output);
-        $this->assertStringContainsString('#2C3E50', $output);
-    }
+	public function test_render_with_default_options() {
+		$output = $this->renderer->render( $this->palette );
 
-    public function test_render_with_ai_descriptions() {
-        // Set up mock AI description
-        $description = [
-            'colors' => [
-                'primary' => [
-                    'hex' => '#2C3E50',
-                    'name' => 'Midnight Ocean',
-                    'emotion' => 'Deep trust and stability'
-                ]
-            ],
-            'palette_story' => 'A professional and modern palette'
-        ];
-        update_option('gl_cpg_last_palette_description', $description);
+		$this->assertIsString( $output );
+		$this->assertStringContainsString( 'gl-color-palette', $output );
+		$this->assertStringContainsString( '#2C3E50', $output );
+	}
 
-        $output = $this->renderer->render($this->palette, [
-            'layout' => 'cards',
-            'show_info' => true
-        ]);
+	public function test_render_with_ai_descriptions() {
+		// Set up mock AI description
+		$description = array(
+			'colors'        => array(
+				'primary' => array(
+					'hex'     => '#2C3E50',
+					'name'    => 'Midnight Ocean',
+					'emotion' => 'Deep trust and stability',
+				),
+			),
+			'palette_story' => 'A professional and modern palette',
+		);
+		update_option( 'gl_cpg_last_palette_description', $description );
 
-        $this->assertStringContainsString('Midnight Ocean', $output);
-        $this->assertStringContainsString('Deep trust and stability', $output);
-        $this->assertStringContainsString('A professional and modern palette', $output);
-    }
+		$output = $this->renderer->render(
+			$this->palette,
+			array(
+				'layout'    => 'cards',
+				'show_info' => true,
+			)
+		);
 
-    public function test_render_with_missing_ai_descriptions() {
-        delete_option('gl_cpg_last_palette_description');
+		$this->assertStringContainsString( 'Midnight Ocean', $output );
+		$this->assertStringContainsString( 'Deep trust and stability', $output );
+		$this->assertStringContainsString( 'A professional and modern palette', $output );
+	}
 
-        $output = $this->renderer->render($this->palette, [
-            'layout' => 'cards',
-            'show_info' => true
-        ]);
+	public function test_render_with_missing_ai_descriptions() {
+		delete_option( 'gl_cpg_last_palette_description' );
 
-        // Should still render without AI descriptions
-        $this->assertIsString($output);
-        $this->assertStringContainsString('#2C3E50', $output);
-    }
+		$output = $this->renderer->render(
+			$this->palette,
+			array(
+				'layout'    => 'cards',
+				'show_info' => true,
+			)
+		);
 
-    public function test_render_different_layouts() {
-        $layouts = ['swatches', 'grid', 'cards'];
+		// Should still render without AI descriptions
+		$this->assertIsString( $output );
+		$this->assertStringContainsString( '#2C3E50', $output );
+	}
 
-        foreach ($layouts as $layout) {
-            $output = $this->renderer->render($this->palette, [
-                'layout' => $layout
-            ]);
-            
-            $this->assertIsString($output);
-            $this->assertStringContainsString("gl-color-palette--$layout", $output);
-        }
-    }
+	public function test_render_different_layouts() {
+		$layouts = array( 'swatches', 'grid', 'cards' );
 
-    public function test_render_palette_info() {
-        $description = [
-            'palette_story' => 'A harmonious blend of colors'
-        ];
-        update_option('gl_cpg_last_palette_description', $description);
+		foreach ( $layouts as $layout ) {
+			$output = $this->renderer->render(
+				$this->palette,
+				array(
+					'layout' => $layout,
+				)
+			);
 
-        $output = $this->renderer->render_palette_info($this->palette);
-        
-        $this->assertStringContainsString('Palette Story', $output);
-        $this->assertStringContainsString('A harmonious blend of colors', $output);
-    }
+			$this->assertIsString( $output );
+			$this->assertStringContainsString( "gl-color-palette--$layout", $output );
+		}
+	}
 
-    public function test_render_color_info() {
-        $reflection = new \ReflectionClass($this->renderer);
-        $method = $reflection->getMethod('render_color_info');
-        $method->setAccessible(true);
+	public function test_render_palette_info() {
+		$description = array(
+			'palette_story' => 'A harmonious blend of colors',
+		);
+		update_option( 'gl_cpg_last_palette_description', $description );
 
-        $output = $method->invoke(
-            $this->renderer,
-            '#2C3E50',
-            0,
-            $this->palette,
-            ['show_names' => true, 'show_values' => true]
-        );
+		$output = $this->renderer->render_palette_info( $this->palette );
 
-        $this->assertStringContainsString('Primary', $output);
-        $this->assertStringContainsString('#2C3E50', $output);
-    }
+		$this->assertStringContainsString( 'Palette Story', $output );
+		$this->assertStringContainsString( 'A harmonious blend of colors', $output );
+	}
+
+	public function test_render_color_info() {
+		$reflection = new \ReflectionClass( $this->renderer );
+		$method     = $reflection->getMethod( 'render_color_info' );
+		$method->setAccessible( true );
+
+		$output = $method->invoke(
+			$this->renderer,
+			'#2C3E50',
+			0,
+			$this->palette,
+			array(
+				'show_names'  => true,
+				'show_values' => true,
+			)
+		);
+
+		$this->assertStringContainsString( 'Primary', $output );
+		$this->assertStringContainsString( '#2C3E50', $output );
+	}
 }

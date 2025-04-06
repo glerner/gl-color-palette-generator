@@ -1,23 +1,23 @@
 <?php
 // Test with multisite enabled.
 if ( ! defined( 'ABSPATH' ) ) {
-	define( 'ABSPATH', getenv('WP_ROOT') ?: '/app/' );
+	define( 'ABSPATH', getenv( 'WP_ROOT' ) ?: '/app/' );
 }
 if ( ! defined( 'MULTISITE' ) ) {
 	define( 'MULTISITE', false );
 }
 
 if ( ! defined( 'DB_NAME' ) ) {
-	define( 'DB_NAME', getenv('WP_TESTS_DB_NAME') ?: 'wordpress_test' );
+	define( 'DB_NAME', getenv( 'WP_TESTS_DB_NAME' ) ?: 'wordpress_test' );
 }
 if ( ! defined( 'DB_USER' ) ) {
-	define( 'DB_USER', getenv('WP_TESTS_DB_USER') ?: 'wordpress' );
+	define( 'DB_USER', getenv( 'WP_TESTS_DB_USER' ) ?: 'wordpress' );
 }
 if ( ! defined( 'DB_PASSWORD' ) ) {
-	define( 'DB_PASSWORD', getenv('WP_TESTS_DB_PASSWORD') ?: 'wordpress' );
+	define( 'DB_PASSWORD', getenv( 'WP_TESTS_DB_PASSWORD' ) ?: 'wordpress' );
 }
 if ( ! defined( 'DB_HOST' ) ) {
-	define( 'DB_HOST', getenv('WP_TESTS_DB_HOST') ?: 'database' );
+	define( 'DB_HOST', getenv( 'WP_TESTS_DB_HOST' ) ?: 'database' );
 }
 if ( ! defined( 'DB_CHARSET' ) ) {
 	define( 'DB_CHARSET', 'utf8' );

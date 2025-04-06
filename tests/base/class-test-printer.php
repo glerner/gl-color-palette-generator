@@ -5,29 +5,27 @@ use PHPUnit\Framework\TestListener;
 use PHPUnit\Framework\TestResult;
 use PHPUnit\TextUI\DefaultResultPrinter;
 
-class Test_Printer extends DefaultResultPrinter implements TestListener
-{
-    private $buffer = '';
-    private $headersSafe = false;
+class Test_Printer extends DefaultResultPrinter implements TestListener {
 
-    public function write(string $buffer): void
-    {
-        // Buffer output until headers are safe
-        if (!$this->headersSafe) {
-            $this->buffer .= $buffer;
-            return;
-        }
+	private $buffer      = '';
+	private $headersSafe = false;
 
-        // Once headers are safe, flush buffer and write normally
-        if ($this->buffer !== '') {
-            parent::write($this->buffer);
-            $this->buffer = '';
-        }
-        parent::write($buffer);
-    }
+	public function write( string $buffer ): void {
+		// Buffer output until headers are safe
+		if ( ! $this->headersSafe ) {
+			$this->buffer .= $buffer;
+			return;
+		}
 
-    public function setHeadersSafe(bool $safe): void
-    {
-        $this->headersSafe = $safe;
-    }
+		// Once headers are safe, flush buffer and write normally
+		if ( $this->buffer !== '' ) {
+			parent::write( $this->buffer );
+			$this->buffer = '';
+		}
+		parent::write( $buffer );
+	}
+
+	public function setHeadersSafe( bool $safe ): void {
+		$this->headersSafe = $safe;
+	}
 }

@@ -18,34 +18,34 @@ use WP_Error;
  * @since 1.0.0
  */
 interface AI_Service {
-    /**
-     * Initialize the AI service
-     *
-     * @param array $config Service configuration
-     * @return bool|WP_Error True on success, WP_Error on failure
-     */
-    public function initialize($config);
+	/**
+	 * Initialize the AI service
+	 *
+	 * @param array $config Service configuration
+	 * @return bool|WP_Error True on success, WP_Error on failure
+	 */
+	public function initialize( $config );
 
-    /**
-     * Process input data
-     *
-     * @param mixed $input Input data to process
-     * @param array $options Processing options
-     * @return mixed|WP_Error Processed data or error
-     */
-    public function process_input($input, $options = []);
+	/**
+	 * Process input data
+	 *
+	 * @param mixed $input Input data to process
+	 * @param array $options Processing options
+	 * @return mixed|WP_Error Processed data or error
+	 */
+	public function process_input( $input, $options = array() );
 
-    /**
-     * Get service status
-     *
-     * @return array Service status information
-     */
-    public function get_status();
+	/**
+	 * Get service status
+	 *
+	 * @return array Service status information
+	 */
+	public function get_status();
 
-    /**
-     * Get service capabilities
-     *
-     * @return array List of service capabilities
-     */
-    public function get_capabilities();
+	/**
+	 * Get service capabilities
+	 *
+	 * @return array List of service capabilities
+	 */
+	public function get_capabilities();
 }

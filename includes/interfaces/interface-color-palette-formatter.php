@@ -17,28 +17,28 @@ namespace GL_Color_Palette_Generator\Interfaces;
  * Defines the contract for formatting color palettes
  */
 interface Color_Palette_Formatter_Interface {
-    /**
-     * Format palette for output
-     *
-     * @param array  $palette Array of colors.
-     * @param string $format  Output format (css, scss, less, tailwind, json).
-     * @param array  $options Optional formatting options.
-     * @return string Formatted palette.
-     * @throws \Exception If format is invalid.
-     */
-    public function format_palette(array $palette, string $format, array $options = []): string;
+	/**
+	 * Format palette for output
+	 *
+	 * @param array  $palette Array of colors.
+	 * @param string $format  Output format (css, scss, less, tailwind, json).
+	 * @param array  $options Optional formatting options.
+	 * @return string Formatted palette.
+	 * @throws \Exception If format is invalid.
+	 */
+	public function format_palette( array $palette, string $format, array $options = array() ): string;
 
-    /**
-     * Get supported formats
-     *
-     * @return array List of supported formats
-     */
-    public function get_supported_formats(): array;
+	/**
+	 * Get supported formats
+	 *
+	 * @return array List of supported formats
+	 */
+	public function get_supported_formats(): array;
 
-    /**
-     * Get default formatting options
-     *
-     * @return array Default options
-     */
-    public function get_default_options(): array;
+	/**
+	 * Get default formatting options
+	 *
+	 * @return array Default options
+	 */
+	public function get_default_options(): array;
 }

@@ -16,24 +16,30 @@ use GL_Color_Palette_Generator\Color_Management\Color_Shade_Generator;
  * @since   1.0.0
  */
 trait Color_Shade_Generator_Trait {
-    /**
-     * Generate accessible tints and shades
-     *
-     * @param string $color Base color in hex format
-     * @param array  $options Optional. Generation options.
-     * @return array Array of accessible tints and shades (lighter, light, dark, darker)
-     */
-    protected function generate_accessible_shades($color, $options = []) {
-        if (!isset($this->shade_generator)) {
-            throw new \RuntimeException('ColorShadeGenerator dependency not set. Make sure to initialize it in the constructor.');
-        }
+	/**
+	 * Generate accessible tints and shades
+	 *
+	 * @param string $color Base color in hex format
+	 * @param array  $options Optional. Generation options.
+	 * @return array Array of accessible tints and shades (lighter, light, dark, darker)
+	 */
+	protected function generate_accessible_shades( $color, $options = array() ) {
+		if ( ! isset( $this->shade_generator ) ) {
+			throw new \RuntimeException( 'ColorShadeGenerator dependency not set. Make sure to initialize it in the constructor.' );
+		}
 
-        $result = $this->shade_generator->generate_tints_and_shades($color, array_merge([
-            'contrast_level' => 'AA',
-            'small_text' => true,
-            'include_base' => true
-        ], $options));
+		$result = $this->shade_generator->generate_tints_and_shades(
+			$color,
+			array_merge(
+				array(
+					'contrast_level' => 'AA',
+					'small_text'     => true,
+					'include_base'   => true,
+				),
+				$options
+			)
+		);
 
-        return $result['variations'];
-    }
+		return $result['variations'];
+	}
 }

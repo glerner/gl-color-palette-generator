@@ -18,6 +18,9 @@ namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Interfaces\ColorMetricsAnalyzer;
 
+/**
+ * @covers \GL_Color_Palette_Generator\Interfaces\ColorMetricsAnalyzer
+ */
 class Test_ColorMetricsAnalyzer extends Unit_Test_Case {
     private $analyzer;
 

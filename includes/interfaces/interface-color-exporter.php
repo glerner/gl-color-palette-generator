@@ -15,20 +15,20 @@ use WP_Error;
  * @since 1.0.0
  */
 interface Color_Exporter_Interface {
-    /**
-     * Export a palette
-     *
-     * @param Color_Palette $palette Palette to export
-     * @param string       $format  Export format
-     * @param array        $options Export options
-     * @return string|array|WP_Error Exported data or error
-     */
-    public function export_palette(Color_Palette $palette, string $format, array $options = []): string|array|WP_Error;
+	/**
+	 * Export a palette
+	 *
+	 * @param Color_Palette $palette Palette to export
+	 * @param string        $format  Export format
+	 * @param array         $options Export options
+	 * @return string|array|WP_Error Exported data or error
+	 */
+	public function export_palette( Color_Palette $palette, string $format, array $options = array() ): string|array|WP_Error;
 
-    /**
-     * Get supported export formats
-     *
-     * @return array List of supported formats
-     */
-    public function get_supported_formats(): array;
+	/**
+	 * Get supported export formats
+	 *
+	 * @return array List of supported formats
+	 */
+	public function get_supported_formats(): array;
 }

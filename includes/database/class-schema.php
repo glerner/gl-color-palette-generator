@@ -13,19 +13,19 @@ namespace GL_Color_Palette_Generator\Database;
  * Handles database table creation and updates
  */
 class Schema {
-    /**
-     * Create database tables
-     *
-     * @return void
-     */
-    public static function create_tables() {
-        global $wpdb;
+	/**
+	 * Create database tables
+	 *
+	 * @return void
+	 */
+	public static function create_tables() {
+		global $wpdb;
 
-        $charset_collate = $wpdb->get_charset_collate();
+		$charset_collate = $wpdb->get_charset_collate();
 
-        // Color palettes table
-        $table_name = $wpdb->prefix . 'gl_cpg_palettes';
-        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+		// Color palettes table
+		$table_name = $wpdb->prefix . 'gl_cpg_palettes';
+		$sql        = "CREATE TABLE IF NOT EXISTS $table_name (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             name varchar(255) NOT NULL,
             colors text NOT NULL,
@@ -36,9 +36,9 @@ class Schema {
             PRIMARY KEY  (id)
         ) $charset_collate;";
 
-        // Color schemes table
-        $table_schemes = $wpdb->prefix . 'gl_cpg_schemes';
-        $sql .= "CREATE TABLE IF NOT EXISTS $table_schemes (
+		// Color schemes table
+		$table_schemes = $wpdb->prefix . 'gl_cpg_schemes';
+		$sql          .= "CREATE TABLE IF NOT EXISTS $table_schemes (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             palette_id bigint(20) unsigned NOT NULL,
             name varchar(255) NOT NULL,
@@ -51,9 +51,9 @@ class Schema {
             FOREIGN KEY (palette_id) REFERENCES {$wpdb->prefix}gl_cpg_palettes(id) ON DELETE CASCADE
         ) $charset_collate;";
 
-        // Settings table
-        $table_settings = $wpdb->prefix . 'gl_cpg_settings';
-        $sql .= "CREATE TABLE IF NOT EXISTS $table_settings (
+		// Settings table
+		$table_settings = $wpdb->prefix . 'gl_cpg_settings';
+		$sql           .= "CREATE TABLE IF NOT EXISTS $table_settings (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             setting_name varchar(255) NOT NULL,
             setting_value text NOT NULL,
@@ -64,7 +64,7 @@ class Schema {
             UNIQUE KEY setting_name (setting_name)
         ) $charset_collate;";
 
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
-    }
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		dbDelta( $sql );
+	}
 }

@@ -13,7 +13,6 @@
 
     <!-- Use WordPress standards -->
     <rule ref="WordPress">
-        <!-- Exclude rules here if needed -->
     </rule>
 
     <!-- PHP version compatibility -->
@@ -32,4 +31,4 @@
     <rule ref="Generic.Arrays.DisallowShortArraySyntax.Found">
         <severity>0</severity>
     </rule>
-</ruleset> 
+</ruleset>

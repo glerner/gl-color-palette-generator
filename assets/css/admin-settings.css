@@ -1,18 +1,18 @@
 .cache-status-message {
-    margin: 10px 0;
-    display: none;
+	margin: 10px 0;
+	display: none;
 }
 
 .cache-status-message p {
-    margin: 0.5em 0;
-    padding: 2px;
+	margin: 0.5em 0;
+	padding: 2px;
 }
 
 .updating-message::before {
-    margin: 0 5px 0 -2px;
+	margin: 0 5px 0 -2px;
 }
 
 .notice.inline {
-    margin: 5px 0 15px;
-    display: block;
-} 
+	margin: 5px 0 15px;
+	display: block;
+}
