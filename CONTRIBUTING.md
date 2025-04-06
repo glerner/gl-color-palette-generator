@@ -465,17 +465,48 @@ composer test
 
 ## Coding Standards
 
-This project follows the WordPress Coding Standards. To check your code:
+This project follows the WordPress Coding Standards. 
 
+To check your code, use PHP-CS-Fixer.
+
+To install PHP-CS-Fixer using Composer, you can use the following command:
+```bash
+composer global require friendsofphp/php-cs-fixer
+```
+
+Then check your code:
 ```bash
 composer phpcs
 ```
 
-To automatically fix some coding standard issues:
+### Fixing Coding Standards Issues
+
+To install PHPCBF via Composer, you can use the following command:
+```bash
+composer require --dev squizlabs/php_codesniffer
+```
+
+There are two ways to automatically fix coding standard issues:
+
+1. **Using Composer script** (runs PHPCBF on the entire project):
 
 ```bash
 composer phpcbf
 ```
+
+2. **Using PHPCBF directly** (recommended for specific files):
+
+```bash
+# Fix a specific file
+./vendor/bin/phpcbf path/to/file.php
+
+# Example:
+./vendor/bin/phpcbf includes/interfaces/interface-color-constants.php
+```
+
+> **Important Note**: While VS Code extensions for PHPCS/PHPCBF exist, they have proven unreliable and difficult to configure properly. Multiple attempts to set up these extensions have failed, while the command line version works immediately without configuration issues. **Always use the command line approach for consistent results.**
+
+The direct PHPCBF command is more efficient when working with specific files and provides detailed output about which issues were fixed and which require manual intervention.
 
 ## Pull Request Process
 

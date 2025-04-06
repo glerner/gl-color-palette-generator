@@ -376,7 +376,44 @@ Keep your test suite healthy:
 3. **Automated tools** to check test quality
 4. **Document test patterns** for team consistency
 
-Example test analyzer script:
+### Current Test Organization Scripts
+
+We've developed several scripts to help organize and maintain our test suite:
+
+#### 1. bin/test-analyzer.sh
+- Analyzes test files to determine correct test type (unit, wp-mock, integration)
+- Records decisions about test types in results file
+- Identifies files that need to be moved
+- Documents bugs/issues found during analysis
+- Generates a move script for reorganizing files
+
+#### 2. bin/interface-test-fixer.sh
+- Identifies interface naming mismatches
+- Detects when test files reference incorrect interface names
+- Suggests fixes for interface references with confidence levels
+- Identifies missing interface files
+- Suggests potential implementation classes for missing interfaces
+- Checks test class naming conventions
+
+#### 3. bin/fix-test-base-classes.sh
+- Updates base class references across all test files
+- Ensures tests use proper namespaces for base classes
+
+#### 4. bin/git-fix-moves.sh
+- Handles proper git move tracking for moved files
+
+### Potential Areas for Future Enhancement
+
+While our current scripts cover the most critical aspects of test organization, there are additional areas we could address in future refinements:
+
+1. **Namespace Consistency**: Verify that test namespaces match their directory structure
+2. **Test Method Naming**: Check for consistent test method naming (test_*)
+3. **Test Coverage Analysis**: Analyze which classes/methods lack tests
+4. **Dependency Injection Patterns**: Verify proper dependency injection in test setup
+5. **PHPDoc Completeness**: Check for complete PHPDoc annotations (@covers, etc.)
+6. **Test Isolation**: Analyze potential test isolation issues
+
+### Example Test Analyzer Script
 ```bash
 #!/bin/bash
 # Analyze test files to ensure they're in the right directory
