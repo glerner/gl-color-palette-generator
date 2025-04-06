@@ -18,229 +18,235 @@ use GL_Color_Palette_Generator\Interfaces\Color_Palette_Importer;
  * @covers GL_Color_Palette_Generator\Interfaces\Color_Palette_Importer
  */
 class Test_Color_Palette_Importer extends Unit_Test_Case {
-    private $importer;
+	private $importer;
 
-    public function setUp(): void {
-        $this->importer = $this->createMock(Color_Palette_Importer::class);
-    }
+	public function setUp(): void {
+		$this->importer = $this->createMock( Color_Palette_Importer::class );
+	}
 
-    public function test_import_from_file_loads_palette(): void {
-        // Arrange
-        $file_path = '/imports/palette.json';
-        $options = [
-            'format' => 'json',
-            'validation' => ['strict' => true]
-        ];
+	public function test_import_from_file_loads_palette(): void {
+		// Arrange
+		$file_path = '/imports/palette.json';
+		$options   = array(
+			'format'     => 'json',
+			'validation' => array( 'strict' => true ),
+		);
 
-        $expected = [
-            'palette' => [
-                'name' => 'Imported Palette',
-                'colors' => ['#FF0000', '#00FF00']
-            ],
-            'validation' => [
-                'valid' => true,
-                'errors' => []
-            ],
-            'transformations' => [
-                'applied' => ['format_colors', 'normalize_names']
-            ],
-            'metadata' => [
-                'imported_at' => '2024-01-20T12:00:00Z',
-                'source' => 'file'
-            ]
-        ];
+		$expected = array(
+			'palette'         => array(
+				'name'   => 'Imported Palette',
+				'colors' => array( '#FF0000', '#00FF00' ),
+			),
+			'validation'      => array(
+				'valid'  => true,
+				'errors' => array(),
+			),
+			'transformations' => array(
+				'applied' => array( 'format_colors', 'normalize_names' ),
+			),
+			'metadata'        => array(
+				'imported_at' => '2024-01-20T12:00:00Z',
+				'source'      => 'file',
+			),
+		);
 
-        $this->importer
-            ->expects($this->once())
-            ->method('import_from_file')
-            ->with($file_path, $options)
-            ->willReturn($expected);
+		$this->importer
+			->expects( $this->once() )
+			->method( 'import_from_file' )
+			->with( $file_path, $options )
+			->willReturn( $expected );
 
-        // Act
-        $result = $this->importer->import_from_file($file_path, $options);
+		// Act
+		$result = $this->importer->import_from_file( $file_path, $options );
 
-        // Assert
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('palette', $result);
-        $this->assertArrayHasKey('validation', $result);
-        $this->assertArrayHasKey('transformations', $result);
-        $this->assertArrayHasKey('metadata', $result);
-    }
+		// Assert
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'palette', $result );
+		$this->assertArrayHasKey( 'validation', $result );
+		$this->assertArrayHasKey( 'transformations', $result );
+		$this->assertArrayHasKey( 'metadata', $result );
+	}
 
-    public function test_import_from_url_fetches_palette(): void {
-        // Arrange
-        $url = 'https://api.example.com/palette';
-        $options = [
-            'headers' => ['Accept' => 'application/json'],
-            'auth' => ['token' => 'abc123']
-        ];
+	public function test_import_from_url_fetches_palette(): void {
+		// Arrange
+		$url     = 'https://api.example.com/palette';
+		$options = array(
+			'headers' => array( 'Accept' => 'application/json' ),
+			'auth'    => array( 'token' => 'abc123' ),
+		);
 
-        $expected = [
-            'palette' => [
-                'name' => 'Remote Palette',
-                'colors' => ['#FF0000', '#00FF00']
-            ],
-            'source' => [
-                'url' => 'https://api.example.com/palette',
-                'type' => 'api'
-            ],
-            'validation' => [
-                'valid' => true,
-                'errors' => []
-            ],
-            'metadata' => [
-                'imported_at' => '2024-01-20T12:00:00Z',
-                'source' => 'url'
-            ]
-        ];
+		$expected = array(
+			'palette'    => array(
+				'name'   => 'Remote Palette',
+				'colors' => array( '#FF0000', '#00FF00' ),
+			),
+			'source'     => array(
+				'url'  => 'https://api.example.com/palette',
+				'type' => 'api',
+			),
+			'validation' => array(
+				'valid'  => true,
+				'errors' => array(),
+			),
+			'metadata'   => array(
+				'imported_at' => '2024-01-20T12:00:00Z',
+				'source'      => 'url',
+			),
+		);
 
-        $this->importer
-            ->expects($this->once())
-            ->method('import_from_url')
-            ->with($url, $options)
-            ->willReturn($expected);
+		$this->importer
+			->expects( $this->once() )
+			->method( 'import_from_url' )
+			->with( $url, $options )
+			->willReturn( $expected );
 
-        // Act
-        $result = $this->importer->import_from_url($url, $options);
+		// Act
+		$result = $this->importer->import_from_url( $url, $options );
 
-        // Assert
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('palette', $result);
-        $this->assertArrayHasKey('source', $result);
-        $this->assertArrayHasKey('validation', $result);
-        $this->assertArrayHasKey('metadata', $result);
-    }
+		// Assert
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'palette', $result );
+		$this->assertArrayHasKey( 'source', $result );
+		$this->assertArrayHasKey( 'validation', $result );
+		$this->assertArrayHasKey( 'metadata', $result );
+	}
 
-    public function test_import_from_tool_extracts_palette(): void {
-        // Arrange
-        $tool_file = '/imports/design.sketch';
-        $tool = 'sketch';
-        $options = [
-            'version' => '70',
-            'extraction' => ['scope' => 'global']
-        ];
+	public function test_import_from_tool_extracts_palette(): void {
+		// Arrange
+		$tool_file = '/imports/design.sketch';
+		$tool      = 'sketch';
+		$options   = array(
+			'version'    => '70',
+			'extraction' => array( 'scope' => 'global' ),
+		);
 
-        $expected = [
-            'palette' => [
-                'name' => 'Sketch Palette',
-                'colors' => ['#FF0000', '#00FF00']
-            ],
-            'assets' => [
-                'swatches' => [
-                    ['name' => 'Primary', 'color' => '#FF0000'],
-                    ['name' => 'Secondary', 'color' => '#00FF00']
-                ]
-            ],
-            'validation' => [
-                'valid' => true,
-                'errors' => []
-            ],
-            'metadata' => [
-                'imported_at' => '2024-01-20T12:00:00Z',
-                'tool' => 'sketch'
-            ]
-        ];
+		$expected = array(
+			'palette'    => array(
+				'name'   => 'Sketch Palette',
+				'colors' => array( '#FF0000', '#00FF00' ),
+			),
+			'assets'     => array(
+				'swatches' => array(
+					array(
+						'name'  => 'Primary',
+						'color' => '#FF0000',
+					),
+					array(
+						'name'  => 'Secondary',
+						'color' => '#00FF00',
+					),
+				),
+			),
+			'validation' => array(
+				'valid'  => true,
+				'errors' => array(),
+			),
+			'metadata'   => array(
+				'imported_at' => '2024-01-20T12:00:00Z',
+				'tool'        => 'sketch',
+			),
+		);
 
-        $this->importer
-            ->expects($this->once())
-            ->method('import_from_tool')
-            ->with($tool_file, $tool, $options)
-            ->willReturn($expected);
+		$this->importer
+			->expects( $this->once() )
+			->method( 'import_from_tool' )
+			->with( $tool_file, $tool, $options )
+			->willReturn( $expected );
 
-        // Act
-        $result = $this->importer->import_from_tool($tool_file, $tool, $options);
+		// Act
+		$result = $this->importer->import_from_tool( $tool_file, $tool, $options );
 
-        // Assert
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('palette', $result);
-        $this->assertArrayHasKey('assets', $result);
-        $this->assertArrayHasKey('validation', $result);
-        $this->assertArrayHasKey('metadata', $result);
-    }
+		// Assert
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'palette', $result );
+		$this->assertArrayHasKey( 'assets', $result );
+		$this->assertArrayHasKey( 'validation', $result );
+		$this->assertArrayHasKey( 'metadata', $result );
+	}
 
-    public function test_validate_import_checks_data(): void {
-        // Arrange
-        $import_data = [
-            'name' => 'Test Palette',
-            'colors' => ['#FF0000', '#00FF00']
-        ];
+	public function test_validate_import_checks_data(): void {
+		// Arrange
+		$import_data = array(
+			'name'   => 'Test Palette',
+			'colors' => array( '#FF0000', '#00FF00' ),
+		);
 
-        $rules = [
-            'schema' => ['required' => ['name', 'colors']],
-            'constraints' => ['min_colors' => 1]
-        ];
+		$rules = array(
+			'schema'      => array( 'required' => array( 'name', 'colors' ) ),
+			'constraints' => array( 'min_colors' => 1 ),
+		);
 
-        $expected = [
-            'valid' => true,
-            'errors' => [],
-            'warnings' => [],
-            'metadata' => [
-                'validated_at' => '2024-01-20T12:00:00Z',
-                'rules_applied' => ['schema', 'constraints']
-            ]
-        ];
+		$expected = array(
+			'valid'    => true,
+			'errors'   => array(),
+			'warnings' => array(),
+			'metadata' => array(
+				'validated_at'  => '2024-01-20T12:00:00Z',
+				'rules_applied' => array( 'schema', 'constraints' ),
+			),
+		);
 
-        $this->importer
-            ->expects($this->once())
-            ->method('validate_import')
-            ->with($import_data, $rules)
-            ->willReturn($expected);
+		$this->importer
+			->expects( $this->once() )
+			->method( 'validate_import' )
+			->with( $import_data, $rules )
+			->willReturn( $expected );
 
-        // Act
-        $result = $this->importer->validate_import($import_data, $rules);
+		// Act
+		$result = $this->importer->validate_import( $import_data, $rules );
 
-        // Assert
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('valid', $result);
-        $this->assertArrayHasKey('errors', $result);
-        $this->assertArrayHasKey('warnings', $result);
-        $this->assertArrayHasKey('metadata', $result);
-        $this->assertTrue($result['valid']);
-    }
+		// Assert
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'valid', $result );
+		$this->assertArrayHasKey( 'errors', $result );
+		$this->assertArrayHasKey( 'warnings', $result );
+		$this->assertArrayHasKey( 'metadata', $result );
+		$this->assertTrue( $result['valid'] );
+	}
 
-    /**
-     * @dataProvider invalidFilePathProvider
-     */
-    public function test_import_from_file_validates_path(string $file_path): void {
-        $this->importer
-            ->expects($this->once())
-            ->method('import_from_file')
-            ->with($file_path)
-            ->willThrowException(new \InvalidArgumentException());
+	/**
+	 * @dataProvider invalidFilePathProvider
+	 */
+	public function test_import_from_file_validates_path( string $file_path ): void {
+		$this->importer
+			->expects( $this->once() )
+			->method( 'import_from_file' )
+			->with( $file_path )
+			->willThrowException( new \InvalidArgumentException() );
 
-        $this->expectException(\InvalidArgumentException::class);
-        $this->importer->import_from_file($file_path);
-    }
+		$this->expectException( \InvalidArgumentException::class );
+		$this->importer->import_from_file( $file_path );
+	}
 
-    public function invalidFilePathProvider(): array {
-        return [
-            'empty_path' => [''],
-            'invalid_extension' => ['/path/file.xyz'],
-            'directory_path' => ['/path/directory/'],
-            'nonexistent' => ['/path/nonexistent.json']
-        ];
-    }
+	public function invalidFilePathProvider(): array {
+		return array(
+			'empty_path'        => array( '' ),
+			'invalid_extension' => array( '/path/file.xyz' ),
+			'directory_path'    => array( '/path/directory/' ),
+			'nonexistent'       => array( '/path/nonexistent.json' ),
+		);
+	}
 
-    /**
-     * @dataProvider invalidUrlProvider
-     */
-    public function test_import_from_url_validates_url(string $url): void {
-        $this->importer
-            ->expects($this->once())
-            ->method('import_from_url')
-            ->with($url)
-            ->willThrowException(new \InvalidArgumentException());
+	/**
+	 * @dataProvider invalidUrlProvider
+	 */
+	public function test_import_from_url_validates_url( string $url ): void {
+		$this->importer
+			->expects( $this->once() )
+			->method( 'import_from_url' )
+			->with( $url )
+			->willThrowException( new \InvalidArgumentException() );
 
-        $this->expectException(\InvalidArgumentException::class);
-        $this->importer->import_from_url($url);
-    }
+		$this->expectException( \InvalidArgumentException::class );
+		$this->importer->import_from_url( $url );
+	}
 
-    public function invalidUrlProvider(): array {
-        return [
-            'empty_url' => [''],
-            'invalid_protocol' => ['ftp://example.com'],
-            'malformed_url' => ['not_a_url'],
-            'missing_host' => ['https://']
-        ];
-    }
+	public function invalidUrlProvider(): array {
+		return array(
+			'empty_url'        => array( '' ),
+			'invalid_protocol' => array( 'ftp://example.com' ),
+			'malformed_url'    => array( 'not_a_url' ),
+			'missing_host'     => array( 'https://' ),
+		);
+	}
 }

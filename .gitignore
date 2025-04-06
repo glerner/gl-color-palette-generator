@@ -39,23 +39,24 @@ Thumbs.db
 *.log
 *.cache
 *.tmp
-junk.txt
 
-# Test analyzer files
+# Test processing files
 /test_analysis_results.txt
-/test_files_to_analyze.txt
 /source_files.txt
 /code_issues.md
 /untested_files.txt
 /temp_unanalyzed.txt
-
-# Test processing files
-/test_processing_progress.txt
+test_processing_progress.txt
 ##### BUG Windsurf can't access files in .gitignore!
+# junk.txt
 /test_processing_scripts/
-/last_processed_line.txt
+last_processed_line.txt
+current_batch.txt
+interface_map.txt
+last_processed_interface_line.txt
+test_files_to_analyze.txt
 
-# files for modifying PHPUnit test files, batch processing
+# want Git these files for modifying PHPUnit test files, batch processing
 # bin/test-analyzer.sh
 # bin/move_test_files.sh
 # bin/process-test-results.sh
