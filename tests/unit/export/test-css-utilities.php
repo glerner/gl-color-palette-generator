@@ -3,10 +3,10 @@
  * Test CSS Utilities
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Export
+ * @subpackage Tests\Unit\Export
  */
 
-namespace GL_Color_Palette_Generator\Tests\Export;
+namespace GL_Color_Palette_Generator\Tests\Unit\Export;
 
 use GL_Color_Palette_Generator\Export\CSS_Utilities;
 use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;

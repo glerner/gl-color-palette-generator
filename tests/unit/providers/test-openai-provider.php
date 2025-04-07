@@ -4,7 +4,7 @@
  * OpenAI Provider Tests
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests
+ * @subpackage Tests\Unit\Providers
  */
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Providers;

@@ -3,7 +3,7 @@
  * Error Reporter Interface Tests
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Interfaces
+ * @subpackage Tests\Unit\Interfaces
  * @since 1.0.0
  */
 

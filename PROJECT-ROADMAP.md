@@ -56,6 +56,7 @@ This document outlines the revised approach for the GL Color Palette Generator p
 ### 6️⃣ Configure Development Tools
 - Set up Composer with appropriate dependencies
 - Configure PHPStan for static analysis
+  - Note: Using configuration file phpstan.neon.
 - Set up PHPCS with WordPress coding standards
 - Set up Git for the new repository
 - Set up JavaScript testing framework (Jest, etc.)

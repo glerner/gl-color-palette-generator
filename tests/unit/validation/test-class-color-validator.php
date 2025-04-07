@@ -3,10 +3,12 @@
  * Tests for Color_Validator class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests
+ * @subpackage Tests\Unit\Validation
+ *
+ * @coversDefaultClass \GL_Color_Palette_Generator\Validation\Color_Validator
  */
 
-namespace GL_Color_Palette_Generator\Tests\Unit\Core;
+namespace GL_Color_Palette_Generator\Tests\Unit\Validation;
 
 use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Validation\Color_Validator;
@@ -14,8 +16,6 @@ use GL_Color_Palette_Generator\Core\Logger;
 
 /**
  * Class Test_Color_Validator
- *
- * @coversDefaultClass \GL_Color_Palette_Generator\Validation\Color_Validator
  */
 class Test_Color_Validator extends Unit_Test_Case {
 	/**

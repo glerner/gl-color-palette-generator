@@ -3,7 +3,7 @@
  * Color Palette Logger Interface Tests
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Interfaces
+ * @subpackage Tests\Unit\Interfaces
  */
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;

@@ -3,7 +3,8 @@
  * Tests for Autoloader class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\System
+ * @subpackage Tests\Unit\System
+ * @covers GL_Color_Palette_Generator\System\Autoloader
  * @since 1.0.0
  */
 
@@ -15,10 +16,6 @@ use Mockery;
 
 /**
  * Tests for the Autoloader class
- *
- * @package GL_Color_Palette_Generator
- * @subpackage Tests\Unit\System
- * @covers GL_Color_Palette_Generator\System\Autoloader
  */
 class Test_Autoloader extends Unit_Test_Case {
 	use \Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;

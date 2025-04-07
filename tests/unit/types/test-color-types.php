@@ -3,7 +3,7 @@
  * Tests for Color_Types class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Types
+ * @subpackage Tests\Unit\Types
  * @since 1.0.0
  */
 

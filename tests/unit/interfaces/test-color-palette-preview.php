@@ -7,7 +7,7 @@
  * Validates various preview templates, options, and error handling.
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Interfaces
+ * @subpackage Tests\Unit\Interfaces
  * @since 1.0.0
  * @version 1.1.0
  * @author GL Color Palette Generator

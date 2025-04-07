@@ -161,6 +161,11 @@ PHPStan Level Guidelines:
   - Undefined classes, properties, and methods
   - Basic type checks
 
+- Level 2: Recommended for test files and namespace consistency
+  - Catches class inheritance issues
+  - Identifies namespace resolution problems
+  - Validates use statements and class references
+
 - Level 5: Recommended for feature development and public APIs
   - Stricter type checking
   - Dead code detection

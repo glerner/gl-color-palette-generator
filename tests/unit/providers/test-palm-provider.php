@@ -1,4 +1,10 @@
 <?php
+/**
+ * Tests for the Palm Provider
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Unit\Providers
+ */
 namespace GL_Color_Palette_Generator\Tests\Unit\Providers;
 
 use GL_Color_Palette_Generator\Tests\Test_Provider_Mock;
