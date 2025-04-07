@@ -1,16 +1,19 @@
 #!/bin/bash
 #
-# Toggle comment status of test processing files in .gitignore
-# This allows temporarily accessing files that would otherwise be ignored
+# Toggle comment status of specified lines in .gitignore
 #
-# Usage: ./gitignore-toggle.sh [on|off]
+# Usage: ./bin/gitignore-toggle.sh [on|off]
 #   on  - Comment out the lines (allow access to files)
 #   off - Uncomment the lines (block access to files)
+# (Windsurf Bug: can't edit files that are blocked by .gitignore)
 
-set -e
-
-# Define the gitignore file path
-GITIGNORE_FILE="../.gitignore"
+# Define the gitignore file path - works whether run from root or bin directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ "$(basename "$SCRIPT_DIR")" == "bin" ]]; then
+    GITIGNORE_FILE="$SCRIPT_DIR/../.gitignore"
+else
+    GITIGNORE_FILE="$SCRIPT_DIR/.gitignore"
+fi
 
 # Define the patterns to look for
 PATTERNS=(
@@ -30,82 +33,55 @@ PATTERNS=(
     "junk.txt"
 )
 
-# Simple direct approach to modify the .gitignore file
-modify_gitignore() {
-    local action=$1
-    local temp_file=$(mktemp)
-    local changes_made=false
-    
-    # Read the file line by line
-    while IFS= read -r line; do
-        local modified_line="$line"
-        
-        # Check if this line matches any of our patterns
-        for pattern in "${PATTERNS[@]}"; do
-            # Remove any leading # and whitespace for comparison
-            local clean_line="${line#\# }"
-            
-            if [[ "$clean_line" == "$pattern" ]]; then
-                if [[ "$action" == "off" && "$line" == "# $pattern" ]]; then
-                    # Uncomment the line - files WILL be ignored by Git
-                    modified_line="$pattern"
-                    changes_made=true
-                    echo "Uncommenting: $line -> $modified_line (will be ignored by Git)"
-                elif [[ "$action" == "on" && "$line" == "$pattern" ]]; then
-                    # Comment out the line - files will NOT be ignored by Git
-                    modified_line="# $line"
-                    changes_made=true
-                    echo "Commenting out: $line -> $modified_line (will NOT be ignored by Git)"
-                fi
-                break
-            fi
-        done
-        
-        # Write the line (possibly modified) to the temp file
-        echo "$modified_line" >> "$temp_file"
-    done < "$GITIGNORE_FILE"
-    
-    # Only update the file if changes were made
-    if [[ "$changes_made" == true ]]; then
-        mv "$temp_file" "$GITIGNORE_FILE"
-        echo "Updated .gitignore file"
-    else
-        rm "$temp_file"
-        echo "No changes made to .gitignore file"
-    fi
-}
-
-# Check if we're in the right directory
+# Verify the .gitignore file exists
 if [[ ! -f "$GITIGNORE_FILE" ]]; then
-    echo "Error: .gitignore file not found at $GITIGNORE_FILE"
-    echo "Make sure you're running this script from the bin directory"
+    echo "ERROR: .gitignore file not found at $GITIGNORE_FILE"
     exit 1
 fi
 
-# Process command line arguments
-if [[ "$1" == "on" ]]; then
-    echo "===== GITIGNORE TOGGLE: ON ====="
-    echo "Adding # to lines in .gitignore - Files will NOT be ignored by Git"
-    echo "This allows access to test processing files for editing"
-    modify_gitignore "on"
-elif [[ "$1" == "off" ]]; then
-    echo "===== GITIGNORE TOGGLE: OFF ====="
-    echo "Removing # from lines in .gitignore - Files WILL be ignored by Git"
-    echo "This blocks access to test processing files for editing"
-    modify_gitignore "off"
-else
-    echo "Please specify 'on' or 'off'"
+# Check command line argument
+if [[ "$1" != "on" && "$1" != "off" ]]; then
     echo "Usage: $0 [on|off]"
     echo "  on  - Comment out the lines (allow access to files)"
     echo "  off - Uncomment the lines (block access to files)"
     exit 1
 fi
 
-if [[ "$changes_made" == true ]]; then
-    echo "✓ Successfully updated .gitignore settings"
-    echo "✓ Run 'git check-ignore ./*.txt' to verify which files are now ignored"
-else
-    echo "ℹ️ No changes were needed - .gitignore already in the requested state"
-fi
+# Process the file
+temp_file=$(mktemp)
+changes_made=false
 
-echo "Done!"
+while IFS= read -r line; do
+    modified_line="$line"
+
+    # Check if this line matches any of our patterns
+    for pattern in "${PATTERNS[@]}"; do
+        # For "on" - add comment if line matches pattern exactly
+        if [[ "$1" == "on" && "$line" == "$pattern" ]]; then
+            modified_line="# $pattern"
+            changes_made=true
+            echo "Commenting: $line -> $modified_line"
+            break
+        fi
+
+        # For "off" - remove comment if line is a commented pattern
+        if [[ "$1" == "off" && "$line" == "# $pattern" ]]; then
+            modified_line="$pattern"
+            changes_made=true
+            echo "Uncommenting: $line -> $modified_line"
+            break
+        fi
+    done
+
+    # Write the line to temp file
+    echo "$modified_line" >> "$temp_file"
+done < "$GITIGNORE_FILE"
+
+# Update the file if changes were made
+if [[ "$changes_made" == "true" ]]; then
+    mv "$temp_file" "$GITIGNORE_FILE"
+    echo "Updated .gitignore file"
+else
+    rm "$temp_file"
+    echo "No changes needed - .gitignore already in requested state"
+fi

@@ -41,7 +41,7 @@ Thumbs.db
 *.tmp
 
 # Test processing files
-/test_analysis_results.txt
+# /test_analysis_results.txt
 /source_files.txt
 /code_issues.md
 /untested_files.txt

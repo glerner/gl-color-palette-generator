@@ -41,6 +41,10 @@ get_next_batch() {
 }
 
 # Function to generate move script
+# TODO: FUTURE ENHANCEMENT - The move script generation doesn't properly handle the format used in
+# test_analysis_results.txt file. It's looking for "MOVE:" but the actual format uses "MOVE_NEEDED" at
+# the end of DECISION lines. This needs to be updated to properly parse the source and target paths
+# from the decision lines with the correct format.
 generate_move_script() {
     echo "#!/bin/bash" > "$MOVE_SCRIPT"
     echo "# Generated on $(date)" >> "$MOVE_SCRIPT"
@@ -62,6 +66,10 @@ generate_move_script() {
 }
 
 # Function to show statistics
+# TODO: FUTURE ENHANCEMENT - The statistics calculation doesn't properly handle different decision formats
+# in the test_analysis_results.txt file (e.g., :CORRECT vs :OK, :EDIT_NEEDED vs :EDIT).
+# This leads to inaccurate counts. The parsing logic should be made more flexible to handle
+# variations in the format of decision markers.
 show_stats() {
     # Create a clean temporary file for counting
     TEMP_COUNT_FILE="$(mktemp)"
@@ -78,10 +86,10 @@ show_stats() {
     # Count DECISION entries if the file exists and has content
     if [ -s "$RESULTS_FILE" ]; then
         processed=$(grep -c "^DECISION:" "$RESULTS_FILE")
-        ok_files=$(grep -c "^DECISION:.*:OK$" "$RESULTS_FILE")
-        move_files=$(grep -c "^DECISION:.*:MOVE$" "$RESULTS_FILE")
-        edit_files=$(grep -c "^DECISION:.*:EDIT$" "$RESULTS_FILE")
-        edit_move_files=$(grep -c "^DECISION:.*:EDIT-MOVE$" "$RESULTS_FILE")
+        ok_files=$(grep -c "^DECISION:.*:CORRECT$" "$RESULTS_FILE")
+        move_files=$(grep -c "^DECISION:.*:MOVE_NEEDED$" "$RESULTS_FILE")
+        edit_files=$(grep -c "^DECISION:.*:EDIT_NEEDED$" "$RESULTS_FILE")
+        edit_move_files=$(grep -c "^DECISION:.*:EDIT_MOVE_NEEDED$" "$RESULTS_FILE")
     fi
 
     # Count bugs if the file exists and has content
