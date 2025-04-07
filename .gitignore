@@ -41,8 +41,10 @@ Thumbs.db
 *.tmp
 
 # Test processing files
-# /test_analysis_results.txt
-/source_files.txt
+# test_analysis_results.txt - Committed once but local changes should not be tracked
+# Use: git update-index --skip-worktree test_analysis_results.txt
+# To resume tracking: git update-index --no-skip-worktree test_analysis_results.txt
+source_files.txt
 /code_issues.md
 /untested_files.txt
 /temp_unanalyzed.txt

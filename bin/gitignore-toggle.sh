@@ -17,7 +17,6 @@ fi
 
 # Define the patterns to look for
 PATTERNS=(
-    "/test_analysis_results.txt"
     "/source_files.txt"
     "/code_issues.md"
     "/untested_files.txt"
