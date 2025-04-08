@@ -1,4 +1,10 @@
 <?php
+/**
+ * Tests for Settings Migrator
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Settings
+ */
 declare(strict_types=1);
 
 namespace GL_Color_Palette_Generator\Tests\Settings;
@@ -6,11 +12,8 @@ namespace GL_Color_Palette_Generator\Tests\Settings;
 use GL_Color_Palette_Generator\Settings\Settings_Migrator;
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
-use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
-use WP_Mock\Tools\TestCase;
-use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 
-class Test_Settings_Migrator extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
+class Test_Settings_Migrator extends WP_Mock_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		WP_Mock::setUp();
