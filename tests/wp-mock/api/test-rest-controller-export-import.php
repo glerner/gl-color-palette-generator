@@ -3,11 +3,12 @@
  * Test REST Controller Export/Import Endpoints
  *
  * @package GL_Color_Palette_Generator
+ * @subpackage Tests\WP_Mock\API
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  */
 
-namespace GL_Color_Palette_Generator\Tests\API;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\API;
 
 use GL_Color_Palette_Generator\API\Rest_Controller;
 use WP_REST_Request;
@@ -20,7 +21,7 @@ use Mockery;
 /**
  * Class Test_Rest_Controller_Export_Import
  */
-class Test_Rest_Controller_Export_Import extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
+class Test_Rest_Controller_Export_Import extends WP_Mock_Test_Case {
 	use \Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
 	/**

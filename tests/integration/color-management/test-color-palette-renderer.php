@@ -12,7 +12,7 @@ use GL_Color_Palette_Generator\Color_Management\Color_Palette_Renderer;
 use GL_Color_Palette_Generator\Color_Management\Color_Palette;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 
-class Test_Color_Palette_Renderer extends \GL_Color_Palette_Generator\Tests\Base\Integration_Test_Case {
+class Test_Color_Palette_Renderer extends Integration_Test_Case {
 	private $renderer;
 	private $palette;
 

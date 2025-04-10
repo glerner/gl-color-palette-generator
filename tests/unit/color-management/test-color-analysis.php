@@ -7,8 +7,8 @@ use GL_Color_Palette_Generator\Color_Management\Color_Analysis;
 class Test_Color_Analysis extends Unit_Test_Case {
 	private Color_Analysis $analyzer;
 
-	protected function set_up() {
-		parent::set_up();
+	protected function setUp(): void {
+		parent::setUp();
 		$this->analyzer = new Color_Analysis();
 	}
 

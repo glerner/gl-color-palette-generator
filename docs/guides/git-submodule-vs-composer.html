@@ -1,0 +1,182 @@
+<h1 id="git-submodule-vs-composer-package-for-testing-framework-integration">Git Submodule vs Composer Package for Testing Framework Integration</h1>
+<h2 id="background-and-decision-context">Background and Decision Context</h2>
+<p>When designing a “Separate Testing Framework Repository with Development Tools,” a key question emerged:</p>
+<blockquote>
+<p>Does this design work for a project where another developer, who already has their environment set up, can just get the PHPUnit part (which for experienced developers, would be the hard part)?</p>
+</blockquote>
+<p>This document explores two primary approaches to integrating a separate testing framework repository into WordPress plugin projects, with a focus on developer experience and flexibility.</p>
+<h2 id="comparison-overview">Comparison Overview</h2>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 35%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Factor</th>
+<th>Git Submodules</th>
+<th>Composer Packages</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Setup Complexity</td>
+<td>Moderate</td>
+<td>Higher</td>
+</tr>
+<tr class="even">
+<td>Developer Experience</td>
+<td>Requires Git knowledge</td>
+<td>Requires Composer knowledge</td>
+</tr>
+<tr class="odd">
+<td>Versioning</td>
+<td>Manual tracking</td>
+<td>Automatic via semantic versioning</td>
+</tr>
+<tr class="even">
+<td>Update Process</td>
+<td><code>git submodule update</code></td>
+<td><code>composer update</code></td>
+</tr>
+<tr class="odd">
+<td>Flexibility for Experienced Devs</td>
+<td>Direct access to files</td>
+<td>Abstracted as a dependency</td>
+</tr>
+<tr class="even">
+<td>Learning Curve</td>
+<td>Git commands</td>
+<td>Composer + Package publishing</td>
+</tr>
+</tbody>
+</table>
+<h2 id="option-a-git-submodules">Option A: Git Submodules</h2>
+<h3 id="what-are-git-submodules">What Are Git Submodules?</h3>
+<p>Git submodules allow you to include one Git repository inside another as a subdirectory. This creates a link to a specific commit in the external repository rather than copying the code.</p>
+<h3 id="implementation-steps">Implementation Steps</h3>
+<ol type="1">
+<li><p><strong>Create your testing framework repository</strong>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="fu">mkdir</span> ~/sites/wp-phpunit-framework</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="bu">cd</span> ~/sites/wp-phpunit-framework</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a><span class="fu">git</span> init</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a><span class="co"># Add your testing framework files</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a><span class="fu">git</span> add .</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a><span class="fu">git</span> commit -m <span class="st">&quot;Initial commit of testing framework&quot;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a><span class="fu">git</span> remote add origin https://github.com/yourusername/wp-phpunit-framework.git</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true"></a><span class="fu">git</span> push -u origin main</span></code></pre></div></li>
+<li><p><strong>Add the submodule to your plugin project</strong>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="bu">cd</span> ~/sites/gl-color-palette-generator</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a><span class="fu">git</span> submodule add https://github.com/yourusername/wp-phpunit-framework.git tests/framework</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a><span class="fu">git</span> commit -m <span class="st">&quot;Add testing framework as submodule&quot;</span></span></code></pre></div></li>
+<li><p><strong>For developers cloning your plugin project</strong>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="fu">git</span> clone https://github.com/yourusername/gl-color-palette-generator.git</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a><span class="bu">cd</span> gl-color-palette-generator</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a><span class="fu">git</span> submodule init</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a><span class="fu">git</span> submodule update</span></code></pre></div></li>
+<li><p><strong>To update the framework in your plugin</strong>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="co"># In the main project</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a><span class="fu">git</span> submodule update --remote tests/framework</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true"></a><span class="fu">git</span> commit -m <span class="st">&quot;Update testing framework submodule&quot;</span></span></code></pre></div></li>
+</ol>
+<h3 id="advantages">Advantages</h3>
+<ul>
+<li><strong>Direct Access</strong>: Developers can directly access and modify framework files if needed</li>
+<li><strong>No Publishing Required</strong>: No need to publish packages to Packagist or set up private repositories</li>
+<li><strong>Version Control</strong>: Clear tracking of which framework version is being used</li>
+<li><strong>Independence</strong>: Framework can be developed independently of plugins using it</li>
+<li><strong>Simplicity</strong>: No need to understand Composer’s package system beyond basic dependencies</li>
+</ul>
+<h3 id="disadvantages">Disadvantages</h3>
+<ul>
+<li><strong>Git Knowledge Required</strong>: Developers need to understand Git submodules</li>
+<li><strong>Extra Clone Steps</strong>: Requires additional commands when cloning the repository</li>
+<li><strong>Potential Confusion</strong>: Submodules can be confusing for developers new to Git</li>
+<li><strong>Manual Updates</strong>: Updates to the framework must be manually pulled and committed</li>
+</ul>
+<h2 id="option-b-composer-packages">Option B: Composer Packages</h2>
+<h3 id="what-are-composer-packages">What Are Composer Packages?</h3>
+<p>Composer is PHP’s dependency manager. Packages are reusable libraries that can be required in projects via Composer.</p>
+<h3 id="implementation-steps-1">Implementation Steps</h3>
+<ol type="1">
+<li><p><strong>Prepare your framework as a Composer package</strong>:</p>
+<ul>
+<li><p>Create a proper <code>composer.json</code> in your framework repository:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a>  <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;yourusername/wp-phpunit-framework&quot;</span><span class="fu">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true"></a>  <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;WordPress PHPUnit Testing Framework&quot;</span><span class="fu">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;library&quot;</span><span class="fu">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true"></a>  <span class="dt">&quot;require&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true"></a>    <span class="dt">&quot;php&quot;</span><span class="fu">:</span> <span class="st">&quot;&gt;=7.4&quot;</span><span class="fu">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true"></a>    <span class="dt">&quot;phpunit/phpunit&quot;</span><span class="fu">:</span> <span class="st">&quot;^9.0&quot;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true"></a>  <span class="fu">},</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true"></a>  <span class="dt">&quot;autoload&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true"></a>    <span class="dt">&quot;psr-4&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true"></a>      <span class="dt">&quot;YourNamespace</span><span class="ch">\\</span><span class="dt">TestFramework</span><span class="ch">\\</span><span class="dt">&quot;</span><span class="fu">:</span> <span class="st">&quot;src/&quot;</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true"></a>    <span class="fu">}</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true"></a>  <span class="fu">}</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true"></a><span class="fu">}</span></span></code></pre></div></li>
+</ul></li>
+<li><p><strong>Use a private repository approach</strong> (simpler than Packagist):</p>
+<ul>
+<li><p>In your plugin’s <code>composer.json</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="fu">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a>  <span class="dt">&quot;repositories&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a>    <span class="fu">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a>      <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;vcs&quot;</span><span class="fu">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true"></a>      <span class="dt">&quot;url&quot;</span><span class="fu">:</span> <span class="st">&quot;https://github.com/yourusername/wp-phpunit-framework.git&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true"></a>    <span class="fu">}</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true"></a>  <span class="dt">&quot;require&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true"></a>    <span class="dt">&quot;yourusername/wp-phpunit-framework&quot;</span><span class="fu">:</span> <span class="st">&quot;dev-main&quot;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true"></a>  <span class="fu">}</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true"></a><span class="fu">}</span></span></code></pre></div></li>
+</ul></li>
+<li><p><strong>Install the dependency</strong>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="ex">composer</span> require yourusername/wp-phpunit-framework:dev-main</span></code></pre></div></li>
+</ol>
+<h3 id="advantages-1">Advantages</h3>
+<ul>
+<li><strong>Standard PHP Workflow</strong>: Follows standard PHP dependency management practices</li>
+<li><strong>Semantic Versioning</strong>: Can leverage semantic versioning for updates</li>
+<li><strong>Autoloading</strong>: Automatic class autoloading</li>
+<li><strong>Dependency Management</strong>: Handles nested dependencies automatically</li>
+<li><strong>Familiar to PHP Devs</strong>: Most PHP developers are familiar with Composer</li>
+</ul>
+<h3 id="disadvantages-1">Disadvantages</h3>
+<ul>
+<li><strong>Publishing Required</strong>: Requires understanding how to publish packages</li>
+<li><strong>Less Direct Access</strong>: Files are in vendor directory and shouldn’t be directly modified</li>
+<li><strong>More Complex Setup</strong>: More complex initial setup, especially for private packages</li>
+<li><strong>Learning Curve</strong>: Steeper learning curve for package maintenance</li>
+</ul>
+<h2 id="recommendation-for-wordpress-plugin-testing-frameworks">Recommendation for WordPress Plugin Testing Frameworks</h2>
+<p>For a WordPress plugin testing framework that needs to be accessible to developers with varying experience levels:</p>
+<h3 id="use-git-submodules-when">Use Git Submodules When:</h3>
+<ul>
+<li>You’re still learning Git and Composer</li>
+<li>You want direct control over the framework files</li>
+<li>You prefer simplicity over standardization</li>
+<li>You want to make frequent changes to both repositories</li>
+<li>Your team is comfortable with Git but not necessarily with Composer package publishing</li>
+</ul>
+<h3 id="use-composer-packages-when">Use Composer Packages When:</h3>
+<ul>
+<li>You’re comfortable with Composer package management</li>
+<li>You have multiple projects that will use the framework</li>
+<li>You want to leverage semantic versioning</li>
+<li>Your team is already using Composer extensively</li>
+<li>You want to follow PHP community standards for dependency management</li>
+</ul>
+<h2 id="practical-considerations-for-wordpress-developers">Practical Considerations for WordPress Developers</h2>
+<ol type="1">
+<li><p><strong>WordPress Development Culture</strong>: Many WordPress developers are more familiar with Git than with Composer package publishing.</p></li>
+<li><p><strong>Learning Path</strong>: Git submodules can be a stepping stone to learning more advanced dependency management.</p></li>
+<li><p><strong>Team Composition</strong>: Consider the technical background of all developers who will work with the codebase.</p></li>
+<li><p><strong>Long-term Maintenance</strong>: Composer packages may be easier to maintain across multiple projects in the long run.</p></li>
+<li><p><strong>Hybrid Approach</strong>: You can start with Git submodules and transition to Composer packages as your team’s expertise grows.</p></li>
+</ol>
+<h2 id="conclusion">Conclusion</h2>
+<p>For the specific context of a WordPress testing framework where experienced developers should be able to easily access just the PHPUnit part, Git submodules provide a more direct and accessible approach initially. As your project and team mature, you can consider transitioning to a Composer package for better standardization and dependency management.</p>
+<p>The most important factor is that your testing framework remains modular and well-documented, regardless of the integration method chosen.</p>

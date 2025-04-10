@@ -12,8 +12,8 @@ class Test_Color_Validator extends Unit_Test_Case {
 	/** @var Color_Validator */
 	private $instance;
 
-	public function set_up() {
-		parent::set_up();
+	public function setUp(): void {
+		parent::setUp();
 		$this->instance = new Color_Validator();
 	}
 

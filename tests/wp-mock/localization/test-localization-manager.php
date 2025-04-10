@@ -1,26 +1,66 @@
 <?php
+/**
+ * Tests for the Localization_Manager class.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Localization
+ * @since 1.0.0
+ */
 
 namespace GL_Color_Palette_Generator\Tests\Localization;
 
 use GL_Color_Palette_Generator\Localization\Localization_Manager;
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
+use WP_Mock;
+use Brain\Monkey\Functions;
 
-class Test_Localization_Manager extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
+/**
+ * Test case for the Localization_Manager class.
+ *
+ * @covers \GL_Color_Palette_Generator\Localization\Localization_Manager
+ */
+class Test_Localization_Manager extends WP_Mock_Test_Case {
+	/**
+	 * The Localization_Manager instance being tested.
+	 *
+	 * @var Localization_Manager
+	 */
 	private $localization_manager;
 
+	/**
+	 * Set up the test environment.
+	 *
+	 * @return void
+	 */
 	public function setUp(): void {
 		parent::setUp();
+		WP_Mock::setUp();
 		$this->localization_manager = new Localization_Manager();
 	}
 
+	/**
+	 * Tests the load_textdomain method.
+	 *
+	 * @return void
+	 */
 	public function test_load_textdomain(): void {
 		// Test that the textdomain is loaded correctly
 		$result = $this->localization_manager->load_textdomain();
 		$this->assertTrue( $result );
 
+		// Mock the WordPress function
+		Functions\expect( 'is_textdomain_loaded' )
+			->with( 'gl-color-palette-generator' )
+			->andReturn( true );
+
 		$this->assertTrue( is_textdomain_loaded( 'gl-color-palette-generator' ) );
 	}
 
+	/**
+	 * Tests the get_available_languages method.
+	 *
+	 * @return void
+	 */
 	public function test_get_available_languages(): void {
 		$languages = $this->localization_manager->get_available_languages();
 
@@ -35,6 +75,11 @@ class Test_Localization_Manager extends GL_Color_Palette_Generator\Tests\Base\WP
 		}
 	}
 
+	/**
+	 * Tests the get_current_language method.
+	 *
+	 * @return void
+	 */
 	public function test_get_current_language(): void {
 		$current = $this->localization_manager->get_current_language();
 
@@ -44,6 +89,11 @@ class Test_Localization_Manager extends GL_Color_Palette_Generator\Tests\Base\WP
 		$this->assertArrayHasKey( 'direction', $current );
 	}
 
+	/**
+	 * Tests the switch_language method.
+	 *
+	 * @return void
+	 */
 	public function test_switch_language(): void {
 		// Test switching to a valid language
 		$result = $this->localization_manager->switch_language( 'es_ES' );
@@ -58,6 +108,11 @@ class Test_Localization_Manager extends GL_Color_Palette_Generator\Tests\Base\WP
 		$this->assertFalse( $result );
 	}
 
+	/**
+	 * Tests the register_strings method.
+	 *
+	 * @return void
+	 */
 	public function test_register_strings(): void {
 		$strings = array(
 			'test_key'    => 'Test String',
@@ -76,6 +131,11 @@ class Test_Localization_Manager extends GL_Color_Palette_Generator\Tests\Base\WP
 		}
 	}
 
+	/**
+	 * Tests RTL language support functionality.
+	 *
+	 * @return void
+	 */
 	public function test_rtl_support(): void {
 		// Test RTL detection for Arabic
 		$result = $this->localization_manager->switch_language( 'ar' );
@@ -92,6 +152,11 @@ class Test_Localization_Manager extends GL_Color_Palette_Generator\Tests\Base\WP
 		$this->assertEquals( 'ltr', $current['direction'] );
 	}
 
+	/**
+	 * Tests translation fallback functionality.
+	 *
+	 * @return void
+	 */
 	public function test_translation_fallbacks(): void {
 		// Test fallback to default language
 		$this->localization_manager->switch_language( 'fr_FR' );
@@ -101,6 +166,11 @@ class Test_Localization_Manager extends GL_Color_Palette_Generator\Tests\Base\WP
 		$this->assertNotEmpty( $test_string );
 	}
 
+	/**
+	 * Tests that hooks are fired when switching languages.
+	 *
+	 * @return void
+	 */
 	public function test_language_switching_hooks(): void {
 		// Test that hooks are fired when switching languages
 		$hook_fired = false;
@@ -119,7 +189,13 @@ class Test_Localization_Manager extends GL_Color_Palette_Generator\Tests\Base\WP
 		$this->assertTrue( $hook_fired );
 	}
 
+	/**
+	 * Tear down the test environment.
+	 *
+	 * @return void
+	 */
 	public function tearDown(): void {
+		WP_Mock::tearDown();
 		parent::tearDown();
 	}
 }

@@ -4,11 +4,11 @@ Generate beautiful and accessible color palettes for your WordPress website usin
 
 ## Description
 
-GL Color Palette Generator (named with "GL" to distinguish it from other color palette plugins) is a WordPress plugin that helps you create and manage color palettes for your website design. It uses AI to generate harmonious color combinations while ensuring accessibility standards are met.
+GL Color Palette Generator (named with "GL" to distinguish it from other color palette plugins) is a WordPress plugin that helps you create and manage color palettes for your website design. It uses AI to generate harmonious color combinations, while ensuring accessibility standards are met.
 
 ### Theme Variations
 
-Theme variations are optional design configurations within a block theme that allow you to change the look of your website without switching to a different theme. This plugin generates 16 harmonious variations for you to choose from.
+Theme variations are optional design configurations within a block theme that allow you to change the look of your website without switching to a different theme. This plugin generates 6 or 24 harmonious variations for you to choose from.
 
 To switch between variations:
 1. Go to your WordPress dashboard, navigate to Appearance > Editor
@@ -23,14 +23,32 @@ This plugin is designed to work with the TwentyTwentyFour theme (and future Word
 
 ### Features
 
-- Generate 16 AI-powered theme variations
-- Preview variations in real-time within the Site Editor
-- Switch variations easily without changing themes
-- AI-powered color palette generation
-- Multiple AI provider support (OpenAI, Anthropic, etc.)
-- Accessibility checking (WCAG 2.1)
-- Color scheme analysis
-- Cultural context awareness
+#### Color Generation
+- Generate 6 or 24 AI-powered theme variations
+- 1-3 main colors (primary, secondary, tertiary) with 1 accent color
+- 4 variations per color (lighter, light, dark, darker)
+- Neutral colors plus black/white
+- AI-generated palette based on business and ideal client questionnaire
+- Manual color input with automatic WCAG AAA contrast adjustment
+
+#### Color Properties
+- Artist-inspired palette names (e.g., "Energetic Sunrise")
+- Emotional attributes (e.g., Joyful, Calm, Professional)
+- Hex codes with optional functional names
+- Color scheme analysis and harmony validation
+
+#### Accessibility Features
+- WCAG AAA contrast compliance checking
+- Visually distinct colors for better usability
+- Light colors optimized for black text readability
+- Dark colors optimized for white text readability
+
+#### Output Options
+- WordPress color palette display
+- Theme Style Variations (theme.json)
+- Light and Dark themes with browser switching via CSS light-dark()
+- Color permutations (all combinations of primary/secondary/tertiary colors)
+- Downloadable .zip of all variations
 - Export/Import functionality
 - WordPress block editor integration
 - REST API endpoints
@@ -44,7 +62,7 @@ For development setup and contribution guidelines, please see:
 
 ### Requirements
 
-- WordPress 6.2 - 6.7.1
+- WordPress 6.2 to latest (as of April 2025 6.7.2)
 - PHP 8.1 or higher
 - Node.js 16+ (for development)
 - Composer (for development)

@@ -3,7 +3,7 @@
  * Tests for Color Accessibility
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests
+ * @subpackage Tests\Color_Management
  */
 
 namespace GL_Color_Palette_Generator\Tests\Color_Management;
@@ -18,7 +18,7 @@ use Mockery;
 /**
  * Class Test_Color_Accessibility
  */
-class Test_Color_Accessibility extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
+class Test_Color_Accessibility extends WP_Mock_Test_Case {
 	/**
 	 * Test instance
 	 *

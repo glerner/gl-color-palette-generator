@@ -1,4 +1,30 @@
 <?php
+/**
+ * Tests for the Name_Generator class which uses the color-namer library
+ * to generate artist-inspired palette names based on color values.
+ * 
+ * The color-namer library provides names inspired by various sources including:
+ * - Famous artists' color palettes
+ * - Art movements and periods
+ * - Emotional and psychological color associations
+ * 
+ * Installation:
+ * ```
+ * npm install color-namer
+ * ```
+ * 
+ * PHP Implementation Note:
+ * This test verifies that our Name_Generator class correctly implements the functionality
+ * of the color-namer library, either through direct integration or by replicating its
+ * naming algorithms. The actual implementation should use the library's API or port its
+ * naming database to PHP.
+ * 
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Unit\Generators
+ * @since 1.0.0
+ * @link https://github.com/colorjs/color-namer
+ */
+
 declare(strict_types=1);
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Generators;

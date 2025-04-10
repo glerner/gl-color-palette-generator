@@ -10,6 +10,14 @@ Key documentation to review before contributing:
 2. [Theme Color Guide](docs/THEME-COLOR-GUIDE.md) - Essential guide for theme developers implementing color variations
 3. [Database Setup](docs/database-setup.md) - MySQL setup for running tests
 4. [Color Harmonies](docs/color-harmonies.md) - Adding new color harmony types
+5. [PHPUnit Testing Tutorial](docs/guides/phpunit-testing-tutorial.md) - Comprehensive guide to our testing approach
+
+### Development Workflow Documentation
+
+We've created detailed guides for working with our modular testing framework:
+
+1. [Git Submodule vs Composer Package](docs/guides/git-submodule-vs-composer.md) - Comparison of integration approaches for our testing framework
+2. [Preparing Projects for Dual Git/Composer Deployment](docs/guides/preparing-projects-for-dual-git-composer-deployment.md) - How to structure projects for multiple distribution methods
 
 Additional documentation can be found in the `docs/` directory, including:
 - Developer guides in `docs/guides/`

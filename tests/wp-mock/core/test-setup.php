@@ -17,7 +17,7 @@ use Mockery;
 /**
  * Class Test_Setup
  */
-class Test_Setup extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
+class Test_Setup extends WP_Mock_Test_Case {
 	use \Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
 	/**

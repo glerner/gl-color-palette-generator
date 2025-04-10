@@ -115,7 +115,7 @@ class Unit_Test_Case extends \PHPUnit\Framework\TestCase {
         parent::setUp();
         // Common setup for unit tests
     }
-    
+
     protected function tearDown(): void {
         // Common teardown for unit tests
         parent::tearDown();
@@ -133,7 +133,7 @@ class WP_Mock_Test_Case extends \PHPUnit\Framework\TestCase {
         parent::setUp();
         \WP_Mock::setUp();
     }
-    
+
     protected function tearDown(): void {
         \WP_Mock::tearDown();
         parent::tearDown();
@@ -151,7 +151,7 @@ class Integration_Test_Case extends \PHPUnit\Framework\TestCase {
         parent::setUp();
         // Setup WordPress test environment
     }
-    
+
     protected function tearDown(): void {
         // Cleanup WordPress test environment
         parent::tearDown();
@@ -210,7 +210,7 @@ class Test_Settings_Manager extends Unit_Test_Case {
 
 Key principles:
 - Match namespace to directory path
-- Use consistent casing (typically snake_case for files, PascalCase for classes)
+- Use consistent casing (snake_case for files, WordPress-style Snake_Case with underscores for classes)
 - Import the appropriate base test case
 - Import the class being tested
 
@@ -234,7 +234,7 @@ Follow these guidelines to choose the appropriate test type:
 
 Decision flowchart:
 ```
-Does the code use WordPress functions? 
+Does the code use WordPress functions?
 ├── No → Unit Test
 └── Yes → Does it need database or WordPress core behavior?
     ├── No → WP-Mock Test
@@ -268,8 +268,8 @@ public function test_process_data_calls_validator() {
     $validator->shouldReceive('validate')
         ->once()
         ->with('test-data')
-        ->andReturn(true);
-        
+        ->andReturn( true );
+
     $processor = new Data_Processor($validator);
     $processor->process_data('test-data');
 }
@@ -277,15 +277,76 @@ public function test_process_data_calls_validator() {
 
 ### For WP-Mock Tests
 
-Use WP_Mock to mock WordPress functions:
+#### Using WP_Mock for WordPress Hooks
+
+Use WP_Mock to mock WordPress hooks and actions:
 
 ```php
 public function test_register_hooks_adds_actions() {
     \WP_Mock::expectActionAdded('init', [$this->instance, 'initialize']);
     \WP_Mock::expectFilterAdded('the_content', [$this->instance, 'filter_content']);
-    
+
     $this->instance->register_hooks();
 }
+```
+
+#### Using Brain Monkey for WordPress Functions
+
+Brain Monkey complements WP_Mock by providing the ability to mock WordPress global functions. This is essential for testing code that interacts with WordPress core functions without needing a real WordPress environment.
+
+**Setup and Teardown:**
+
+Ensure proper setup and teardown in your test classes:
+
+```php
+public function setUp(): void {
+    parent::setUp();
+    \Brain\Monkey\setUp();
+    // Your test setup
+}
+
+public function tearDown(): void {
+    \Brain\Monkey\tearDown();
+    parent::tearDown();
+}
+```
+
+**Using Brain Monkey to Mock WordPress Functions:**
+
+```php
+public function test_cache_operations() {
+    // Functions\expect is the Brain Monkey command to mock a WordPress function
+    // Use Brain Monkey to mock Setting the cache and specify its return value
+    Functions\expect( 'wp_cache_set' )
+        ->once()
+        ->with( 'cache_key', $expected_data, 'cache_group', 3600 )
+        ->andReturn( true );
+
+    // Use Brain Monkey to mock Getting a specific cache return value
+    Functions\expect( 'wp_cache_get' )
+        ->once()
+        ->with( 'cache_key', 'cache_group' )
+        ->andReturn( $test_data );
+
+    // Execute the method that should use these functions
+    $result = $this->instance->get_cached_data('cache_key');
+
+    // Assert the result matches expectations
+    $this->assertEquals($expected_result, $result);
+}
+```
+
+**Important Brain Monkey Features:**
+
+1. **Function Expectations**: Verify WordPress functions are called with specific parameters
+2. **Return Value Control**: Determine what mocked functions should return
+3. **Call Counting**: Ensure functions are called the expected number of times
+4. **Argument Matching**: Verify the correct arguments are passed to functions
+
+Remember to import the Functions namespace:
+
+```php
+use Brain\Monkey\Functions;
 ```
 
 ### For Integration Tests
@@ -296,7 +357,7 @@ Minimize mocking, but use it for external services:
 public function test_save_option_stores_in_database() {
     // No mocking of WordPress functions
     $this->instance->save_option('test_key', 'test_value');
-    
+
     // Verify using WordPress functions
     $this->assertEquals('test_value', get_option('plugin_prefix_test_key'));
 }
@@ -315,7 +376,7 @@ Example:
 ```php
 protected function setUp(): void {
     parent::setUp();
-    
+
     // Create unique test data
     $this->test_id = uniqid('test_');
     $this->test_data = ['name' => 'Test ' . $this->test_id];
@@ -324,7 +385,7 @@ protected function setUp(): void {
 protected function tearDown(): void {
     // Clean up test data
     delete_option('plugin_prefix_' . $this->test_id);
-    
+
     parent::tearDown();
 }
 ```
@@ -355,10 +416,10 @@ Configure CI for reliable testing:
    ```yaml
    - name: Run unit tests
      run: vendor/bin/phpunit --configuration phpunit.xml
-     
+
    - name: Run WP-Mock tests
      run: vendor/bin/phpunit --configuration phpunit-wp-mock.xml
-     
+
    - name: Run integration tests
      run: vendor/bin/phpunit --configuration phpunit-integration.xml
    ```
@@ -412,25 +473,6 @@ While our current scripts cover the most critical aspects of test organization, 
 4. **Dependency Injection Patterns**: Verify proper dependency injection in test setup
 5. **PHPDoc Completeness**: Check for complete PHPDoc annotations (@covers, etc.)
 6. **Test Isolation**: Analyze potential test isolation issues
-
-### Example Test Analyzer Script
-```bash
-#!/bin/bash
-# Analyze test files to ensure they're in the right directory
-# and using the correct base class
-
-find tests/ -name "test-*.php" | while read file; do
-    # Check if test uses WordPress functions
-    if grep -q "wp_" "$file" && ! grep -q "WP_Mock" "$file"; then
-        echo "$file might need to be a WP-Mock or integration test"
-    fi
-    
-    # Check base class
-    if grep -q "extends Unit_Test_Case" "$file" && grep -q "wp_" "$file"; then
-        echo "$file extends Unit_Test_Case but uses WordPress functions"
-    fi
-done
-```
 
 ---
 

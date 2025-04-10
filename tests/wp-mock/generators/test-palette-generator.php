@@ -1,18 +1,55 @@
 <?php
-namespace GL_Color_Palette_Generator\Tests;
+/**
+ * Tests for the Palette_Generator class.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\WP_Mock\Generators
+ * @since 1.0.0
+ */
+
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Generators;
 
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Generators\Palette_Generator;
 use GL_Color_Palette_Generator\Providers\Provider;
 use GL_Color_Palette_Generator\Color_Management\Color_Validator;
+use PHPUnit\Framework\MockObject\MockObject;
+use WP_Mock;
 
-class Test_Palette_Generator extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
+/**
+ * Test case for the Palette_Generator class.
+ *
+ * @covers \GL_Color_Palette_Generator\Generators\Palette_Generator
+ */
+class Test_Palette_Generator extends WP_Mock_Test_Case {
+	/**
+	 * The Palette_Generator instance being tested.
+	 *
+	 * @var Palette_Generator
+	 */
 	protected Palette_Generator $generator;
+
+	/**
+	 * Mock provider instance.
+	 *
+	 * @var Provider
+	 */
 	protected $mock_provider;
+
+	/**
+	 * Mock color validator instance.
+	 *
+	 * @var Color_Validator
+	 */
 	protected $mock_validator;
 
-	protected function set_up() {
-		parent::set_up();
+	/**
+	 * Set up the test environment.
+	 *
+	 * @return void
+	 */
+	protected function setUp(): void {
+		parent::setUp();
 
 		// Create mock provider
 		$this->mock_provider  = $this->createMock( Provider::class );
@@ -21,6 +58,11 @@ class Test_Palette_Generator extends GL_Color_Palette_Generator\Tests\Base\WP_Mo
 		$this->generator = new Palette_Generator( $this->mock_provider, $this->mock_validator );
 	}
 
+	/**
+	 * Tests the generate method with default parameters.
+	 *
+	 * @return void
+	 */
 	public function test_generate_palette() {
 		$prompt          = 'Modern tech company';
 		$expected_colors = array( '#2C3E50', '#E74C3C', '#ECF0F1', '#3498DB', '#2ECC71' );
@@ -41,6 +83,11 @@ class Test_Palette_Generator extends GL_Color_Palette_Generator\Tests\Base\WP_Mo
 		$this->assertEquals( $expected_colors, $palette );
 	}
 
+	/**
+	 * Tests the generate method with invalid colors.
+	 *
+	 * @return void
+	 */
 	public function test_generate_palette_with_invalid_colors() {
 		$prompt         = 'Modern tech company';
 		$invalid_colors = array( '#2C3E50', 'invalid', '#ECF0F1', 'not-a-color', '#2ECC71' );
@@ -64,6 +111,11 @@ class Test_Palette_Generator extends GL_Color_Palette_Generator\Tests\Base\WP_Mo
 		$this->generator->generate( $prompt );
 	}
 
+	/**
+	 * Tests the generate method with a specific count parameter.
+	 *
+	 * @return void
+	 */
 	public function test_generate_palette_with_count() {
 		$prompt          = 'Modern tech company';
 		$count           = 3;
@@ -86,6 +138,11 @@ class Test_Palette_Generator extends GL_Color_Palette_Generator\Tests\Base\WP_Mo
 		$this->assertEquals( $expected_colors, $palette );
 	}
 
+	/**
+	 * Tests the generate method with a specific format parameter.
+	 *
+	 * @return void
+	 */
 	public function test_generate_palette_with_format() {
 		$prompt          = 'Modern tech company';
 		$format          = 'rgb';

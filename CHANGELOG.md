@@ -1,8 +1,12 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+**Note: This project's complete change history is maintained through GitHub commit history and releases.**
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+For the most up-to-date changes, please refer to:
+- [GitHub Commits](https://github.com/glerner/gl-color-palette-generator/commits/main)
+- [GitHub Releases](https://github.com/glerner/gl-color-palette-generator/releases)
+
+The format of releases is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.0.0] - 2024-12-07

@@ -3,19 +3,17 @@
  * Test Update Checker Class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests
+ * @subpackage Tests\Core
  */
 
 namespace GL_Color_Palette_Generator\Tests\Core;
 
 use GL_Color_Palette_Generator\Core\Update_Checker;
-use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
-use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use Mockery;
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 
-class Test_Update_Checker extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
+class Test_Update_Checker extends WP_Mock_Test_Case {
 	private $update_checker;
 	private $update_url  = 'https://example.com/updates.json';
 	private $plugin_file = '/path/to/plugin.php';

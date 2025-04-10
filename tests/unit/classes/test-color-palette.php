@@ -1,13 +1,38 @@
 <?php
+/**
+ * Tests for the Color_Palette class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Unit\Classes
+ * @since 1.0.0
+ * @author George Lerner
+ * @link https://website-tech.glerner.com/
+ */
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
 use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
 use GL_Color_Palette_Generator\Color_Palette;
 
+/**
+ * Test_Color_Palette class
+ *
+ * Tests the functionality of the Color_Palette class, including:
+ * - Palette creation with different parameters
+ * - Color management (adding, removing, retrieving)
+ * - Metadata handling
+ * - Validation and sanitization
+ */
 class Test_Color_Palette extends Unit_Test_Case {
 	private Color_Palette $palette;
 
+	/**
+	 * Set up the test environment
+	 *
+	 * Creates a test palette with predefined values for testing
+	 *
+	 * @return void
+	 */
 	public function setUp(): void {
 		$this->palette = new Color_Palette(
 			array(
@@ -18,6 +43,14 @@ class Test_Color_Palette extends Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Test constructor with default values
+	 *
+	 * Verifies that the Color_Palette constructor properly initializes
+	 * with default values when no parameters are provided
+	 *
+	 * @return void
+	 */
 	public function test_constructor_with_default_values(): void {
 		$palette = new Color_Palette();
 		$this->assertEquals( 'Untitled Palette', $palette->getName() );
@@ -25,6 +58,14 @@ class Test_Color_Palette extends Unit_Test_Case {
 		$this->assertEmpty( $palette->getMetadata() );
 	}
 
+	/**
+	 * Test constructor with custom values
+	 *
+	 * Verifies that the Color_Palette constructor properly initializes
+	 * with custom values when parameters are provided
+	 *
+	 * @return void
+	 */
 	public function test_constructor_with_custom_values(): void {
 		$this->assertEquals( 'Test Palette', $this->palette->getName() );
 		$this->assertEquals( array( '#FF0000', '#00FF00', '#0000FF' ), $this->palette->getColors() );

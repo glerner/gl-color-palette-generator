@@ -42,9 +42,11 @@ Please do not report security vulnerabilities through public GitHub issues.
 When using this plugin:
 
 1. Keep WordPress core, themes, and plugins updated
-2. Use strong passwords, kept in a secure password manager software
-3. Implement proper file permissions
-4. Enable SSL/HTTPS
-5. Regular security audits
-6. Monitor error logs
-7. Backup regularly
+2. Use strong passwords, kept in a secure password manager software, such as [Bitwarden](https://bitwarden.com/)
+3. Run WordFence (or similar, but it is too hard to thoroughly compare so use WordFence)
+4. Use Cloudflare (the free version is adequate for most websites, adds security and speed and optimizes downloads)
+5. Implement proper file permissions
+6. Enable SSL/HTTPS
+7. Regular security audits
+8. Monitor error logs
+9. Backup regularly

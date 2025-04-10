@@ -3,26 +3,27 @@
  * Color Palette Cache Tests
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Classes
+ * @subpackage Tests\WP_Mock\Classes
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
 
-namespace GL_Color_Palette_Generator\Tests\Unit;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Classes;
 
-use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Classes\Color_Palette_Cache;
 use GL_Color_Palette_Generator\Classes\Color_Palette;
+use Brain\Monkey\Functions;
 
 
 /**
  * Tests for the Color Palette Cache class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Classes
+ * @subpackage Tests\WP_Mock\Classes
  */
-class Test_Color_Palette_Cache extends Unit_Test_Case {
+class Test_Color_Palette_Cache extends WP_Mock_Test_Case {
 	protected Color_Palette_Cache $cache;
 	protected Color_Palette $test_palette;
 

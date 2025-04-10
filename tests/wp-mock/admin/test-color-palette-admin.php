@@ -18,7 +18,7 @@ use WP_Mock;
 /**
  * Tests for Color Palette Admin
  */
-class Test_Color_Palette_Admin extends GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case {
+class Test_Color_Palette_Admin extends WP_Mock_Test_Case {
 	protected Color_Palette_Admin $admin;
 	protected Color_Palette_Generator $generator;
 

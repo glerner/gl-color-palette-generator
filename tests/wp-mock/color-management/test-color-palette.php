@@ -3,7 +3,7 @@
  * Test Color Palette Class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests
+ * @subpackage Tests\Color_Management
  */
 
 namespace GL_Color_Palette_Generator\Tests\Color_Management;
