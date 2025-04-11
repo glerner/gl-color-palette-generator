@@ -28,38 +28,38 @@ Git submodules allow you to include one Git repository inside another as a subdi
 ### Implementation Steps
 
 1. **Create your testing framework repository**:
-   ```bash
-   mkdir ~/sites/wp-phpunit-framework
-   cd ~/sites/wp-phpunit-framework
-   git init
-   # Add your testing framework files
-   git add .
-   git commit -m "Initial commit of testing framework"
-   git remote add origin https://github.com/yourusername/wp-phpunit-framework.git
-   git push -u origin main
-   ```
+```bash
+mkdir ~/sites/wp-phpunit-framework
+cd ~/sites/wp-phpunit-framework
+git init
+# Add your testing framework files
+git add .
+git commit -m "Initial commit of testing framework"
+git remote add origin https://github.com/glerner/wp-phpunit-framework.git
+git push -u origin main
+```
 
 2. **Add the submodule to your plugin project**:
-   ```bash
-   cd ~/sites/gl-color-palette-generator
-   git submodule add https://github.com/yourusername/wp-phpunit-framework.git tests/framework
-   git commit -m "Add testing framework as submodule"
-   ```
+```bash
+cd ~/sites/gl-color-palette-generator
+git submodule add https://github.com/glerner/wp-phpunit-framework.git tests/framework
+git commit -m "Add testing framework as submodule"
+```
 
 3. **For developers cloning your plugin project**:
-   ```bash
-   git clone https://github.com/yourusername/gl-color-palette-generator.git
-   cd gl-color-palette-generator
-   git submodule init
-   git submodule update
-   ```
+```bash
+git clone https://github.com/glerner/gl-color-palette-generator.git
+cd gl-color-palette-generator
+git submodule init
+git submodule update
+```
 
 4. **To update the framework in your plugin**:
-   ```bash
-   # In the main project
-   git submodule update --remote tests/framework
-   git commit -m "Update testing framework submodule"
-   ```
+```bash
+# In the main project
+git submodule update --remote tests/framework
+git commit -m "Update testing framework submodule"
+```
 
 ### Advantages
 

@@ -1,4 +1,10 @@
 <?php
+/**
+ * Tests for the Settings Manager class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Settings
+ */
 declare(strict_types=1);
 
 namespace GL_Color_Palette_Generator\Tests\Settings;
@@ -10,25 +16,57 @@ use GL_Color_Palette_Generator\Exceptions\Palette_Generation_Exception;
 use WP_Mock;
 
 class Test_Settings_Manager extends WP_Mock_Test_Case {
+	/**
+	 * The Settings_Manager instance being tested.
+	 *
+	 * @var Settings_Manager
+	 */
 	private Settings_Manager $settings_manager;
 
+	/**
+	 * Set up the test environment before each test.
+	 * 
+	 * Initializes WP_Mock and creates a new Settings_Manager instance.
+	 *
+	 * @return void
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		WP_Mock::setUp();
 		$this->settings_manager = new Settings_Manager();
 	}
 
+	/**
+	 * Clean up the test environment after each test.
+	 * 
+	 * Tears down WP_Mock to ensure a clean state for the next test.
+	 *
+	 * @return void
+	 */
 	public function tearDown(): void {
 		WP_Mock::tearDown();
 		parent::tearDown();
 	}
 
+	/**
+	 * Test that the init method properly adds the register_settings method to the admin_init hook.
+	 *
+	 * @return void
+	 */
 	public function test_init(): void {
 		WP_Mock::expectActionAdded( 'admin_init', array( $this->settings_manager, 'register_settings' ) );
 		$this->settings_manager->init();
 		$this->assertConditionsMet();
 	}
 
+	/**
+	 * Test that the register_settings method properly registers settings, sections, and fields.
+	 * 
+	 * Verifies that WordPress functions are called with the correct arguments to register
+	 * the plugin settings, create a settings section, and add all the required settings fields.
+	 *
+	 * @return void
+	 */
 	public function test_register_settings(): void {
 		WP_Mock::userFunction(
 			'register_setting',
@@ -70,6 +108,13 @@ class Test_Settings_Manager extends WP_Mock_Test_Case {
 		$this->assertConditionsMet();
 	}
 
+	/**
+	 * Test that the render_section method outputs the expected HTML content.
+	 * 
+	 * Verifies that the section description is properly escaped and displayed.
+	 *
+	 * @return void
+	 */
 	public function test_render_section(): void {
 		WP_Mock::userFunction(
 			'esc_html__',
@@ -86,6 +131,14 @@ class Test_Settings_Manager extends WP_Mock_Test_Case {
 		$this->assertStringContainsString( 'Configure your color palette generator settings below.', $output );
 	}
 
+	/**
+	 * Test that the render_field method correctly renders a select field.
+	 * 
+	 * Verifies that the select field contains all expected options from the AI_PROVIDERS list
+	 * and that proper escaping and selection functions are called.
+	 *
+	 * @return void
+	 */
 	public function test_render_field_select(): void {
 		$args = array(
 			'key'   => 'ai_provider',
@@ -129,6 +182,13 @@ class Test_Settings_Manager extends WP_Mock_Test_Case {
 		}
 	}
 
+	/**
+	 * Test that the render_field method correctly renders a password field.
+	 * 
+	 * Verifies that the password input has the correct type and CSS classes.
+	 *
+	 * @return void
+	 */
 	public function test_render_field_password(): void {
 		$args = array(
 			'key'   => 'api_key',
@@ -153,6 +213,13 @@ class Test_Settings_Manager extends WP_Mock_Test_Case {
 		$this->assertStringContainsString( 'class="regular-text"', $output );
 	}
 
+	/**
+	 * Test that the render_field method correctly renders a number field.
+	 * 
+	 * Verifies that the number input has the correct type, min/max attributes, and CSS classes.
+	 *
+	 * @return void
+	 */
 	public function test_render_field_number(): void {
 		$args = array(
 			'key'   => 'cache_duration',
@@ -181,6 +248,13 @@ class Test_Settings_Manager extends WP_Mock_Test_Case {
 		$this->assertStringContainsString( 'class="small-text"', $output );
 	}
 
+	/**
+	 * Test that the sanitize_settings method correctly validates and returns settings when all inputs are valid.
+	 * 
+	 * Verifies that each setting is properly sanitized and returned in the expected format.
+	 *
+	 * @return void
+	 */
 	public function test_sanitize_settings_success(): void {
 		$input = array(
 			'ai_provider'      => 'openai',
@@ -205,6 +279,14 @@ class Test_Settings_Manager extends WP_Mock_Test_Case {
 		$this->assertFalse( $output['debug_mode'] );
 	}
 
+	/**
+	 * Test that the sanitize_settings method throws an exception when a required field is missing.
+	 * 
+	 * Verifies that an exception is thrown with the appropriate message when the AI provider
+	 * setting (which is required) is not provided.
+	 *
+	 * @return void
+	 */
 	public function test_sanitize_settings_missing_required(): void {
 		$this->expectException( Palette_Generation_Exception::class );
 		$this->expectExceptionMessage( 'Field AI Provider is required' );
@@ -216,6 +298,14 @@ class Test_Settings_Manager extends WP_Mock_Test_Case {
 		$this->settings_manager->sanitize_settings( $input );
 	}
 
+	/**
+	 * Test that the sanitize_settings method throws an exception when a setting has an invalid value.
+	 * 
+	 * Verifies that an exception is thrown with the appropriate message when the cache_duration
+	 * setting has a negative value, which is outside its valid range.
+	 *
+	 * @return void
+	 */
 	public function test_sanitize_settings_invalid_value(): void {
 		$this->expectException( Palette_Generation_Exception::class );
 		$this->expectExceptionMessage( 'Invalid value for Cache Duration' );
@@ -229,6 +319,15 @@ class Test_Settings_Manager extends WP_Mock_Test_Case {
 		$this->settings_manager->sanitize_settings( $input );
 	}
 
+	/**
+	 * Test that the get_option method correctly retrieves options from WordPress.
+	 * 
+	 * Verifies that:
+	 * 1. Existing options are correctly returned
+	 * 2. Default values are returned for non-existent options
+	 *
+	 * @return void
+	 */
 	public function test_get_option(): void {
 		WP_Mock::userFunction(
 			'get_option',
@@ -245,6 +344,14 @@ class Test_Settings_Manager extends WP_Mock_Test_Case {
 		$this->assertEquals( Settings_Types::DEFAULT_SETTINGS['nonexistent_key'] ?? null, $default_value );
 	}
 
+	/**
+	 * Test that the update_option method successfully updates a valid setting.
+	 * 
+	 * Verifies that the WordPress update_option function is called with the correct arguments
+	 * and that the method returns true on success.
+	 *
+	 * @return void
+	 */
 	public function test_update_option_success(): void {
 		WP_Mock::userFunction(
 			'update_option',
@@ -258,6 +365,14 @@ class Test_Settings_Manager extends WP_Mock_Test_Case {
 		$this->assertTrue( $result );
 	}
 
+	/**
+	 * Test that the update_option method throws an exception when given an invalid setting key.
+	 * 
+	 * Verifies that an exception is thrown with the appropriate message when attempting
+	 * to update a setting that doesn't exist in the defined settings.
+	 *
+	 * @return void
+	 */
 	public function test_update_option_invalid_key(): void {
 		$this->expectException( Palette_Generation_Exception::class );
 		$this->expectExceptionMessage( 'Invalid setting key: invalid_key' );
@@ -265,6 +380,14 @@ class Test_Settings_Manager extends WP_Mock_Test_Case {
 		$this->settings_manager->update_option( 'invalid_key', 'value' );
 	}
 
+	/**
+	 * Test that the update_option method throws an exception when given an invalid setting value.
+	 * 
+	 * Verifies that an exception is thrown with the appropriate message when attempting
+	 * to update the cache_duration setting with a negative value.
+	 *
+	 * @return void
+	 */
 	public function test_update_option_invalid_value(): void {
 		$this->expectException( Palette_Generation_Exception::class );
 		$this->expectExceptionMessage( 'Invalid value for Cache Duration' );
