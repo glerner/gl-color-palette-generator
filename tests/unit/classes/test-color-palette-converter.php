@@ -1,4 +1,10 @@
 <?php
+/**
+ * Color Palette Converter Tests
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Unit\Classes
+ */
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 

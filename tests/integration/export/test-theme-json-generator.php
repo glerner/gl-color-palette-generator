@@ -1,4 +1,10 @@
 <?php
+/**
+ * Test Theme_JSON_Generator class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Integration\Export
+ */
 
 namespace GL_Color_Palette_Generator\Tests\Integration\Export;
 use GL_Color_Palette_Generator\Tests\Base\Integration_Test_Case;
@@ -9,9 +15,6 @@ use GL_Color_Palette_Generator\Color_Management\Color_Variation_Generator;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use GL_Color_Palette_Generator\Localization\Theme_Namer;
 
-/**
- * Test Theme_JSON_Generator class
- */
 class Test_Theme_JSON_Generator extends Integration_Test_Case implements Color_Constants {
 	/** @var Theme_JSON_Generator */
 	private $instance;

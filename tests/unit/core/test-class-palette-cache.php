@@ -3,7 +3,7 @@
  * Tests for Palette_Cache class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests
+ * @subpackage Tests\Unit\Core
  */
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Core;

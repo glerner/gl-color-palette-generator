@@ -3,7 +3,7 @@
  * Test plugin activation
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests
+ * @subpackage Tests\Integration
  */
 
 namespace GL_Color_Palette_Generator\Tests\Integration;

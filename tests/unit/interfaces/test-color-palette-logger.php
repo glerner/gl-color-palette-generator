@@ -4,6 +4,7 @@
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Tests\Unit\Interfaces
+ * @since 1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;

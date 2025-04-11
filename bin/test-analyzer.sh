@@ -45,6 +45,7 @@ get_next_batch() {
 # test_analysis_results.txt file. It's looking for "MOVE:" but the actual format uses "MOVE_NEEDED" at
 # the end of DECISION lines. This needs to be updated to properly parse the source and target paths
 # from the decision lines with the correct format.
+# But am having AI analyze each file, instead of a script.
 generate_move_script() {
     echo "#!/bin/bash" > "$MOVE_SCRIPT"
     echo "# Generated on $(date)" >> "$MOVE_SCRIPT"
@@ -193,7 +194,8 @@ main_menu() {
         echo "3. Show statistics"
         echo "4. Check for untested files"
         echo "5. View bugs/issues found"
-        echo "6. Exit"
+        echo "6. Show AI Prompt Again"
+        echo "7. Exit"
         read -p "Select an option: " option
 
         case $option in
@@ -214,12 +216,16 @@ main_menu() {
                     echo "       * WP_Mock_Test_Case - For tests that mock WordPress functions"
                     echo "       * Integration_Test_Case - For tests requiring a WordPress environment"
                     echo ""
-                    echo "2. NAMESPACE CORRECTNESS:"
+                    echo "2. NAMESPACE AND DOCUMENTATION CORRECTNESS:"
                     echo "   - Check if the namespace matches the directory structure"
                     echo "   - Verify imports/use statements are correct"
                     echo "   - Test class naming should follow the Test_* pattern (e.g., Test_Ajax_Handler)"
                     echo "   - Base classes follow a different pattern (Unit_Test_Case, WP_Mock_Test_Case, Integration_Test_Case)"
                     echo "   - Base classes should be in the GL_Color_Palette_Generator\\Tests\\Base namespace"
+                    echo "   - Verify file has proper docblocks with @package GL_Color_Palette_Generator annotation"
+                    echo "   - Verify file has proper @subpackage annotation that matches directory structure"
+                    echo "     (e.g., Tests\\Unit\\Classes for files in tests/unit/classes/)"
+                    echo "   - Class-level and method-level docblocks should be present and descriptive"
                     echo ""
                     echo "3. TEST COVERAGE:"
                     echo "   - Verify the test is actually testing the intended code"
@@ -235,7 +241,7 @@ main_menu() {
                     echo "   - Focus primarily on the test type, namespace, coverage, and scope"
                     echo ""
                     echo "For each file, add results to $RESULTS_FILE in this format:"
-                    echo "DECISION:[file_path]:[unit|wp-mock|integration]:[detailed reason for decision]:[OK|MOVE|EDIT|EDIT-MOVE]"
+                    echo "DECISION:[file_path]:[unit|wp-mock|integration]:[detailed reason for decision including docblock status]:[OK|MOVE|EDIT|EDIT-MOVE]"
                     echo "MOVE:[source_path]:[target_path] (if the file needs to be moved)"
                     echo "EDIT:[file_path]:[description of changes needed] (if the file needs editing)"
                     echo ""
@@ -282,6 +288,12 @@ main_menu() {
                 fi
                 ;;
             6)
+                # Show the AI prompt again
+                # Remove the marker file so the prompt will be shown again
+                rm -f "$PROJECT_ROOT/.prompt_shown"
+                echo "AI prompt will be shown the next time you process a batch of files."
+                ;;
+            7)
                 echo "Exiting."
                 rm "$PROJECT_ROOT/.prompt_shown"
                 exit 0

@@ -1,4 +1,10 @@
 <?php
+/**
+ * Tests for Accessibility Checker Interface
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Unit\Interfaces
+ */
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Interfaces;
 

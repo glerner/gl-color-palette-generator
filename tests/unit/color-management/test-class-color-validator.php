@@ -1,4 +1,11 @@
 <?php
+/**
+ * Tests for Color_Validator class
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Unit\Color_Management
+ */
+
 namespace GL_Color_Palette_Generator\Tests\Unit\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Validator;

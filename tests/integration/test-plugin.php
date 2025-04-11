@@ -1,4 +1,10 @@
 <?php declare(strict_types=1);
+/**
+ * Basic integration test to verify plugin setup
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Integration
+ */
 
 namespace GL_Color_Palette_Generator\Tests\Integration;
 

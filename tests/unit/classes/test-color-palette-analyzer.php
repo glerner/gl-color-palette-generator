@@ -3,6 +3,7 @@
  * Color Palette Analyzer Tests
  *
  * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Unit\Classes
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0

@@ -3,6 +3,7 @@
  * Test Color Palette Renderer
  *
  * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Integration\Color_Management
  */
 
 namespace GL_Color_Palette_Generator\Tests\Integration\Color_Management;

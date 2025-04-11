@@ -14,7 +14,7 @@ use GL_Color_Palette_Generator\Types\Provider_Config;
  * the factory that creates providers, not a provider implementation itself.
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests
+ * @subpackage Tests\Unit\Providers
  */
 class Test_AI_Provider_Factory extends Test_Provider_Mock {
 	protected AI_Provider_Factory $factory;
