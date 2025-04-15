@@ -3,11 +3,12 @@
  * Tests for the Localization_Manager class.
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Localization
+ * @subpackage Tests\WP_Mock\Localization
  * @since 1.0.0
+ * @author George Lerner
  */
 
-namespace GL_Color_Palette_Generator\Tests\Localization;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Localization;
 
 use GL_Color_Palette_Generator\Localization\Localization_Manager;
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;

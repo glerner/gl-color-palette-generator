@@ -4,11 +4,12 @@ declare(strict_types=1);
  * Tests for the Prompt_Engineer class.
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Generators
+ * @subpackage Tests\WP_Mock\Generators
  * @since 1.0.0
+ * @author George Lerner
  */
 
-namespace GL_Color_Palette_Generator\Tests\Generators;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Generators;
 
 use GL_Color_Palette_Generator\Generators\Prompt_Engineer;
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;

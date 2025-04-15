@@ -1,9 +1,12 @@
-<?php
+<?php declare(strict_types=1);
+
 /**
  * Tests for the Palm Provider
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Tests\Unit\Providers
+ * @since 1.0.0
+ * @covers GL_Color_Palette_Generator\Providers\Palm_Provider
  */
 namespace GL_Color_Palette_Generator\Tests\Unit\Providers;
 

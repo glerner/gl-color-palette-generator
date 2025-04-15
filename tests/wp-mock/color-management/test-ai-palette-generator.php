@@ -5,6 +5,8 @@
  * @package GL_Color_Palette_Generator
  * @subpackage Tests\Color_Management
  * @bootstrap wp-mock
+ * @author George Lerner
+ * @since 1.0.0
  *
  * @covers GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator
  * @group color-management
@@ -14,12 +16,24 @@
 namespace GL_Color_Palette_Generator\Tests\Color_Management;
 
 use GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator;
-use GL_Color_Palette_Generator\Utils\Color_Utility;
+use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use GL_Color_Palette_Generator\Interfaces\Color_Constants;
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
 
 class Test_AI_Palette_Generator extends WP_Mock_Test_Case {
+	/**
+	 * Color utility instance
+	 *
+	 * @var Color_Utility|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $color_utility;
+
+	/**
+	 * Generator instance
+	 *
+	 * @var Color_Palette_Generator
+	 */
 	private $generator;
 
 	protected function setUp(): void {

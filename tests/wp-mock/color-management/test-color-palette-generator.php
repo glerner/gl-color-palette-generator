@@ -3,10 +3,12 @@
  * Tests for Color_Palette_Generator class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Color_Management
+ * @subpackage Tests\WP_Mock\Color_Management
+ * @author George Lerner
+ * @since 1.0.0
  */
 
-namespace GL_Color_Palette_Generator\Tests\Color_Management;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Color_Management;
 
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator;
@@ -21,6 +23,8 @@ use Mockery;
 
 /**
  * Class Test_Color_Palette_Generator
+ *
+ * @covers GL_Color_Palette_Generator\Color_Management\Color_Palette_Generator
  */
 class Test_Color_Palette_Generator extends WP_Mock_Test_Case implements Color_Constants {
 	/**

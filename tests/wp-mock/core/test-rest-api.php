@@ -6,11 +6,14 @@
  * Ensures proper registration and handling of REST routes.
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Core
+ * @subpackage Tests\WP_Mock\Core
  * @since 1.0.0
+ * @author George Lerner
+ *
+ * @covers GL_Color_Palette_Generator\Core\REST_API
  */
 
-namespace GL_Color_Palette_Generator\Tests\Core;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Core;
 
 use GL_Color_Palette_Generator\Core\REST_API;
 use WP_Mock;

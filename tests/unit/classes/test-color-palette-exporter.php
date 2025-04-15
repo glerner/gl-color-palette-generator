@@ -1,8 +1,12 @@
 <?php
 /**
- * Color Palette Exporter Tests
+ * Color Palette Exporter Tests - Unit Tests for Pure PHP Functionality
+ *
+ * Note: WordPress-dependent functionality is tested in the WP-Mock test file:
+ * /tests/wp-mock/classes/test-color-palette-exporter.php
  *
  * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Unit\Classes
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
@@ -11,9 +15,9 @@
 namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
 use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
-use GL_Color_Palette_Generator\Color_Palette;
-use GL_Color_Palette_Generator\Color_Palette_Exporter;
-use GL_Color_Palette_Generator\Color_Palette_Formatter;
+use GL_Color_Palette_Generator\Color_Management\Color_Palette;
+use GL_Color_Palette_Generator\Color_Management\Color_Palette_Exporter;
+use GL_Color_Palette_Generator\Color_Management\Color_Palette_Formatter;
 
 class Test_Color_Palette_Exporter extends Unit_Test_Case {
 	protected Color_Palette_Exporter $exporter;

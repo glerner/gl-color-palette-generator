@@ -4,6 +4,10 @@
  *
  * @package GL_Color_Palette_Generator
  * @subpackage Tests\Color_Management
+ * @author George Lerner
+ * @since 1.0.0
+ *
+ * @covers GL_Color_Palette_Generator\Color_Management\Color_Accessibility
  */
 
 namespace GL_Color_Palette_Generator\Tests\Color_Management;

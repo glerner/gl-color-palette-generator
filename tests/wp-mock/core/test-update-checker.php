@@ -3,10 +3,14 @@
  * Test Update Checker Class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Core
+ * @subpackage Tests\WP_Mock\Core
+ * @author George Lerner
+ * @since 1.0.0
+ *
+ * @covers GL_Color_Palette_Generator\Core\Update_Checker
  */
 
-namespace GL_Color_Palette_Generator\Tests\Core;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Core;
 
 use GL_Color_Palette_Generator\Core\Update_Checker;
 use WP_Mock;

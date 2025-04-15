@@ -3,7 +3,11 @@
  * Test Assets Class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Core
+ * @subpackage Tests\WP_Mock\Core
+ * @author George Lerner
+ * @since 1.0.0
+ *
+ * @covers GL_Color_Palette_Generator\Core\Assets
  */
 
 namespace GL_Color_Palette_Generator\Tests\Core;

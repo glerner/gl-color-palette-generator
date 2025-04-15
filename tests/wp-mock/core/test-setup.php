@@ -3,11 +3,15 @@
  * Test Setup Class
  *
  * @package GL_Color_Palette_Generator
+ * @subpackage Tests\WP_Mock\Core
  * @author  George Lerner
+ * @since 1.0.0
  * @link    https://website-tech.glerner.com/
+ *
+ * @covers GL_Color_Palette_Generator\Core\Setup
  */
 
-namespace GL_Color_Palette_Generator\Tests\Core;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Core;
 
 use GL_Color_Palette_Generator\Core\Setup;
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;

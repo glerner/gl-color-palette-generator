@@ -3,6 +3,7 @@
  * Color Palette Renderer Tests
  *
  * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Unit\Classes
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
@@ -15,6 +16,11 @@ use GL_Color_Palette_Generator\Color_Palette;
 use GL_Color_Palette_Generator\Color_Palette_Renderer;
 use GL_Color_Palette_Generator\Color_Palette_Formatter;
 
+/**
+ * Test class for Color_Palette_Renderer core functionality
+ *
+ * @covers GL_Color_Palette_Generator\Color_Palette_Renderer
+ */
 class Test_Color_Palette_Renderer extends Unit_Test_Case {
 	private Color_Palette_Renderer $renderer;
 	private Color_Palette_Formatter $formatter;

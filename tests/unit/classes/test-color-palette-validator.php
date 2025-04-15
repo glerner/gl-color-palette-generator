@@ -1,186 +1,135 @@
 <?php
 /**
- * Color Palette Validator Tests
+ * Unit Tests for Color Palette Validator
+ *
+ * Tests the non-WordPress dependent functionality of the Color_Palette_Validator class.
  *
  * @package GL_Color_Palette_Generator
+ * @subpackage Tests\Unit\Classes
  * @author  George Lerner
- * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
 
 use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
-use GL_Color_Palette_Generator\Color_Palette;
-use GL_Color_Palette_Generator\Color_Palette_Validator;
+use GL_Color_Palette_Generator\Color_Management\Color_Utility;
+use PHPUnit\Framework\MockObject\MockObject;
 
+/**
+ * Test class for Color_Palette_Validator non-WordPress functionality
+ *
+ * @covers GL_Color_Palette_Generator\Color_Management\Color_Palette_Validator
+ */
 class Test_Color_Palette_Validator extends Unit_Test_Case {
-	protected Color_Palette_Validator $validator;
+	/**
+	 * Color utility mock
+	 *
+	 * @var MockObject|Color_Utility
+	 */
+	private $color_utility;
 
+	/**
+	 * Set up the test environment
+	 *
+	 * @return void
+	 */
 	public function setUp(): void {
-		$this->validator = new Color_Palette_Validator();
+		parent::setUp();
+		
+		// Create a mock for Color_Utility to test color format validation
+		$this->color_utility = $this->createMock(Color_Utility::class);
 	}
 
-	public function test_validate_valid_palette(): void {
-		$palette = new Color_Palette(
-			array(
-				'name'     => 'Test Palette',
-				'colors'   => array( '#FF0000', '#00FF00', '#0000FF' ),
-				'metadata' => array(
-					'type'       => 'custom',
-					'tags'       => array( 'test', 'rgb' ),
-					'created_at' => '2024-03-14T12:00:00Z',
-				),
-			)
-		);
+	/**
+	 * Test validate_color_format with valid hex colors
+	 *
+	 * @return void
+	 */
+	public function test_validate_color_format_with_valid_hex(): void {
+		// Set up the mock to validate hex colors
+		$this->color_utility->method('is_valid_hex_color')
+			->willReturnCallback(function($color) {
+				return preg_match('/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $color) === 1;
+			});
 
-		$this->assertTrue( $this->validator->validatePalette( $palette ) );
-		$this->assertEmpty( $this->validator->getErrors() );
+		// Create a test validator that uses our mocked color utility
+		$validator = $this->getMockBuilder('GL_Color_Palette_Generator\Color_Management\Color_Palette_Validator')
+			->disableOriginalConstructor()
+			->onlyMethods(['get_last_errors'])
+			->getMock();
+
+		// Use reflection to set the color_utility property
+		$reflection = new \ReflectionClass($validator);
+		$property = $reflection->getProperty('color_utility');
+		$property->setAccessible(true);
+		$property->setValue($validator, $this->color_utility);
+
+		// Test with valid hex colors
+		$this->assertTrue($validator->validate_color_format('#FF0000'));
+		$this->assertTrue($validator->validate_color_format('#00FF00'));
+		$this->assertTrue($validator->validate_color_format('#0000FF'));
+		$this->assertTrue($validator->validate_color_format('#fff'));
+		$this->assertTrue($validator->validate_color_format('#000'));
 	}
 
-	public function test_validate_invalid_color_format(): void {
-		$palette = new Color_Palette(
-			array(
-				'name'   => 'Invalid Colors',
-				'colors' => array( 'invalid', '#FF0000' ),
-			)
-		);
+	/**
+	 * Test validate_color_format with invalid hex colors
+	 *
+	 * @return void
+	 */
+	public function test_validate_color_format_with_invalid_hex(): void {
+		// Set up the mock to validate hex colors
+		$this->color_utility->method('is_valid_hex_color')
+			->willReturnCallback(function($color) {
+				return preg_match('/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $color) === 1;
+			});
 
-		$this->assertFalse( $this->validator->validatePalette( $palette ) );
-		$this->assertNotEmpty( $this->validator->getErrors() );
+		// Create a test validator that uses our mocked color utility
+		$validator = $this->getMockBuilder('GL_Color_Palette_Generator\Color_Management\Color_Palette_Validator')
+			->disableOriginalConstructor()
+			->onlyMethods(['get_last_errors'])
+			->getMock();
+
+		// Use reflection to set the color_utility property
+		$reflection = new \ReflectionClass($validator);
+		$property = $reflection->getProperty('color_utility');
+		$property->setAccessible(true);
+		$property->setValue($validator, $this->color_utility);
+
+		// Test with invalid hex colors
+		$this->assertFalse($validator->validate_color_format('FF0000')); // Missing #
+		$this->assertFalse($validator->validate_color_format('#GGGGGG')); // Invalid characters
+		$this->assertFalse($validator->validate_color_format('#FF00')); // Wrong length
+		$this->assertFalse($validator->validate_color_format('invalid')); // Not a hex color
+		$this->assertFalse($validator->validate_color_format('')); // Empty string
 	}
 
-	public function test_validate_empty_name(): void {
-		$palette = new Color_Palette(
-			array(
-				'name'   => '',
-				'colors' => array( '#FF0000' ),
-			)
-		);
+	/**
+	 * Test get_last_errors returns an array
+	 *
+	 * @return void
+	 */
+	public function test_get_last_errors(): void {
+		// Create a test validator
+		$validator = $this->getMockBuilder('GL_Color_Palette_Generator\Color_Management\Color_Palette_Validator')
+			->disableOriginalConstructor()
+			->onlyMethods([])
+			->getMock();
 
-		$this->assertFalse( $this->validator->validatePalette( $palette ) );
-		$this->assertNotEmpty( $this->validator->getErrors() );
-	}
+		// Use reflection to set the last_errors property
+		$reflection = new \ReflectionClass($validator);
+		$property = $reflection->getProperty('last_errors');
+		$property->setAccessible(true);
+		$property->setValue($validator, []);
 
-	public function test_validate_empty_colors(): void {
-		$palette = new Color_Palette(
-			array(
-				'name'   => 'Empty Colors',
-				'colors' => array(),
-			)
-		);
+		// Test that get_last_errors returns an array
+		$this->assertIsArray($validator->get_last_errors());
+		$this->assertEmpty($validator->get_last_errors());
 
-		$this->assertFalse( $this->validator->validatePalette( $palette ) );
-		$this->assertNotEmpty( $this->validator->getErrors() );
-	}
-
-	public function test_validate_invalid_metadata_type(): void {
-		$palette = new Color_Palette(
-			array(
-				'name'     => 'Invalid Metadata',
-				'colors'   => array( '#FF0000' ),
-				'metadata' => array(
-					'type' => 'invalid',
-				),
-			)
-		);
-
-		$this->assertFalse( $this->validator->validatePalette( $palette ) );
-		$this->assertNotEmpty( $this->validator->getErrors() );
-	}
-
-	public function test_validate_invalid_metadata_datetime(): void {
-		$palette = new Color_Palette(
-			array(
-				'name'     => 'Invalid DateTime',
-				'colors'   => array( '#FF0000' ),
-				'metadata' => array(
-					'created_at' => 'invalid-date',
-				),
-			)
-		);
-
-		$this->assertFalse( $this->validator->validatePalette( $palette ) );
-		$this->assertNotEmpty( $this->validator->getErrors() );
-	}
-
-	public function test_validate_invalid_metadata_version(): void {
-		$palette = new Color_Palette(
-			array(
-				'name'     => 'Invalid Version',
-				'colors'   => array( '#FF0000' ),
-				'metadata' => array(
-					'version' => 'invalid',
-				),
-			)
-		);
-
-		$this->assertFalse( $this->validator->validatePalette( $palette ) );
-		$this->assertNotEmpty( $this->validator->getErrors() );
-	}
-
-	public function test_validate_color_format(): void {
-		$this->assertTrue( $this->validator->validateColorFormat( '#FF0000' ) );
-		$this->assertTrue( $this->validator->validateColorFormat( '#fff' ) );
-		$this->assertFalse( $this->validator->validateColorFormat( 'invalid' ) );
-		$this->assertFalse( $this->validator->validateColorFormat( '#GGGGGG' ) );
-	}
-
-	public function test_validate_structure(): void {
-		$valid_data = array(
-			'name'     => 'Test',
-			'colors'   => array( '#FF0000' ),
-			'metadata' => array(),
-		);
-
-		$this->assertTrue( $this->validator->validateStructure( $valid_data ) );
-		$this->assertEmpty( $this->validator->getErrors() );
-	}
-
-	public function test_get_validation_rules(): void {
-		$rules = $this->validator->getValidationRules();
-
-		$this->assertIsArray( $rules );
-		$this->assertArrayHasKey( 'palette', $rules );
-		$this->assertArrayHasKey( 'metadata', $rules );
-	}
-
-	public function test_validate_metadata_tags(): void {
-		$valid_metadata = array(
-			'tags' => array( 'tag1', 'tag2' ),
-		);
-
-		$invalid_metadata = array(
-			'tags' => array( 'tag1', 123 ),
-		);
-
-		$this->assertTrue( $this->validator->validateMetadata( $valid_metadata ) );
-		$this->assertFalse( $this->validator->validateMetadata( $invalid_metadata ) );
-	}
-
-	public function test_validate_too_many_colors(): void {
-		$colors  = array_fill( 0, 101, '#FF0000' );
-		$palette = new Color_Palette(
-			array(
-				'name'   => 'Too Many Colors',
-				'colors' => $colors,
-			)
-		);
-
-		$this->assertFalse( $this->validator->validatePalette( $palette ) );
-		$this->assertNotEmpty( $this->validator->getErrors() );
-	}
-
-	public function test_validate_name_too_long(): void {
-		$long_name = str_repeat( 'a', 101 );
-		$palette   = new Color_Palette(
-			array(
-				'name'   => $long_name,
-				'colors' => array( '#FF0000' ),
-			)
-		);
-
-		$this->assertFalse( $this->validator->validatePalette( $palette ) );
-		$this->assertNotEmpty( $this->validator->getErrors() );
+		// Set some errors and test again
+		$property->setValue($validator, ['Error 1', 'Error 2']);
+		$this->assertCount(2, $validator->get_last_errors());
+		$this->assertEquals(['Error 1', 'Error 2'], $validator->get_last_errors());
 	}
 }

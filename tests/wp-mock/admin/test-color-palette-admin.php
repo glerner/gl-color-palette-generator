@@ -4,8 +4,10 @@
  * Test Color Palette Admin Class
  *
  * @package GL_Color_Palette_Generator
+ * @subpackage Tests\WP_Mock\Admin
  * @author  George Lerner
  * @link    https://website-tech.glerner.com/
+ * @since 1.0.0
  */
 
 namespace GL_Color_Palette_Generator\Tests\WP_Mock\Admin;

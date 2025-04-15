@@ -3,10 +3,14 @@
  * Tests for Color_Shade_Generator class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Color_Management
+ * @subpackage Tests\WP_Mock\Color_Management
+ * @author George Lerner
+ * @since 1.0.0
+ *
+ * @covers GL_Color_Palette_Generator\Color_Management\Color_Shade_Generator
  */
 
-namespace GL_Color_Palette_Generator\Tests\Color_Management;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Color_Management;
 
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Color_Management\Color_Shade_Generator;
