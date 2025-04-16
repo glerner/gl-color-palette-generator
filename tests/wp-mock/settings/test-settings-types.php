@@ -2,28 +2,64 @@
 /**
  * Tests for Settings Types
  *
+ * This file contains tests for the Settings_Types class which defines constants and validation
+ * methods for plugin settings. The Settings_Types class manages the structure, default values,
+ * and validation rules for all plugin settings.
+ *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Settings
+ * @subpackage Tests\WP_Mock\Settings
  */
 declare(strict_types=1);
 
-namespace GL_Color_Palette_Generator\Tests\Settings;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Settings;
 
 use GL_Color_Palette_Generator\Settings\Settings_Types;
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
 
+/**
+ * Test class for the Settings_Types class
+ *
+ * Tests the constants, field definitions, and validation methods provided by the Settings_Types class.
+ * The Settings_Types class is responsible for defining the structure of plugin settings,
+ * providing default values, and validating user inputs.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\WP_Mock\Settings
+ * @covers GL_Color_Palette_Generator\Settings\Settings_Types
+ */
 class Test_Settings_Types extends WP_Mock_Test_Case {
+	/**
+	 * Set up the test environment before each test.
+	 * 
+	 * Initializes WP_Mock for WordPress function mocking.
+	 *
+	 * @return void
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		WP_Mock::setUp();
 	}
 
+	/**
+	 * Clean up the test environment after each test.
+	 * 
+	 * Tears down WP_Mock to ensure a clean state for the next test.
+	 *
+	 * @return void
+	 */
 	public function tearDown(): void {
 		WP_Mock::tearDown();
 		parent::tearDown();
 	}
 
+	/**
+	 * Test that the AI_PROVIDERS constant is properly defined.
+	 *
+	 * Verifies that the constant is an array and contains the expected AI provider keys.
+	 *
+	 * @return void
+	 */
 	public function test_ai_providers_constant(): void {
 		$this->assertIsArray( Settings_Types::AI_PROVIDERS );
 		$this->assertArrayHasKey( 'openai', Settings_Types::AI_PROVIDERS );
@@ -32,6 +68,14 @@ class Test_Settings_Types extends WP_Mock_Test_Case {
 		$this->assertArrayHasKey( 'cohere', Settings_Types::AI_PROVIDERS );
 	}
 
+	/**
+	 * Test that the DEFAULT_SETTINGS constant is properly defined.
+	 *
+	 * Verifies that the constant is an array, contains all required settings keys,
+	 * and that each setting has the correct data type.
+	 *
+	 * @return void
+	 */
 	public function test_default_settings_constant(): void {
 		$defaults = Settings_Types::DEFAULT_SETTINGS;
 
@@ -55,6 +99,14 @@ class Test_Settings_Types extends WP_Mock_Test_Case {
 		$this->assertIsBool( $defaults['debug_mode'] );
 	}
 
+	/**
+	 * Test the get_field_definitions method.
+	 *
+	 * Verifies that the field definitions array contains all required fields
+	 * and that each field has the correct structure and properties.
+	 *
+	 * @return void
+	 */
 	public function test_field_definitions(): void {
 		$fields = Settings_Types::get_field_definitions();
 
@@ -85,6 +137,14 @@ class Test_Settings_Types extends WP_Mock_Test_Case {
 		$this->assertIsInt( $cache_duration['max'] );
 	}
 
+	/**
+	 * Test the validate_ai_provider method.
+	 *
+	 * Verifies that the method correctly validates valid AI provider values
+	 * and rejects invalid ones.
+	 *
+	 * @return void
+	 */
 	public function test_validate_ai_provider(): void {
 		$this->assertTrue( Settings_Types::validate_ai_provider( 'openai' ) );
 		$this->assertTrue( Settings_Types::validate_ai_provider( 'anthropic' ) );
@@ -93,12 +153,28 @@ class Test_Settings_Types extends WP_Mock_Test_Case {
 		$this->assertFalse( Settings_Types::validate_ai_provider( 'invalid_provider' ) );
 	}
 
+	/**
+	 * Test the validate_api_key method.
+	 *
+	 * Verifies that the method correctly validates API keys based on length
+	 * and format requirements.
+	 *
+	 * @return void
+	 */
 	public function test_validate_api_key(): void {
 		$this->assertTrue( Settings_Types::validate_api_key( 'sk-1234567890abcdef1234567890abcdef1234567890abcdef' ) );
 		$this->assertFalse( Settings_Types::validate_api_key( '' ) );
 		$this->assertFalse( Settings_Types::validate_api_key( 'short_key' ) );
 	}
 
+	/**
+	 * Test the validate_cache_duration method.
+	 *
+	 * Verifies that the method correctly validates cache duration values
+	 * within the acceptable range and rejects values outside that range.
+	 *
+	 * @return void
+	 */
 	public function test_validate_cache_duration(): void {
 		$this->assertTrue( Settings_Types::validate_cache_duration( 0 ) );
 		$this->assertTrue( Settings_Types::validate_cache_duration( 3600 ) );
@@ -107,6 +183,14 @@ class Test_Settings_Types extends WP_Mock_Test_Case {
 		$this->assertFalse( Settings_Types::validate_cache_duration( 86401 ) );
 	}
 
+	/**
+	 * Test the validate_max_colors method.
+	 *
+	 * Verifies that the method correctly validates maximum color values
+	 * within the acceptable range and rejects values outside that range.
+	 *
+	 * @return void
+	 */
 	public function test_validate_max_colors(): void {
 		$this->assertTrue( Settings_Types::validate_max_colors( 2 ) );
 		$this->assertTrue( Settings_Types::validate_max_colors( 10 ) );
@@ -115,6 +199,14 @@ class Test_Settings_Types extends WP_Mock_Test_Case {
 		$this->assertFalse( Settings_Types::validate_max_colors( 21 ) );
 	}
 
+	/**
+	 * Test the validate_default_colors method.
+	 *
+	 * Verifies that the method correctly validates default color values
+	 * within the acceptable range and rejects values outside that range.
+	 *
+	 * @return void
+	 */
 	public function test_validate_default_colors(): void {
 		$this->assertTrue( Settings_Types::validate_default_colors( 2 ) );
 		$this->assertTrue( Settings_Types::validate_default_colors( 5 ) );
@@ -123,11 +215,26 @@ class Test_Settings_Types extends WP_Mock_Test_Case {
 		$this->assertFalse( Settings_Types::validate_default_colors( 11 ) );
 	}
 
+	/**
+	 * Test the validate_boolean method.
+	 *
+	 * Verifies that the method correctly validates boolean values.
+	 *
+	 * @return void
+	 */
 	public function test_validate_boolean(): void {
 		$this->assertTrue( Settings_Types::validate_boolean( true ) );
 		$this->assertTrue( Settings_Types::validate_boolean( false ) );
 	}
 
+	/**
+	 * Test the validate_rate_limit method.
+	 *
+	 * Verifies that the method correctly validates rate limit values
+	 * within the acceptable range and rejects values outside that range.
+	 *
+	 * @return void
+	 */
 	public function test_validate_rate_limit(): void {
 		$this->assertTrue( Settings_Types::validate_rate_limit( 1 ) );
 		$this->assertTrue( Settings_Types::validate_rate_limit( 60 ) );

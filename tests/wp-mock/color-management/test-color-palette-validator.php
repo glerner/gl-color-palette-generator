@@ -1,27 +1,30 @@
 <?php
 /**
- * Unit Tests for Color Palette Validator
+ * WP_Mock Tests for Color Palette Validator
  *
- * Tests the non-WordPress dependent functionality of the Color_Palette_Validator class.
+ * Tests the WordPress-dependent functionality of the Color_Palette_Validator class.
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Unit\Classes
+ * @subpackage Tests\WP_Mock\Color_Management
  * @author  George Lerner
  * @since   1.0.0
  */
 
-namespace GL_Color_Palette_Generator\Tests\Unit\Classes;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Color_Management;
 
-use GL_Color_Palette_Generator\Tests\Base\Unit_Test_Case;
+use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Color_Management\Color_Utility;
 use PHPUnit\Framework\MockObject\MockObject;
+use Brain\Monkey\Functions;
 
 /**
- * Test class for Color_Palette_Validator non-WordPress functionality
+ * Test class for Color_Palette_Validator WordPress functionality
  *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\WP_Mock\Color_Management
  * @covers GL_Color_Palette_Generator\Color_Management\Color_Palette_Validator
  */
-class Test_Color_Palette_Validator extends Unit_Test_Case {
+class Test_Color_Palette_Validator extends WP_Mock_Test_Case {
 	/**
 	 * Color utility mock
 	 *
@@ -36,6 +39,9 @@ class Test_Color_Palette_Validator extends Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		
+		// Set up WP_Mock
+		\WP_Mock::setUp();
 		
 		// Create a mock for Color_Utility to test color format validation
 		$this->color_utility = $this->createMock(Color_Utility::class);
@@ -131,5 +137,15 @@ class Test_Color_Palette_Validator extends Unit_Test_Case {
 		$property->setValue($validator, ['Error 1', 'Error 2']);
 		$this->assertCount(2, $validator->get_last_errors());
 		$this->assertEquals(['Error 1', 'Error 2'], $validator->get_last_errors());
+	}
+
+	/**
+	 * Tear down the test environment
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		\WP_Mock::tearDown();
+		parent::tearDown();
 	}
 }

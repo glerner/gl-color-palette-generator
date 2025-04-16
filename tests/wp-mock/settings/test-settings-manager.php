@@ -3,11 +3,11 @@
  * Tests for the Settings Manager class
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Settings
+ * @subpackage Tests\WP_Mock\Settings
  */
 declare(strict_types=1);
 
-namespace GL_Color_Palette_Generator\Tests\Settings;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Settings;
 
 use GL_Color_Palette_Generator\Settings\Settings_Manager;
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;

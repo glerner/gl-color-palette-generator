@@ -3,17 +3,27 @@
  * Tests for Settings Validator
  *
  * @package GL_Color_Palette_Generator
- * @subpackage Tests\Settings
+ * @subpackage Tests\WP_Mock\Settings
  */
 declare(strict_types=1);
 
-namespace GL_Color_Palette_Generator\Tests\Settings;
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Settings;
 
 use GL_Color_Palette_Generator\Settings\Settings_Validator;
 use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use GL_Color_Palette_Generator\Exceptions\Palette_Generation_Exception;
 use WP_Mock;
 
+/**
+ * Test class for the Settings_Validator class
+ *
+ * Tests the validation logic for plugin settings, including cross-field validation
+ * and exception handling for invalid settings combinations.
+ *
+ * @package GL_Color_Palette_Generator
+ * @subpackage Tests\WP_Mock\Settings
+ * @covers GL_Color_Palette_Generator\Settings\Settings_Validator
+ */
 class Test_Settings_Validator extends WP_Mock_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
