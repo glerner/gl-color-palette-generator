@@ -143,6 +143,52 @@ show_stats() {
     rm -f "$TEMP_COUNT_FILE"
 }
 
+# Function to generate all required temporary files
+generate_temp_files() {
+    echo "Generating required temporary files..."
+
+    # Generate source files list
+    echo "Finding source files..."
+    find "$PROJECT_ROOT/includes" -name "*.php" > "$SOURCE_FILES"
+    echo "Found $(wc -l < "$SOURCE_FILES") source files."
+
+    # Generate test files list
+    echo "Finding test files..."
+    find "$PROJECT_ROOT/tests" -name "test-*.php" | grep -v "/base/" | grep -v "/bootstrap/" > "$TEST_FILES"
+    echo "Found $(wc -l < "$TEST_FILES") test files."
+
+    # Initialize results file if it doesn't exist or if requested to recreate
+    if [ ! -f "$RESULTS_FILE" ] || [ "$1" = "force" ]; then
+        echo "Creating results file..."
+        echo "# Test Analysis Results" > "$RESULTS_FILE"
+        echo "# Format: DECISION:[file_path]:[unit|wp-mock|integration]:[detailed reason for decision]:[OK|MOVE|EDIT|EDIT-MOVE]" >> "$RESULTS_FILE"
+        echo "# Created on $(date)" >> "$RESULTS_FILE"
+        echo "" >> "$RESULTS_FILE"
+    else
+        echo "Results file already exists. Use 'force' option to recreate."
+    fi
+
+    # Initialize bugs file if it doesn't exist or if requested to recreate
+    if [ ! -f "$BUGS_FILE" ] || [ "$1" = "force" ]; then
+        echo "Creating bugs file..."
+        echo "# Code Issues Found During Test Analysis" > "$BUGS_FILE"
+        echo "# Format: BUG:[file_path]:[severity]:[issue_type]:[description]" >> "$BUGS_FILE"
+        echo "# Created on $(date)" >> "$BUGS_FILE"
+        echo "" >> "$BUGS_FILE"
+    else
+        echo "Bugs file already exists. Use 'force' option to recreate."
+    fi
+
+    echo "All required temporary files have been generated."
+}
+
+# Test mapping functionality has been removed as it's now handled by the dedicated generate-test-mapping.php script
+
+# Function to clean up temporary files
+cleanup_temp_files() {
+    rm -f "$PROJECT_ROOT/.filtered_source_files.tmp"
+}
+
 # Function to check for untested files
 check_untested_files() {
     echo "Checking for untested files..."
@@ -166,18 +212,47 @@ check_untested_files() {
         fi
     done < "$SOURCE_FILES"
 
+    # Create a temporary file with all test file basenames for faster lookup
+    TEST_BASENAMES="$PROJECT_ROOT/.test_basenames.tmp"
+    > "$TEST_BASENAMES"
+    while IFS= read -r test_file; do
+        basename "$test_file" .php >> "$TEST_BASENAMES"
+    done < "$TEST_FILES"
+
     # Check each filtered source file for a corresponding test
     while IFS= read -r source_file; do
         # Extract the base name without path and extension
         base_name=$(basename "$source_file" .php)
+        simple_name=${base_name#class-}  # Remove class- prefix if present
+        simple_name=${simple_name#interface-}  # Remove interface- prefix if present
+        simple_name=${simple_name#abstract-}  # Remove abstract- prefix if present
 
-        # Look for corresponding test file
-        if ! grep -q "test-$base_name.php" "$TEST_FILES" && ! grep -q "test-${base_name/-class/}.php" "$TEST_FILES"; then
+        # Try multiple naming patterns
+        found=false
+
+        # Common test naming patterns
+        patterns=("test-$base_name" "test-${base_name/-class/}" "test-$simple_name" \
+                 "test_$base_name" "test_$simple_name" "${simple_name}_test" \
+                 "test-${simple_name}-validator" "test-${simple_name}-manager" \
+                 "test-settings-$simple_name")
+
+        for pattern in "${patterns[@]}"; do
+            if grep -q "^$pattern$" "$TEST_BASENAMES"; then
+                found=true
+                break
+            fi
+        done
+
+        # If no test found with any pattern, mark as untested
+        if [ "$found" = false ]; then
             echo "$source_file" >> "$UNTESTED_FILES"
         fi
     done < "$FILTERED_SOURCE_FILES"
 
-    # Clean up temporary file
+    # Clean up temporary files
+    rm -f "$TEST_BASENAMES"
+
+    # Clean up temporary files
     rm -f "$FILTERED_SOURCE_FILES"
 
     echo "Found $(wc -l < "$UNTESTED_FILES") potentially untested files."
@@ -195,7 +270,8 @@ main_menu() {
         echo "4. Check for untested files"
         echo "5. View bugs/issues found"
         echo "6. Show AI Prompt Again"
-        echo "7. Exit"
+        echo "7. Generate/Regenerate temporary files"
+        echo "8. Exit"
         read -p "Select an option: " option
 
         case $option in
@@ -287,15 +363,27 @@ main_menu() {
                     echo "No bugs or issues have been recorded yet."
                 fi
                 ;;
-            6)
+            7)
                 # Show the AI prompt again
                 # Remove the marker file so the prompt will be shown again
                 rm -f "$PROJECT_ROOT/.prompt_shown"
                 echo "AI prompt will be shown the next time you process a batch of files."
                 ;;
-            7)
+            8)
+                # Generate temporary files
+                echo "This will generate or regenerate the following files:"
+                echo "- $SOURCE_FILES"
+                echo "- $TEST_FILES"
+                read -p "Do you want to force recreation of existing results and bugs files? (y/n): " force_recreate
+                if [[ "$force_recreate" =~ ^[Yy]$ ]]; then
+                    generate_temp_files "force"
+                else
+                    generate_temp_files
+                fi
+                ;;
+            9)
                 echo "Exiting."
-                rm "$PROJECT_ROOT/.prompt_shown"
+                rm -f "$PROJECT_ROOT/.prompt_shown"
                 exit 0
                 ;;
             *)
@@ -306,18 +394,20 @@ main_menu() {
 }
 
 # Check if required input files exist
-if [ ! -f "$SOURCE_FILES" ]; then
-    echo "Error: Source files list not found at $SOURCE_FILES"
-    echo "Please create this file with a list of source files to be tested using:"
-    echo "find $PROJECT_ROOT/includes -name '*.php' > $SOURCE_FILES"
-    exit 1
-fi
+if [ ! -f "$SOURCE_FILES" ] || [ ! -f "$TEST_FILES" ]; then
+    echo "Required temporary files are missing."
+    echo "Would you like to generate them now? (y/n)"
+    read -p "> " generate_now
 
-if [ ! -f "$TEST_FILES" ]; then
-    echo "Error: Test files list not found at $TEST_FILES"
-    echo "Please create this file with a list of test files to analyze using:"
-    echo "find $PROJECT_ROOT/tests -name 'test-*.php' | grep -v '/base/' | grep -v '/bootstrap/' > $TEST_FILES"
-    exit 1
+    if [[ "$generate_now" =~ ^[Yy]$ ]]; then
+        generate_temp_files
+    else
+        echo "Error: Required files are missing. Cannot continue."
+        echo "To generate them manually:"
+        echo "find $PROJECT_ROOT/includes -name '*.php' > $SOURCE_FILES"
+        echo "find $PROJECT_ROOT/tests -name 'test-*.php' | grep -v '/base/' | grep -v '/bootstrap/' > $TEST_FILES"
+        exit 1
+    fi
 fi
 
 # Initialize results file if it doesn't exist

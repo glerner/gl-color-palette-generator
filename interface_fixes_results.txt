@@ -1,54 +1,145 @@
-
-=== BATCH 1 (files 1-10) ===
-
-MATCH:/home/george/sites/gl-color-palette-generator/tests/integration/color-management/test-color-palette-renderer.php:Color_Constants
-MATCH:/home/george/sites/gl-color-palette-generator/tests/integration/export/test-theme-json-generator.php:Color_Constants
-test-anthropic-provider-live-api.php: No interface references found
-test-azure-openai-provider-live-api.php: No interface references found
-test-cohere-provider-live-api.php: No interface references found
-test-huggingface-provider-live-api.php: No interface references found
-test-openai-provider-live-api.php: No interface references found
-test-palm-provider-live-api.php: No interface references found
-test-ajax-handler.php: No interface references found
-test-plugin-activation.php: No interface references found
-
-=== BATCH 2 (files 11-20) ===
-
-test-plugin.php: No interface references found
-test-wordpress-integration.php: No interface references found
-test-color-palette-analyzer.php: No interface references found
-test-color-palette-converter.php: No interface references found
-test-color-palette-formatter.php: No interface references found
-test-color-palette-importer.php: No interface references found
-test-color-palette-optimizer.php: No interface references found
-test-color-palette.php: No interface references found
-MATCH:/home/george/sites/gl-color-palette-generator/tests/unit/color-management/test-class-color-metrics.php:Color_Constants
-MATCH:/home/george/sites/gl-color-palette-generator/tests/unit/color-management/test-class-color-validator.php:Color_Constants
-
-=== BATCH 3 (files 21-30) ===
-
-test-color-analysis.php: No interface references found
-MATCH:/home/george/sites/gl-color-palette-generator/tests/unit/color-management/test-color-utility.php:Color_Constants
-test-class-error-handler.php: No interface references found
-test-class-logger.php: No interface references found
-test-class-palette-cache.php: No interface references found
-test-class-rate-limiter.php: No interface references found
-test-css-utilities.php: No interface references found
-test-name-generator.php: No interface references found
-MATCH:/home/george/sites/gl-color-palette-generator/tests/unit/interfaces/test-accessibility-checker.php:Accessibility_Checker_Interface
-MATCH:/home/george/sites/gl-color-palette-generator/tests/unit/interfaces/test-admin-interface.php:AdminInterface
-
-=== BATCH 4 (files 31-40) ===
-
-MATCH:/home/george/sites/gl-color-palette-generator/tests/unit/interfaces/test-ai-interfaces.php:AI_Color_Service
-MISMATCH:/home/george/sites/gl-color-palette-generator/tests/unit/interfaces/test-ai-interfaces.php:AI_Provider:AI_Provider_Interface:ai-provider-interface:52:/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-ai-provider.php:No
-MATCH:/home/george/sites/gl-color-palette-generator/tests/unit/interfaces/test-ai-interfaces.php:AI_Service
-MATCH:/home/george/sites/gl-color-palette-generator/tests/unit/interfaces/test-analytics.php:Analytics
-NOMATCH:/home/george/sites/gl-color-palette-generator/tests/unit/interfaces/test-business-analyzer.php:BusinessAnalyzer:/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-businessanalyzer.php:No
-NOMATCH:/home/george/sites/gl-color-palette-generator/tests/unit/interfaces/test-cache-manager.php:CacheManager:/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-cachemanager.php:No
-NOMATCH:/home/george/sites/gl-color-palette-generator/tests/unit/interfaces/test-color-exporter.php:ColorExporter:/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-colorexporter.php:No
-NOMATCH:/home/george/sites/gl-color-palette-generator/tests/unit/interfaces/test-color-harmonizer.php:ColorHarmonizer:/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-colorharmonizer.php:No
-NOMATCH:/home/george/sites/gl-color-palette-generator/tests/unit/interfaces/test-color-metrics-analyzer.php:ColorMetricsAnalyzer:/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-colormetricsanalyzer.php:No
-NOMATCH:/home/george/sites/gl-color-palette-generator/tests/unit/interfaces/test-color-mixer.php:ColorMixer:/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-colormixer.php:No
-NOMATCH:/home/george/sites/gl-color-palette-generator/tests/unit/interfaces/test-color-palette-analytics.php:Color_Palette_Analytics:/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-analytics.php:No
-MISMATCH:/home/george/sites/gl-color-palette-generator/tests/unit/interfaces/test-color-palette-analyzer.php:Color_Palette_Analyzer:Color_Palette_Analyzer_Interface:color-palette-analyzer:100:/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-analyzer.php:Yes
+# Interface Test Analysis Results
+#
+# This file contains the results of analyzing interface references in test files.
+# Each line represents a test file and its interface references.
+# Generated by bin/interface-test-fixer.sh on Thu Apr 17 01:14:15 PM MST 2025
+#
+## Field Descriptions
+#
+# 1. STATUS: MATCH (correct reference), MISMATCH (incorrect reference), or NOMATCH (no matching interface found)
+# 2. TEST_FILE: Path to the test file
+# 3. INTERFACE_REF: The interface reference found in the test file
+# 4. SUGGESTED_INTERFACE: For MISMATCHes, the suggested correct interface name
+# 5. INTERFACE_FILENAME: The expected filename for the interface
+# 6. CONFIDENCE: For MISMATCHes, the confidence level (percentage) of the suggestion
+# 7. INTERFACE_FILE_PATH: Path to the expected interface file
+# 8. FILE_EXISTS: Whether the expected interface file exists (Yes/No)
+# 9. TEST_CLASS_COUNT: Number of test classes in the file
+# 10. BATCH: The processing batch number
+# 11. FIX_STATUS: Whether the fix has been applied (Pending/Applied/Skipped)
+#
+## Results
+#
+STATUS|TEST_FILE|INTERFACE_REF|SUGGESTED_INTERFACE|INTERFACE_FILENAME|CONFIDENCE|INTERFACE_FILE_PATH|FILE_EXISTS|TEST_CLASS_COUNT|BATCH|FIX_STATUS
+------|---------|-------------|-------------------|------------------|----------|-------------------|-----------|----------------|-----|----------
+INFO|tests/integration/providers/test-huggingface-provider-live-api.php|NO_INTERFACES||||||||1|N/A
+INFO|tests/integration/providers/test-cohere-provider-live-api.php|NO_INTERFACES||||||||1|N/A
+INFO|tests/integration/providers/test-palm-provider-live-api.php|NO_INTERFACES||||||||1|N/A
+INFO|tests/integration/providers/test-azure-openai-provider-live-api.php|NO_INTERFACES||||||||1|N/A
+INFO|tests/integration/providers/test-anthropic-provider-live-api.php|NO_INTERFACES||||||||1|N/A
+INFO|tests/integration/providers/test-openai-provider-live-api.php|NO_INTERFACES||||||||1|N/A
+MATCH|tests/integration/color-management/test-color-palette-renderer.php|Color_Constants||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-constants.php|Yes||1|N/A
+INFO|tests/integration/test-plugin-activation.php|NO_INTERFACES||||||||1|N/A
+INFO|tests/integration/test-ajax-handler.php|NO_INTERFACES||||||||1|N/A
+MATCH|tests/integration/export/test-theme-json-generator.php|Color_Constants||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-constants.php|Yes||1|N/A
+INFO|tests/integration/test-plugin.php|NO_INTERFACES||||||||2|N/A
+INFO|tests/integration/test-wordpress-integration.php|NO_INTERFACES||||||||2|N/A
+INFO|tests/unit/generators/test-name-generator.php|NO_INTERFACES||||||||2|N/A
+INFO|tests/unit/providers/test-google-palm-provider.php|NO_INTERFACES||||||||2|N/A
+INFO|tests/unit/providers/test-color-pizza-provider.php|NO_INTERFACES||||||||2|N/A
+INFO|tests/unit/providers/test-ai-provider-factory.php|NO_INTERFACES||||||||2|N/A
+INFO|tests/unit/providers/test-openai-provider.php|NO_INTERFACES||||||||2|N/A
+INFO|tests/unit/providers/test-palm-provider.php|NO_INTERFACES||||||||2|N/A
+INFO|tests/unit/providers/test-azure-openai-provider.php|NO_INTERFACES||||||||2|N/A
+INFO|tests/unit/providers/test-anthropic-provider.php|NO_INTERFACES||||||||2|N/A
+INFO|tests/unit/providers/test-cohere-provider.php|NO_INTERFACES||||||||3|N/A
+INFO|tests/unit/providers/test-huggingface-provider.php|NO_INTERFACES||||||||3|N/A
+MATCH|tests/unit/color-management/test-color-utility.php|Color_Constants||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-constants.php|Yes||3|N/A
+INFO|tests/unit/color-management/test-color-analysis.php|NO_INTERFACES||||||||3|N/A
+MATCH|tests/unit/color-management/test-class-color-metrics.php|Color_Constants||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-constants.php|Yes||3|N/A
+MATCH|tests/unit/color-management/test-class-color-validator.php|Color_Constants||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-constants.php|Yes||3|N/A
+INFO|tests/unit/core/test-class-palette-cache.php|NO_INTERFACES||||||||3|N/A
+INFO|tests/unit/core/test-class-rate-limiter.php|NO_INTERFACES||||||||3|N/A
+INFO|tests/unit/core/test-class-logger.php|NO_INTERFACES||||||||3|N/A
+INFO|tests/unit/core/test-class-error-handler.php|NO_INTERFACES||||||||3|N/A
+MISMATCH|tests/unit/interfaces/test-color-palette-preview.php|Color_Palette_Preview|Color_Palette_Preview_Interface|color-palette-preview|100|/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-preview.php|Yes||4|Pending
+NOMATCH|tests/unit/interfaces/test-business-analyzer.php|BusinessAnalyzer|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-businessanalyzer.php|No||4|N/A
+NOMATCH|tests/unit/interfaces/test-color-palette-converter.php|Color_Palette_Converter|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-converter.php|No||4|N/A
+NOMATCH|tests/unit/interfaces/test-harmony-generator.php|HarmonyGenerator|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-harmonygenerator.php|No||4|N/A
+NOMATCH|tests/unit/interfaces/test-color-scheme-generator.php|ColorSchemeGenerator|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-colorschemegenerator.php|No||4|N/A
+MISMATCH|tests/unit/interfaces/test-color-palette-importer.php|Color_Palette_Importer|Color_Palette_Importer_Interface|color-palette-importer|100|/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-importer.php|Yes||4|Pending
+MISMATCH|tests/unit/interfaces/test-color-palette-storage.php|Color_Palette_Storage|Color_Palette_Storage_Interface|color-palette-storage|100|/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-storage.php|Yes||4|Pending
+MISMATCH|tests/unit/interfaces/test-color-palette-manager.php|Color_Palette_Manager|Color_Palette_Manager_Interface|color-palette-manager|100|/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-manager.php|Yes||4|Pending
+NOMATCH|tests/unit/interfaces/test-palette-generator.php|PaletteGenerator|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-palettegenerator.php|No||4|N/A
+NOMATCH|tests/unit/interfaces/test-color-metrics-analyzer.php|ColorMetricsAnalyzer|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-colormetricsanalyzer.php|No||4|N/A
+MISMATCH|tests/unit/interfaces/test-color-palette-formatter.php|Color_Palette_Formatter|Color_Palette_Formatter_Interface|color-palette-formatter|100|/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-formatter.php|Yes||5|Pending
+NOMATCH|tests/unit/interfaces/test-performance-monitor.php|PerformanceMonitor|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-performancemonitor.php|No||5|N/A
+NOMATCH|tests/unit/interfaces/test-color-harmonizer.php|ColorHarmonizer|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-colorharmonizer.php|No||5|N/A
+NOMATCH|tests/unit/interfaces/test-palette-analysis-interfaces.php|Color_Palette_Analytics|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-analytics.php|No||5|N/A
+MISMATCH|tests/unit/interfaces/test-palette-analysis-interfaces.php|Color_Palette_Analyzer|Color_Palette_Analyzer_Interface|color-palette-analyzer|100|/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-analyzer.php|Yes||5|Pending
+NOMATCH|tests/unit/interfaces/test-palette-analysis-interfaces.php|ColorMetricsAnalyzer|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-colormetricsanalyzer.php|No||5|N/A
+NOMATCH|tests/unit/interfaces/test-error-reporter.php|ErrorReporter|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-errorreporter.php|No||5|N/A
+NOMATCH|tests/unit/interfaces/test-palette-optimizer.php|PaletteOptimizer|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-paletteoptimizer.php|No||5|N/A
+NOMATCH|tests/unit/interfaces/test-color-palette-analytics.php|Color_Palette_Analytics|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-analytics.php|No||5|N/A
+MISMATCH|tests/unit/interfaces/test-color-palette-validator.php|Color_Palette_Validator|Color_Palette_Validator_Interface|color-palette-validator|100|/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-validator.php|Yes||5|Pending
+MATCH|tests/unit/interfaces/test-admin-interface.php|AdminInterface||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-admininterface.php|No||5|N/A
+MATCH|tests/unit/interfaces/test-color-palette-logger.php|Color_Palette_Logger||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-logger.php|Yes||5|N/A
+MATCH|tests/unit/interfaces/test-color-palette-version-control.php|Color_Palette_Version_Control||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-version-control.php|Yes||6|N/A
+NOMATCH|tests/unit/interfaces/test-color-exporter.php|ColorExporter|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-colorexporter.php|No||6|N/A
+MATCH|tests/unit/interfaces/test-analytics.php|Analytics||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-analytics.php|Yes||6|N/A
+MISMATCH|tests/unit/interfaces/test-color-palette-optimizer.php|Color_Palette_Optimizer|Color_Palette_Optimizer_Interface|color-palette-optimizer|100|/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-optimizer.php|Yes||6|Pending
+NOMATCH|tests/unit/interfaces/test-theme-generator.php|ThemeGenerator|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-themegenerator.php|No||6|N/A
+NOMATCH|tests/unit/interfaces/test-file-handler.php|FileHandler|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-filehandler.php|No||6|N/A
+MATCH|tests/unit/interfaces/test-color-palette-cache.php|Color_Palette_Cache||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-cache.php|Yes||6|N/A
+MISMATCH|tests/unit/interfaces/test-data-exporter.php|DataExporter|Exporter|exporter|53|/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-dataexporter.php|No||6|Pending
+MATCH|tests/unit/interfaces/test-accessibility-checker.php|Accessibility_Checker_Interface||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-accessibility-checker-interface.php|No||6|N/A
+MATCH|tests/unit/interfaces/test-color-palette-search.php|Color_Palette_Search||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-search.php|Yes||6|N/A
+MISMATCH|tests/unit/interfaces/test-color-palette-analyzer.php|Color_Palette_Analyzer|Color_Palette_Analyzer_Interface|color-palette-analyzer|100|/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-analyzer.php|Yes||7|Pending
+MATCH|tests/unit/interfaces/test-ai-interfaces.php|AI_Color_Service||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-ai-color-service.php|Yes||7|N/A
+MISMATCH|tests/unit/interfaces/test-ai-interfaces.php|AI_Provider|AI_Provider_Interface|ai-provider-interface|52|/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-ai-provider.php|No||7|Pending
+MATCH|tests/unit/interfaces/test-ai-interfaces.php|AI_Service||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-ai-service.php|Yes||7|N/A
+MATCH|tests/unit/interfaces/test-color-palette-notifier.php|Color_Palette_Notifier||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-notifier.php|Yes||7|N/A
+NOMATCH|tests/unit/interfaces/test-error-handler.php|ErrorHandler|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-errorhandler.php|No||7|N/A
+NOMATCH|tests/unit/interfaces/test-palette-manager.php|PaletteManager|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-palettemanager.php|No||7|N/A
+NOMATCH|tests/unit/interfaces/test-color-mixer.php|ColorMixer|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-colormixer.php|No||7|N/A
+NOMATCH|tests/unit/interfaces/test-cache-manager.php|CacheManager|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-cachemanager.php|No||7|N/A
+MISMATCH|tests/unit/interfaces/test-color-palette-exporter.php|Color_Palette_Exporter|Color_Palette_Exporter_Interface|color-palette-exporter|100|/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-exporter.php|Yes||7|Pending
+MATCH|tests/unit/interfaces/test-exporter.php|Exporter||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-exporter.php|Yes||7|N/A
+NOMATCH|tests/unit/interfaces/test-visualization-engine.php|VisualizationEngine|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-visualizationengine.php|No||7|N/A
+NOMATCH|tests/unit/interfaces/test-settings-manager.php|SettingsManager|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-settingsmanager.php|No||8|N/A
+MATCH|tests/unit/interfaces/test-validator.php|Validator||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-validator.php|Yes||8|N/A
+MATCH|tests/unit/interfaces/test-color-palette-history.php|Color_Palette_History||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-palette-history.php|Yes||8|N/A
+NOMATCH|tests/unit/interfaces/test-cultural-analyzer.php|CulturalAnalyzer|||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-culturalanalyzer.php|No||8|N/A
+MISMATCH|tests/unit/interfaces/test-color-theme-manager.php|Color_Theme_Manager|ColorThemeManager|color-theme-manager|100|/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-theme-manager.php|Yes||8|Pending
+INFO|tests/unit/export/test-css-utilities.php|NO_INTERFACES||||||||8|N/A
+INFO|tests/unit/classes/test-color-palette-renderer.php|NO_INTERFACES||||||||8|N/A
+INFO|tests/unit/classes/test-color-palette-converter.php|NO_INTERFACES||||||||8|N/A
+INFO|tests/unit/classes/test-color-palette-importer.php|NO_INTERFACES||||||||8|N/A
+INFO|tests/unit/classes/test-color-palette-formatter.php|NO_INTERFACES||||||||8|N/A
+INFO|tests/unit/classes/test-color-palette.php|NO_INTERFACES||||||||9|N/A
+INFO|tests/unit/classes/test-color-palette-optimizer.php|NO_INTERFACES||||||||9|N/A
+INFO|tests/unit/classes/test-color-palette-analyzer.php|NO_INTERFACES||||||||9|N/A
+INFO|tests/unit/classes/test-color-palette-exporter.php|NO_INTERFACES||||||||9|N/A
+INFO|tests/unit/system/test-autoloader.php|NO_INTERFACES||||||||9|N/A
+INFO|tests/unit/types/test-color-types.php|NO_INTERFACES||||||||9|N/A
+INFO|tests/unit/validation/test-class-color-validator.php|NO_INTERFACES||||||||9|N/A
+INFO|tests/wp-mock/generators/test-palette-generator.php|NO_INTERFACES||||||||9|N/A
+INFO|tests/wp-mock/generators/test-prompt-engineer.php|NO_INTERFACES||||||||9|N/A
+INFO|tests/wp-mock/generators/test-ml-color-engine.php|NO_INTERFACES||||||||9|N/A
+MATCH|tests/wp-mock/color-management/test-color-palette-renderer.php|Color_Constants||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-constants.php|Yes||10|N/A
+MATCH|tests/wp-mock/color-management/test-color-scheme-generator.php|Color_Constants||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-constants.php|Yes||10|N/A
+MATCH|tests/wp-mock/color-management/test-color-accessibility.php|Color_Constants||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-constants.php|Yes||10|N/A
+MATCH|tests/wp-mock/color-management/test-color-palette-generator.php|Color_Constants||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-constants.php|Yes||10|N/A
+INFO|tests/wp-mock/color-management/test-color-palette.php|NO_INTERFACES||||||||10|N/A
+MATCH|tests/wp-mock/color-management/test-ai-palette-generator.php|Color_Constants||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-constants.php|Yes||10|N/A
+INFO|tests/wp-mock/color-management/test-color-palette-validator.php|NO_INTERFACES||||||||10|N/A
+MATCH|tests/wp-mock/color-management/test-color-shade-generator.php|Color_Constants||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-constants.php|Yes||10|N/A
+INFO|tests/wp-mock/security/test-security-manager.php|NO_INTERFACES||||||||10|N/A
+INFO|tests/wp-mock/settings/test-settings-validator.php|NO_INTERFACES||||||||10|N/A
+INFO|tests/wp-mock/settings/test-settings-types.php|NO_INTERFACES||||||||11|N/A
+INFO|tests/wp-mock/settings/test-settings-migrator.php|NO_INTERFACES||||||||11|N/A
+INFO|tests/wp-mock/settings/test-settings-manager.php|NO_INTERFACES||||||||11|N/A
+INFO|tests/wp-mock/core/test-assets.php|NO_INTERFACES||||||||11|N/A
+INFO|tests/wp-mock/core/test-rest-api.php|NO_INTERFACES||||||||11|N/A
+INFO|tests/wp-mock/core/test-setup.php|NO_INTERFACES||||||||11|N/A
+INFO|tests/wp-mock/core/test-update-checker.php|NO_INTERFACES||||||||11|N/A
+INFO|tests/wp-mock/test-sample-wp-mock.php|NO_INTERFACES||||||||11|N/A
+INFO|tests/wp-mock/utils/test-validator.php|NO_INTERFACES||||||||11|N/A
+INFO|tests/wp-mock/utils/test-color-converter.php|NO_INTERFACES||||||||11|N/A
+INFO|tests/wp-mock/admin/test-color-palette-admin.php|NO_INTERFACES||||||||12|N/A
+INFO|tests/wp-mock/api/test-rest-controller-export-import.php|NO_INTERFACES||||||||12|N/A
+INFO|tests/wp-mock/api/test-rest-controller-accessibility.php|NO_INTERFACES||||||||12|N/A
+MATCH|tests/wp-mock/classes/test-color-palette-validator.php|Color_Constants||||/home/george/sites/gl-color-palette-generator/includes/interfaces/interface-color-constants.php|Yes||12|N/A
+INFO|tests/wp-mock/classes/test-color-palette-cache.php|NO_INTERFACES||||||||12|N/A
+INFO|tests/wp-mock/classes/test-color-palette-exporter.php|NO_INTERFACES||||||||12|N/A
+INFO|tests/wp-mock/localization/test-localization-manager.php|NO_INTERFACES||||||||12|N/A

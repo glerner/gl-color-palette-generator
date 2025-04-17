@@ -19,6 +19,16 @@
 
 # OS files
 .DS_Store
+
+# Test analysis temporary files
+analyze_test_files.txt
+mapping_test_files.txt
+interface_fixes_results.txt
+fix_interface_references.sh
+test_files_to_analyze.txt
+untested_files.txt
+test_processing_progress*.txt
+test_analysis_results*.txt
 Thumbs.db
 
 # Test coverage

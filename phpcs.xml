@@ -13,6 +13,8 @@
 
     <!-- Use WordPress standards -->
     <rule ref="WordPress">
+        <!-- Exclude rules -->
+        <exclude name="Squiz.Commenting.InlineComment.InvalidEndChar" />
     </rule>
 
     <!-- PHP version compatibility -->
