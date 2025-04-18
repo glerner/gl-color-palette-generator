@@ -51,6 +51,11 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Get absolute paths
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PLUGIN_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
+TEST_DIR="$PLUGIN_DIR/tests"
+
 # Cleanup function
 cleanup() {
     # Remove temporary test files
@@ -89,11 +94,6 @@ if [ -z "${WP_ROOT:-}" ]; then
 
     exit 1
 fi
-
-# Get absolute paths
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PLUGIN_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
-TEST_DIR="$PLUGIN_DIR/tests"
 
 echo -e "${GREEN}=== Starting test.sh ===${NC}"
 echo "Using directories:"
@@ -280,13 +280,17 @@ echo "  Current directory: $(pwd)"
 # ls -la "${TEST_DIR}/"
 
 echo "=== System Status Before Tests ==="
-df -h
-du -sh /tmp/* /var/tmp/* /app/* 2>/dev/null | sort -h
+df -h .
+find . -type f -size +100M -ls
 
 # Run tests
 echo -e "\n${GREEN}Running:${NC} $CMD"
 $CMD
 
 echo "=== System Status After Tests ==="
-df -h
-du -sh /tmp/* /var/tmp/* /app/* 2>/dev/null | sort -h
+df -h .
+# if need details what is filling local computer
+# but this does access the local file system
+# (/app, at least on linux, is a mount to local computer)
+# du -sh /tmp/* /var/tmp/* /app/* 2>/dev/null | sort -h
+find . -type f -size +100M -ls

@@ -11,6 +11,12 @@ This document outlines the revised approach for the GL Color Palette Generator p
 - Validated that the testing structure is fully functional
 - Created comprehensive test-to-implementation mapping in `test_mapping_log.md`
 
+### ⏳ Test Quality Assurance (In Progress)
+- Resolve test class naming conflicts and duplicate declarations `scripts/find-duplicate-classes.sh` saved to `docs/analysis/duplicate-class-names.txt`
+- Configure PHPStan to validate test files for errors
+- Ensure method signatures in implementations match interface declarations
+- Document test tooling setup in development documentation
+
 ### ✅ Apply Interface Fixes (Completed)
 - Ran `bin/interface-test-fixer.sh` to identify interface issues
 - Fixed interface implementations in test files

@@ -17,7 +17,7 @@ use GL_Color_Palette_Generator\Tests\Base\WP_Mock_Test_Case;
 use WP_Mock;
 use Mockery;
 
-class Test_Color_Palette extends WP_Mock_Test_Case {
+class Test_Color_Management_Color_Palette extends WP_Mock_Test_Case {
 	protected $valid_colors   = array( '#FF0000', '#00FF00', '#0000FF' );
 	protected $valid_metadata = array(
 		'name'        => 'Test Palette',

@@ -63,6 +63,8 @@ elif [[ "$PHP_VERSION" =~ ^8\.2\. ]]; then
     COMPOSER_FILE="composer.php82.json"
 elif [[ "$PHP_VERSION" =~ ^8\.3\. ]]; then
     COMPOSER_FILE="composer.php83.json"
+elif [[ "$PHP_VERSION" =~ ^8\.4\. ]]; then
+    COMPOSER_FILE="composer.php83.json"
 else
     echo "Unsupported PHP version: $PHP_VERSION"
     exit 1

@@ -1,0 +1,86 @@
+Duplicate Class Declarations
+===========================
+
+Class: Test_Color_Palette_Importer
+Found in files:
+  - tests/unit/interfaces/test-color-palette-importer.php
+  - tests/unit/classes/test-color-palette-importer.php
+
+Class: Test_Color_Palette_Optimizer
+Found in files:
+  - tests/unit/interfaces/test-color-palette-optimizer.php
+  - tests/unit/classes/test-color-palette-optimizer.php
+
+Class: Test_Validator
+Found in files:
+  - tests/unit/interfaces/test-validator.php
+  - tests/wp-mock/utils/test-validator.php
+
+Class: Test_Color_Palette_Validator
+Found in files:
+  - tests/unit/interfaces/test-color-palette-validator.php
+  - tests/wp-mock/color-management/test-color-palette-validator.php
+  - tests/wp-mock/classes/test-color-palette-validator.php
+
+Class: Test_Color_Analysis
+Found in files:
+  - tests/unit/color-management/test-color-analysis.php
+  - tests/unit/classes/class-test-color-analysis.php
+
+Class: Test_Color_Palette_Cache
+Found in files:
+  - tests/unit/interfaces/test-color-palette-cache.php
+  - tests/wp-mock/classes/test-color-palette-cache.php
+
+Class: Test_Settings_Manager
+Found in files:
+  - tests/unit/interfaces/test-settings-manager.php
+  - tests/wp-mock/settings/test-settings-manager.php
+
+Class: Test_Color_Validator
+Found in files:
+  - tests/unit/color-management/test-class-color-validator.php
+  - tests/unit/validation/test-class-color-validator.php
+
+Class: Test_Color_Scheme_Generator
+Found in files:
+  - tests/unit/interfaces/test-color-scheme-generator.php
+  - tests/wp-mock/color-management/test-color-scheme-generator.php
+
+Class: Test_Color_Palette_Analytics
+Found in files:
+  - tests/unit/interfaces/test-palette-analysis-interfaces.php
+  - tests/unit/interfaces/test-color-palette-analytics.php
+
+Class: Test_Color_Palette_Converter
+Found in files:
+  - tests/unit/interfaces/test-color-palette-converter.php
+  - tests/unit/classes/test-color-palette-converter.php
+
+Class: Test_Color_Palette
+Found in files:
+  - tests/unit/classes/test-color-palette.php
+  - tests/wp-mock/color-management/test-color-palette.php
+
+Class: Test_Color_Palette_Renderer
+Found in files:
+  - tests/integration/color-management/test-color-palette-renderer.php
+  - tests/unit/classes/test-color-palette-renderer.php
+
+Class: Test_Color_Palette_Analyzer
+Found in files:
+  - tests/unit/interfaces/test-palette-analysis-interfaces.php
+  - tests/unit/interfaces/test-color-palette-analyzer.php
+  - tests/unit/classes/test-color-palette-analyzer.php
+
+Class: Test_Color_Palette_Formatter
+Found in files:
+  - tests/unit/interfaces/test-color-palette-formatter.php
+  - tests/unit/classes/test-color-palette-formatter.php
+
+Class: Test_Color_Palette_Exporter
+Found in files:
+  - tests/unit/interfaces/test-color-palette-exporter.php
+  - tests/unit/classes/test-color-palette-exporter.php
+  - tests/wp-mock/classes/test-color-palette-exporter.php
+

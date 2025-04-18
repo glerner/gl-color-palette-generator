@@ -2,8 +2,8 @@ parameters:
     level: 1
     paths:
         - includes/
+        - tests/
     excludePaths:
-        - tests/*
         - vendor/*
     ignoreErrors:
         - identifier: missingType.generics
@@ -11,3 +11,4 @@ parameters:
         - vendor/autoload.php
         - phpstan-bootstrap.php
     treatPhpDocTypesAsCertain: false
+    checkMissingOverrideMethodAttribute: false

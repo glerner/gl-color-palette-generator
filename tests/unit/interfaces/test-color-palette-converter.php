@@ -17,7 +17,7 @@ use GL_Color_Palette_Generator\Interfaces\Color_Palette_Converter;
  *
  * @covers GL_Color_Palette_Generator\Interfaces\Color_Palette_Converter
  */
-class Test_Color_Palette_Converter extends Unit_Test_Case {
+class Test_Color_Palette_Converter_Interface extends Unit_Test_Case {
 	private $converter;
 
 	public function setUp(): void {
