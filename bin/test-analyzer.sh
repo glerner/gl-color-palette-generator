@@ -6,16 +6,17 @@
 PROJECT_ROOT="/home/george/sites/gl-color-palette-generator"
 TEST_ROOT="$PROJECT_ROOT/tests"
 SOURCE_FILES="$PROJECT_ROOT/source_files.txt"
-TEST_FILES="$PROJECT_ROOT/test_files_to_analyze.txt"
-RESULTS_FILE="$PROJECT_ROOT/test_analysis_results.txt"
-BUGS_FILE="$PROJECT_ROOT/code_issues.md"
-MOVE_SCRIPT="$PROJECT_ROOT/move_test_files.sh"
+DOCS_ANALYSIS_DIR="$PROJECT_ROOT/docs/code-analysis"
+TEST_FILES="$DOCS_ANALYSIS_DIR/test_files_to_analyze.txt"
+RESULTS_FILE="$DOCS_ANALYSIS_DIR/test_analysis_results.txt"
+BUGS_FILE="$DOCS_ANALYSIS_DIR/code_issues.md"
+MOVE_SCRIPT="$DOCS_ANALYSIS_DIR/move_test_files.sh"
 BATCH_SIZE=5
 
 # Function to get next batch of files
 get_next_batch() {
     # Create a temporary file to store unanalyzed files
-    TEMP_UNANALYZED="$PROJECT_ROOT/temp_unanalyzed.txt"
+    TEMP_UNANALYZED="$DOCS_ANALYSIS_DIR/temp_unanalyzed.txt"
 
     # Find files that haven't been analyzed yet
     while IFS= read -r file; do

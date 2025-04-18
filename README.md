@@ -4,7 +4,7 @@ Generate beautiful and accessible color palettes for your WordPress website usin
 
 ## Description
 
-GL Color Palette Generator (named with "GL" to distinguish it from other color palette plugins) is a WordPress plugin that helps you create and manage color palettes for your website design. It uses AI to generate harmonious color combinations, while ensuring accessibility standards are met.
+GL Color Palette Generator (named with "GL" to distinguish it from other color palette plugins) is a WordPress plugin that helps you create and manage color palettes for your website design. It uses AI to generate harmonious color combinations, while ensuring accessibility standards are met. It makes multiple theme variations, of the same 3 or 4 colors, for you to choose from.
 
 ### Theme Variations
 
@@ -47,7 +47,6 @@ This plugin is designed to work with the TwentyTwentyFour theme (and future Word
 - WordPress color palette display
 - Theme Style Variations (theme.json)
 - Light and Dark themes with browser switching via CSS light-dark()
-- Color permutations (all combinations of primary/secondary/tertiary colors)
 - Downloadable .zip of all variations
 - Export/Import functionality
 - WordPress block editor integration

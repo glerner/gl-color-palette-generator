@@ -21,7 +21,7 @@ class Test_Color_Palette_Analyzer extends Unit_Test_Case {
 
 	public function setUp(): void {
 		parent::setUp();
-		$this->analyzer = $this->getMockBuilder( Color_Palette_Analyzer::class )
+		$this->analyzer = $this->getMockBuilder( (Color_Palette_Analyzer_Interface)::class )
 								->getMockForAbstractClass();
 	}
 

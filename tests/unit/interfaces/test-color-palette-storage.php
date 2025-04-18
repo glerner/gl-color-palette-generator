@@ -21,7 +21,7 @@ class Test_Color_Palette_Storage extends Unit_Test_Case {
 	private $storage;
 
 	public function setUp(): void {
-		$this->storage = $this->createMock( Color_Palette_Storage::class );
+		$this->storage = $this->createMock( (Color_Palette_Storage_Interface)::class );
 	}
 
 	public function test_store_in_db_saves_palette(): void {

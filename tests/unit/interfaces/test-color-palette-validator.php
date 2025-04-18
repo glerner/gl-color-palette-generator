@@ -16,7 +16,7 @@ class Test_Color_Palette_Validator extends Unit_Test_Case {
 	private $validator;
 
 	public function setUp(): void {
-		$this->validator = $this->createMock( Color_Palette_Validator::class );
+		$this->validator = $this->createMock( (Color_Palette_Validator_Interface)::class );
 	}
 
 	public function test_validate_colors_checks_values(): void {

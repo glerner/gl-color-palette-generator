@@ -12,7 +12,7 @@ namespace GL_Color_Palette_Generator\Interfaces;
  * @link    https://website-tech.glerner.com/
  * @since   1.0.0
  */
-interface ColorThemeManager {
+interface Color_Theme_Manager_Interface {
 	/**
 	 * Creates a new theme from a color scheme.
 	 *

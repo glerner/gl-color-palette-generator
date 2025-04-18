@@ -21,7 +21,7 @@ class Test_Color_Palette_Exporter extends Unit_Test_Case {
 
 	public function setUp(): void {
 		parent::setUp();
-		$this->exporter = $this->getMockBuilder( Color_Palette_Exporter::class )
+		$this->exporter = $this->getMockBuilder( (Color_Palette_Exporter_Interface)::class )
 								->getMockForAbstractClass();
 	}
 

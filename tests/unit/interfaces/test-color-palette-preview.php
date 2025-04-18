@@ -28,7 +28,7 @@ class Test_Color_Palette_Preview extends Unit_Test_Case {
 	private $preview;
 
 	public function setUp(): void {
-		$this->preview = $this->createMock( Color_Palette_Preview::class );
+		$this->preview = $this->createMock( (Color_Palette_Preview_Interface)::class );
 	}
 
 	/**

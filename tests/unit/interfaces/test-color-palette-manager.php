@@ -19,7 +19,7 @@ class Test_Color_Palette_Manager extends Unit_Test_Case {
 	protected $manager;
 
 	public function setUp(): void {
-		$this->manager = $this->createMock( Color_Palette_Manager::class );
+		$this->manager = $this->createMock( (Color_Palette_Manager_Interface)::class );
 	}
 
 	public function test_create_palette_stores_new_palette(): void {

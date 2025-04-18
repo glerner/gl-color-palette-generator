@@ -19,7 +19,7 @@ class Test_Color_Palette_Formatter extends Unit_Test_Case {
 	private $formatter;
 
 	public function setUp(): void {
-		$this->formatter = $this->createMock( Color_Palette_Formatter::class );
+		$this->formatter = $this->createMock( (Color_Palette_Formatter_Interface)::class );
 	}
 
 	public function test_format_colors_converts_values(): void {

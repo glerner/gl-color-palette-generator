@@ -122,7 +122,7 @@ class Test_Color_Palette_Analyzer extends Unit_Test_Case {
 	private $analyzer;
 
 	public function setUp(): void {
-		$this->analyzer = $this->createMock( Color_Palette_Analyzer::class );
+		$this->analyzer = $this->createMock( (Color_Palette_Analyzer_Interface)::class );
 	}
 
 	/*

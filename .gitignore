@@ -59,7 +59,6 @@ source_files.txt
 /untested_files.txt
 /temp_unanalyzed.txt
 test_processing_progress.txt
-##### BUG Windsurf can't access files in .gitignore!
 junk.txt
 /test_processing_scripts/
 last_processed_line.txt

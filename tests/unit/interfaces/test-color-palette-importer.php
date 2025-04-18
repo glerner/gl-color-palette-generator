@@ -21,7 +21,7 @@ class Test_Color_Palette_Importer extends Unit_Test_Case {
 	private $importer;
 
 	public function setUp(): void {
-		$this->importer = $this->createMock( Color_Palette_Importer::class );
+		$this->importer = $this->createMock( (Color_Palette_Importer_Interface)::class );
 	}
 
 	public function test_import_from_file_loads_palette(): void {

@@ -6,13 +6,19 @@
 PROJECT_ROOT="/home/george/sites/gl-color-palette-generator"
 TEST_ROOT="$PROJECT_ROOT/tests"
 INTERFACES_ROOT="$PROJECT_ROOT/includes/interfaces"
-RESULTS_FILE="$PROJECT_ROOT/interface_fixes_results.txt"
-BUGS_FILE="$PROJECT_ROOT/interface_issues.md"
-FIX_SCRIPT="$PROJECT_ROOT/fix_interface_references.sh"
-TEST_FILES="$PROJECT_ROOT/test_files_to_analyze.txt"
-LAST_PROCESSED_LINE="$PROJECT_ROOT/last_processed_interface_line.txt"
+DOCS_ANALYSIS_DIR="$PROJECT_ROOT/docs/code-analysis"
+RESULTS_FILE="$DOCS_ANALYSIS_DIR/interface_fixes_results.txt"
+BUGS_FILE="$DOCS_ANALYSIS_DIR/script_interface_issues.txt"
+FIX_SCRIPT="$DOCS_ANALYSIS_DIR/fix_interface_references.sh"
+TEST_FILES="$DOCS_ANALYSIS_DIR/test_files_to_analyze.txt"
+LAST_PROCESSED_LINE="$DOCS_ANALYSIS_DIR/last_processed_interface_line.txt"
+INTERFACE_MAP="$DOCS_ANALYSIS_DIR/interface_map.txt"
+CURRENT_BATCH_FILE="$DOCS_ANALYSIS_DIR/current_batch.txt"
 BATCH_SIZE=10
 CURRENT_BATCH=1
+
+# Create the docs/code-analysis directory if it doesn't exist
+mkdir -p "$DOCS_ANALYSIS_DIR"
 
 # Initialize or create files if they don't exist
 touch "$BUGS_FILE"
@@ -86,7 +92,7 @@ EOF
 
 # Function to build the interface map
 build_interface_map() {
-  local map_file="$PROJECT_ROOT/interface_map.txt"
+  local map_file="$INTERFACE_MAP"
   > "$map_file"  # Clear the file
 
   echo "Building interface map..."
@@ -145,7 +151,7 @@ get_next_batch() {
   CURRENT_BATCH=$(( (start_line - 1) / BATCH_SIZE + 1 ))
 
   echo "Processing batch $CURRENT_BATCH: files $start_line to $end_line (of $total_lines total)"
-  sed -n "${start_line},${end_line}p" "$TEST_FILES" > "$PROJECT_ROOT/current_batch.txt"
+  sed -n "${start_line},${end_line}p" "$TEST_FILES" > "$CURRENT_BATCH_FILE"
   echo $end_line > "$LAST_PROCESSED_LINE"
 
   return 0
@@ -156,7 +162,7 @@ build_interface_map
 
 # Function to process a batch of test files
 process_batch() {
-  local batch_file="$PROJECT_ROOT/current_batch.txt"
+  local batch_file="$CURRENT_BATCH_FILE"
   local total=$(wc -l < "$batch_file")
   local count=0
 
@@ -199,8 +205,8 @@ process_batch() {
       fi
 
       # 1. Try direct match with the map keys
-      if grep -q "^$expected_key:" "$PROJECT_ROOT/interface_map.txt"; then
-        actual_interface=$(grep "^$expected_key:" "$PROJECT_ROOT/interface_map.txt" | cut -d':' -f2)
+      if grep -q "^$expected_key:" "$INTERFACE_MAP"; then
+        actual_interface=$(grep "^$expected_key:" "$INTERFACE_MAP" | cut -d':' -f2)
         matched_key="$expected_key"
         found_match=true
         match_confidence=100
@@ -246,7 +252,7 @@ process_batch() {
             best_match_key=$key
             best_match_interface="$interface_value"
           fi
-        done < "$PROJECT_ROOT/interface_map.txt"
+        done < "$INTERFACE_MAP"
 
         # Use the best match if confidence is above threshold
         if [ "$highest_confidence" -gt 50 ]; then

@@ -1,6 +1,29 @@
-# Interface Issues and Prioritization
+# Recommendations for Rebuild
 
-## Interface Naming Mismatches
+1. **Standardize Interface Naming**:
+   - Use consistent naming pattern (e.g., IColorPaletteManager or ColorPaletteManagerInterface)
+   - Apply consistent casing (either snake_case or PascalCase)
+   - Ensure file names match class names with appropriate prefixes/suffixes
+
+2. **Consolidate Related Interfaces**:
+   - Group related functionality under fewer, more comprehensive interfaces
+   - For example, combine color-palette-exporter, color-exporter, and data-exporter
+
+3. **Simplify Interface Hierarchy**:
+   - Reduce the total number of interfaces by focusing on core abstractions
+   - Create a cleaner inheritance hierarchy with clear parent-child relationships
+
+4. **Address the AI Provider Issue**:
+   - As noted earlier, rename AI_Provider_Interface to Provider or PaletteProvider
+   - Create proper separation between AI and non-AI providers if needed
+
+5. **Preserve Critical Interfaces**:
+   - Maintain the color-constants interface (but rename to class as noted elsewhere)
+   - Keep core color management interfaces that define the plugin's primary functionality
+
+## Interface Issues and Prioritization
+
+### Interface Naming Mismatches
 | Interface File | Interface Name | Test File | Test Interface Name | Issue | Priority |
 |---------------|---------------|-----------|---------------------|-------|----------|
 | interface-ai-provider-interface.php | AI_Provider_Interface | test-ai-interfaces.php | AI_Provider | Naming mismatch (confidence: 52% - REQUIRES REVIEW) | 4 |
@@ -27,7 +50,7 @@
 ### Provider Naming and Structure
 | Issue | Analysis | Recommendation |
 |-------|----------|----------------|
-| "AI Provider" vs "Provider" | The codebase uses an `AI_Provider` interface and `AI_Provider_Base` abstract class for all providers, including non-AI services like Color Pizza:<br><br>- All providers implement the same interface regardless of whether they use AI<br>- Documentation states the interface "Defines the contract for AI providers that generate color palettes"<br>- Non-AI providers like Color_Pizza_Provider extend AI_Provider_Base<br>- This creates confusion about what constitutes an "AI Provider" | **Refactor provider architecture:**<br>1. Rename interface to just `Provider` or `PaletteProvider` for accuracy<br>2. Create clearer separation between AI and non-AI providers if needed<br>3. Maintain common interface for all providers to ensure interchangeability<br>4. Update documentation to clarify that providers can use various technologies |  
+| "AI Provider" vs "Provider" | The codebase uses an `AI_Provider` interface and `AI_Provider_Base` abstract class for all providers, including non-AI services like Color Pizza:<br><br>- All providers implement the same interface regardless of whether they use AI<br>- Documentation states the interface "Defines the contract for AI providers that generate color palettes"<br>- Non-AI providers like Color_Pizza_Provider extend AI_Provider_Base<br>- This creates confusion about what constitutes an "AI Provider" | **Refactor provider architecture:**<br>1. Rename interface to just `Provider` or `PaletteProvider` for accuracy<br>2. Create clearer separation between AI and non-AI providers if needed<br>3. Maintain common interface for all providers to ensure interchangeability<br>4. Update documentation to clarify that providers can use various technologies |
 
 ### Libraries vs External APIs
 | Consideration | Local Library | External API |
@@ -165,62 +188,3 @@ Building interface map...
 4. **Concrete Classes as Interfaces**:
    - Some entries like color-utility -> Color_Utility don't follow interface naming conventions
    - These may be concrete implementations rather than true interfaces
-
-### Recommendations for Rebuild
-
-1. **Standardize Interface Naming**:
-   - Use consistent naming pattern (e.g., IColorPaletteManager or ColorPaletteManagerInterface)
-   - Apply consistent casing (either snake_case or PascalCase)
-   - Ensure file names match class names with appropriate prefixes/suffixes
-
-2. **Consolidate Related Interfaces**:
-   - Group related functionality under fewer, more comprehensive interfaces
-   - For example, combine color-palette-exporter, color-exporter, and data-exporter
-
-3. **Simplify Interface Hierarchy**:
-   - Reduce the total number of interfaces by focusing on core abstractions
-   - Create a cleaner inheritance hierarchy with clear parent-child relationships
-
-4. **Address the AI Provider Issue**:
-   - As noted earlier, rename AI_Provider_Interface to Provider or PaletteProvider
-   - Create proper separation between AI and non-AI providers if needed
-
-5. **Preserve Critical Interfaces**:
-   - Maintain the color-constants interface (but rename to class as noted elsewhere)
-   - Keep core color management interfaces that define the plugin's primary functionality
-| interface-color-palette-preview.php | Color_Palette_Preview_Interface | test-color-palette-preview.php | Color_Palette_Preview | Naming mismatch (confidence: 100% - CERTAIN) | 4 |
-| Unknown | Unknown | test-business-analyzer.php | BusinessAnalyzer | No matching interface found (expected: businessanalyzer, file exists: No) | 4 |
-| Unknown | Unknown | test-color-palette-converter.php | Color_Palette_Converter | No matching interface found (expected: color-palette-converter, file exists: No) | 4 |
-| Unknown | Unknown | test-harmony-generator.php | HarmonyGenerator | No matching interface found (expected: harmonygenerator, file exists: No) | 4 |
-| Unknown | Unknown | test-color-scheme-generator.php | ColorSchemeGenerator | No matching interface found (expected: colorschemegenerator, file exists: No) | 4 |
-| interface-color-palette-importer.php | Color_Palette_Importer_Interface | test-color-palette-importer.php | Color_Palette_Importer | Naming mismatch (confidence: 100% - CERTAIN) | 4 |
-| interface-color-palette-storage.php | Color_Palette_Storage_Interface | test-color-palette-storage.php | Color_Palette_Storage | Naming mismatch (confidence: 100% - CERTAIN) | 4 |
-| interface-color-palette-manager.php | Color_Palette_Manager_Interface | test-color-palette-manager.php | Color_Palette_Manager | Naming mismatch (confidence: 100% - CERTAIN) | 4 |
-| Unknown | Unknown | test-palette-generator.php | PaletteGenerator | No matching interface found (expected: palettegenerator, file exists: No) | 4 |
-| Unknown | Unknown | test-color-metrics-analyzer.php | ColorMetricsAnalyzer | No matching interface found (expected: colormetricsanalyzer, file exists: No) | 4 |
-| interface-color-palette-formatter.php | Color_Palette_Formatter_Interface | test-color-palette-formatter.php | Color_Palette_Formatter | Naming mismatch (confidence: 100% - CERTAIN) | 5 |
-| Unknown | Unknown | test-performance-monitor.php | PerformanceMonitor | No matching interface found (expected: performancemonitor, file exists: No) | 5 |
-| Unknown | Unknown | test-color-harmonizer.php | ColorHarmonizer | No matching interface found (expected: colorharmonizer, file exists: No) | 5 |
-| Unknown | Unknown | test-palette-analysis-interfaces.php | Color_Palette_Analytics | No matching interface found (expected: color-palette-analytics, file exists: No) | 5 |
-| interface-color-palette-analyzer.php | Color_Palette_Analyzer_Interface | test-palette-analysis-interfaces.php | Color_Palette_Analyzer | Naming mismatch (confidence: 100% - CERTAIN) | 5 |
-| Unknown | Unknown | test-palette-analysis-interfaces.php | ColorMetricsAnalyzer | No matching interface found (expected: colormetricsanalyzer, file exists: No) | 5 |
-| Unknown | Unknown | test-error-reporter.php | ErrorReporter | No matching interface found (expected: errorreporter, file exists: No) | 5 |
-| Unknown | Unknown | test-palette-optimizer.php | PaletteOptimizer | No matching interface found (expected: paletteoptimizer, file exists: No) | 5 |
-| Unknown | Unknown | test-color-palette-analytics.php | Color_Palette_Analytics | No matching interface found (expected: color-palette-analytics, file exists: No) | 5 |
-| interface-color-palette-validator.php | Color_Palette_Validator_Interface | test-color-palette-validator.php | Color_Palette_Validator | Naming mismatch (confidence: 100% - CERTAIN) | 5 |
-| Unknown | Unknown | test-color-exporter.php | ColorExporter | No matching interface found (expected: colorexporter, file exists: No) | 6 |
-| interface-color-palette-optimizer.php | Color_Palette_Optimizer_Interface | test-color-palette-optimizer.php | Color_Palette_Optimizer | Naming mismatch (confidence: 100% - CERTAIN) | 6 |
-| Unknown | Unknown | test-theme-generator.php | ThemeGenerator | No matching interface found (expected: themegenerator, file exists: No) | 6 |
-| Unknown | Unknown | test-file-handler.php | FileHandler | No matching interface found (expected: filehandler, file exists: No) | 6 |
-| interface-exporter.php | Exporter | test-data-exporter.php | DataExporter | Naming mismatch (confidence: 53% - REQUIRES REVIEW) | 6 |
-| interface-color-palette-analyzer.php | Color_Palette_Analyzer_Interface | test-color-palette-analyzer.php | Color_Palette_Analyzer | Naming mismatch (confidence: 100% - CERTAIN) | 7 |
-| interface-ai-provider-interface.php | AI_Provider_Interface | test-ai-interfaces.php | AI_Provider | Naming mismatch (confidence: 52% - REQUIRES REVIEW) | 7 |
-| Unknown | Unknown | test-error-handler.php | ErrorHandler | No matching interface found (expected: errorhandler, file exists: No) | 7 |
-| Unknown | Unknown | test-palette-manager.php | PaletteManager | No matching interface found (expected: palettemanager, file exists: No) | 7 |
-| Unknown | Unknown | test-color-mixer.php | ColorMixer | No matching interface found (expected: colormixer, file exists: No) | 7 |
-| Unknown | Unknown | test-cache-manager.php | CacheManager | No matching interface found (expected: cachemanager, file exists: No) | 7 |
-| interface-color-palette-exporter.php | Color_Palette_Exporter_Interface | test-color-palette-exporter.php | Color_Palette_Exporter | Naming mismatch (confidence: 100% - CERTAIN) | 7 |
-| Unknown | Unknown | test-visualization-engine.php | VisualizationEngine | No matching interface found (expected: visualizationengine, file exists: No) | 7 |
-| Unknown | Unknown | test-settings-manager.php | SettingsManager | No matching interface found (expected: settingsmanager, file exists: No) | 8 |
-| Unknown | Unknown | test-cultural-analyzer.php | CulturalAnalyzer | No matching interface found (expected: culturalanalyzer, file exists: No) | 8 |
-| interface-color-theme-manager.php | ColorThemeManager | test-color-theme-manager.php | Color_Theme_Manager | Naming mismatch (confidence: 100% - CERTAIN) | 8 |

@@ -16,7 +16,7 @@ class Test_Color_Palette_Optimizer extends Unit_Test_Case {
 	private $optimizer;
 
 	public function setUp(): void {
-		$this->optimizer = $this->createMock( Color_Palette_Optimizer::class );
+		$this->optimizer = $this->createMock( (Color_Palette_Optimizer_Interface)::class );
 	}
 
 	public function test_optimize_accessibility_improves_compliance(): void {
