@@ -36,7 +36,7 @@ This document outlines the revised approach for the GL Color Palette Generator p
 
 ## Phase 2: Extract Reusable Testing Framework
 
-### 1️⃣ Create Modular Testing Framework Repository
+### Create Modular Testing Framework Repository
 - Extract the PHPUnit testing structure to a standalone repository
 - Design a modular architecture with clear separation of concerns:
   - Core testing framework (base classes, bootstrap files)
@@ -54,7 +54,7 @@ This document outlines the revised approach for the GL Color Palette Generator p
   - See documentation in `docs/guides/preparing-projects-for-dual-git-composer-deployment.md` and `docs/guides/git-submodule-vs-composer.md`
 - Set up CI/CD to validate the framework itself
 
-### 2️⃣ Document Testing Framework
+### Document Testing Framework
 - Create comprehensive documentation for the testing framework
 - Include setup instructions for new projects
 - Document test types and when to use each
@@ -62,7 +62,7 @@ This document outlines the revised approach for the GL Color Palette Generator p
 
 ## Phase 3: Prepare for Rebuild
 
-### 3️⃣ Extract Specifications from Tests
+### Extract Specifications from Tests
 - Review test files to understand expected functionality
 - Create a test-to-feature mapping document
 - Identify core vs. peripheral functionality
@@ -77,12 +77,12 @@ This document outlines the revised approach for the GL Color Palette Generator p
     - Keep `includes/interfaces/interface-color-constants.php` (rename to `class-color-constants.php`)
     - Maintain color roles, schemes, and WCAG accessibility requirements
 
-### 4️⃣ Preserve Valuable Documentation
+### Preserve Valuable Documentation
 - Identify which documentation is still relevant
 - Update architectural and design documentation
 - Create a documentation plan for the new implementation
 
-### 5️⃣ Set Up New Project Structure
+### Set Up New Project Structure
 - Archive current repository:
   - Create final commit with message "Archive before rewrite"
   - Tag the final version (e.g., `v0.9.0-legacy`)
@@ -101,7 +101,7 @@ This document outlines the revised approach for the GL Color Palette Generator p
   git commit -m "docs: Preparing for code restructuring"
 ```
 
-### 6️⃣ Integrate Testing Framework and Configure Development Tools
+### Integrate Testing Framework and Configure Development Tools
 - Integrate testing framework using Git submodules:
   - `git submodule add [testing-framework-repo-url] tests/framework`
   - This keeps the testing framework as a separate repository
@@ -115,26 +115,36 @@ This document outlines the revised approach for the GL Color Palette Generator p
 - Configure development environment (in User and plugin development folders)
 - Commit restructured codebase
 
-## Phase 4: Rebuild Implementation
+## Phase 3: Rebuild Plugin from Scratch
 
-### 7️⃣ Implement Core Functionality
+### Implement MVC Architecture
+- Follow the Models-Services-Views-Controllers approach documented in `docs/architecture/classes-models-mvc.md`
+- Organize codebase with clear separation of concerns:
+  - **Models**: Core data structures (Color_Palette, Color_Scheme)
+  - **Services**: Business logic (Palette_Generator, Contrast_Checker)
+  - **Views**: Output rendering (admin pages, blocks, shortcodes)
+  - **Controllers**: WordPress integration (hooks, REST endpoints)
+- Apply consistent naming conventions for classes and files
+- Ensure proper namespace organization reflecting architectural components
+
+### Create Core Plugin Architecture
 - Start with essential color manipulation classes
   - Color generation (primary, secondary, tertiary, accent)
   - Color variations (lighter, light, dark, darker)
   - Neutral colors generation
   - Color properties (name, emotional attributes, hex codes)
-  - WCAG AAA contrast validation and adjustment
+  - WCAG accessibility checking (AAA contrast validation)
 - Follow WordPress coding standards from the beginning
 - Use proper namespaces and class organization
 - Write tests for each component as you build
 
-### 8️⃣ Develop WordPress Integration
+### Develop WordPress Integration
 - Implement admin pages and settings
 - Create basic user interface for plugin functionality
 - Set up WordPress hooks and filters
 - Implement shortcodes and blocks
 
-### 9️⃣ Implement AI Color Palette Generation
+### Implement AI Color Palette Generation
 - Build questionnaire interface for users to specify palette preferences
   - Business type/industry questions
   - Ideal client/audience questions
@@ -147,13 +157,13 @@ This document outlines the revised approach for the GL Color Palette Generator p
 - Add emotional attribute tagging for palettes
 - Add user feedback collection for palette suggestions
 
-### 🔟 Implement Provider Integrations
+### Implement Provider Integrations
 - Build AI API integrations with proper abstraction
 - Ensure consistent interface implementation
 - Add comprehensive error handling
 - Test each provider thoroughly
 
-### 1️⃣1️⃣ Complete WordPress Integration
+### Complete WordPress Integration
 - Add shortcodes and block editor integration
 - Set up proper hooks and filters
 - Ensure proper asset management
@@ -166,12 +176,12 @@ This document outlines the revised approach for the GL Color Palette Generator p
   - Color permutations generator
   - Downloadable .zip of all variations
 
-### 1️⃣2️⃣ Develop JavaScript Components
+### Develop JavaScript Components
 - Implement front-end functionality with modern JS practices
 - Ensure proper integration with WordPress enqueuing
 - Test JavaScript functionality across browsers
 
-### 1️⃣3️⃣ Finalize and Document
+### Finalize and Document
 - Complete user documentation
 - Finalize developer documentation
 - Create deployment and update procedures

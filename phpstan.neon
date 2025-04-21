@@ -1,14 +1,30 @@
 parameters:
-    level: 1
+    # Start with level 3 for new code, as recommended in our strategy
+    level: 3
     paths:
         - includes/
         - tests/
+        - src/  # For new code structure
     excludePaths:
         - vendor/*
     ignoreErrors:
         - identifier: missingType.generics
+        # PHP 8.4 specific ignores if needed
+        # - message: '#PHP 8\.4 specific feature#'
     bootstrapFiles:
         - vendor/autoload.php
         - phpstan-bootstrap.php
     treatPhpDocTypesAsCertain: false
     checkMissingOverrideMethodAttribute: false
+    
+    # PHP 8.4 specific settings
+    phpVersion: 80400  # PHP 8.4
+    
+    # WordPress specific settings
+    scanDirectories:
+        - /app/wp-includes/  # WordPress core in Lando environment
+        - /app/wp-admin/
+    dynamicConstantNames:
+        - WP_DEBUG
+        - ABSPATH
+        - WPINC

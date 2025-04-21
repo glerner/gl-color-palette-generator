@@ -67,7 +67,7 @@ interface_map.txt
 last_processed_interface_line.txt
 test_files_to_analyze.txt
 
-# want Git these files for modifying PHPUnit test files, batch processing
+# want Git tracking these files for modifying PHPUnit test files, batch processing
 # bin/test-analyzer.sh
 # bin/move_test_files.sh
 # bin/process-test-results.sh

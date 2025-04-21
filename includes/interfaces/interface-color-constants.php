@@ -256,6 +256,7 @@ interface Color_Constants {
 		'core'       => array(
 			'primary',
 			'secondary',
+			'tertiary',
 			'accent',
 			'contrast',
 		),

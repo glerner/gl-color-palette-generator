@@ -48,10 +48,10 @@ Models typically:
 - Contain little to no application logic
 - Focus on data integrity and structure
 
-### Models vs. Regular Classes
-- **Models** focus on representing domain entities and their relationships
-- **Service classes** focus on performing operations on models
-- **Utility classes** provide helper functions not tied to specific models
+### Model Classes vs. Other Types of Classes
+- **Model classes** focus on representing domain entities and their relationships (e.g., `Palette`, `Color`)
+- **Service classes** focus on performing operations on models (e.g., `Palette_Generator`, `Color_Converter`)
+- **Utility classes** provide helper functions not tied to specific models (e.g., `Array_Utils`, `String_Utils`)
 
 ## MVC Architecture
 
@@ -116,43 +116,42 @@ WordPress doesn't strictly enforce MVC, but we can adapt the pattern:
 
 ## Application to GL Color Palette Generator
 
-### Current Issues
-1. **Duplicate implementations**: Multiple Color_Palette classes in different namespaces
-2. **Unclear responsibilities**: Mixing model and service functionality
-3. **Inconsistent naming**: Lack of clear distinction between models and services
-
 ### Recommended Structure
 
-#### Models Namespace
-Contains domain entities:
+Following our naming conventions where models use base names and services use action-specific suffixes:
+
+#### Palette Management
+Contains palette-related models and services:
 ```
-Models/
-  ├── Color_Palette.php
-  ├── Color_Scheme.php
-  ├── Theme.php
-  └── User_Preferences.php
+includes/palette/
+  ├── class-palette.php                 # Model representing a color palette
+  ├── class-palette-generator.php       # Service for generating palettes
+  ├── class-palette-storage.php         # Service for storing/retrieving palettes
+  └── class-palette-transformer.php     # Service for transforming palettes
 ```
 
-#### Services Namespace
-Contains classes that operate on models:
+#### Color Manipulation
+Contains color-related classes:
 ```
-Services/
-  ├── Palette_Generator.php
-  ├── Theme_Builder.php
-  ├── Color_Converter.php
-  ├── Accessibility_Service.php
-  ├── Contrast_Checker.php
-  └── Analytics_Service.php
+includes/color/
+  ├── class-color.php                   # Model representing a single color
+  ├── class-color-accessibility.php     # Service for accessibility checks
+  ├── class-color-converter.php         # Service for color format conversion
+  └── class-color-namer.php             # Service for naming colors
 ```
 
-#### Controllers Namespace
-Contains WordPress integration points:
+#### User Interface
+Contains UI components and controllers:
 ```
-Controllers/
-  ├── Admin_Controller.php
-  ├── Block_Controller.php
-  ├── REST_Controller.php
-  └── Shortcode_Controller.php
+includes/ui/
+  ├── class-admin-page.php              # Main admin interface
+  ├── class-settings-page.php           # Plugin settings page
+  ├── components/
+  │   ├── class-palette-display.php     # Component for displaying palettes
+  │   └── class-business-questionnaire.php # Form for gathering business context
+  └── blocks/
+      ├── class-palette-block.php       # Block for embedding palettes
+      └── class-palette-generator-block.php # Block for generating palettes
 ```
 
 ### Benefits of This Approach
@@ -176,7 +175,7 @@ Controllers/
 
 ### Before (Mixed Responsibilities)
 ```php
-class Color_Palette {
+class Palette {
     private $colors = [];
 
     public function generate_from_image($image_path) {
@@ -193,9 +192,11 @@ class Color_Palette {
 
 ### After (Separation of Concerns)
 
-**Model**:
+**Model (includes/palette/class-palette.php)**:
 ```php
-class Color_Palette {
+namespace GL_Color_Palette_Generator\Palette;
+
+class Palette {
     private $colors = [];
 
     public function add_color($color) {
@@ -208,11 +209,13 @@ class Color_Palette {
 }
 ```
 
-**Service**:
+**Service (includes/palette/class-palette-generator.php)**:
 ```php
-class Palette_Generator_Service {
+namespace GL_Color_Palette_Generator\Palette;
+
+class Palette_Generator {
     public function generate_from_image($image_path) {
-        $palette = new Color_Palette();
+        $palette = new Palette();
         // Extract colors from image
         // Add colors to palette
         return $palette;
@@ -220,10 +223,14 @@ class Palette_Generator_Service {
 }
 ```
 
-**Formatter Service**:
+**Formatter Service (includes/output/class-css-formatter.php)**:
 ```php
-class Palette_Formatter_Service {
-    public function export_to_css(Color_Palette $palette) {
+namespace GL_Color_Palette_Generator\Output;
+
+use GL_Color_Palette_Generator\Palette\Palette;
+
+class CSS_Formatter {
+    public function format_palette(Palette $palette) {
         // Generate CSS from palette
     }
 }
@@ -240,3 +247,60 @@ Adopting a clear architectural approach with proper separation between models, s
 5. Make the codebase more approachable for new developers
 
 As we rebuild the plugin, we should focus on creating a clean domain model first, then building services that operate on that model, and finally integrating with WordPress through controllers.
+
+## Test File Naming Conventions for MVC Architecture
+
+To maintain clarity and avoid naming conflicts, test files should follow these conventions:
+
+### Directory Structure
+
+```
+tests/
+  ├── unit/
+  │   ├── models/             # Tests for model classes
+  │   ├── services/           # Tests for service classes
+  │   └── interfaces/         # Tests for interfaces
+  ├── wp-mock/
+  │   ├── controllers/        # Tests for WordPress integration
+  │   └── views/              # Tests for output rendering
+  └── integration/            # End-to-end tests
+```
+
+### File Naming
+
+1. **Model Tests**:
+   - Filename: `test-{model-name}.php`
+   - Class: `Test_{Model_Name}`
+   - Example: `test-color-palette.php` with class `Test_Color_Palette`
+
+2. **Service Tests**:
+   - Filename: `test-{service-name}.php`
+   - Class: `Test_{Service_Name}`
+   - Example: `test-palette-generator-service.php` with class `Test_Palette_Generator_Service`
+
+3. **Interface Tests**:
+   - Filename: `test-{interface-name}.php`
+   - Class: `Test_{Interface_Name}_Interface`
+   - Example: `test-color-palette-generator.php` with class `Test_Color_Palette_Generator_Interface`
+
+4. **Controller Tests**:
+   - Filename: `test-{controller-name}.php`
+   - Class: `Test_{Controller_Name}`
+   - Example: `test-admin-controller.php` with class `Test_Admin_Controller`
+
+5. **View Tests**:
+   - Filename: `test-{view-name}.php`
+   - Class: `Test_{View_Name}_View`
+   - Example: `test-palette-preview.php` with class `Test_Palette_Preview_View`
+
+### Namespace Conventions
+
+Each test should be in a namespace that reflects its location and purpose:
+
+```php
+namespace GL_Color_Palette_Generator\Tests\Unit\Models;
+// or
+namespace GL_Color_Palette_Generator\Tests\WP_Mock\Controllers;
+```
+
+By following these conventions, we can avoid the duplicate class issues we've encountered and create a more maintainable test suite that aligns with our MVC architecture.
