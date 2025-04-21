@@ -15,8 +15,6 @@ parameters:
         - tests/data/*
     ignoreErrors:
         - identifier: missingType.generics
-        # PHP 8.4 specific ignores if needed
-        # - message: '#PHP 8\.4 specific feature#'
     bootstrapFiles:
         - vendor/autoload.php
         - phpstan-bootstrap.php
@@ -26,10 +24,7 @@ parameters:
     # PHP 8.4 specific settings
     phpVersion: 80400  # PHP 8.4
     
-    # WordPress specific settings
-    scanDirectories:
-        - /app/wp-includes/  # WordPress core in Lando environment
-        - /app/wp-admin/
+    # WordPress constants (without paths)
     dynamicConstantNames:
         - WP_DEBUG
         - ABSPATH

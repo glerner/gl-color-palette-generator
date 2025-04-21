@@ -80,6 +80,13 @@ project-root/
 │   │   ├── unit-test-case.php
 │   │   ├── wp-mock-test-case.php
 │   │   └── integration-test-case.php
+│   ├── fixtures/
+│   │   ├── images/            # Sample images for testing
+│   │   ├── data/              # General test data files (JSON, XML, CSV, etc.)
+│   │   ├── api-responses/     # Mock responses from external APIs
+│   │   ├── html/              # HTML snippets or templates
+│   │   ├── css/               # CSS snippets or templates
+│   │   └── README.md          # Documentation for fixtures
 │   ├── unit/
 │   │   ├── core/
 │   │   └── ...
@@ -99,6 +106,8 @@ Key points:
 - Separate configuration files for each test type
 - Bootstrap files for different test environments
 - Base test classes in their own directory
+- Fixtures directory for test data and sample files
+- Mirror source code structure in test directories
 - Test directories mirror source code structure
 
 ## Base Test Classes
