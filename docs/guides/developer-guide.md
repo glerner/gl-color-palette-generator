@@ -460,6 +460,8 @@ composer run phpcs
 # Fix PHP code
 composer run phpcbf
 
+> **Note:** Using Composer's phpcbf command works more reliably than trying to install and configure Visual Studio Code extensions for PHP code formatting. The command-line approach ensures consistent formatting across all development environments.
+
 # Check JavaScript/TypeScript code
 npm run lint
 

@@ -1,10 +1,12 @@
 name: gl-color-palette-generator
 recipe: wordpress
 config:
-  php: '8.1'
-  # WordPress Recommended: PHP 8.0 or 8.1
-  # PHP 8.2 has only recently gained full support
-  # PHP 8.3 support is still in progress
+  php: '8.2'
+  # WordPress Recommended: PHP 8.1 or 8.2
+  # https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/
+  # As of April 2025, WordPress supports PHP versions 8.4 (beta), 8.3 (beta), 8.2, 8.1, and 8.0 for the latest WordPress version, 6.8.
+  # For WordPress version 6.7, the supported PHP versions are 8.4 (beta), 8.3 (beta), 8.2, 8.1, and 8.0.
+  # WordPress version 6.6 supports PHP versions 8.3 (beta), 8.2, 8.1, 8.0, 7.4, 7.3, 7.2, and does not support PHP 7.1 and older.
   ssl: true
   xdebug: true
   config:
@@ -12,7 +14,7 @@ config:
   ServerName: gl-color-palette.lndo.site
   database: mysql:8.0
   webroot: .
-  composer_version: '2.2.22'
+  composer_version: '2.8.8'
 
 # Force HTTPS only (port 443) and prevent HTTP routes from being created
 proxy:
@@ -78,6 +80,52 @@ services:
       - database
 
 tooling:
+  db-export:
+    service: database
+    description: Export database to a file
+    # Uses Lando's built-in SQL export helper script
+    cmd: /helpers/sql-export.sh
+    options:
+      host:
+        default: database
+        describe: Database host
+      user:
+        default: wordpress
+        describe: Database user
+      password:
+        default: wordpress
+        describe: Database password
+      database:
+        default: wordpress
+        describe: Database name
+      port:
+        default: 3306
+        describe: Database port
+      no-wipe:
+        default: false
+        describe: Do not destroy the target file if it exists
+        boolean: true
+  db-import:
+    service: database
+    description: Import database from a file
+    # Uses Lando's built-in SQL import helper script
+    cmd: /helpers/sql-import.sh
+    options:
+      host:
+        default: database
+        describe: Database host
+      user:
+        default: wordpress
+        describe: Database user
+      password:
+        default: wordpress
+        describe: Database password
+      database:
+        default: wordpress
+        describe: Database name
+      port:
+        default: 3306
+        describe: Database port
   composer:
     service: appserver
   setup-wp-tests:

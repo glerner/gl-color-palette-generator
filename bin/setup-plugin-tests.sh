@@ -194,6 +194,7 @@ install_test_suite() {
     MYSQL_CMD="mysql"
 
     # Check if MySQL is reachable
+    # Note: no space between -p and password
     echo "Attempting to connect to MySQL..."
     if ! $MYSQL_CMD -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "SELECT 1" 2>&1; then
         echo "Error: Cannot connect to MySQL server. Full error output above."

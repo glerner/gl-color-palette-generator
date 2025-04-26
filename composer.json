@@ -3,6 +3,7 @@
     "description": "AI-powered color palette generator for WordPress",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
+    "version": "0.0.8",
     "prefer-stable": true,
     "authors": [
         {

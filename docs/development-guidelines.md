@@ -13,13 +13,39 @@
    - Accessibility checks
    - Never duplicate existing color manipulation functions
 
-3. **Accessibility Standards**:
+3. **Code Formatting and Embedded Languages**:
+   - Use heredoc syntax for all multi-line embedded code (SQL, HTML, CSS, JavaScript, Bash, Python, JSON, etc.)
+   - Use descriptive identifiers for heredoc blocks that indicate their purpose
+   - Separate code definition from escaping/formatting logic
+   - Write embedded code in its natural syntax without PHP escaping
+   - Use dedicated helper functions for escaping and formatting when needed
+   - Example:
+     ```php
+     // Good: Using heredoc with descriptive identifier and separate escaping
+     $html_content = <<<COLOR_PICKER
+     <div class="color-picker" data-color="{$color_hex}">
+       <input type="color" value="{$color_hex}" />
+       <span class="color-label">{$color_name}</span>
+     </div>
+     COLOR_PICKER;
+     
+     // Apply escaping after defining the content
+     $html = format_html_output($html_content);
+     
+     // Bad: String concatenation with inline escaping
+     $html = '<div class="color-picker" data-color="' . esc_attr($color_hex) . '">' . 
+             '<input type="color" value="' . esc_attr($color_hex) . '" />' . 
+             '<span class="color-label">' . esc_html($color_name) . '</span>' . 
+             '</div>';
+     ```
+
+4. **Accessibility Standards**:
    - Use `WCAG_CONTRAST_TARGET` as primary contrast target
    - Fall back to `WCAG_CONTRAST_MIN` only when target contrast cannot be met
    - Never reference 'AA' or 'AAA' levels directly
    - Never hardcode contrast ratios
 
-4. **Testing Protocol**:
+5. **Testing Protocol**:
    - Never test in plugin source folder
    - Testing environment: `~/sites/wordpress` (defined in `./bin/setup-plugin-tests.sh`)
    - Always copy files before testing using `./bin/sync-to-wp.sh`
