@@ -58,3 +58,18 @@ old file name includes/generators/class-name-generator.php
 **Implementation Notes:**
 - Should be enhanced with the color-namer library (https://github.com/colorjs/color-namer)
 - Documentation has been added to test-name-generator.php
+
+
+## Mock Testing
+
+### Find all WordPress functions to Mock
+
+Run this command in your terminal to find all WordPress functions:
+This will give us a complete list of WordPress functions we need to mock, rather than discovering them one error at a time.
+
+``` bash
+cd ~/sites/gl-color-palette-generator && \
+grep -r "^[[:space:]]*\(add_\|admin_\|get_\|wp_\|is_\|esc_\|\_\_\|\_e\|admin_\)" . --include="*.php" | \
+sed -E 's/.*[^a-zA-Z_](add_|get_|wp_|is_|esc_|__|_e|admin_)[a-zA-Z_]+\(.*/\1&/' | \
+grep -o '[a-zA-Z_]\+(' | sort -u | sed 's/(//'
+```

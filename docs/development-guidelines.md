@@ -28,14 +28,14 @@
        <span class="color-label">{$color_name}</span>
      </div>
      COLOR_PICKER;
-     
+
      // Apply escaping after defining the content
      $html = format_html_output($html_content);
-     
+
      // Bad: String concatenation with inline escaping
-     $html = '<div class="color-picker" data-color="' . esc_attr($color_hex) . '">' . 
-             '<input type="color" value="' . esc_attr($color_hex) . '" />' . 
-             '<span class="color-label">' . esc_html($color_name) . '</span>' . 
+     $html = '<div class="color-picker" data-color="' . esc_attr($color_hex) . '">' .
+             '<input type="color" value="' . esc_attr($color_hex) . '" />' .
+             '<span class="color-label">' . esc_html($color_name) . '</span>' .
              '</div>';
      ```
 
@@ -47,6 +47,7 @@
 
 5. **Testing Protocol**:
    - Never test in plugin source folder
+   - (but can run code syntax tools like PHPStan in the source folder)
    - Testing environment: `~/sites/wordpress` (defined in `./bin/setup-plugin-tests.sh`)
    - Always copy files before testing using `./bin/sync-to-wp.sh`
    - Run integration tests with WordPress test framework, in the testing environment
@@ -121,6 +122,13 @@
    - Check for missing or unnecessary use statements
    - Follow PSR-4 namespace conventions
    - Keep namespaces aligned with plugin prefix (`GL_Color_Palette_Generator`)
+   - Use the "fully qualified from current namespace" approach for clarity:
+     ```php
+     // If you're in this namespace:
+     namespace GL_Color_Palette_Generator\Tests;
+     // You can reference a child namespace like this:
+     use Unit\Test_Case; // Refers to GL_Color_Palette_Generator\Tests\Unit\Test_Case
+     ```
 
 2. **File Structure**:
    - One class per file

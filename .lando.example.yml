@@ -57,7 +57,8 @@ services:
         - "443"
       environment:
         HTTP_HOST: 'gl-color-palette.lndo.site'
-        BUILD_PATH: '/app/wp-content/plugins/gl-color-palette-generator'
+        WP_ROOT: /app
+        BUILD_PATH: /app/wp-content/plugins/gl-color-palette-generator
         XDEBUG_MODE: 'debug,develop,trace,coverage'
         XDEBUG_CONFIG: 'client_host=host.docker.internal client_port=9003 log=/var/www/html/logs/xdebug.log'
         WP_TESTS_DIR: /app/wordpress-phpunit
@@ -69,7 +70,6 @@ services:
   database:
     type: mysql:8.0
     healthcheck: mysql -uroot --silent --execute "SHOW DATABASES;"
-
   mailhog:
     type: mailhog
     hogfrom:

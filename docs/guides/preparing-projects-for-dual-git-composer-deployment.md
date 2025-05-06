@@ -224,12 +224,12 @@ For a WordPress PHPUnit testing framework:
 
 ```json
 {
-  "name": "yourusername/wp-phpunit-framework",
+  "name": "glerner/wp-phpunit-framework",
   "description": "WordPress PHPUnit Testing Framework with support for unit, integration, and WP-Mock tests",
   "type": "library",
   "license": "MIT",
   "require": {
-    "php": ">=7.4",
+    "php": ">=8.0",
     "phpunit/phpunit": "^9.0",
     "brain/monkey": "^2.6",
     "mockery/mockery": "^1.4",
@@ -237,7 +237,7 @@ For a WordPress PHPUnit testing framework:
   },
   "autoload": {
     "psr-4": {
-      "YourNamespace\\TestFramework\\": "src/"
+      "WP_PHPUnit_Framework\\TestFramework\\": "src/"
     }
   }
 }
@@ -252,11 +252,11 @@ For a WordPress PHPUnit testing framework:
   "repositories": [
     {
       "type": "vcs",
-      "url": "https://github.com/yourusername/wp-phpunit-framework.git"
+      "url": "https://github.com/glerner/wp-phpunit-framework.git"
     }
   ],
   "require-dev": {
-    "yourusername/wp-phpunit-framework": "dev-main"
+    "glerner/wp-phpunit-framework": "dev-main"
   }
 }
 ```
@@ -265,7 +265,7 @@ For a WordPress PHPUnit testing framework:
 
 ```bash
 # Add the framework as a submodule
-git submodule add https://github.com/yourusername/wp-phpunit-framework.git tests/framework
+git submodule add https://github.com/glerner/wp-phpunit-framework.git tests/framework
 
 # Initialize and update
 git submodule init

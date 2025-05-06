@@ -171,6 +171,12 @@ includes/ui/
    - Dependencies are explicit and manageable
    - New features can be added without modifying existing code
 
+4. **Efficient testing with groups**:
+   - Tests can be run together as groups
+   - Architectural component test groups (across all Models, Services, or Controllers)
+   - Feature-centric test groups can span multiple components
+   - Faster feedback cycles by running only relevant tests for the area being worked on
+
 ## Practical Example: Color Palette Generation
 
 ### Before (Mixed Responsibilities)
@@ -302,5 +308,34 @@ namespace GL_Color_Palette_Generator\Tests\Unit\Models;
 // or
 namespace GL_Color_Palette_Generator\Tests\WP_Mock\Controllers;
 ```
+
+#### Namespace Import Approaches
+
+PHP offers three ways to reference namespaced elements:
+
+1. **Relative after this namespace** (relative import):
+   ```php
+   // In namespace GL_Color_Palette_Generator\Tests
+   use Unit\Models\Color_Palette_Test;  // Refers to GL_Color_Palette_Generator\Tests\Unit\Models\Color_Palette_Test
+   ```
+
+2. **Fully qualified from current namespace** (explicit path):
+   ```php
+   // In namespace GL_Color_Palette_Generator\Tests
+   use GL_Color_Palette_Generator\Tests\Unit\Models\Color_Palette_Test;  // Explicitly starts from current namespace
+   ```
+
+3. **Fully qualified** (absolute from global namespace):
+   ```php
+   // In any namespace
+   use \GL_Color_Palette_Generator\Tests\Unit\Models\Color_Palette_Test;  // Always refers to the same class
+   use \WP_Post;  // WordPress core classes should use this approach
+   ```
+
+   This approach is particularly important for WordPress core classes and functions, which are in the global namespace. Always use a leading backslash when referencing WordPress core elements.
+
+The "fully qualified from current namespace" approach (option 2) is recommended for clarity and maintainability. It explicitly shows the full path while maintaining flexibility for your code to be embedded in other namespace hierarchies if needed.
+
+However, when directly referencing a class from a completely different namespace tree within your code (not in a use statement), consider using the leading backslash for clarity. Without it, PHP first looks in the current namespace before checking the global namespace.
 
 By following these conventions, we can avoid the duplicate class issues we've encountered and create a more maintainable test suite that aligns with our MVC architecture.

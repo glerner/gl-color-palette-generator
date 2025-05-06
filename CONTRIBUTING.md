@@ -326,19 +326,19 @@ vendor/bin/phpunit --bootstrap=tests/bootstrap-wp-mock.php
 
 Tests are organized into three main suites:
 
-1. **WP_Mock Tests** (`--group wp-mock`):
+1. **WP_Mock Tests**:
    - Located in `tests/providers` and `tests/api`
    - Used for testing external API interactions and isolated functionality
    - Doesn't require WordPress database or functions
    - Faster execution and more precise control
 
-2. **WP_UnitTestCase Tests** (`--group wp-unit`):
+2. **WP_UnitTestCase Tests**
    - Located in `tests/core`, `tests/admin`, and `tests/settings`
    - Used for testing WordPress-specific functionality
    - Requires WordPress test environment
    - Tests actual WordPress hooks, filters, and database operations
 
-3. **Integration Tests** (`--group integration`):
+3. **Integration Tests**
    - Located in `tests/integration`
    - Tests full system integration
    - Requires complete WordPress environment
@@ -478,7 +478,7 @@ composer test
 
 ## Coding Standards
 
-This project follows the WordPress Coding Standards. 
+This project follows the WordPress Coding Standards.
 
 To check your code, use PHP-CS-Fixer.
 
