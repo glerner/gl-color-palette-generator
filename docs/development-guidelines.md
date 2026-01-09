@@ -232,7 +232,7 @@ Cache-related functions (apc_, wincache_)
 Your plugin's custom functions (generate_*)
 
 ### Testing Notes
-- Keep adding lines like " * @bootstrap wp-mock" to specify which PHPUnit bootstrap method to use, see .github/issues/improve-test-bootstrap-robustness.md
+- OBSOLETE (now have folders for each test type, and can have a class tested by multiple test types): Keep adding lines like " * @bootstrap wp-mock" to specify which PHPUnit bootstrap method to use, see .github/issues/improve-test-bootstrap-robustness.md
 
 #### Choosing the Right Test Type
 

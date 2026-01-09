@@ -39,6 +39,8 @@ For new projects or complete rewrites (like our GL Color Palette Generator), we 
 
 ### Installation
 
+This is already done for you in the GL PHPUnit Testing framework, if you followed the standard installation instructions.
+
 1. **Install PHPStan via Composer**:
    ```bash
    # Basic installation
@@ -52,6 +54,21 @@ For new projects or complete rewrites (like our GL Color Palette Generator), we 
    ```bash
    ./vendor/bin/phpstan --version
    ```
+
+### WordPress-Specific Rules
+
+Install the WordPress extension for PHPStan:
+
+```bash
+composer require --dev szepeviktor/phpstan-wordpress
+```
+
+Add to your configuration:
+
+```neon
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+```
 
 ### Implementation Steps
 
@@ -81,7 +98,7 @@ For new projects or complete rewrites (like our GL Color Palette Generator), we 
        // ...
    }
    ```
-   
+
    Note: You don't need to annotate every file with PHPStan levels. This is only needed for specific classes or methods that require exceptions to your project's default level.
 
 ### Benefits of Clean Slate
@@ -155,21 +172,6 @@ parameters:
         - WP_DEBUG
         - ABSPATH
         - WPINC
-```
-
-## WordPress-Specific Rules
-
-Install the WordPress extension for PHPStan:
-
-```bash
-composer require --dev szepeviktor/phpstan-wordpress
-```
-
-Add to your configuration:
-
-```neon
-includes:
-    - vendor/szepeviktor/phpstan-wordpress/extension.neon
 ```
 
 ### Custom WordPress Rules

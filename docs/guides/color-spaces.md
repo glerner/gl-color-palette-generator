@@ -5,7 +5,9 @@ Understanding color spaces is crucial for accurate color management and reproduc
 
 ## Common Color Spaces
 
-### RGB (Red, Green, Blue)
+### RGB (Red, Green, Blue, Alpha)
+see [Web colors](https://en.wikipedia.org/wiki/Web_colors)
+and [Named-color - CSS: Cascading Style Sheets | MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/named-color "Named-color - CSS: Cascading Style Sheets | MDN")
 
 ```php
 // RGB color space examples
@@ -164,4 +166,4 @@ $universal = $utility->create_universal_color('#FF0000', [
 ## See Also
 - [Color Utility Documentation](../API/color-utility.md)
 - [Color Metrics Analyzer Documentation](../API/color-metrics-analyzer.md)
-- [Media Analysis Documentation](../API/media-analysis.md) 
+- [Media Analysis Documentation](../API/media-analysis.md)

@@ -3,7 +3,7 @@
 ## Setting Up the Development Environment
 
 ### Prerequisites
-- WordPress 6.2 or higher
+- WordPress 6.7 or higher
 - PHP 8.0 or higher
 - Node.js 16+
 - Composer

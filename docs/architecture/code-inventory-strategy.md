@@ -181,6 +181,53 @@ For each functional group, we will create:
 6. **Modular Progress**: Clear tracking of completion status by functional group
 7. **Simplified Collaboration**: Team members can work on different functional groups with minimal conflicts
 
+## AI-Assisted Development Strategy
+
+When working with AI assistants on this project, the code inventory structure provides significant advantages for managing context and focusing development efforts.
+
+### Context Window Management
+
+The AI context window (approximately 180,000 tokens for Claude 3.7 Sonnet) can be efficiently utilized by loading only the relevant functional group documentation when needed:
+
+1. **Focused Context Loading**: When working on a specific functional group, load only the three inventory files for that group:
+   ```
+   /docs/code-inventory/[group]-classes.md
+   /docs/code-inventory/[group]-methods.md
+   /docs/code-inventory/[group]-constants.md
+   ```
+
+2. **Context Switching**: Use a simple command pattern to change context between functional groups:
+   ```
+   "Load context for [Group Name] functional group"
+   ```
+
+3. **Memory Efficiency**: Each functional group's documentation (approximately 5,000-10,000 tokens) leaves ample room for code, conversation, and additional context.
+
+4. **Boundary Management**: The documented relationships between classes help manage cases where you need to understand interactions across functional groups.
+
+### AI Development Workflow
+
+1. **Initial Context Setup**:
+   - Load the relevant functional group inventory files
+   - Include any specific design documents or requirements
+   - Reference related test specifications
+
+2. **Implementation Process**:
+   - Focus on one class or component at a time
+   - Implement methods according to the inventory specifications
+   - Validate against documented relationships and dependencies
+   - Update inventory documentation as implementation progresses
+
+3. **Cross-Group Integration**:
+   - When working across functional groups, temporarily load both inventories
+   - Focus on interface points and dependency management
+   - Document any changes to cross-group relationships
+
+4. **Documentation Updates**:
+   - Update inventory files as implementation progresses
+   - Mark completed components in the inventory
+   - Document any design decisions or implementation notes
+
 ## Blocks and Shortcodes Strategy
 
 ### Primary: Gutenberg Blocks
@@ -243,11 +290,11 @@ During the incremental development process, we'll use a hybrid approach for test
    {
        $generator = new Palette_Generator();
        $palette = $generator->generate_palette(['primary' => '#336699']);
-       
+
        // Assert stub returns expected structure with placeholder data
        $this->assertInstanceOf(Palette::class, $palette);
        $this->assertNotEmpty($palette->get_colors());
-       
+
        // Document expected real behavior
        $this->markTestIncomplete('Stub implementation - will eventually generate proper palette');
    }
@@ -265,7 +312,7 @@ During the incremental development process, we'll use a hybrid approach for test
    public function test_palette_accessibility_validation(): void
    {
        $this->markTestSkipped('Accessibility validation not yet implemented');
-       
+
        // Document expected behavior even though test is skipped
        // $palette = new Palette(['primary' => '#336699']);
        // $this->assertTrue($palette->meets_wcag_aa_requirements());
